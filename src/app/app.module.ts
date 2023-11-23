@@ -28,6 +28,7 @@ function appInitializer(authService: AuthService) {
 @NgModule({
   declarations: [AppComponent],
   imports: [
+    TranslateModule.forRoot(),
     BrowserModule,
     BrowserAnimationsModule,
     TranslateModule.forRoot(),

@@ -3,11 +3,12 @@ import { Observable, BehaviorSubject, of, Subscription } from 'rxjs';
 import { map, catchError, switchMap, finalize } from 'rxjs/operators';
 import { UserModel } from '../models/user.model';
 import { AuthModel } from '../models/auth.model';
-import { AuthHTTPService } from './auth-http';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
 export type UserType = UserModel | undefined;
+const API_USERS_URL = `${environment.apiUrl}/auth`;
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,6 @@ export type UserType = UserModel | undefined;
 export class AuthService implements OnDestroy {
   // private fields
   private unsubscribe: Subscription[] = []; // Read more: => https://brianflove.com/2016/12/11/anguar-2-unsubscribe-observables/
-  private authLocalStorageToken = `${environment.appVersion}-${environment.USERDATA_KEY}`;
 
   // public fields
   currentUser$: Observable<UserType>;
@@ -32,8 +32,8 @@ export class AuthService implements OnDestroy {
   }
 
   constructor(
-    private authHttpService: AuthHTTPService,
-    private router: Router
+    private router: Router,
+    private http : HttpClient,
   ) {
     this.isLoadingSubject = new BehaviorSubject<boolean>(false);
     this.currentUserSubject = new BehaviorSubject<UserType>(undefined);
@@ -44,12 +44,36 @@ export class AuthService implements OnDestroy {
   }
 
   // public methods
-  login(email: string, password: string): Observable<UserType> {
+  login(username: string, password: string): Observable<UserType> {
     this.isLoadingSubject.next(true);
-    return this.authHttpService.login(email, password).pipe(
-      map((auth: AuthModel) => {
-        const result = this.setAuthFromLocalStorage(auth);
-        return result;
+
+    const hotel = sessionStorage.getItem("HOTEL") as string;
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append("hotel",hotel);
+
+    return this.http.post(environment.apiUrl+"/auth/login",{params:queryParams,username,password})
+    .pipe(
+      map((datosUsuario:any)=>{
+        if(datosUsuario.mensaje=="usuario inexistente")
+        {
+          return datosUsuario.mensaje
+        }
+        else if(datosUsuario){
+          let usuario:UserType;
+          for(var i in datosUsuario){
+            if(datosUsuario.hasOwnProperty(i))
+            {
+               usuario = datosUsuario[i]
+               this.currentUserSubject.next(usuario);
+               this.currentUserSubject = new BehaviorSubject<UserType>(usuario);
+            }
+          }
+        if(usuario){
+          this.setAuthFromLocalStorage(usuario)
+          
+          return usuario
+        }
+        }
       }),
       switchMap(() => this.getUserByToken()),
       catchError((err) => {
@@ -60,10 +84,42 @@ export class AuthService implements OnDestroy {
     );
   }
 
+
   logout() {
-    localStorage.removeItem(this.authLocalStorageToken);
+    localStorage.removeItem('ACCESS_TOKEN');
     this.router.navigate(['/auth/login'], {
       queryParams: {},
+    });
+  }
+
+  registration(hotels:string,fullname:string,email:string,username:string,password:string,terminos:boolean){
+    const hotel = sessionStorage.getItem("HOTEL") as string;
+    let queryParams = new HttpParams();
+    queryParams = queryParams.append("hotel",hotel);
+
+    return this.http.post<any>(environment.apiUrl+"/createdb",{params:queryParams,hotels,fullname,email,username,password,terminos})
+    .pipe(map(res=>{
+      let mensaje=null
+      if(res.mensaje == "Usuario agregado con exito"){
+
+        return res
+      }
+      if(res.response == 'El nombre de usuario no se puede usar, especifique otro'){
+        
+        return res.response
+      }
+      else {
+        return mensaje ='No se pudo registrar al usuario'
+      }
+    }))
+  }
+
+  getUserByTokenBackend(token: string): Observable<UserModel> {
+    const httpHeaders = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+    return this.http.get<UserModel>(`${API_USERS_URL}/me`, {
+      headers: httpHeaders,
     });
   }
 
@@ -74,7 +130,7 @@ export class AuthService implements OnDestroy {
     }
 
     this.isLoadingSubject.next(true);
-    return this.authHttpService.getUserByToken(auth.authToken).pipe(
+    return this.getUserByTokenBackend(auth.authToken).pipe(
       map((user: UserType) => {
         if (user) {
           this.currentUserSubject.next(user);
@@ -86,35 +142,16 @@ export class AuthService implements OnDestroy {
       finalize(() => this.isLoadingSubject.next(false))
     );
   }
+  
 
-  // need create new user then login
-  registration(user: UserModel): Observable<any> {
-    this.isLoadingSubject.next(true);
-    return this.authHttpService.createUser(user).pipe(
-      map(() => {
-        this.isLoadingSubject.next(false);
-      }),
-      switchMap(() => this.login(user.email, user.password)),
-      catchError((err) => {
-        console.error('err', err);
-        return of(undefined);
-      }),
-      finalize(() => this.isLoadingSubject.next(false))
-    );
-  }
-
-  forgotPassword(email: string): Observable<boolean> {
-    this.isLoadingSubject.next(true);
-    return this.authHttpService
-      .forgotPassword(email)
-      .pipe(finalize(() => this.isLoadingSubject.next(false)));
-  }
 
   // private methods
-  private setAuthFromLocalStorage(auth: AuthModel): boolean {
+  private setAuthFromLocalStorage(auth: UserModel): boolean {
+    localStorage.setItem('USER',JSON.stringify(auth))
+    localStorage.setItem('HOTEL',auth.hotel)
     // store auth authToken/refreshToken/epiresIn in local storage to keep user logged in between page refreshes
     if (auth && auth.authToken) {
-      localStorage.setItem(this.authLocalStorageToken, JSON.stringify(auth));
+      localStorage.setItem('ACCESS_TOKEN',auth.authToken);
       return true;
     }
     return false;
@@ -122,7 +159,7 @@ export class AuthService implements OnDestroy {
 
   private getAuthFromLocalStorage(): AuthModel | undefined {
     try {
-      const lsValue = localStorage.getItem(this.authLocalStorageToken);
+      const lsValue = localStorage.getItem('ACCESS_TOKEN');
       if (!lsValue) {
         return undefined;
       }
@@ -134,6 +171,21 @@ export class AuthService implements OnDestroy {
       return undefined;
     }
   }
+
+  // registration(user: UserModel): Observable<any> {
+  //   this.isLoadingSubject.next(true);
+  //   return this.authHttpService.createUser(user).pipe(
+  //     map(() => {
+  //       this.isLoadingSubject.next(false);
+  //     }),
+  //     switchMap(() => this.login(user.email, user.password)),
+  //     catchError((err) => {
+  //       console.error('err', err);
+  //       return of(undefined);
+  //     }),
+  //     finalize(() => this.isLoadingSubject.next(false))
+  //   );
+  // }
 
   ngOnDestroy() {
     this.unsubscribe.forEach((sb) => sb.unsubscribe());
