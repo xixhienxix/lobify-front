@@ -46,12 +46,18 @@ export class AuthService implements OnDestroy {
   // public methods
   login(username: string, password: string): Observable<UserType> {
     this.isLoadingSubject.next(true);
+    let headers = new HttpHeaders();
+        headers.append('content-type', 'application/json');
+        headers.append('access-control-allow-origin', '*');
+        headers.append('access-control-allow-methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
+        headers.append('access-control-allow-headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        headers.append('access-control-allow-credentials', 'true');
 
     const hotel = sessionStorage.getItem("HOTEL") as string;
     let queryParams = new HttpParams();
     queryParams = queryParams.append("hotel",hotel);
 
-    return this.http.post(environment.apiUrl+"/auth/login",{params:queryParams,username,password})
+    return this.http.post(environment.apiUrl+"/login",{headers:headers, params:queryParams, username,password})
     .pipe(
       map((datosUsuario:any)=>{
         if(datosUsuario.mensaje=="usuario inexistente")
