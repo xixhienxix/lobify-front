@@ -9,25 +9,29 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
 export type UserType = UserModel | undefined;
 const API_USERS_URL = `${environment.apiUrl}/auth`;
-
+export const DEFAULT_AUTH = {
+  authToken: '',
+  refreshToken: '',
+  expiresIn: 0
+}
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService implements OnDestroy {
   // private fields
   private unsubscribe: Subscription[] = []; // Read more: => https://brianflove.com/2016/12/11/anguar-2-unsubscribe-observables/
-
+  authModel:AuthModel= DEFAULT_AUTH
   // public fields
   currentUser$: Observable<UserType>;
   isLoading$: Observable<boolean>;
   currentUserSubject: BehaviorSubject<UserType>;
   isLoadingSubject: BehaviorSubject<boolean>;
 
-  get currentUserValue(): UserType {
+  get getcurrentUserValue(): UserType {
     return this.currentUserSubject.value;
   }
 
-  set currentUserValue(user: UserType) {
+  set setcurrentUserValue(user: UserType) {
     this.currentUserSubject.next(user);
   }
 
@@ -39,49 +43,32 @@ export class AuthService implements OnDestroy {
     this.currentUserSubject = new BehaviorSubject<UserType>(undefined);
     this.currentUser$ = this.currentUserSubject.asObservable();
     this.isLoading$ = this.isLoadingSubject.asObservable();
-    const subscr = this.getUserByToken().subscribe();
-    this.unsubscribe.push(subscr);
+    // const subscr = this.getUserByToken().subscribe();
+    // this.unsubscribe.push(subscr);
   }
 
   // public methods
-  login(username: string, password: string): Observable<UserType> {
+  login(username: string, password: string): Observable<UserType|string> {
     this.isLoadingSubject.next(true);
-    let headers = new HttpHeaders();
-        headers.append('content-type', 'application/json');
-        headers.append('access-control-allow-origin', '*');
-        headers.append('access-control-allow-methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
-        headers.append('access-control-allow-headers', 'Origin, X-Requested-With, Content-Type, Accept');
-        headers.append('access-control-allow-credentials', 'true');
 
-    const hotel = sessionStorage.getItem("HOTEL") as string;
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append("hotel",hotel);
-
-    return this.http.post(environment.apiUrl+"/login",{headers:headers, params:queryParams, username,password})
+    return this.http.post<UserModel|string>(environment.apiUrl+"/login",{username,password})
     .pipe(
       map((datosUsuario:any)=>{
-        if(datosUsuario.mensaje=="usuario inexistente")
+        if(datosUsuario.mensaje== 'usuario inexistente' )
         {
-          return datosUsuario.mensaje
+          return 'Usuario Inexistente' 
         }
         else if(datosUsuario){
-          let usuario:UserType;
-          for(var i in datosUsuario){
-            if(datosUsuario.hasOwnProperty(i))
-            {
-               usuario = datosUsuario[i]
+          let usuario:UserModel;
+
+               usuario = datosUsuario
                this.currentUserSubject.next(usuario);
                this.currentUserSubject = new BehaviorSubject<UserType>(usuario);
-            }
-          }
-        if(usuario){
-          this.setAuthFromLocalStorage(usuario)
-          
-          return usuario
-        }
+               this.setAuthFromLocalStorage(usuario)
+               return usuario
         }
       }),
-      switchMap(() => this.getUserByToken()),
+      //switchMap(() => this.getUserByToken()),
       catchError((err) => {
         console.error('err', err);
         return of(undefined);
@@ -122,9 +109,9 @@ export class AuthService implements OnDestroy {
 
   getUserByTokenBackend(token: string): Observable<UserModel> {
     const httpHeaders = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
+      Authorization: `${token}`,
     });
-    return this.http.get<UserModel>(`${API_USERS_URL}/me`, {
+    return this.http.get<UserModel>(environment.apiUrl+'/getUserByToken', {// for getting user data from token on refresh of the page
       headers: httpHeaders,
     });
   }
@@ -156,8 +143,8 @@ export class AuthService implements OnDestroy {
     localStorage.setItem('USER',JSON.stringify(auth))
     localStorage.setItem('HOTEL',auth.hotel)
     // store auth authToken/refreshToken/epiresIn in local storage to keep user logged in between page refreshes
-    if (auth && auth.authToken) {
-      localStorage.setItem('ACCESS_TOKEN',auth.authToken);
+    if (auth && auth.accessToken) {
+      localStorage.setItem('ACCESS_TOKEN',auth.accessToken);
       return true;
     }
     return false;
@@ -169,13 +156,23 @@ export class AuthService implements OnDestroy {
       if (!lsValue) {
         return undefined;
       }
+      const expireIn = this.tokenExpired(lsValue)
+      const authData = lsValue;
 
-      const authData = JSON.parse(lsValue);
-      return authData;
+      this.authModel.authToken=authData
+      this.authModel.expiresIn=expireIn
+
+      return this.authModel;
     } catch (error) {
       console.error(error);
       return undefined;
     }
+  }
+
+  private tokenExpired(token: string) {
+    const expiry = (JSON.parse(atob(token.split('.')[1]))).exp;
+    // return (Math.floor((new Date).getTime() / 1000)) >= expiry;
+    return (JSON.parse(atob(token.split('.')[1]))).exp;
   }
 
   // registration(user: UserModel): Observable<any> {

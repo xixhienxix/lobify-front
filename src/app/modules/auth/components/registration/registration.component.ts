@@ -27,7 +27,7 @@ export class RegistrationComponent implements OnInit, OnDestroy {
   ) {
     this.isLoading$ = this.authService.isLoading$;
     // redirect to home if already logged in
-    if (this.authService.currentUserValue) {
+    if (this.authService.getcurrentUserValue) {
       this.router.navigate(['/']);
     }
   }

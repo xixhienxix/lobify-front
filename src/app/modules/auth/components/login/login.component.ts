@@ -5,7 +5,10 @@ import { first } from 'rxjs/operators';
 import { UserModel } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
-
+export interface userAccesed {
+  user: UserModel | undefined,
+  accessToken: string;
+}
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -32,8 +35,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   ) {
     this.isLoading$ = this.authService.isLoading$;
     // redirect to home if already logged in
-    if (this.authService.currentUserValue) {
-      this.router.navigate(['/']);
+    if (this.authService.getcurrentUserValue) {
+      this.router.navigate(['/Dashboard']);
     }
   }
 
@@ -72,11 +75,11 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.hasError = false;
     const loginSubscr = this.authService
       .login(this.f.username.value, this.f.password.value)
-      .pipe(first())
-      .subscribe((user: UserModel | undefined) => {
-        if (user) {
+      .subscribe((user:any) => {
+        if (this.authService.getcurrentUserValue?.accessToken) {
           this.router.navigate([this.returnUrl]);
         } else {
+          this.message = 'Usuario y/o contraseña inexistente'
           this.hasError = true;
         }
       });
