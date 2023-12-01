@@ -108,12 +108,12 @@ export class AuthService implements OnDestroy {
   }
 
   getUserByTokenBackend(token: string): Observable<UserModel> {
-    const httpHeaders = new HttpHeaders({
-      Authorization: `${token}`,
-    });
+    // const httpHeaders = new HttpHeaders({
+    //   Authorization: `${token}`,
+    // });
     return this.http.get<UserModel>(environment.apiUrl+'/getUserByToken', {// for getting user data from token on refresh of the page
-      headers: httpHeaders,
-    });
+      // headers: httpHeaders,
+    })
   }
 
   getUserByToken(): Observable<UserType> {
@@ -124,13 +124,13 @@ export class AuthService implements OnDestroy {
 
     this.isLoadingSubject.next(true);
     return this.getUserByTokenBackend(auth.authToken).pipe(
-      map((user: UserType) => {
-        if (user) {
-          this.currentUserSubject.next(user);
-        } else {
+      map((user: any) => {
+        if ((user.exp < (Math.floor(Date.now() / 1000)))) {
           this.logout();
+        } else {
+          this.currentUserSubject.next(user);
         }
-        return user;
+        return user.usuariosResultQuery;
       }),
       finalize(() => this.isLoadingSubject.next(false))
     );
