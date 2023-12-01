@@ -1,0 +1,13 @@
+{
+    "LoginComponent": {
+    "title": "e-config Cloud",
+    "brand": "Marca ",
+    "type": "Tipo",
+    "subtitle": "Sistema IBM Configurador de Ordenes de Venta en la Nube.",
+    "welcome": "Usuario: ",
+    "role": "Rol: ",
+    "Preferences_tt": "Administrar mis preferencias y los valores predeterminados de la  e-Config Cloud",
+    "preferences": " Mis Preferencias",
+    "tooltip_info": "Información del Repositorio"
+}
+}

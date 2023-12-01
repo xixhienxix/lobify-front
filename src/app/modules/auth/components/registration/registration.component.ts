@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { FormGroup, FormBuilder, Validators, FormControl } from '@angular/forms';
 import { Subscription, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -27,7 +27,7 @@ export class RegistrationComponent implements OnInit, OnDestroy {
   ) {
     this.isLoading$ = this.authService.isLoading$;
     // redirect to home if already logged in
-    if (this.authService.currentUserValue) {
+    if (this.authService.getcurrentUserValue) {
       this.router.navigate(['/']);
     }
   }
@@ -44,6 +44,15 @@ export class RegistrationComponent implements OnInit, OnDestroy {
   initForm() {
     this.registrationForm = this.fb.group(
       {
+        hotel: [
+          '',
+          Validators.compose([
+            Validators.required,
+            this.nameValidator,
+            Validators.minLength(3),
+            Validators.maxLength(100),
+          ]),
+        ],
         fullname: [
           '',
           Validators.compose([
@@ -53,12 +62,20 @@ export class RegistrationComponent implements OnInit, OnDestroy {
           ]),
         ],
         email: [
-          'qwe@qwe.qwe',
+          '',
           Validators.compose([
             Validators.required,
             Validators.email,
             Validators.minLength(3),
-            Validators.maxLength(320), // https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
+            Validators.maxLength(320), 
+          ]),
+        ],
+        username: [
+          '',
+          Validators.compose([
+            Validators.required,
+            Validators.minLength(3),
+            Validators.maxLength(15), 
           ]),
         ],
         password: [
@@ -85,6 +102,13 @@ export class RegistrationComponent implements OnInit, OnDestroy {
     );
   }
 
+  nameValidator(control: FormControl): { [key: string]: boolean } {
+    const nameRegexp: RegExp = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
+    if (control.value && nameRegexp.test(control.value)) {
+       return { invalidName: true };
+    }else return { invalidName:false }
+}
+
   submit() {
     this.hasError = false;
     const result: {
@@ -96,11 +120,12 @@ export class RegistrationComponent implements OnInit, OnDestroy {
     const newUser = new UserModel();
     newUser.setUser(result);
     const registrationSubscr = this.authService
-      .registration(newUser)
+      .registration(this.f.hotel.value,this.f.fullname.value,this.f.email.value,this.f.username.value,this.f.password.value,this.f.agree.value)
       .pipe(first())
-      .subscribe((user: UserModel) => {
-        if (user) {
-          this.router.navigate(['/']);
+      .subscribe((value) => {
+        if(value.mensaje==="Usuario agregado con exito")
+        {
+          this.router.navigate(['auth/login'])
         } else {
           this.hasError = true;
         }

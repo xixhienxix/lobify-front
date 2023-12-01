@@ -5,7 +5,10 @@ import { first } from 'rxjs/operators';
 import { UserModel } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
-
+export interface userAccesed {
+  user: UserModel | undefined,
+  accessToken: string;
+}
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -13,14 +16,13 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class LoginComponent implements OnInit, OnDestroy {
   // KeenThemes mock, change it to:
-  defaultAuth: any = {
-    email: 'admin@demo.com',
-    password: 'demo',
-  };
+
   loginForm: FormGroup;
   hasError: boolean;
   returnUrl: string;
   isLoading$: Observable<boolean>;
+  message: string;
+
 
   // private fields
   private unsubscribe: Subscription[] = []; // Read more: => https://brianflove.com/2016/12/11/anguar-2-unsubscribe-observables/
@@ -33,8 +35,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   ) {
     this.isLoading$ = this.authService.isLoading$;
     // redirect to home if already logged in
-    if (this.authService.currentUserValue) {
-      this.router.navigate(['/']);
+    if (this.authService.getcurrentUserValue) {
+      this.router.navigate(['/Dashboard']);
     }
   }
 
@@ -52,21 +54,18 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   initForm() {
     this.loginForm = this.fb.group({
-      email: [
-        this.defaultAuth.email,
+      username: ['',
         Validators.compose([
           Validators.required,
-          Validators.email,
           Validators.minLength(3),
-          Validators.maxLength(320), // https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
+          Validators.maxLength(20), // https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
         ]),
       ],
-      password: [
-        this.defaultAuth.password,
+      password: ['',
         Validators.compose([
           Validators.required,
           Validators.minLength(3),
-          Validators.maxLength(100),
+          Validators.maxLength(15),
         ]),
       ],
     });
@@ -75,12 +74,12 @@ export class LoginComponent implements OnInit, OnDestroy {
   submit() {
     this.hasError = false;
     const loginSubscr = this.authService
-      .login(this.f.email.value, this.f.password.value)
-      .pipe(first())
-      .subscribe((user: UserModel | undefined) => {
-        if (user) {
+      .login(this.f.username.value, this.f.password.value)
+      .subscribe((user:any) => {
+        if (this.authService.getcurrentUserValue?.accessToken) {
           this.router.navigate([this.returnUrl]);
         } else {
+          this.message = 'Usuario y/o contraseña inexistente'
           this.hasError = true;
         }
       });
