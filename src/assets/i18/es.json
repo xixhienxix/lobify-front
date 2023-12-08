@@ -1,13 +1,22 @@
 {
-    "LoginComponent": {
-    "title": "e-config Cloud",
-    "brand": "Marca ",
-    "type": "Tipo",
-    "subtitle": "Sistema IBM Configurador de Ordenes de Venta en la Nube.",
-    "welcome": "Usuario: ",
-    "role": "Rol: ",
-    "Preferences_tt": "Administrar mis preferencias y los valores predeterminados de la  e-Config Cloud",
-    "preferences": " Mis Preferencias",
-    "tooltip_info": "Información del Repositorio"
-}
+    "menu":{
+        "Dashboard":"Dashboard"
+    },
+    "ArrivalsComponent":{
+        "arrivals-title":"Llegadas del día",
+        "arrivals-now":"Ya Llegaron",
+        "arrivals-later":"Por Llegar",
+        "go-to-reports":"Ir Al Reporte"
+    },
+    "DeparturesComponent":{
+        "departures-title":"Salidas del Día",
+        "departures-today":"Ya se fueron",
+        "departures-later":"Por salir",
+        "go-to-reports":"Ir Al Reporte"
+    },
+    "InHouseComponent":{
+        "in-house":"Húespedes en casa",
+        "stoketaking": "Inventario",
+        "avaible": "Disponibles"
+    }
 }

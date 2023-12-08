@@ -5,6 +5,7 @@
 // Desktop mode
 @include media-breakpoint-up(lg) {
 	.app-container {
+		background-color: #0c233a;
 		padding-left: $app-container-padding-x !important;
         padding-right: $app-container-padding-x !important;
 	}

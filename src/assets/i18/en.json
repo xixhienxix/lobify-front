@@ -1,0 +1,21 @@
+{
+    "Dashboard":"Dashboard",
+    "ArrivalsComponent":{
+        "arrivals-title":"Daily Arrivals",
+        "arrivals-now":"Already Checked-In",
+        "arrivals-later":"Arrives Today",
+        "go-to-reports":"Go to Report"
+    },
+    "DeparturesComponent":{
+        "departures-title":"Departures for today",
+        "departures-today":"Already Checked-out",
+        "departures-later":"In - House",
+        "go-to-reports":"Go to Report"
+    },
+    "InHouseComponent":{
+        "in-house":"In-House",
+        "stoketaking": "Stoketaking",
+        "avaible": "Avaible"
+    }
+
+}

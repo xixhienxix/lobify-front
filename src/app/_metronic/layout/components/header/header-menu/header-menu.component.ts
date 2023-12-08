@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { LayoutType } from '../../../core/configs/config';
 import { LayoutInitService } from '../../../core/layout-init.service';
 import { LayoutService } from '../../../core/layout.service';
+import { TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-header-menu',
@@ -10,7 +11,9 @@ import { LayoutService } from '../../../core/layout.service';
   styleUrls: ['./header-menu.component.scss'],
 })
 export class HeaderMenuComponent implements OnInit {
-  constructor(private router: Router, private layout: LayoutService, private layoutInit: LayoutInitService) {}
+  constructor(private router: Router, private layout: LayoutService, private layoutInit: LayoutInitService, private translateService:TranslateService) {
+    this.translateService.use('es')
+  }
 
   ngOnInit(): void {}
 

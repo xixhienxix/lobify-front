@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { TranslationService } from './modules/i18n';
+import { TranslateService } from '@ngx-translate/core';
 // language list
 import { locale as enLang } from './modules/i18n/vocabs/en';
 import { locale as chLang } from './modules/i18n/vocabs/ch';
@@ -18,19 +18,16 @@ import { ThemeModeService } from './_metronic/partials/layout/theme-mode-switche
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
+
+  supportedLanguages = ['en', 'es'];
+
   constructor(
-    private translationService: TranslationService,
+    private translateServeice: TranslateService,
     private modeService: ThemeModeService
   ) {
     // register translations
-    this.translationService.loadTranslations(
-      enLang,
-      chLang,
-      esLang,
-      jpLang,
-      deLang,
-      frLang
-    );
+    translateServeice.addLangs(this.supportedLanguages);
+    translateServeice.setDefaultLang(this.supportedLanguages[1]);
   }
 
   ngOnInit() {

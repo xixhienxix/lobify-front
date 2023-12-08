@@ -2,7 +2,21 @@
 // Bootstrap & Custom Variables
 // Safely override any variable in _variables.custom.scss
 //
+:root {
+	//LobifyVariableColors
+	--light-blue-title: #1b5e8d !important;
+	--light-blue-font: #2ea9eb !important;
+	--light-green-background: #bfd88c !important;
+	--light-yellow-font: #cfce85 !important;
+	--light-red-font: #dc8289 !important;
+	--light-green-background: #cdffcd !important;
+	--light-green-font: #cdffcd !important;
 
+	//Darker
+	--deep-red-font: #dc8289 !important;
+	--dark-blue-background: #12384f !important;
+	
+}
 // Prefix for :root CSS variables
 $prefix: bs- !default; // Deprecated in v5.2.0 for the shorter `$prefix`
 
