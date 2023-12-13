@@ -16,6 +16,30 @@
         "in-house":"In-House",
         "stoketaking": "Stoketaking",
         "avaible": "Avaible"
+    },
+    "CleanStatusWidgetComponent":{
+        "tittle":"Cleaning",
+        "clean": "Clean",
+        "dirty": "Dirty",
+        "review": "Review",
+        "retouch": "Retouch"
+    },
+    "OccupacyAndIncomeWidgetComponent":{
+        "tittle":"Occupation and Income",
+        "adr": "ADR",
+        "average-daily-rate":"Average Daily Rate",
+        "revpar": "RevPar",
+        "income-by-free-hab": "Revenue per avaible room",
+        "hotel-occupacy-rate": "Hotel Occupancy Rate",
+        "occupacy-percentage": "Percentage of occupation",
+        "total-revenue": "Total Revenue",
+        "daily-income": "Profits of the day"
+    },
+    "BadgeWidget":{
+        "future-reservations":"Future Reservations",
+        "canceled-reservations":"Canceled Reservations",
+        "temporal-reservations": "Temporal Reservations",
+        "abandon-reservations": "Abandon Reservations"
     }
 
 }

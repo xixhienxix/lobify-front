@@ -18,13 +18,13 @@
 <div class="row gx-5 gx-xl-10">
   <!--begin::Col-->
   <div class="col-xxl-6 mb-5 mb-xl-10">
-    <app-new-charts-widget8 cssClass="h-xl-100" chartHeight="275px" [chartHeightNumber]="275"></app-new-charts-widget8>
+    <app-clean-status-widget></app-clean-status-widget>
   </div>
   <!--end::Col-->
 
   <!--begin::Col-->
   <div class="col-xxl-6 mb-5 mb-xl-10">
-    <app-cards-widget18 cssClass="h-xl-100" image="./assets/media/stock/600x600/img-65.jpg"></app-cards-widget18>
+    <app-occupacy-and-income-widget></app-occupacy-and-income-widget>
   </div>
   <!--end::Col-->
 </div>
@@ -32,39 +32,19 @@
 <!-- begin::Row -->
 <div class="row g-5 g-xl-8">
   <div class="col-xl-3">
-    <app-stats-widget2
-      class="card card-xl-stretch mb-xl-8"
-      avatar="./assets/media/svg/avatars/029-boy-11.svg"
-      title="Arthur Goldstain"
-      description="System & Software Architect"
-    ></app-stats-widget2>
+    <app-future-reservations></app-future-reservations>
   </div>
 
   <div class="col-xl-3">
-    <app-stats-widget2
-      class="card card-xl-stretch mb-xl-8"
-      avatar="./assets/media/svg/avatars/014-girl-7.svg"
-      title="Lisa Bold"
-      description="Marketing & Fanance Manager"
-    ></app-stats-widget2>
+    <app-canceled-reservations></app-canceled-reservations>
   </div>
 
   <div class="col-xl-3">
-    <app-stats-widget2
-      class="card card-xl-stretch mb-5 mb-xl-8"
-      avatar="./assets/media/svg/avatars/004-boy-1.svg"
-      title="Nick Stone"
-      description="Customer Support Team"
-    ></app-stats-widget2>
+    <app-temporal-reservations-widget></app-temporal-reservations-widget>
   </div>
 
   <div class="col-xl-3">
-    <app-stats-widget2
-      class="card card-xl-stretch mb-5 mb-xl-8"
-      avatar="./assets/media/svg/avatars/004-boy-1.svg"
-      title="Nick Stone"
-      description="Customer Support Team"
-    ></app-stats-widget2>
+    <app-abandon-reservations-widget></app-abandon-reservations-widget>
   </div>
 </div>
 <!-- end::Row -->

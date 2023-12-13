@@ -12,11 +12,35 @@
         "departures-title":"Salidas del Día",
         "departures-today":"Ya se fueron",
         "departures-later":"Por salir",
-        "go-to-reports":"Ir Al Reporte"
+        "go-to-reports":"Ir al Reporte"
     },
     "InHouseComponent":{
         "in-house":"Húespedes en casa",
         "stoketaking": "Inventario",
         "avaible": "Disponibles"
+    },
+    "CleanStatusWidgetComponent":{
+        "tittle":"Limpieza",
+        "clean": "Limpias",
+        "dirty": "Sucias",
+        "review": "Revisar",
+        "retouch": "Retocar"
+    },
+    "OccupacyAndIncomeWidgetComponent":{
+        "tittle":"ocupación e Ingresos",
+        "adr": "ADR",
+        "average-daily-rate":"Tarifa Diaria Promedio",
+        "revpar": "RevPar",
+        "income-by-free-hab": "Ingresos por habitación disponible",
+        "hotel-occupacy-rate": "Tasa de Ocupación",
+        "occupacy-percentage": "Porcentaje de Ocupación",
+        "total-revenue": "Ingresos Totales",
+        "daily-income": "Ganancias del día"
+    },
+    "BadgeWidget":{
+        "future-reservations":"Reservas Futuras",
+        "canceled-reservations":"Reservaciones Canceladas",
+        "temporal-reservations": "Reservaciones Temporales",
+        "abandon-reservations": "Reservaciones Abandonadas"
     }
 }

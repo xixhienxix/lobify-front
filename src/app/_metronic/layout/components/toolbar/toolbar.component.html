@@ -1,14 +1,14 @@
 <!--begin::Toolbar container-->
 <div id="kt_app_toolbar_container" class="app-container" [ngClass]="appToolbarContainerCSSClass">
   <ng-container *ngIf="showPageTitle()">
-    <app-page-title [appPageTitleDirection]="appPageTitleDirection" [appPageTitleBreadcrumb]="appPageTitleBreadcrumb"
+    <!-- <app-page-title [appPageTitleDirection]="appPageTitleDirection" [appPageTitleBreadcrumb]="appPageTitleBreadcrumb"
       [appPageTitleDescription]="appPageTitleDescription" class="page-title d-flex flex-wrap me-3"
       [ngClass]="{'flex-column justify-content-center': appPageTitleDirection === 'column', 'align-items-center': appPageTitleDirection !== 'column', appPageTitleCSSClass}">
-    </app-page-title>
+    </app-page-title> -->
   </ng-container>
 
   <ng-container *ngIf="appToolbarLayout === 'classic'">
-    <app-classic class="d-flex align-items-center gap-2 gap-lg-3"></app-classic>
+    <!-- <app-classic class="d-flex align-items-center gap-2 gap-lg-3"></app-classic> -->
   </ng-container>
   <ng-container *ngIf="appToolbarLayout === 'accounting'">
     <app-accounting class="d-flex align-items-center me-5"></app-accounting>
