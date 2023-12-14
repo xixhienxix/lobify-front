@@ -42,5 +42,15 @@
         "canceled-reservations":"Reservaciones Canceladas",
         "temporal-reservations": "Reservaciones Temporales",
         "abandon-reservations": "Reservaciones Abandonadas"
+    },
+    "SidebarMenuComponent":{
+        "dashboard":"Dashboard",
+        "calendar":"Calendario",
+        "reservations-guest":"Reservaciones y Húespedes",
+        "client-history":"Historico de Clientes",
+        "transactions": "Transacciones",
+        "finance":"Finanzas",
+        "configurations":"Configuraciones",
+        "parameters":"Parametros"
     }
 }
