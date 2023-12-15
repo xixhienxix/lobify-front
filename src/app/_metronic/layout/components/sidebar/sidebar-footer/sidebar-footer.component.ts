@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { environment } from '../../../../../../environments/environment';
+import { AuthService } from 'src/app/modules/auth';
 
 @Component({
   selector: 'app-sidebar-footer',
@@ -8,8 +9,13 @@ import { environment } from '../../../../../../environments/environment';
 })
 export class SidebarFooterComponent implements OnInit {
   appPreviewChangelogUrl: string = environment.appPreviewChangelogUrl;
+  userAvatarClass: string = 'symbol-35px symbol-md-40px';
+  itemClass: string = 'ms-1 ms-lg-3';
+  nombre:string|undefined=''
 
-  constructor() {}
+  constructor(public authService:AuthService) {
+    this.nombre = this.authService.getcurrentUserValue?.nombre
+  }
 
   ngOnInit(): void {}
 }

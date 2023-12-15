@@ -1,3 +1,17 @@
+<div class="d-flex align-items-center p-5" style="background-color: var(--light-blue-title);">
+  <div class="app-navbar-item p-1" [ngClass]="itemClass">
+    <div class="cursor-pointer symbol" [ngClass]="userAvatarClass" data-kt-menu-trigger="{default: 'click'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
+      <img src="./assets/media/avatars/300-3.jpg" />
+    </div>
+    <app-user-inner data-kt-menu='true'></app-user-inner>
+  </div>
+  <div class="flex flex-grow-1 p-1 ">
+    <span class="btn-label" style="color: white; ">{{nombre}}</span>
+  </div>
+
+</div>
+
+
 <a target="_blank" [href]="appPreviewChangelogUrl"
   class="btn btn-flex flex-center btn-custom btn-primary overflow-hidden text-nowrap px-0 h-40px w-100"
   data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss-="click" title="logout">
