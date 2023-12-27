@@ -12,8 +12,8 @@ import { IGanttChartEvent } from "../../_models/gantt-chart-event.model";
 })
 export class GanttComponent implements OnInit {
   @Input() rows: IGanttCharRow[];
-  @Input() startDate: Date = new Date('2021-01-01');
-  @Input() endDate: Date = new Date('2021-04-30');
+  @Input() startDate: Date = new Date('2023-12-01');
+  @Input() endDate: Date = new Date('2023-12-30');
   chartPeriodDays: number;
   monthAxis: MonthAxis[];
   colourPallete = ['#7C4DFF',
