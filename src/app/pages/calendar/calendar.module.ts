@@ -8,7 +8,7 @@ import { HeaderComponent } from './components/header/header.component';
 import { ContentComponent } from './components/content/content.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { GanttComponent } from './components/gantt/gantt.component';
-
+import { BryntumSchedulerModule } from '@bryntum/scheduler-angular'; 
 
 
 @NgModule({
@@ -17,6 +17,7 @@ import { GanttComponent } from './components/gantt/gantt.component';
     TranslateModule,
     CommonModule,
     SharedModule,
+    BryntumSchedulerModule,
     RouterModule.forChild([
       {
         path: '',
