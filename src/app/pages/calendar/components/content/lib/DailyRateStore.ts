@@ -23,9 +23,12 @@ export default class DailyRateStore extends ResourceTimeRangeStore {
         super();
 
         // Configure the store to use the DailyRateModel model
-        this.configure({
-            modelClass : DailyRateModel
-        });
+        if(typeof this.configure === 'function'){
+            this.configure({
+                modelClass : DailyRateModel
+            });
+        }
+        
     }
 
     getPricePerNightFor(property: PropertyModel, date: Date) {

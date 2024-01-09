@@ -23,7 +23,7 @@ const schedulerConfig: Partial<SchedulerConfig> = {
     resourceImagePath         : 'assets/resources/',
     startDate                 : new Date(2022, 10, 28),
     endDate                   : new Date(2022, 11, 20),
-    allowOverlap              : false,
+    allowOverlap              : true,
     zoomOnTimeAxisDoubleClick : false,
     zoomOnMouseWheel          : false,
     createEventOnDblClick     : false,
