@@ -64,5 +64,9 @@
         "btn-bloqued": "Bloqueo / Sin Llegadas",
         "footer-status-recep":"Estado en Recepción",
         "footer-status-clean": "Estado de Limpieza"
+    },
+    "WidgetTable11":{
+        "title":"Tipos de Habitación",
+        "buttonHeader":"Agregar Nueva Habitación"
     }
 }

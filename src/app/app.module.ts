@@ -18,7 +18,15 @@ import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import { FakeAPIService } from './_fake/fake-api.service';
 import { AuthInterceptor } from './modules/auth/services/auth.interceptor';
 import { ArrivalsComponent } from './pages/reports/widgets/arrivals/arrivals.component';
+import { ParametrosComponent } from './parametros/parametros.component';
+import { ReactiveFormsModule } from '@angular/forms';
 // #fake-end#
+import {MatSelectModule} from '@angular/material/select';
+import { SharedModule } from './_metronic/shared/shared.module';
+import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFireStorageModule } from '@angular/fire/compat/storage';
+
 
 function appInitializer(authService: AuthService) {
   return () => {
@@ -32,8 +40,19 @@ export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, '../assets/i18/', '.json');
 }
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [AppComponent, ParametrosComponent],
   imports: [
+    AngularFireDatabaseModule,
+    AngularFireModule.initializeApp({
+      apiKey: environment.fireBaseStorageSecrets.apiKey,
+      authDomain: environment.fireBaseStorageSecrets.authDomain,
+      projectId: environment.fireBaseStorageSecrets.projectId,
+      storageBucket: environment.fireBaseStorageSecrets.storageBucket,
+      messagingSenderId: environment.fireBaseStorageSecrets.messagingSenderId,
+      appId: environment.fireBaseStorageSecrets.appId,
+      databaseURL: environment.fireBaseStorageSecrets.databaseURL,
+    }),
+    AngularFireStorageModule,
     TranslateModule.forRoot({
       defaultLanguage: 'es',
       loader: {
@@ -46,6 +65,9 @@ export function createTranslateLoader(http: HttpClient) {
     BrowserAnimationsModule,
     HttpClientModule,
     ClipboardModule,
+    ReactiveFormsModule,
+    MatSelectModule,
+    SharedModule,
     // #fake-start#
     environment.isMockEnabled
       ? HttpClientInMemoryWebApiModule.forRoot(FakeAPIService, {

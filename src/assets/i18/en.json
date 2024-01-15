@@ -62,6 +62,10 @@
         "btn-bloqued": "Bloqued / No Arrivals",
         "footer-status-recep":"Reception Status",
         "footer-status-clean": "Clean Status"
+    },
+    "WidgetTable11":{
+        "title":"Rooms Types",
+        "buttonHeader":"Add New Room"
     }
 
 }
