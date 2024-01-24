@@ -11,6 +11,9 @@
 @import "./assets/plugins/keenicons/outline/style.css";
 @import "./assets/plugins/keenicons/solid/style.css";
 
+//MATERIAL
+@import "../node_modules/@angular/material/prebuilt-themes/indigo-pink.css";
+
 body {
     font-family : Roboto, sans-serif;
     font-size   : 14px;

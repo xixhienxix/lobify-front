@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription, map } from 'rxjs';
@@ -10,21 +10,26 @@ import { Habitacion } from 'src/app/models/habitaciones.model';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { NewRoomComponent } from './components/new-room/new-room.component';
 import { FileUploadService } from 'src/app/services/file.upload.service';
-
+interface roomTable {
+  Codigo:string,
+  Tipo:string,
+  Adultos:number,
+  Inventario:number
+}
 @Component({
   selector: 'app-rooms',
   templateUrl: './rooms.component.html',
-  styleUrls: ['./rooms.component.scss']
+  styleUrls: ['./rooms.component.scss'],
 })
 export class RoomsComponent implements OnInit{
 
 
     /**Table */
-    dataSource = new MatTableDataSource<any[]>();
+    dataSource = new MatTableDataSource<roomTable>();
     displayedColumns = ["Nombre de la habitación",
-    "Codigo de la Habitación",
-    "Tipo",
-    "Capacidad",
+    "Tipo de la Habitación",
+    "Capacidad Max.",
+    "Inventario",
     "Acciones"];
 
   /**Subscription */
@@ -58,114 +63,64 @@ export class RoomsComponent implements OnInit{
   ngOnInit(){
     this.getImagenesHabitaciones();
 
-    this._habitacionService.fetch()
-    //this.getHabitaciones(false)
+    this.getHabitaciones(false)
 
     const sb = this._habitacionService.isLoading$.subscribe((res) => {
       this.isLoading = res
     });
     this.subscriptions.push(sb);
-
-    this.grouping = this._habitacionService.grouping;
-    this.paginator = this._habitacionService.paginator;
-    this.sorting = this._habitacionService.sorting;
-    this.sorting.column = 'Codigo'
-    this.sorting.direction = 'asc'
     
-    this.isLoading=false
+    this.isLoading=false;
   }
 
-  getHabitaciones(){
+  getHabitaciones(reloading:boolean){
+    let codigosCuarto
+    let arrayUniqueByKey
+    let newArray
 
-  }
-  // getHabitaciones(reloading:boolean){
-    
-  //   if(!reloading)
-  //   {
-  //     // this.blockedTabled=true //
-  //   }
-  //   if(reloading){
-  //     this.reloading=true
-  //   }
-
-  //   const sb = this._habitacionService.getAll().subscribe(
-  //     (value)=>{
-  //         if(Object.keys(habitaciones).length !== 0){
-  //           this.habitacionesporCodigo = habitaciones.reduce(function (r, a) {
-  //             r[a.Codigo] = r[a.Codigo] || [];
-  //             r[a.Codigo].push(a);
-  //             return r;
-  //         }, Object.create(null));
-          
-
-  //         this.habitacionesArr=[] // limpia array de habitaciones
-
-
-  //         for(let i=0;i<value.length;i++){
-  //           let inventario = 0
-  //           for(let g=0;g<habitaciones.length;g++)
-  //           {
-  //             if(value[i].toString()==habitaciones[g].Codigo){
-  //               inventario++
-  //             }
-  //           }
-
-  //           let array = {
-  //             Codigo:'',
-  //             Capacidad:1,
-  //             Tipo:'',
-  //             Inventario:1,
-  //             Amenidades:[],
-  //             Camas:1,
-  //             Descripcion:'',
-  //             Personas:1,
-  //             Personas_Extra:1,
-  //             Vista:'',
-  //             Tipos_Camas:[],
-  //             Orden:1
-  //           }
-  //             array.Codigo=this.habitacionesporCodigo[value[i].toString()][0].Codigo
-  //             array.Capacidad = this.habitacionesporCodigo[value[i].toString()][0].Personas
-  //             array.Amenidades = this.habitacionesporCodigo[value[i].toString()][0].Amenidades
-  //             array.Camas = this.habitacionesporCodigo[value[i].toString()][0].Camas
-  //             array.Tipo = this.habitacionesporCodigo[value[i].toString()][0].Tipo
-  //             array.Inventario =inventario
-  //             array.Descripcion = this.habitacionesporCodigo[value[i].toString()][0].Descripcion
-  //             array.Personas = this.habitacionesporCodigo[value[i].toString()][0].Personas
-  //             array.Personas_Extra = this.habitacionesporCodigo[value[i].toString()][0].Personas_Extra
-  //             array.Vista=  this.habitacionesporCodigo[value[i].toString()][0].Vista
-  //             array.Tipos_Camas=  this.habitacionesporCodigo[value[i].toString()][0].Tipos_Camas
-  //             array.Orden=  this.habitacionesporCodigo[value[i].toString()][0].Orden
-
-  //             this.habitacionesArr.push(array)
-  //             this.blockedTabled=false
-  //             this.reloading=false
-  //         }
-  //         this.dataSource.data=this.habitacionesArr
-  //       }
+    if(!reloading)
+    {
+      // this.blockedTabled=true //
+    }
+    if(reloading){
+      this.reloading=true
+    }
+    const sb  =  this._habitacionService.getAll().subscribe(
+      (val:Habitacion[])=>{
         
+        codigosCuarto = [...new Set(val.map(item => item.Codigo))];
 
-  //       this.subscriptions.push(sb)
-  //   })
+        arrayUniqueByKey = [...new Map(val.map(item  =>
+          [item['Codigo'], item])).values()];
 
-  //   this.subscriptions.push(sb)
-  // }
+        newArray = arrayUniqueByKey
+          .map(({_id, Amenidades, Tipos_Camas, Numero, Descripcion, Vista, Camas, Tarifa, Orden, hotel, Ninos, URL, ...keepAttrs}) => keepAttrs)
+
+        this.dataSource.data = newArray
+        
+    })
+
+    this.subscriptions.push(sb)
+  }
 
   add(habitacion:any){
     const modalRef = this.modalService.open(NewRoomComponent,{ size: 'md', backdrop:'static' })
     modalRef.componentInstance.habitacion=habitacion
+    modalRef.componentInstance.editarHab=true
     modalRef.result.then((result) => {
       this.habitacionesArr=[]
-      // this.getHabitaciones(false);
-      this._habitacionService.fetch();
       this.closeResult = `Closed with: ${result}`;
       }, (reason) => {
           this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
       });  
   }
 
+  delete(habitacion:any){
+    console.log(habitacion)
+  }
+
   altaDehabitacion(){
-    const modalRef=this.modalService.open(RoomsComponent,{ size: 'lg', backdrop:'static' })
+    const modalRef=this.modalService.open(NewRoomComponent,{ size: 'lg', backdrop:'static' })
     modalRef.componentInstance.edicion=false
   }
 
@@ -268,23 +223,14 @@ export class RoomsComponent implements OnInit{
       })
   }
 
-    // sorting
-    sort(column: string) {
-      const sorting = this.sorting;
-      const isActiveColumn = sorting.column === column;
-      if (!isActiveColumn) {
-        sorting.column = column;
-        sorting.direction = 'desc';
-      } else {
-        sorting.direction = sorting.direction === 'desc' ? 'asc' : 'desc';
-      }
-      this._habitacionService.patchState({ sorting });
-    }
+  applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
 
-      // pagination
-    paginate(paginator: PaginatorState) {
-      this._habitacionService.patchState({ paginator });
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
     }
+  }
 
   private getDismissReason(reason: any): string {
     if (reason === ModalDismissReasons.ESC) {

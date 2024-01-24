@@ -1,0 +1,61 @@
+.additional-selection {
+    opacity: 0.75;
+    font-size: 0.75em;
+  }
+.button1
+{
+background-color: white;
+  color: black;
+  margin-right: 10px;
+  border: 2px solid #4CAF50; /* Green */
+  position:relative
+}
+.button2
+{
+background-color: white;
+  color: black;
+  margin-right: 10px;
+  position: relative;
+  border: 2px solid #af4c5c; /* Green */
+}
+.button3
+{
+background-color: white;
+color: black;
+margin-right: 10px;
+position: relative;
+border: 2px solid #564caf; /* Green */
+}
+.lesser-size{
+  font-size: .5rem;
+  position:absolute;
+  top:-3px;
+  // left:-3px
+
+}
+.withoutArrow {
+  .mat-select-arrow {
+    border: none;
+  }
+}
+
+.example-section {
+  display: flex;
+  align-content: center;
+  align-items: center;
+}
+
+.float-container {
+  padding: 20px;
+}
+
+.float-child {
+  float: left;
+}
+.cdk-overlay-container, .cdk-overlay-pane {
+  z-index: 19999 !important;
+}
+.square {
+  height: 200px;
+  width: 300px;
+}

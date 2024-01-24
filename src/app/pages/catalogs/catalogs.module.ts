@@ -7,8 +7,14 @@ import { CatalogsRoutingModule } from './catalogs-routing.module';
 import {MatTableModule} from '@angular/material/table';
 import { SharedModule } from 'src/app/_metronic/shared/shared.module';
 import { WidgetsModule } from 'src/app/widgets/widgets.module';
-import { InlineSVGModule } from 'ng-inline-svg-2/lib_commonjs/inline-svg.module';
 import { NewRoomComponent } from './rooms/components/new-room/new-room.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import {MatPaginatorModule} from '@angular/material/paginator';
+import { ReactiveFormsModule } from '@angular/forms';
+import {MatSelectModule} from '@angular/material/select';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import { UploadFormComponent } from '../uploads/upload-form.component';
 
 
 
@@ -16,7 +22,8 @@ import { NewRoomComponent } from './rooms/components/new-room/new-room.component
   declarations: [
     CatalogsComponent,
     RoomsComponent,
-    NewRoomComponent
+    NewRoomComponent,
+    UploadFormComponent
   ],
   imports: [
     CommonModule,
@@ -24,7 +31,12 @@ import { NewRoomComponent } from './rooms/components/new-room/new-room.component
     MatTableModule,
     SharedModule,
     WidgetsModule,
-    InlineSVGModule
+    MatFormFieldModule,
+    MatInputModule,
+    MatPaginatorModule,
+    ReactiveFormsModule,
+    MatSelectModule,
+    MatCheckboxModule
   ]
 })
 export class CatalogsModule { }

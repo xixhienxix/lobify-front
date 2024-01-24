@@ -60,10 +60,7 @@ export class GroupingState implements IGroupingState {
   }
 
   getSelectedRowsCount(): number {
-    if(this.selectedRowIds){    
       return this.selectedRowIds.size;
-    }else 
-    return 0
   }
 }
 

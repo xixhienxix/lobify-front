@@ -1,0 +1,23 @@
+
+
+table {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .mat-mdc-form-field {
+    font-size: 14px;
+    width: 100%;
+  }
+
+  td, th {
+    text-align: center;
+  }
+
+  .ex-container {
+    min-height: 100%;
+    max-height: 400px;
+    width: 100%;
+    max-width: 100%;
+    overflow: auto;
+  }

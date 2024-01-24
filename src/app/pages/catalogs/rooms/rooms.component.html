@@ -10,172 +10,78 @@
           <!--(click)="getHabitaciones(true)" -->
           <button class="btn btn-secondary"><i aria-hidden="true" class="ki ki-reload"></i></button>
         </ng-container>
-        <button style="position: absolute; right: 0px; margin: 10px;" class="btn btn-primary" (click)="altaDehabitacion()">Agregar Nueva Habitacin</button>
+        <button style="position: absolute; right: 0px; margin: 10px;" class="btn btn-primary" (click)="altaDehabitacion()">Agregar Nueva Habitación</button>
       </div>
     </div> 
   
     <div class="card-body">
-      <!-- begin: Grouping -->
-      <ng-container *ngIf="grouping.getSelectedRowsCount()">
-        <div class="form">
-          <div class="row align-items-center form-group-actions margin-top-20 margin-bottom-20">
-            <div class="col-xl-12">
-              <div class="form-group form-group-inline">
-                <div class="form-label form-label-no-wrap">
-                  <label class="font-bold font-danger"><span>Selected records count:
-                      <b>{{ grouping.getSelectedRowsCount() }}</b></span></label>
-                </div>
-               
-              </div>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-      <!-- end: Grouping -->
-  
       <!-- begin:Table -->
-      <div class="table-responsive angular-bootstrap-table">
-  
         <!-- <app-inline-spinner *ngIf="blockedTabled"></app-inline-spinner> -->
-  
-          <mat-table *ngIf="blockedTabled" [dataSource]="dataSource" class="mat-elevation-z8">
-            <!-- Codigo Column -->
-            <ng-container matColumnDef="Codigo">
-              <mat-header-cell *matHeaderCellDef> Codigo </mat-header-cell>
-              <mat-cell *matCellDef="let element"> {{element.Codigo}} </mat-cell>
+        <mat-form-field>
+          <mat-label>Filter</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="" #input>
+        </mat-form-field>
+        <div class="ex-container mat-elevation-z8">
+          <table mat-table [dataSource]="dataSource" matSort>
+        
+            <!-- Nombre de la habitación Column -->
+            <ng-container matColumnDef="Nombre de la habitación" sticky>
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre de la habitación </th>
+              <td mat-cell *matCellDef="let row"> {{row.Codigo}} </td>
             </ng-container>
-          
-            <!-- Capacidad Column -->
-            <ng-container matColumnDef="Capacidad">
-              <mat-header-cell *matHeaderCellDef> Capacidad </mat-header-cell>
-              <mat-cell *matCellDef="let element"> {{element.Capacidad}} </mat-cell>
+        
+            <!-- Codigo de la Habitación Column -->
+            <ng-container matColumnDef="Tipo de la Habitación">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo de la Habitación </th>
+              <td mat-cell *matCellDef="let row"> {{row.Tipo}} </td>
             </ng-container>
-          
+        
             <!-- Tipo Column -->
-            <ng-container matColumnDef="Tipo">
-              <mat-header-cell *matHeaderCellDef> Tipo </mat-header-cell>
-              <mat-cell *matCellDef="let element"> {{element.Tipo}} </mat-cell>
+            <ng-container matColumnDef="Capacidad Max.">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Capacidad Max. </th>
+              <td mat-cell *matCellDef="let row"> {{row.Adultos}} </td>
             </ng-container>
-          
-            <!-- Inventario Column -->
+        
+            <!-- Capacidad Column -->
             <ng-container matColumnDef="Inventario">
-              <mat-header-cell *matHeaderCellDef> Inventario </mat-header-cell>
-              <mat-cell *matCellDef="let element"> {{element.Inventario}} </mat-cell>
-            </ng-container>        
-            
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Inventario </th>
+              <td mat-cell *matCellDef="let row"> {{row.Inventario}} </td>
+            </ng-container>
+
             <!-- Acciones Column -->
             <ng-container matColumnDef="Acciones">
-              <mat-header-cell mat-header-cell *matHeaderCellDef> Agregar al Inventario </mat-header-cell>
-              <mat-cell (click)="$event.stopPropagation()" mat-cell *matCellDef="let element"> 
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Agregar al Inventario </th>
+              <td (click)="$event.stopPropagation()" mat-cell *matCellDef="let element"> 
                 <a
-                    title="Agregar"
-                    class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm"
-                    >
-                    <span (click)="add(element)" [inlineSVG]="'./assets/media/svg/icons/Navigation/Plus.svg'" 
-                      class="svg-icon svg-icon-md svg-icon-success">
-                    </span>
-                  </a> 
-              </mat-cell>
+                title="Agregar"
+                class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm"
+                (click)="add(element)"
+                >
+                <i class="fa-solid fa-plus"></i>
+              </a> 
+              <a
+              title="Borrar"
+              class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm"
+              (click)="delete(element)"
+              >
+             <i class="fa-solid fa-trash-can"></i>
+            </a> 
+             </td>
             </ng-container>
-          
-            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-          </mat-table>
-      </div>
-    </div>
-  </div>
-  
-  
-  <div class="card card-custom gutter-b">
-  
-    
-    <div class="card-body">
-  
-  
-      <!-- begin: Grouping -->
-      <ng-container *ngIf="grouping.getSelectedRowsCount()">
-        <div class="form">
-          <div class="row align-items-center form-group-actions margin-top-20 margin-bottom-20">
-            <div class="col-xl-12">
-              <div class="form-group form-group-inline">
-                <div class="form-label form-label-no-wrap">
-                  <label class="font-bold font-danger"><span>Selected records count:
-                      <b>{{ grouping.getSelectedRowsCount() }}</b></span></label>
-                </div>
-               
-              </div>
-            </div>
-          </div>
-        </div>
-      </ng-container>
-      <!-- end: Grouping -->
-  
-      <!-- begin:Table -->
-      <div class="table-responsive angular-bootstrap-table">
         
-        <table class="table overflow-hidden table-head-custom table-vertical-center">
-          <thead>
-            <th>
-              Nombre de la Habitación
-              <app-sort-icon column="Codigo" [activeColumn]="sorting.column" [activeDirection]="sorting.direction"
-                (sort)="sort($event)"></app-sort-icon>
-            </th>
-            <th>
-              Codigo de la Habitación
-              <app-sort-icon column="Numero" [activeColumn]="sorting.column" [activeDirection]="sorting.direction"
-                (sort)="sort($event)"></app-sort-icon>
-            </th>
-            <th style="text-align: center;">
-              Tipo
-              <app-sort-icon column="Tipo" [activeColumn]="sorting.column" [activeDirection]="sorting.direction"
-                (sort)="sort($event)"></app-sort-icon>
-            </th>
-            <th style="text-align: center;">
-              Capacidad
-              <app-sort-icon column="Personas" [activeColumn]="sorting.column" [activeDirection]="sorting.direction"
-                (sort)="sort($event)"></app-sort-icon>
-            </th>
-            <!-- <th>
-              Inventario
-              <app-sort-icon column="Inventario" [activeColumn]="sorting.column" [activeDirection]="sorting.direction"
-                (sort)="sort($event)"></app-sort-icon>
-            </th> -->
-            <th>Acciones</th>
-          </thead>
-          <tbody>
-            <tr *ngFor="let habitacion of _habitacionService.items$ | async">
-              <td style="text-align: center; vertical-align: middle;">{{ habitacion.Codigo }}</td>
-              <td style="text-align: center; vertical-align: middle;">{{ habitacion.Numero }}</td>
-              <td style="text-align: center; vertical-align: middle;">{{ habitacion.Tipo }}</td>
-                <td style="text-align: center; vertical-align: middle;">{{ habitacion.Adultos }}</td>
-                <!-- <td style="text-align: center; vertical-align: middle;">1</td> -->
-  
-                <td style="text-align: center; vertical-align: middle;">
-                  <a
-                  title="Editar Folio"
-                  class="mx-3 btn btn-icon btn-light btn-hover-primary btn-sm"
-                  (click)="edit(habitacion)">
-                  <span [inlineSVG]="'./assets/media/svg/icons/Communication/Write.svg'" 
-                    class="svg-icon svg-icon-md svg-icon-primary">
-                  </span>
-                </a>
-                <a
-                title="Borrar Habitación"
-                class="btn btn-icon btn-light btn-hover-danger btn-sm"
-                (click)="popDelete(habitacion)">
-                <span [inlineSVG]="'./assets/media/svg/icons/General/Trash.svg'" 
-            class="svg-icon svg-icon-md svg-icon-danger">
-          </span>
-              </a>
-                </td>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayedColumns.length">
+                NO DATA
+              </td>
             </tr>
-          </tbody>
-        </table>
+          </table>
+
+          <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" aria-label="Select page of users"></mat-paginator>
+        </div>
       </div>
-      <!-- end: Table -->
-      <app-paginator class="flex-wrap d-flex justify-content-between align-items-center" [paginator]="paginator"
-        [isLoading]="isLoading" (paginate)="paginate($event)"></app-paginator>
-    </div>
   </div>
   
   <ng-container *ngIf="isLoading">

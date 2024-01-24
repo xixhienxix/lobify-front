@@ -1,0 +1,38 @@
+<label>
+  <input
+    type="file"
+    class="text-nowrap text-truncate"
+    (change)="selectFile($event)"
+  />
+</label>
+
+<!-- <button
+  class="btn btn-success btn-sm"
+  [disabled]="fileName==''"
+  (click)="upload()"
+>
+  Upload
+</button> -->
+
+<div class="row col-lg-12">
+  <div *ngIf="selectedFiles">
+    <img class="square" [attr.src]="imgURL"/>
+  </div>
+</div>
+
+<div>
+  <label>{{message}}</label>
+</div>
+
+<div *ngIf="currentFileUpload" class="progress mt-2">
+  <div
+    class="progress-bar progress-bar-info"
+    role="progressbar"
+    attr.aria-valuenow="{{ percentage }}"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    [ngStyle]="{ width: percentage + '%' }"
+  >
+    {{ percentage }}%
+  </div>
+</div>

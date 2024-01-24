@@ -5,6 +5,7 @@ import { Habitacion } from '../models/habitaciones.model';
 import { environment } from 'src/environments/environment';
 import { ITableState } from '../_metronic/shared/models/table.model';
 import { TableService } from '../_metronic/shared/services/table.service';
+import { codigosCuarto } from '../models/codigosCuarto.model';
 const DEFAULT_HABITACION = {
   _id:'',
   Codigo:'',
@@ -21,6 +22,12 @@ const DEFAULT_HABITACION = {
   Orden:1,
   Tarifa:0
 }
+const DEFAUL_CODIGOS = {
+  nombreHabitacion:'',
+  codigo:'',
+  tipo:'',
+  capacidad:''
+}
 @Injectable({
   providedIn: 'root'
 })
@@ -30,11 +37,15 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
   HabitacionUpdate$: Observable<Habitacion>;
   private currentHabitacion$=new BehaviorSubject<Habitacion>(DEFAULT_HABITACION);
   API_URL_MAIN = `${environment.apiUrl}`
+  currentCodigosCuartoSubject: BehaviorSubject<codigosCuarto>;
+
 
   constructor(@Inject(HttpClient) http: any,   
    ) { 
     super(http);
     this.HabitacionUpdate$=this.currentHabitacion$.asObservable();
+    this.currentCodigosCuartoSubject = new BehaviorSubject<codigosCuarto>(DEFAUL_CODIGOS);
+
   }
 
   get getcurrentHabitacionValue(): Habitacion {
@@ -45,14 +56,38 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
     this.currentHabitacion$.next(Habitacion);
   }
 
+  get getcurrentUserValue(): codigosCuarto {
+    return this.currentCodigosCuartoSubject.value;
+  }
+
+  set setcurrentUserValue(user: codigosCuarto) {
+    this.currentCodigosCuartoSubject.next(user);
+  }
+
    getAll() :Observable<Habitacion[]> {
     return this.http
-     .get<Habitacion[]>(environment.apiUrl + '/codigos/habitaciones')
+     .get<Habitacion[]>(environment.apiUrl + '/habitaciones')
      .pipe(
        map(responseData=>{
-       return responseData
+        const postArray = []
+         for(const key in responseData)
+         {
+           if(responseData.hasOwnProperty(key))
+           postArray.push(responseData[key]);
+           this.setcurrentHabitacionValue = postArray[0] 
+          }
+          return responseData
      })
      )
+   }
+
+   postHabitacion(habitacion:Habitacion,editar:boolean,filename:File){
+
+    return this.http.post(environment.apiUrl+'/habitacion/guardar',{habitacion,editar}).pipe(
+      map(response=>{
+        return response
+      })
+    )
    }
 
    searchRoom(habitacion:Habitacion){
@@ -73,7 +108,7 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
       catchError((err, caught) => {
         return err;
       })
-    ).toPromise();;
+    ).toPromise();
   }
 
    ngOnDestroy() {
