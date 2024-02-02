@@ -8,23 +8,14 @@ export const environment = {
   USERDATA_KEY: 'authf649fc9a5f55',
   isMockEnabled: true,
   apiUrl:'http://localhost:5000/lobify-api/us-central1/api',
-  appThemeName: 'Metronic',
-  appPurchaseUrl: 'https://1.envato.market/EA4JP',
-  appHTMLIntegration:
-    'https://preview.keenthemes.com/metronic8/demo1/documentation/base/helpers/flex-layouts.html',
-  appPreviewUrl: 'https://preview.keenthemes.com/metronic8/angular/demo1/',
-  appPreviewAngularUrl:
-    'https://preview.keenthemes.com/metronic8/angular/demo1',
-  appPreviewDocsUrl: 'https://preview.keenthemes.com/metronic8/angular/docs',
-  appPreviewChangelogUrl:
-    'https://preview.keenthemes.com/metronic8/angular/docs/changelog',
-  appDemos: {
-    demo1: {
-      title: 'Demo 1',
-      description: 'Default Dashboard',
-      published: true,
-      thumbnail: './assets/media/demos/demo1.png',
-    },
+  fireBaseStorageSecrets:{
+    apiKey: "AIzaSyB3tYq0nD6m4hljK3lfkGmQtqHwm3ssCiU",
+    authDomain: "movnext-api.firebaseapp.com",
+    projectId: "movnext-api",
+    storageBucket: "movnext-api.appspot.com",
+    messagingSenderId: "82604568171",
+    appId: "1:82604568171:web:21dafcd8a28f1767008b2e",
+    databaseURL: "https://movnext-api-default-rtdb.firebaseio.com",
 
   }
 };
