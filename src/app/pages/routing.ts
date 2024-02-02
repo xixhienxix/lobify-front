@@ -10,9 +10,8 @@ const Routing: Routes = [
     loadChildren: () => import('./calendar/calendar.module').then((m) => m.CalendarModule),
   },
   {
-    path: 'crafted/pages/profile',
-    loadChildren: () => import('../modules/profile/profile.module').then((m) => m.ProfileModule),
-    // data: { layout: 'light-sidebar' },
+    path: 'catalogs',
+    loadChildren: () => import('./catalogs/catalogs.module').then((m) => m.CatalogsModule),
   },
 
   {
