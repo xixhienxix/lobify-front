@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "demo1": {
+    "lobify": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -20,7 +20,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/demo1",
+            "outputPath": "dist/lobify",
             "allowedCommonJsDependencies": [
               "object-path",
               "apexcharts",
@@ -85,14 +85,14 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "demo1:build:production"
+              "browserTarget": "lobify:build:production"
             },
             "development": {
-              "browserTarget": "demo1:build:development"
+              "browserTarget": "lobify:build:development"
             }
           },
           "options": {
-            "browserTarget": "demo1:build",
+            "browserTarget": "lobify:build",
             "proxyConfig": "proxy.conf.json"
           },
           "defaultConfiguration": "development"
@@ -100,8 +100,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "demo1:build"
-            "proxyConfig": "proxy.conf.json"
+            "browserTarget": "lobify:build"
           }
         },
         "test": {
