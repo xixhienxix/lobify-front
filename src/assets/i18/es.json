@@ -52,5 +52,16 @@
         "finance":"Finanzas",
         "configurations":"Configuraciones",
         "parameters":"Parametros"
+    },
+    "CalendarComponent":{
+        "nva-rsv": "Nueva Reservación",
+        "btn-reserva-no-payment": "Reserva Sin Pago",
+        "btn-reserva-confirm": "Reserva Confirmada",
+        "btn-huesped-inhouse": "Húesped en Casa",
+        "btn-checkout": "Hizó Checkout",
+        "btn-internaluse": "Uso Interno",
+        "btn-bloqued": "Bloqueo / Sin Llegadas",
+        "footer-status-recep":"Estado en Recepción",
+        "footer-status-clean": "Estado de Limpieza"
     }
 }

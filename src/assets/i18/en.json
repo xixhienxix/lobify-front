@@ -50,6 +50,17 @@
         "finance":"Finance",
         "configurations":"Configurations",
         "parameters":"parameters"
+    },
+    "CalendarComponent":{
+        "nva-rsv": "New Reservation",
+        "btn-reserva-no-payment": "No Payment reservation",
+        "btn-reserva-confirm": "Confirmed Reservation",
+        "btn-huesped-inhouse": "In-House",
+        "btn-checkout": "Checkout",
+        "btn-internaluse": "Internal Use",
+        "btn-bloqued": "Bloqued / No Arrivals",
+        "footer-status-recep":"Reception Status",
+        "footer-status-clean": "Clean Status"
     }
 
 }
