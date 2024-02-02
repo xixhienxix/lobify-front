@@ -1,0 +1,187 @@
+
+  <!--begin::Card-->
+  <div class="card card-custom gutter-b">
+    <!--begin::Header-->
+    <div class="card-header card-header-tabs-line">
+      <ul class="nav nav-dark nav-bold nav-tabs nav-tabs-line" role="tablist">
+        <li class="nav-item">
+          <a
+            class="nav-link cursor-pointer"
+            role="tab"
+          >
+            Parametros Generales
+          </a>
+        </li>
+      </ul>
+    </div>
+    <!--end::Header-->
+    <!--begin::Form-->
+    <form class="form" [formGroup]="formGroup" (ngSubmit)="submitParametros()">
+      <!--begin::Body-->
+      <div class="card-body">
+        <div class="tab-content pt-3">
+          <!-- begin::Header -->
+            <div class="form-group row">
+              <label class="col-lg-3 col-form-label text-lg-right"
+                >Zona Horaria:</label
+              >
+              <div class="col-lg-9 col-xl-4">
+                <mat-form-field appearance="fill">
+                  <mat-label>{{_parametrosService.getCurrentParametrosValue.codigoZona}} - {{_parametrosService.getCurrentParametrosValue.zona}}</mat-label>
+                  <mat-select (selectionChange)='onSelectTimeZone($event.value)'  formControlName="timeZone" required>
+                    <mat-option *ngFor="let timezone of zonaHoraria" [value]="timezone.UTC+' '+timezone.Nombre">
+                      (UTC {{timezone.UTC}}) {{timezone.Nombre}} 
+                    </mat-option>
+                  </mat-select>
+                  <!-- <mat-error *ngIf="animalControl.hasError('required')">Please choose an animal</mat-error>
+                  <mat-hint>{{animalControl.value?.sound}}</mat-hint> -->
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-lg-3 col-form-label text-lg-right"
+                >Divisa:</label
+              >
+              <div class="col-lg-9 col-xl-4">
+                <mat-form-field appearance="fill">
+                  <mat-label>{{_parametrosService.getCurrentParametrosValue.divisa}}</mat-label>
+                  <mat-select formControlName="divisa" required>
+                    <mat-option *ngFor="let divisa of divisas" [value]="divisa.Nombre">
+                      {{divisa.Nombre}} - {{divisa.Localidad}} - {{divisa.Simbolo}} 
+                    </mat-option>
+                  </mat-select>
+                  <!-- <mat-error *ngIf="animalControl.hasError('required')">Please choose an animal</mat-error>
+                  <mat-hint>{{animalControl.value?.sound}}</mat-hint> -->
+                </mat-form-field>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-lg-3 col-form-label text-lg-right"
+                >IVA %:</label
+              >
+              <div class="col-lg-9 col-xl-4">
+                <input class="form-control" type="number" formControlName='iva' value=""> 
+                <div class="form-text text-muted">Seleccione % de impuesto a aplicar.</div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-lg-3 col-form-label text-lg-right"
+                >ISH %:</label
+              >
+              <div class="col-lg-9 col-xl-4">
+                <input class="form-control" type="number" formControlName='ish' value=""> 
+                <div class="form-text text-muted">Seleccione % de impuesto a aplicar.</div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-lg-3 col-form-label text-lg-right"
+                >Hora de Entrada:</label
+              >
+              <div class="col-lg-9 col-xl-4">
+                <mat-form-field appearance="fill">
+                  <mat-label>--Selecciona Hora--</mat-label>
+                  <mat-select  formControlName="checkIn" required>
+                    <mat-option *ngFor="let checkIn of checkOutList" [value]="checkIn">
+                      {{checkIn}} 
+                    </mat-option>
+                  </mat-select>
+                  <!-- <mat-error *ngIf="animalControl.hasError('required')">Please choose an animal</mat-error>
+                  <mat-hint>{{animalControl.value?.sound}}</mat-hint> -->
+                </mat-form-field>
+                <div class="form-text text-muted">Seleccione la Hora en la que desea que el sistema marque de manera automatica los Check-Out.</div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-lg-3 col-form-label text-lg-right"
+                >Hora de Salida:</label
+              >
+              <div class="col-lg-9 col-xl-4">
+                <mat-form-field appearance="fill">
+                  <mat-label>--Selecciona Hora--</mat-label>
+                  <mat-select  formControlName="checkOut" required>
+                    <mat-option *ngFor="let checkOut of checkOutList" [value]="checkOut">
+                      {{checkOut}} 
+                    </mat-option>
+                  </mat-select>
+                  <!-- <mat-error *ngIf="animalControl.hasError('required')">Please choose an animal</mat-error>
+                  <mat-hint>{{animalControl.value?.sound}}</mat-hint> -->
+                </mat-form-field>
+                <div class="form-text text-muted">Seleccione la Hora en la que desea que el sistema marque de manera automatica los Check-Out.</div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <label class="col-lg-3 col-form-label text-lg-right"
+                >Hora de No-Show:</label
+              >
+              <div class="col-lg-9 col-xl-4">
+                <mat-form-field appearance="fill">
+                  <mat-label>--Selecciona Hora--</mat-label>
+                  <mat-select  formControlName="noShow" required>
+                    <mat-option *ngFor="let noShow of checkOutList" [value]="noShow">
+                      {{noShow}} 
+                    </mat-option>
+                  </mat-select>
+                  <!-- <mat-error *ngIf="animalControl.hasError('required')">Please choose an animal</mat-error>
+                  <mat-hint>{{animalControl.value?.sound}}</mat-hint> -->
+                </mat-form-field>
+                <div class="form-text text-muted">Seleccione la Hora en la que desea que el sistema marque de manera automatica un No-Show.</div>
+              </div>
+            </div>
+            <!-- <div class="form-group row">
+              <label class="col-lg-3 col-form-label text-lg-right"
+                >Hora de Auditoria:</label
+              >
+              <div class="col-lg-9 col-xl-4">
+                <mat-form-field appearance="fill">
+                  <mat-label>--Selecciona Hora--</mat-label>
+                  <mat-select formControlName="auditoria" required>
+                    <mat-option *ngFor="let auditoria of checkOutList" [value]="auditoria">
+                      {{auditoria}} 
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div class="form-text text-muted">Seleccione la Hora en la que desea que el sistema realize la auditoria de cuartos.</div>
+              </div>
+            </div> -->
+          
+          </div>
+          <!-- end::Header -->
+      </div>
+      <!--end::Body-->
+        <button type="submit" class="btn btn-info col-md-6" >Guardar Cambios 
+        </button>
+    </form>
+    <!--end::Form-->
+  </div>
+  <!--end::Card-->
+  
+  <!-- <div class="card card-custom gutter-b">
+    <div class="card-header">
+      <div class="card-title">
+        <h3 class="card-label">Generated Config</h3>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="example mb-10">
+        <p>
+          Use for layout config in
+          <code>src/app/_metronic/configs/default-layout.config.ts</code>
+        </p>
+        <div class="example-code">
+          <div class="example-code">
+            <span
+              class="example-copy"
+              data-placement="left"
+              ngbTooltip="Copy code"
+            ></span>
+            <div class="example-highlight">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+  
+  <ng-container *ngIf="isLoading">
+    <app-loader-spinner></app-loader-spinner>
+  </ng-container>

@@ -8,7 +8,6 @@ import { AuthService } from 'src/app/modules/auth';
   styleUrls: ['./sidebar-footer.component.scss'],
 })
 export class SidebarFooterComponent implements OnInit {
-  appPreviewChangelogUrl: string = environment.appPreviewChangelogUrl;
   userAvatarClass: string = 'symbol-35px symbol-md-40px';
   itemClass: string = 'ms-1 ms-lg-3';
   nombre:string|undefined=''

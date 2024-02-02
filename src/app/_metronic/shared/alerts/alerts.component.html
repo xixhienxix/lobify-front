@@ -1,0 +1,31 @@
+<div class="modal-header">
+    <h4 class="modal-title">{{alertHeader}}</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>{{mensaje}}</p>
+      <br>
+        <p *ngIf="mensajeExtra">{{mensaje1}}</p>
+        <br>
+        <p *ngIf="mensajeExtra">{{mensaje2}}</p>
+        <br>
+        <p *ngIf="mensajeExtra">{{mensaje3}}</p>
+        <br>
+        <p *ngIf="mensajeExtra">{{mensaje4}}</p>
+        <br>
+      
+
+    <ng-container *ngIf="isProgress">
+      <p>{{countdown}}</p>
+      <!-- <mat-progress-bar value="40"></mat-progress-bar> -->
+    </ng-container>
+
+  </div>
+
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close('Aceptar')">Aceptar</button>
+    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Cerrar</button>
+  </div>
