@@ -1,1 +1,36 @@
-<app-gantt [rows]="rows"></app-gantt>
+
+
+<bryntum-scheduler 
+    #scheduler
+    [allowOverlap] = "schedulerConfig.allowOverlap!"
+    [barMargin] = "schedulerConfig.barMargin!"
+    [columns] = "schedulerConfig.columns!"
+    [createEventOnDblClick] = "schedulerConfig.createEventOnDblClick!"
+    [crudManager] = "schedulerConfig.crudManager!"
+    [endDate] = "schedulerConfig.endDate!"
+    [getDateConstraints] = "schedulerConfig.getDateConstraints!"
+    [resourceImagePath] = "schedulerConfig.resourceImagePath!"
+    [rowHeight] = "schedulerConfig.rowHeight!"
+    [snap] = "schedulerConfig.snap!"
+    [startDate] = "schedulerConfig.startDate!"
+    [tbar] = "schedulerConfig.tbar!"
+    [tickSize] = "schedulerConfig.tickSize!"
+    [viewPreset] = "schedulerConfig.viewPreset!"
+    [zoomOnMouseWheel] = "schedulerConfig.zoomOnMouseWheel!"
+    [zoomOnTimeAxisDoubleClick] = "schedulerConfig.zoomOnTimeAxisDoubleClick!"
+    [eventRenderer] = "schedulerConfig.eventRenderer!"
+    [resourceTimeRangeRenderer] = "schedulerConfig.resourceTimeRangeRenderer!"
+    [cellMenuFeature] = "schedulerConfig.features!.cellMenu!"
+    [eventDragCreateFeature] = "schedulerConfig.features!.eventDragCreate!"
+    [eventEditFeature] = "schedulerConfig.features!.eventEdit!"
+    [eventTooltipFeature] = "schedulerConfig.features!.eventTooltip!"
+    [resourceTimeRangesFeature] = "schedulerConfig.features!.resourceTimeRanges!"
+    [scheduleMenuFeature] = "schedulerConfig.features!.scheduleMenu!"
+    [scheduleTooltipFeature] = "schedulerConfig.features!.scheduleTooltip!"
+    [summaryFeature] = "summaryFeatureConfig!"
+    [timeAxisHeaderMenuFeature] = "schedulerConfig.features!.timeAxisHeaderMenu!"
+    [timeRangesFeature] = "schedulerConfig.features!.timeRanges!"
+    (onResourceTimeRangeDblClick) = "onResourceTimeRangeDblClick($event)"
+    >
+</bryntum-scheduler>
+

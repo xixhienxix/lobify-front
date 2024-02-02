@@ -10,3 +10,18 @@
 @import "./assets/plugins/keenicons/duotone/style.css";
 @import "./assets/plugins/keenicons/outline/style.css";
 @import "./assets/plugins/keenicons/solid/style.css";
+
+body {
+    font-family : Roboto, sans-serif;
+    font-size   : 14px;
+    height      : 100%;
+    padding     : 0;
+    margin      : 0;
+}
+
+app-content {
+    flex           : 1;
+    display        : flex;
+    flex-direction : column;
+    height         : 60vh;
+}

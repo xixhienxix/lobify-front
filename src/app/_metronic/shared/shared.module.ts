@@ -9,10 +9,12 @@ import { TranslateModule } from '@ngx-translate/core';
   ],
   imports: [
     CommonModule,
+    
   ],
   exports: [
     KeeniconComponent,
-    TranslateModule
+    TranslateModule,
+    
   ]
 })
 export class SharedModule {

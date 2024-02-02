@@ -1,0 +1,105 @@
+
+.name-container-dropdown
+  {
+    position: absolute;
+    z-index:1;
+    width:80%;
+    height:80%;
+    max-height:150px;
+    background:#F6F6F6;
+    overflow-y:auto
+  }
+  #close {
+    float:right;
+    display:inline-block;
+    padding:2px 5px;
+    background:#ccc;
+}
+select {
+  background-image:
+    linear-gradient(45deg, transparent 50%, #00506a 60%),
+    linear-gradient(135deg, #00506a 40%, transparent 50%) !important;
+  background-position:
+    calc(100% - 30px) 14px,
+    calc(100% - 20px) 14px,
+    100% 0;
+  background-size:
+    10px 10px,
+    10px 10px;
+  background-repeat: no-repeat;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+#overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,.5); 
+  z-index:10000;
+  text-align: center;
+  vertical-align: middle;
+}
+.day {      
+  text-align: center;
+  padding: 7px;
+  border-radius: 1rem;
+  width: 100% !important;
+}
+.ngb-dp-day{
+  width: 100% !important;
+  height: 100% !important;
+}
+.ngb-dp-weekday{
+ width: 100% !important;
+ height: 100% !important;
+}
+.cdk-overlay-container, .cdk-overlay-pane {
+  z-index: 9999 !important;
+}
+
+
+.mat-form-field {
+  font-size: 14px;
+  width: 100%;
+}
+
+// .table-responsive {
+//   display: block;
+//   width: 100%;
+//   overflow-x: auto;
+//   .mat-table {
+//       width: 100%;
+//       max-width: 100%;
+//       margin-bottom: 1rem;
+//       display: table;
+//       border-collapse: collapse;
+//       margin: 0px;
+//   }
+//   .mat-row,
+//   .mat-header-row {
+//       display: table-row;
+//   }
+//   .mat-cell,
+//   .mat-header-cell {
+//       word-wrap: initial;
+//       display: table-cell;
+//       padding: 0px 10px;
+//       line-break: unset;
+//       width: auto;
+//       white-space: nowrap;
+//       overflow: hidden;
+//       vertical-align: middle;
+//   }
+// }
+
+// .mat-row:hover .mat-cell {
+//   border-color: currentColor;
+//   background-color: rgba(183, 183, 223, 0.966);
+
+// }
+// .mat-row .mat-cell {
+//   cursor: pointer;
+// }
+
+
+
