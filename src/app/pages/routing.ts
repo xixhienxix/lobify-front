@@ -13,7 +13,10 @@ const Routing: Routes = [
     path: 'catalogs',
     loadChildren: () => import('./catalogs/catalogs.module').then((m) => m.CatalogsModule),
   },
-
+  {
+    path: 'params',
+    loadChildren: () => import('./parametros/parametros.module').then((m)=> m.ParametrosModule) 
+  },
   {
     path: '',
     redirectTo: '/dashboard',

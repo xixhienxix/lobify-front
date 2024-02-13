@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "http://localhost:5000/lobify-api/us-central1/api",
+    "target": "https://us-central1-lobify-api.cloudfunctions.net/api",
     "secure": false,
     "pathRewrite": {
       "^/api": ""

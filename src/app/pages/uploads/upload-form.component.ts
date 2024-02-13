@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
 import { Observable } from 'rxjs';
 import { FileUpload } from 'src/app/models/file.upload.model';
 import { FileUploadService } from 'src/app/services/file.upload.service';
@@ -8,7 +8,7 @@ import { FileUploadService } from 'src/app/services/file.upload.service';
   templateUrl: './upload-form.component.html',
   styleUrls: ['./upload-form.component.css']
 })
-export class UploadFormComponent implements OnInit {
+export class UploadFormComponent implements OnInit, OnChanges {
   selectedFiles: FileList;
   currentFileUpload: FileUpload;
   percentage: number;
@@ -26,13 +26,11 @@ export class UploadFormComponent implements OnInit {
   }
 
   ngOnChanges(changes: any) {
-    if(changes.triggerUpload.currentValue){
-      if(typeof changes.triggerUpload.currentValue !== 'undefined' ){
+      if(typeof changes?.triggerUpload !== 'undefined' ){
         if(changes.triggerUpload.currentValue===true){
           this.upload()
         }
       }      
-    }
   }
 
   selectFile(event:any): void {

@@ -5,7 +5,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { LoadingSpinnerComponent } from 'src/app/services/_helpers/loaderspinner/loaderspinner.component';
 import { PaginatorComponent } from './paginator/paginator.component';
 import { SortIconComponent } from './sort-icon/sort-icon.component';
-import { ParametrosComponent } from '../../parametros/parametros.component';
 import { AlertsComponent } from './alerts/alerts.component';
 import { NgPagination } from './paginator/ng-pagination/ng-pagination.component';
 import { FormsModule } from '@angular/forms';

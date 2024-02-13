@@ -12,7 +12,6 @@ import { FutureReservationsComponent } from './widgets/future-reservations/futur
 import { CanceledReservationsComponent } from './widgets/canceled-reservations/canceled-reservations.component';
 import { TemporalReservationsWidgetComponent } from './widgets/temporal-reservations-widget/temporal-reservations-widget.component';
 import { AbandonReservationsWidgetComponent } from './widgets/abandon-reservations-widget/abandon-reservations-widget.component';
-import { CalendarComponent } from '../calendar/calendar.component';
 
 @NgModule({
   declarations: [DashboardComponent, CleanStatusWidgetComponent, OccupacyAndIncomeWidgetComponent, BadgeWidgetComponent, FutureReservationsComponent, CanceledReservationsComponent, TemporalReservationsWidgetComponent, AbandonReservationsWidgetComponent],

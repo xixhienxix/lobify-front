@@ -17,8 +17,6 @@ import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 // #fake-start#
 import { FakeAPIService } from './_fake/fake-api.service';
 import { AuthInterceptor } from './modules/auth/services/auth.interceptor';
-import { ArrivalsComponent } from './pages/reports/widgets/arrivals/arrivals.component';
-import { ParametrosComponent } from './parametros/parametros.component';
 import { ReactiveFormsModule } from '@angular/forms';
 // #fake-end#
 import {MatSelectModule} from '@angular/material/select';
@@ -40,7 +38,7 @@ export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, '../assets/i18/', '.json');
 }
 @NgModule({
-  declarations: [AppComponent, ParametrosComponent],
+  declarations: [AppComponent],
   imports: [
     AngularFireDatabaseModule,
     AngularFireModule.initializeApp({

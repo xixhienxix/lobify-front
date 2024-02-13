@@ -1,15 +1,16 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
-import { Divisas } from './_models/divisas';
-import { TimeZones } from './_models/timezone';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { TimezonesService } from './_services/timezones.service';
-import { DivisasService } from './_services/divisas.service';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
-import { ParametrosService } from './_services/parametros.service';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
-import { Parametros } from './_models/parametros';
+import { TimeZones } from '../_models/timezone';
+import { TimezonesService } from '../_services/timezones.service';
+import { Divisas } from '../_models/divisas';
+import { Parametros } from '../_models/parametros';
+import { DivisasService } from '../_services/divisas.service';
+import { ParametrosService } from '../_services/parametros.service';
+
 const DEFAULT_TIMEZONE = {
   _id:'',
   Codigo:'MX',
@@ -23,11 +24,11 @@ const DEFAULT_DIVISA = {
   Simbolo:'$'
 }
 @Component({
-  selector: 'app-parametros',
-  templateUrl: './parametros.component.html',
-  styleUrls: ['./parametros.component.scss']
+  selector: 'app-parametros-main',
+  templateUrl: './parametros.main.component.html',
+  styleUrls: ['./parametros.main.component.scss']
 })
-export class ParametrosComponent implements OnInit, OnDestroy{
+export class ParametrosMainComponent implements OnInit, OnDestroy{
 /**SIte Helpers */
 isLoading:Boolean=false
 
@@ -81,38 +82,36 @@ setFormGroup(){
 
 getTimeZones()
 {
-  const sb = this.timezonesService.getTimeZones().subscribe(
-    (value:any)=>{
+  const sb = this.timezonesService.getTimeZones().subscribe({
+   next: (value:any)=>{
       if(value)
       {this.zonaHoraria=value}
       else 
       {this.zonaHoraria.push(DEFAULT_TIMEZONE)}
     },
-    (error)=>{
+   error: (error)=>{
       const modalRef=this.modal.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
       modalRef.componentInstance.alertsHeader = 'Error'
       modalRef.componentInstance.mensaje='No se pudo cargar la lista de zonas horarias intente actualizando la pagina'
-    },
-    ()=>{}
+    }}
     )
     this.susbcription.push(sb)
 }
 
 getDivisas(){
-  const sb = this.divisasService.getDivisas().subscribe(
-    (value:any)=>{
+  const sb = this.divisasService.getDivisas().subscribe({
+   next: (value:any)=> {
       if(value)
       {this.divisas=value}
       else 
       {this.divisas.push(DEFAULT_DIVISA)}
     },
-    (error)=>{
+  error: (error)=>{
       const modalRef=this.modal.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
       modalRef.componentInstance.alertsHeader = 'Error'
       modalRef.componentInstance.mensaje='No se pudo cargar la lista de zonas horarias intente actualizando la pagina'
     },
-    ()=>{}
-    )
+    })
     this.susbcription.push(sb)
 }
 

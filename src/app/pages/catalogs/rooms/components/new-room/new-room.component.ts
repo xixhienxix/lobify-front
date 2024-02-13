@@ -14,7 +14,7 @@ import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { DateTime } from 'luxon'
 import { CodigosService } from 'src/app/services/codigos.service';
 import { TarifasService } from 'src/app/services/tarifas.service';
-import { ParametrosService } from 'src/app/parametros/_services/parametros.service';
+import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
 import { Tarifas } from 'src/app/models/tarifas';
 import { Codigos } from 'src/app/models/codigos.model';
 
@@ -116,7 +116,6 @@ export class NewRoomComponent implements OnInit, OnDestroy{
     public _parametrosService:ParametrosService,
     private af :AngularFireStorage
   ) {
-    console.log(this.editarHab)
     this.fromDate = DateTime.now().setZone(_parametrosService.getCurrentParametrosValue.zona)
     this.toDate = DateTime.now().setZone(_parametrosService.getCurrentParametrosValue.zona)
     this.toDate = this.toDate.plus({ days: 1 });
@@ -283,7 +282,7 @@ this.getCodigos();
 
   if(this.editarHab==true){
     habitacionNueva = {
-      _id:this.habitacion._id,
+      _id:'',
       Codigo:codigoHab,
       Numero:this.formGroup.value.etiqueta,
       Descripcion:this.formGroup.value.descripcion,
@@ -301,7 +300,7 @@ this.getCodigos();
   }else {
     if(nombreHabs.length!=0){
       habitacionNueva = {
-        _id:this.habitacion._id,
+        _id:'',
         Codigo:codigoHab,
         Numero:nombreHabs,
         Descripcion:this.formGroup.value.descripcion,
@@ -318,7 +317,7 @@ this.getCodigos();
       }
     }else{
       habitacionNueva = {
-        _id:this.habitacion._id,
+        _id:'',
         Codigo:codigoHab,
         Numero:this.formGroup.value.nombreHabs,
         Descripcion:this.formGroup.value.descripcion,

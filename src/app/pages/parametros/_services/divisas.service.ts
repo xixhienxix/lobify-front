@@ -30,18 +30,11 @@ set setcurrentDivisa(divisa:Divisas){
   ) { }
 
   getDivisas(){
-    const hotel = sessionStorage.getItem("HOTEL") as string;
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append("hotel",hotel);
-
-    return this.http.get(environment.apiUrl+'/parametros/divisas',{params:queryParams})
+    return this.http.get(environment.apiUrl+'/parametros/divisas')
   }
 
   getDivisasByParametro(divisa:string, hotel:string){
-    let queryParams = new HttpParams();
-    queryParams = queryParams.append("hotel",hotel);
-
-     this.http.get<Divisas>(environment.apiUrl+'/parametros/divisas/'+divisa,{params:queryParams})
+     this.http.get<Divisas>(environment.apiUrl+'/parametros/divisas/'+divisa)
     .subscribe(
       (value:any)=>{
         this.setcurrentDivisa=value[0]

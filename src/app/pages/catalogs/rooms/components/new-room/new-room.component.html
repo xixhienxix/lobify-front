@@ -24,7 +24,7 @@
                         <div class="form-group col-lg-12">
                             <label style="color:#00506a; font-weight: bold;">Nombre de la Habitación</label>
                             <input
-                                [attr.disabled]="editarHab"
+                                [attr.attr.disabled]="editarHab"
                                 formControlName="nombre"
                                 style="background-color: #e6e9ed;"
                                 class="form-control"
@@ -150,7 +150,7 @@
                                 style="background-color: #e6e9ed; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;  border-left: 2px solid #e6e9ed;"
                                 class="text-center input-group form-control form-control-lg form-control-solid"
                                 placeholder=""
-                                [disabled]="true"
+                                [attr.disabled]="true"
                                 [value]="quantity"
                                 min="1"
                                 formControlName="adultos"
@@ -177,7 +177,7 @@
                                 </div>
                                 <input
                                 style="background-color: #e6e9ed; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf; border-left: 2px solid #e6e9ed;"
-                                [disabled]="true"
+                                [attr.disabled]="true"
                                 class="text-center input-group form-control form-control-lg form-control-solid" placeholder=""
                                 [value]="quantityExtra"
                                 formControlName="ninos"
@@ -228,7 +228,7 @@
                                   </div>
                                 </mat-select>
                             <div class="input-group-append">
-                                <button [disabled]="reload"  class="btn btn-secondary">
+                                <button [attr.disabled]="reload"  class="btn btn-secondary">
                                     <i class="ki ki-reload" aria-hidden="true"></i>
                                 </button>
                             </div>
@@ -310,7 +310,7 @@
                         style="background-color: #e6e9ed; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;  border-left: 2px solid #e6e9ed;"
                         class="text-center input-group form-control form-control-lg form-control-solid"
                         placeholder=""
-                        [disabled]="true"
+                        [attr.disabled]="true"
                         formControlName="inventario"
                         [value]="quantityInv"
                         >
