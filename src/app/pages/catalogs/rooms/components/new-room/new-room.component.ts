@@ -261,7 +261,6 @@ this.getCodigos();
       });
       return
     }
-    this.closeModal();
     this.isLoading=true
 
     let conteoCamas=0;
@@ -387,7 +386,7 @@ this.getCodigos();
         });
         setTimeout(() => {
           modalRef.close('Close click');
-        },4000)
+        },14000)
           this.modal.close()
 
           this.sendUpload=true
@@ -407,7 +406,7 @@ this.getCodigos();
             });
             setTimeout(() => {
               modalRef.close('Close click');
-            },4000)
+            },14000)
                 
   }
 }

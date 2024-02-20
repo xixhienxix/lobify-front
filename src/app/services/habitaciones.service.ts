@@ -82,8 +82,11 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
    }
 
    postHabitacion(habitacion:Habitacion,editar:boolean,filename:File){
+    const body = {
+      habitacion,editar
+    }
 
-    return this.http.post(environment.apiUrl+'/habitacion/guardar',{habitacion,editar}).pipe(
+    return this.http.post(environment.apiUrl+'/habitacion/guardar',body).pipe(
       map(response=>{
         return response
       })
