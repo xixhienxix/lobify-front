@@ -15,6 +15,13 @@ import { ReactiveFormsModule } from '@angular/forms';
 import {MatSelectModule} from '@angular/material/select';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import { UploadFormComponent } from '../uploads/upload-form.component';
+import { RatesComponent } from './rates/rates.component';
+import { UploadDetailsComponent } from '../uploads/upload-details.component';
+import { UploadListComponent } from '../uploads/upload-list.component';
+import { SpecialRatesComponent } from './rates/special-rates/special-rates.component';
+import { ExpressRatesComponent } from './rates/express-rates/express.rates.component';
+import { EditExpressRateComponent } from './rates/express-rates/edit-express-rate/edit-express-rate.component';
+import { EditSpecialRateComponent } from './rates/special-rates/edit-special-rate/edit-standard-rate.component';
 
 
 
@@ -23,20 +30,21 @@ import { UploadFormComponent } from '../uploads/upload-form.component';
     CatalogsComponent,
     RoomsComponent,
     NewRoomComponent,
-    UploadFormComponent
+    UploadFormComponent,
+    RatesComponent,
+    UploadDetailsComponent,
+    UploadListComponent,
+    UploadFormComponent,
+    SpecialRatesComponent,
+    ExpressRatesComponent,
+    EditExpressRateComponent,
+    EditSpecialRateComponent
   ],
   imports: [
     CommonModule,
     CatalogsRoutingModule,
-    MatTableModule,
     SharedModule,
     WidgetsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatPaginatorModule,
-    ReactiveFormsModule,
-    MatSelectModule,
-    MatCheckboxModule
   ]
 })
 export class CatalogsModule { }

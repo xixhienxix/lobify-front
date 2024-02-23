@@ -1,0 +1,18 @@
+.mat-radio-button ~ .mat-radio-button {
+    margin-left: 16px;
+  }
+  .checkbox-section {
+    display: flex;
+    align-content: center;
+    align-items: center;
+    height: 60px;
+  }
+  .checkbox-margin {
+    margin: 0 10px;
+  }
+  .cdk-overlay-container, .cdk-overlay-pane {
+    z-index: 9999 !important;
+  }
+  .disable-backdrop-click .cdk-overlay-backdrop.cdk-overlay-transparent-backdrop.cdk-overlay-backdrop-showing {
+    pointer-events: none;
+  }

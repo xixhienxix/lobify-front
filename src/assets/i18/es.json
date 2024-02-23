@@ -52,7 +52,9 @@
         "finance":"Finanzas",
         "configurations":"Configuraciones",
         "parameters":"Parametros",
-        "catalogo-hab":"Catalogo de Habitaciones"
+        "catalogo-hab":"Catalogo de Habitaciones",
+        "rates-tittle":"Tarifario"
+
     },
     "CalendarComponent":{
         "nva-rsv": "Nueva Reservación",

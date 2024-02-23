@@ -21,5 +21,6 @@ export interface Tarifas {
         checked: boolean;
     }[],
     hotel?:string;
+    Descuento?:number
 
 }

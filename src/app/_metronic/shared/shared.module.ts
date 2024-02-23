@@ -7,8 +7,26 @@ import { PaginatorComponent } from './paginator/paginator.component';
 import { SortIconComponent } from './sort-icon/sort-icon.component';
 import { AlertsComponent } from './alerts/alerts.component';
 import { NgPagination } from './paginator/ng-pagination/ng-pagination.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InlineSVGModule } from 'ng-inline-svg-2';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { NgbDate, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatTableModule } from '@angular/material/table';
 
 @NgModule({
   declarations: [
@@ -22,7 +40,27 @@ import { InlineSVGModule } from 'ng-inline-svg-2';
   imports: [
     CommonModule,
     FormsModule,
-    InlineSVGModule
+    InlineSVGModule,
+    MatTabsModule,
+    MatExpansionModule,
+    MatIconModule,
+    MatDatepickerModule,
+    MatButtonModule,
+    MatAutocompleteModule,
+    MatListModule,
+    MatToolbarModule,
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    MatSortModule,
+    MatCheckboxModule,
+    NgbModule,
+    FormsModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatPaginatorModule,
+    MatTableModule,
+    MatRadioModule
   ],
   exports: [
     KeeniconComponent,
@@ -30,7 +68,28 @@ import { InlineSVGModule } from 'ng-inline-svg-2';
     LoadingSpinnerComponent,
     PaginatorComponent,
     SortIconComponent,
-    AlertsComponent
+    AlertsComponent,
+    MatRadioModule,
+    InlineSVGModule,
+    MatTabsModule,
+    MatExpansionModule,
+    MatIconModule,
+    MatDatepickerModule,
+    MatButtonModule,
+    MatAutocompleteModule,
+    MatListModule,
+    MatToolbarModule,
+    MatDialogModule,
+    MatProgressSpinnerModule,
+    MatSortModule,
+    NgbModule,
+    FormsModule,
+    MatCheckboxModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatPaginatorModule,
+    MatTableModule
   ]
 })
 export class SharedModule {

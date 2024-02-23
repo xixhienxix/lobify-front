@@ -50,7 +50,9 @@
         "finance":"Finance",
         "configurations":"Configurations",
         "parameters":"parameters",
-        "catalogo-hab":"Room's Catalog"
+        "catalogo-hab":"Room's Catalog",
+        "rates-tittle":"Rates Catalog"
+
     },
     "CalendarComponent":{
         "nva-rsv": "New Reservation",

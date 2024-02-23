@@ -1,0 +1,40 @@
+.cdk-overlay-container, .cdk-overlay-pane {
+    z-index: 9999 !important;
+  }
+  .checkbox-section {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  height: 60px;
+}
+.checkbox-margin {
+  margin: 0 10px;
+}
+.additional-selection {
+  opacity: 0.75;
+  font-size: 0.75em;
+}
+.button1
+{
+background-color: white;
+color: black;
+margin-right: 10px;
+border: 2px solid #4CAF50; /* Green */
+position:relative
+}
+.button2
+{
+background-color: white;
+color: black;
+margin-right: 10px;
+position: relative;
+border: 2px solid #af4c5c; /* Green */
+}
+.button3
+{
+background-color: white;
+color: black;
+margin-right: 10px;
+position: relative;
+border: 2px solid #564caf; /* Green */
+}

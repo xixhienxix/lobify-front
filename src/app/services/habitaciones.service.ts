@@ -81,6 +81,24 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
      )
    }
 
+   getCodigohabitaciones() :Observable<any>{
+    return this.http
+     .get<Habitacion[]>(environment.apiUrl + '/habitaciones/codigos')
+     .pipe(
+       map(responseData=>{
+        const postArray = []
+         for(const key in responseData)
+         {
+           if(responseData.hasOwnProperty(key))
+           postArray.push(responseData[key]);
+           this.setcurrentHabitacionValue = postArray[0] 
+          }
+          return responseData
+     })
+     )
+   }
+
+
    postHabitacion(habitacion:Habitacion,editar:boolean,filename:File){
     const body = {
       habitacion,editar

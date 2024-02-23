@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { CatalogsComponent } from './catalogs.component';
 import { RoomsComponent } from './rooms/rooms.component';
+import { RatesComponent } from './rates/rates.component';
 
 
 
@@ -15,6 +16,10 @@ const routes: Routes = [
       {
         path: 'rooms',
         component: RoomsComponent,
+      },      
+      {
+        path: 'rates',
+        component: RatesComponent,
       },
       { path: '', redirectTo: 'rooms', pathMatch: 'full' },
       { path: '**', redirectTo: 'rooms', pathMatch: 'full' },
