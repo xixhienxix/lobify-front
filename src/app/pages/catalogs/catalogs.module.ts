@@ -22,6 +22,7 @@ import { SpecialRatesComponent } from './rates/special-rates/special-rates.compo
 import { ExpressRatesComponent } from './rates/express-rates/express.rates.component';
 import { EditExpressRateComponent } from './rates/express-rates/edit-express-rate/edit-express-rate.component';
 import { EditSpecialRateComponent } from './rates/special-rates/edit-special-rate/edit-standard-rate.component';
+import { ButtonModule } from '@syncfusion/ej2-angular-buttons';
 
 
 
@@ -45,6 +46,7 @@ import { EditSpecialRateComponent } from './rates/special-rates/edit-special-rat
     CatalogsRoutingModule,
     SharedModule,
     WidgetsModule,
+    ButtonModule,
   ]
 })
 export class CatalogsModule { }

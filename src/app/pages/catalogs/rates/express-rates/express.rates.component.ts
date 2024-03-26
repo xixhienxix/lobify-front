@@ -224,8 +224,8 @@ export class ExpressRatesComponent {
   onSubmit(){
 
 
-    let fromDate = this.fromDate.day+"/"+this.fromDate.month+"/"+this.fromDate.year
-    let toDate = this.toDate.day+"/"+this.toDate.month+"/"+this.toDate.year
+    // let fromDate = this.fromDate.day+"/"+this.fromDate.month+"/"+this.fromDate.year
+    // let toDate = this.toDate.day+"/"+this.toDate.month+"/"+this.toDate.year
 
 
     if(this.resultLocationCamas.length==0){
@@ -236,8 +236,8 @@ export class ExpressRatesComponent {
     let tarifa :Tarifas= {
       Tarifa:'Tarifa Estandar',
       Habitacion:this.resultLocationCamas,
-      Llegada:fromDate,
-      Salida:toDate,
+      Llegada:new Date(),
+      Salida:new Date(),
       Plan:this.plan,
       Politicas: this.gratis!=true ? 'Gratis' : 'Ninguno' || this.sinRembolso!=true ? 'No Reembolsable' : 'Ninguno',
       EstanciaMinima:this.formControls['minima'].value,

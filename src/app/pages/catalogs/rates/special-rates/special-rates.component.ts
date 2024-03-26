@@ -12,7 +12,17 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 
 type listaCamas = {key:number;value:string;}
-
+export const MY_FORMATS = {
+  parse: {
+    dateInput: 'LL',
+  },
+  display: {
+    dateInput: 'LL',
+    monthYearLabel: 'MMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
 @Component({
   selector: 'app-special-rates',
   templateUrl: './special-rates.component.html',
@@ -21,7 +31,10 @@ type listaCamas = {key:number;value:string;}
 
 })
 export class SpecialRatesComponent implements OnInit{
-  
+  range = new FormGroup({
+    start: new FormControl<Date | null>(null),
+    end: new FormControl<Date | null>(null),
+  });
   /**CheckBoxes */
   options = [
     {name:'Lun', value:0, checked:false},
@@ -91,7 +104,11 @@ export class SpecialRatesComponent implements OnInit{
     public modalService:NgbModal,
     private overlayContainer: OverlayContainer
   ) {
-
+    // this.fromDate = DateTime.now()
+    // this.toDate = DateTime.now()
+    // this.toDate = this.toDate.plus({ days: 1 });
+    // this.fechaInicial=this.fromDate.day+" de "+this.i18n.getMonthFullName(this.fromDate.month)+" del "+this.fromDate.year
+    // this.fechaFinal=this.toDate.day+" de "+this.i18n.getMonthFullName(this.toDate.month)+" del "+this.toDate.year
    }
 
    get formControls (){
@@ -257,7 +274,6 @@ export class SpecialRatesComponent implements OnInit{
   fechaSeleccionadaInicial(event:NgbDate){
 
     this.fromDate = DateTime.fromObject({day:event.day,month:event.month,year:event.year})
-  
     this.comparadorInicial = new Date(event.year,event.month-1,event.day)
   
     this.fechaInicial= event.day+" de "+this.i18n.getMonthFullName(event.month)+" del "+event.year
@@ -393,8 +409,8 @@ export class SpecialRatesComponent implements OnInit{
     }else{
 
     
-    let fromDate = this.fromDate.day+"/"+this.fromDate.month+"/"+this.fromDate.year
-    let toDate = this.toDate.day+"/"+this.toDate.month+"/"+this.toDate.year
+    // let fromDate = this.fromDate.day+"/"+this.fromDate.month+"/"+this.fromDate.year
+    // let toDate = this.toDate.day+"/"+this.toDate.month+"/"+this.toDate.year
 
 
     if(this.resultLocationCamas.length==0){
@@ -405,8 +421,8 @@ export class SpecialRatesComponent implements OnInit{
     let tarifa :Tarifas= {
       Tarifa:this.formControls["nombre"].value,
       Habitacion:this.resultLocationCamas,
-      Llegada:fromDate,
-      Salida:toDate,
+      Llegada:new Date(),
+      Salida:new Date,
       Plan:this.plan,
       Adultos:this.preciosFormGroup.value.adultos,
       Ninos:this.preciosFormGroup.value.ninos,

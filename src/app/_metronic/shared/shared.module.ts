@@ -1,6 +1,6 @@
 import {NgModule} from '@angular/core';
 import {KeeniconComponent} from './keenicon/keenicon.component';
-import {CommonModule} from "@angular/common";
+import {CommonModule, JsonPipe} from "@angular/common";
 import { TranslateModule } from '@ngx-translate/core';
 import { LoadingSpinnerComponent } from 'src/app/services/_helpers/loaderspinner/loaderspinner.component';
 import { PaginatorComponent } from './paginator/paginator.component';
@@ -27,6 +27,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
+import { MatInputModule } from '@angular/material/input';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @NgModule({
   declarations: [
@@ -60,7 +62,8 @@ import { MatTableModule } from '@angular/material/table';
     MatSelectModule,
     MatPaginatorModule,
     MatTableModule,
-    MatRadioModule
+    MatRadioModule,
+    MatInputModule
   ],
   exports: [
     KeeniconComponent,
@@ -89,7 +92,11 @@ import { MatTableModule } from '@angular/material/table';
     MatFormFieldModule,
     MatSelectModule,
     MatPaginatorModule,
-    MatTableModule
+    MatTableModule,
+    MatInputModule,
+    JsonPipe,
+    MatDatepickerModule,
+    MatNativeDateModule
   ]
 })
 export class SharedModule {

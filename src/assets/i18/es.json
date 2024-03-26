@@ -70,5 +70,8 @@
     "WidgetTable11":{
         "title":"Tipos de Habitación",
         "buttonHeader":"Agregar Nueva Habitación"
+    },
+    "DialogErros":{
+        "errors.huesped.lenght": "Existen reservaciones que fueron asignadas a esta habitacion aun asi desea eliminarla?"
     }
 }

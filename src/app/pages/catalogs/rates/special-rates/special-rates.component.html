@@ -40,7 +40,7 @@
               [formControl]="camasFC"                               
               [(ngModel)]="resultLocationCamas">
               <footer class="col-sm-12">
-                <button (click)="camasSelect.close(); selectionChange();" mat-raised-button class="col-sm-4 btn btn-primary">Confirmar</button>
+                <button style="color:white" (click)="camasSelect.close(); selectionChange();" mat-button class="col-sm-4 btn btn-primary">Confirmar</button>
               </footer>
                 <mat-select-trigger>                                
                     <button *ngIf="camasFC.value?.length > 0" class="button1">{{camasFC.value[0]}}
@@ -80,17 +80,31 @@
               <label style="font-weight: bold;" class="form-label">HOSPEDANDOTE EN ESTA HABITCIÓN</label>
           </div>
       </div>
-      <div class="row ">
+      <mat-form-field style="width:-webkit-fill-available">
+        <mat-label>Rango de Fechas</mat-label>
+        <mat-date-range-input [formGroup]="range" [rangePicker]="picker">
+          <input matStartDate formControlName="start" placeholder="Llegada">
+          <input matEndDate formControlName="end" placeholder="Salida">
+        </mat-date-range-input>
+        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      
+          <mat-error *ngIf="(range.controls.start.hasError('matStartDateInvalid'))">Fehca Inicial invalida</mat-error>
+          <mat-error *ngIf="(range.controls.end.hasError('matEndDateInvalid'))  ">Fecha Final invalida</mat-error>
+      </mat-form-field>
+      
+      <!-- <div class="row " style="margin-top: 3%;">
           <div class="col-lg-6">
               <div class="form-group">
                   <label style="color:#00506a; font-weight: bold;" class="form-label">Llegando el:</label>
-                  <div class="input-group" style="position:relative">
-                    <input hidden class="form-control" placeholder="yyyy-mm-dd" name="dp" ngbDatepicker  
+                  <div class="input-group">
+                    <input hidden class="form-control" placeholder="yyyy-mm-dd" name="dp" ngbDatepicker 
                        (dateSelect)="fechaSeleccionadaInicial($event)" [minDate]="today" [startDate]="fromDate" #d="ngbDatepicker">
           
                       <input class="form-control" placeholder="yyyy-mm-dd" name="dpnotHidden" #dd [value]="fechaInicial" >
           
-                      <div class="input-group-append">
+                      <div class="input-group-append" >
                       <button class="btn btn-primary" (click)="d.toggle()" type="button">
                         <i class="fa fa-calendar icon"></i>
                       </button>
@@ -101,8 +115,8 @@
           <div class="col-lg-6">
               <div class="form-group" >
                 <label style="color:#00506a; font-weight: bold;" class="form-label">Saliendo el:</label>
-                <div class="input-group" style="position:relative">
-                  <input hidden class="form-control" [minDate]="tomorrow" [startDate]="toDate" placeholder="yyyy-mm-dd" name="dp"  ngbDatepicker placement="bottom-right"
+                <div class="input-group" >
+                  <input hidden class="form-control" [minDate]="tomorrow" [startDate]="toDate" placeholder="yyyy-mm-dd" name="dp"  ngbDatepicker
                   (dateSelect)="fechaSeleccionadaFinal($event)" #f="ngbDatepicker">
         
                   <input class="form-control"  placeholder="yyyy-mm-dd" name="dpnotHidden" #ff  [value]="fechaFinal" >
@@ -115,8 +129,8 @@
                 </div>
               </div>
             </div>
-      </div>
-      <div class="row">
+      </div> -->
+      <div class="row" style="margin-top: 3%;">
         <div class="col-lg-6">
           <label style="color:#00506a; font-weight: bold;" class="form-label">Estancia minima de noches:
            
@@ -154,6 +168,7 @@
           </section>
         </div>
       </div>
+      <hr>
       <div class="row">
         <div class="col-lg-12">
           <section class="checkbox-section">
@@ -266,7 +281,7 @@
                 (selectionChange)="planSeleccionado($event)"
                 >
                 <footer class="col-sm-12">
-                  <button (click)="itemSelect.close()" mat-raised-button class="col-sm-4 btn btn-primary">Confirmar</button>
+                  <button style="color: white;" (click)="itemSelect.close()" mat-button class="col-sm-4 btn btn-primary">Confirmar</button>
                 </footer>
                 <mat-option value="No Aplica"> No Aplica</mat-option>
                 <mat-option value="Plan Europeo" >Plan Europeo</mat-option>
@@ -294,19 +309,3 @@
 <div class="card-footer" style="text-align: center;">
 <button [disabled]="descuentoNoAplicado" (click)="onSubmit()" class="btn btn-success col-lg-12">Aceptar</button>
 </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

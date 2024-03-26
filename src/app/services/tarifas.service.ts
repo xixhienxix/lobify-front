@@ -8,8 +8,8 @@ import { Tarifas } from '../models/tarifas';
 const DEFAULT_TARIFA = {
   Tarifa:'',
   Habitacion:[],
-  Llegada:'',
-  Salida:'',
+  Llegada:new Date(),
+  Salida:new Date(),
   Plan:'',
   Politicas:'',
   EstanciaMinima:1,

@@ -1,36 +1,55 @@
-
-
-<bryntum-scheduler 
-    #scheduler
-    [allowOverlap] = "schedulerConfig.allowOverlap!"
-    [barMargin] = "schedulerConfig.barMargin!"
-    [columns] = "schedulerConfig.columns!"
-    [createEventOnDblClick] = "schedulerConfig.createEventOnDblClick!"
-    [crudManager] = "schedulerConfig.crudManager!"
-    [endDate] = "schedulerConfig.endDate!"
-    [getDateConstraints] = "schedulerConfig.getDateConstraints!"
-    [resourceImagePath] = "schedulerConfig.resourceImagePath!"
-    [rowHeight] = "schedulerConfig.rowHeight!"
-    [snap] = "schedulerConfig.snap!"
-    [startDate] = "schedulerConfig.startDate!"
-    [tbar] = "schedulerConfig.tbar!"
-    [tickSize] = "schedulerConfig.tickSize!"
-    [viewPreset] = "schedulerConfig.viewPreset!"
-    [zoomOnMouseWheel] = "schedulerConfig.zoomOnMouseWheel!"
-    [zoomOnTimeAxisDoubleClick] = "schedulerConfig.zoomOnTimeAxisDoubleClick!"
-    [eventRenderer] = "schedulerConfig.eventRenderer!"
-    [resourceTimeRangeRenderer] = "schedulerConfig.resourceTimeRangeRenderer!"
-    [cellMenuFeature] = "schedulerConfig.features!.cellMenu!"
-    [eventDragCreateFeature] = "schedulerConfig.features!.eventDragCreate!"
-    [eventEditFeature] = "schedulerConfig.features!.eventEdit!"
-    [eventTooltipFeature] = "schedulerConfig.features!.eventTooltip!"
-    [resourceTimeRangesFeature] = "schedulerConfig.features!.resourceTimeRanges!"
-    [scheduleMenuFeature] = "schedulerConfig.features!.scheduleMenu!"
-    [scheduleTooltipFeature] = "schedulerConfig.features!.scheduleTooltip!"
-    [summaryFeature] = "summaryFeatureConfig!"
-    [timeAxisHeaderMenuFeature] = "schedulerConfig.features!.timeAxisHeaderMenu!"
-    [timeRangesFeature] = "schedulerConfig.features!.timeRanges!"
-    (onResourceTimeRangeDblClick) = "onResourceTimeRangeDblClick($event)"
-    >
-</bryntum-scheduler>
-
+<div class="control-section">
+  <div class="col-lg-9 content-wrapper">
+    <ejs-schedule #scheduleObj cssClass='schedule-block-events' width='100%' height='100%' [group]="group"
+    [currentView]="currentView" [selectedDate]="selectedDate" [eventSettings]="eventSettings" [rowAutoHeight]="true">
+      <e-resources>
+        <e-resource field='RoomId' title='Room Type' [dataSource]='resourceDataSource' [allowMultiple]='allowMultiple'
+          name='Room' textField='text' idField='id' colorField='color'>
+        </e-resource>
+      </e-resources>
+      <e-views>
+        <e-view option="TimelineDay"></e-view>
+        <e-view option="TimelineWeek"></e-view>
+        <e-view option="TimelineMonth"></e-view>
+      </e-views>
+    </ejs-schedule>
+  </div>
+</div>
+<!-- <div class="control-section">
+  <div class="drag-sample-wrapper">
+    <div class="schedule-container">
+      <ejs-schedule #scheduleObj cssClass='schedule-block-events' width='100%' height='100%' [group]="group"
+        [currentView]="currentView" [selectedDate]="selectedDate" [eventSettings]="eventSettings" [allowResizing]="allowResizing">
+        <e-resources>
+          <e-resource field='EmployeeId' title='Rooms' name='Employee' [dataSource]='roomDataSource'
+            [allowMultiple]='allowMultiple' textField='Text' idField='Id' groupIDField="GroupId" colorField='Color'>
+          </e-resource>
+        </e-resources>
+        <ng-template #resourceHeaderTemplate let-data>
+          <div class="template-wrap">
+            <div class="employee-category">
+              <div>
+                <img src="https://ej2.syncfusion.com/angular/demos/assets/schedule/images/{{getEmployeeImageName(data)}}.png" class="employee-image" />
+              </div>
+              <div class="employee-name">{{getEmployeeName(data)}}</div>
+              <div class="employee-designation">{{getEmployeeDesignation(data)}}</div>
+            </div>
+          </div>
+        </ng-template>
+        <ng-template #eventSettingsTemplate let-data>
+          <div class='template-wrap'>
+            <div class="subject">{{data.Subject}}</div>
+          </div>
+        </ng-template>
+        <e-views>
+          <e-view option="Day"></e-view>
+          <e-view option="TimelineDay"></e-view>
+          <e-view option="TimelineMonth"></e-view>
+        </e-views>
+      </ejs-schedule>
+    </div>
+  </div>
+</div>
+    
+    
+     -->

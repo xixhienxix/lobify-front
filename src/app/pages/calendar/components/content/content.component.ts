@@ -1,76 +1,67 @@
-import { AfterViewInit, Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+
+import { Component, Inject, ViewChild, ViewEncapsulation } from '@angular/core';
+import { extend } from '@syncfusion/ej2-base';
+import { ChangeEventArgs } from '@syncfusion/ej2-buttons';
 import {
-    Button, ButtonGroup, GridFeatureManager, LocaleManager, ResourceModel, ResourceTimeRangeModel, Scheduler, StringHelper, SummaryConfig
-} from '@bryntum/scheduler';
-import { BryntumSchedulerComponent } from '@bryntum/scheduler-angular';
-import { schedulerConfig } from './content.config';
-import ReservationModel from './_extras/ReservationModel';
-import { DaySelectorFeature } from './_extras/DailySelector';
-import PropertyModel from './_extras/property.model';
+  ScheduleComponent, DragAndDropService, TimelineViewsService, GroupModel, EventSettingsModel, ResizeService, View, TimelineMonthService
+} from '@syncfusion/ej2-angular-schedule';
+import { roomData } from './_data/data';
+import { HabitacionesService } from 'src/app/services/habitaciones.service';
 
 @Component({
     selector      : 'app-content',
     templateUrl   : './content.component.html',
     styleUrls     : ['./content.component.scss'],
-    encapsulation : ViewEncapsulation.None
+    encapsulation : ViewEncapsulation.None,
+    providers: [TimelineViewsService, TimelineMonthService, ResizeService, DragAndDropService]
 })
 
-export class ContentComponent implements AfterViewInit, OnInit {
-    public schedulerConfig = schedulerConfig;
+export class ContentComponent {
+  @ViewChild('scheduleObj') public scheduleObj: ScheduleComponent;
+  public selectedDate: Date = new Date();
+  public rowAutoHeight = true;
+  public currentView: View = 'TimelineWeek';
+  public group: GroupModel = {
+    enableCompactView: false,
+    resources: ['Room']
+  };
+  public allowMultiple = true;
+  public resourceDataSource: Record<string, any>[] = [
+    // { text: 'Room A', id: 1, color: '#98AFC7' },
+    // { text: 'Room B', id: 2, color: '#99c68e' },
+  ];
 
-    public summaryFeatureConfig: Partial<SummaryConfig> = {
-        renderer : ({ events }) => {
-            const
-                reservations = events as ReservationModel[],
-                countButton  = this.scheduler.widgetMap['countButton'] as Button,
-                result       = countButton.pressed ? reservations.length : reservations.reduce((total, reservation) => total + reservation.guests, 0);
-            return StringHelper.xss`${result || ''}`;
-        }
-    };
+  public eventSettings: EventSettingsModel = {
+    dataSource: extend([], roomData, undefined, true) as Record<string, any>[],
+    fields: {
+      id: 'Id',
+      subject: { name: 'Subject', title: 'Summary' },
+      location: { name: 'Location', title: 'Location' },
+      description: { name: 'Description', title: 'Comments' },
+      startTime: { name: 'StartTime', title: 'From' },
+      endTime: { name: 'EndTime', title: 'To' }
+    }
+  };
 
-    private scheduler!: Scheduler;
+  constructor(private _roomsService: HabitacionesService) {
+    this._roomsService.getCodigohabitaciones().subscribe({
+      next :(responseData)=>{
+         const postArray = []
+         for(const key in responseData)
+         {
+           if(responseData.hasOwnProperty(key))
+           postArray.push({ text: responseData[key], id:parseInt(key+1), color: '#98AFC7'});// without color it paint nothing
+          }
+          this.resourceDataSource = postArray
+    
+      }
+    })
 
-    // Bryntum Grid Angular wrapper reference
-    @ViewChild(BryntumSchedulerComponent, { static : false }) schedulerComponent!: BryntumSchedulerComponent;
-
-    ngOnInit(): void {
-      // Register custom DaySelectorFeature in Scheduler enabled by default
-      GridFeatureManager.registerFeature(DaySelectorFeature, true, 'Scheduler');
   }
 
-    async ngAfterViewInit(): Promise<void> {
-        const
-            scheduler               = this.scheduler = this.schedulerComponent.instance,
-            { features, widgetMap } = scheduler,
-            summaryButton           = widgetMap['summaryGroup'] as ButtonGroup,
-            selectedRowButton       = widgetMap['selectedRowButton'] as Button;
-
-        summaryButton.onClick = () => features.summary.refresh();
-
-        selectedRowButton.onToggle = () => features.summary.selectedOnly = !features.summary.selectedOnly;
-
-        scheduler.onBeforeEventAdd = ({ eventRecord, resourceRecords }) => {
-            const
-                reservation = eventRecord as ReservationModel,
-                property    = resourceRecords[0] as PropertyModel;
-            // reservation.pricePerNight = (scheduler.resourceTimeRangeStore as DailyRateStore)
-            //     .getPricePerNightFor(property, eventRecord.startDate as Date);
-        };
-
-        await LocaleManager.applyLocale('Mx', {    
-            Object : {
-                newEvent : 'Guest'
-            }
-        });
-    }
-
-    // Create a new booking when double-clicking an available day
-    async onResourceTimeRangeDblClick(event: {
-        resourceTimeRangeRecord: ResourceTimeRangeModel
-        resourceRecord: ResourceModel
-    }): Promise<void> {
-        await this.scheduler.createEvent(event.resourceTimeRangeRecord.startDate as Date, event.resourceRecord);
-    }
+  onChange(args: ChangeEventArgs|any): void {
+    this.scheduleObj.rowAutoHeight = args.checked;
+  }
 
 }
 

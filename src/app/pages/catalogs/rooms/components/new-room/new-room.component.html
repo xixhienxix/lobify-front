@@ -205,7 +205,7 @@
                                 [(ngModel)]="resultLocation"
                                 >
                                 <footer class="col-sm-12">
-                                  <button (click)="itemSelect.close()" mat-raised-button class="col-sm-4 btn btn-primary">Confirmar</button>
+                                  <button (click)="itemSelect.close()" mat-button class="col-sm-4 btn btn-success" style="color: white;">Confirmar</button>
                                 </footer>
                                 <mat-select-trigger>
                                      <button *ngIf="amenidadesFC.value?.length > 0" class="button1">{{amenidadesFC.value[0]}}

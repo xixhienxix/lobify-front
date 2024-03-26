@@ -1,4 +1,4 @@
-import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterContentChecked, AfterContentInit, AfterViewChecked, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { FormGroup, FormControl, FormBuilder, Validators, FormArray, FormGroupDirective, NgForm } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
@@ -59,8 +59,8 @@ export class NewRoomComponent implements OnInit, OnDestroy{
   disponiblesIndexados:listaAmenidades[]=[]
   disponiblesIndexadosCamas:listaCamas[]=[]
   disponibilidadNuevaGeneral:Disponibilidad[]=[]
-  resultLocation = []
-  resultLocationCamas = []
+  resultLocation:string[] =[]
+  resultLocationCamas:string[] = []
   resultAdicionales = []
   adicionalesArr:Adicional[]=[]
   // camasArr:Adicional[]=[]
@@ -116,14 +116,13 @@ export class NewRoomComponent implements OnInit, OnDestroy{
     public _parametrosService:ParametrosService,
     private af :AngularFireStorage
   ) {
-    this.fromDate = DateTime.now().setZone(_parametrosService.getCurrentParametrosValue.zona)
-    this.toDate = DateTime.now().setZone(_parametrosService.getCurrentParametrosValue.zona)
-    this.toDate = this.toDate.plus({ days: 1 });
 
   }
 
   ngOnInit(): void {
-this.getCodigos();
+  this.getCodigos();
+  // this.checkEdicion();
+
     this.formGroup = this.fb.group({
       nombre: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
       tipo: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
@@ -155,11 +154,18 @@ this.getCodigos();
       this.f.inventario.patchValue(this.habitacion.Inventario)
       this.f.etiqueta.patchValue(this.habitacion.Numero)
 
-      // this.formGroup.controls["nombreHabs"].patchValue(this.habitacion.Tipos_Camas)
+      //this.formGroup.controls["nombreHabs"].patchValue(this.habitacion.Tipos_Camas)
     }
-
     this.inputs.push(this.inputForm);
   }
+
+  checkEdicion(){
+    if (this.editarHab===true){
+      this.resultLocation.push(...this.habitacion.Amenidades);
+      this.resultLocationCamas.push(...this.habitacion.Tipos_Camas);
+    }
+    console.log("hol");
+  };
 
   get inputs() {
     return this.formGroup.controls["nombreHabs"] as FormArray;
@@ -186,6 +192,7 @@ this.getCodigos();
           for(let i=0;i<this.camasArr.length;i++){
             this.disponiblesIndexadosCamas.push({key:i,value:this.camasArr[i].Descripcion,cantidad:1})
           }
+          this.checkEdicion();
     })
   }
 
@@ -340,8 +347,8 @@ this.getCodigos();
   let tarifa : Tarifas= {
     Tarifa:'Tarifa Estandar',
     Habitacion:codigoHab,
-    Llegada:fromDate,
-    Salida:toDate,
+    Llegada:new Date(),
+    Salida:new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
     Plan:'Ninguno',
     Politicas:'Ninguno',
     Adultos:1,
@@ -363,55 +370,51 @@ this.getCodigos();
       {name:'Dom', value:6, checked:true}
     ]
   }
-    
     const request1 = this.habitacionService.postHabitacion(habitacionNueva,this.editarHab,this.formGroup.value.image); 
-    // const request2 = this.habitacionService.creaDisponibilidad(nombreHabs,this.formGroup.value.nombre);
     const request3 = this._tarifasService.postTarifa(tarifa)
     //concat(request1,request2,request3).pipe(
     concat(request1, request3).pipe(
       takeUntil(this.ngUnsubscribe))
-.subscribe({
-  next: (val)=>{
-      this.habitacionGenerada = true
-      this.mensajeDeHabitacionGenerada='Habitación(es) Generadas con éxito'
+      .subscribe({
+        next: (val)=>{
+            this.habitacionGenerada = true
+            this.mensajeDeHabitacionGenerada='Habitación(es) Generadas con éxito'
 
-      const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-      this.isLoading=false
-      modalRef.componentInstance.alertHeader = 'Exito'
-      modalRef.componentInstance.mensaje=this.mensajeDeHabitacionGenerada
-      modalRef.result.then((result) => {
-        this.closeResult = `Closed with: ${result}`;
-        }, (reason) => {
-            this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-        });
-        setTimeout(() => {
-          modalRef.close('Close click');
-        },14000)
-          this.modal.close()
+            const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+            this.isLoading=false
+            modalRef.componentInstance.alertHeader = 'Exito'
+            modalRef.componentInstance.mensaje=this.mensajeDeHabitacionGenerada
+            modalRef.result.then((result) => {
+              this.closeResult = `Closed with: ${result}`;
+              }, (reason) => {
+                  this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+              });
+              setTimeout(() => {
+                modalRef.close('Close click');
+              },14000)
+                this.modal.close()
 
-          this.sendUpload=true
-  },
-  error: (error) =>{
-      this.isLoading=false
+                this.sendUpload=true
+        },
+        error: (error) =>{
+            this.isLoading=false
 
-          this.habitacionGenerada = false
-          this.mensajeDeHabitacionGenerada='No se pudo guardar la habitación intente de nuevo mas tarde'
-          const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-          modalRef.componentInstance.alertHeader = 'Error'
-          modalRef.componentInstance.mensaje=this.mensajeDeHabitacionGenerada
-          modalRef.result.then((result) => {
-            this.closeResult = `Closed with: ${result}`;
-            }, (reason) => {
-                this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-            });
-            setTimeout(() => {
-              modalRef.close('Close click');
-            },14000)
-                
-  }
-}
-      )
-         
+                this.habitacionGenerada = false
+                this.mensajeDeHabitacionGenerada='No se pudo guardar la habitación intente de nuevo mas tarde'
+                const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+                modalRef.componentInstance.alertHeader = 'Error'
+                modalRef.componentInstance.mensaje=this.mensajeDeHabitacionGenerada
+                modalRef.result.then((result) => {
+                  this.closeResult = `Closed with: ${result}`;
+                  }, (reason) => {
+                      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+                  });
+                  setTimeout(() => {
+                    modalRef.close('Close click');
+                  },14000)
+                      
+        }
+      })  
   }
 
 

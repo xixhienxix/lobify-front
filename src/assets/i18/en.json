@@ -68,6 +68,9 @@
     "WidgetTable11":{
         "title":"Rooms Types",
         "buttonHeader":"Add New Room"
+    },
+    "DialogErros":{
+        "errors.huesped.lenght": "There are reservations that were assigned to this room, do you still want to delete it?"
     }
 
 }

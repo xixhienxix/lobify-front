@@ -1,11 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject, Observable, catchError, map } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, catchError, map } from 'rxjs';
 import { Habitacion } from '../models/habitaciones.model';
 import { environment } from 'src/environments/environment';
 import { ITableState } from '../_metronic/shared/models/table.model';
 import { TableService } from '../_metronic/shared/services/table.service';
 import { codigosCuarto } from '../models/codigosCuarto.model';
+import { LocalForageCache } from '../tools/cache/indexdb-expire';
+import { ParametrosService } from '../pages/parametros/_services/parametros.service';
 const DEFAULT_HABITACION = {
   _id:'',
   Codigo:'',
@@ -32,37 +34,70 @@ const DEFAUL_CODIGOS = {
   providedIn: 'root'
 })
 export class HabitacionesService extends TableService<Habitacion> implements OnDestroy {
-
+    indexDBStorage = new LocalForageCache().createInstance({
+      name: 'Lobify',
+      storeName: 'RoomCodes',
+      defaultExpiration: 10800
+  });
   /*Oservables*/
-  HabitacionUpdate$: Observable<Habitacion>;
-  private currentHabitacion$=new BehaviorSubject<Habitacion>(DEFAULT_HABITACION);
+  private currentHabitacion$=new BehaviorSubject<Habitacion[]>([]);
+  private currentHabitacionSubject =new Subject<any>();
+
   API_URL_MAIN = `${environment.apiUrl}`
   currentCodigosCuartoSubject: BehaviorSubject<codigosCuarto>;
 
 
-  constructor(@Inject(HttpClient) http: any,   
+  constructor(@Inject(HttpClient) http: any,
    ) { 
     super(http);
-    this.HabitacionUpdate$=this.currentHabitacion$.asObservable();
     this.currentCodigosCuartoSubject = new BehaviorSubject<codigosCuarto>(DEFAUL_CODIGOS);
+  }
+
+  async writeIndexDB(propertyName: string, propertyValue: any): Promise<void> {
+    if (propertyName && propertyValue) {
+        await this.indexDBStorage.setItem(propertyName, propertyValue);
+    }
+  }
+
+  async readIndexDB(propertyName: string): Promise<any> {
+      if (propertyName) {
+          return  await this.indexDBStorage.getItem(propertyName);
+      }
+  }
+
+  async deleteIndexDB(propertyName: string): Promise<void> {
+      if (propertyName) {
+          await this.indexDBStorage.removeItem(propertyName);
+      }
+  }
+
+  get getcurrentHabitacionValue(){
+    return this.currentHabitacion$;
+  }
+
+  set setcurrentHabitacionValue(Habitacion: any) {
+    this.currentHabitacion$.next(this.currentHabitacion$.getValue().concat(Habitacion))
+    this.sendCustomFormNotification(true);
 
   }
 
-  get getcurrentHabitacionValue(): Habitacion {
-    return this.currentHabitacion$.value;
+  async sendCustomFormNotification(flag:boolean){
+    const deleted = await this.deleteIndexDB("RoomCodes");
+    const re_created = await this.writeIndexDB("RoomCodes",this.getcurrentHabitacionValue.getValue());
+
+    this.currentHabitacionSubject.next(flag)
+  };
+  getcustomFormNotification() {
+    return this.currentHabitacionSubject.asObservable();
   }
 
-  set setcurrentHabitacionValue(Habitacion: Habitacion) {
-    this.currentHabitacion$.next(Habitacion);
-  }
+  // get getcurrentCodigosValue(): Habitacion[] {
+  //   return this.currentCodigosCuartoSubject.value;
+  // }
 
-  get getcurrentUserValue(): codigosCuarto {
-    return this.currentCodigosCuartoSubject.value;
-  }
-
-  set setcurrentUserValue(user: codigosCuarto) {
-    this.currentCodigosCuartoSubject.next(user);
-  }
+  // set setcurrentCodigosValue(user: Habitacion[]) {
+  //   this.currentCodigosCuartoSubject.next(user);
+  // }
 
    getAll() :Observable<Habitacion[]> {
     return this.http
@@ -74,25 +109,28 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
          {
            if(responseData.hasOwnProperty(key))
            postArray.push(responseData[key]);
-           this.setcurrentHabitacionValue = postArray[0] 
+          //  this.setcurrentHabitacionValue = postArray[0] 
           }
+          this.writeIndexDB("RoomCodes",responseData);
+          this.setcurrentHabitacionValue = responseData 
+
           return responseData
      })
      )
    }
 
-   getCodigohabitaciones() :Observable<any>{
+   getCodigohabitaciones() :Observable<string[]>{
     return this.http
-     .get<Habitacion[]>(environment.apiUrl + '/habitaciones/codigos')
+     .get<string[]>(environment.apiUrl + '/habitaciones/codigos')
      .pipe(
        map(responseData=>{
-        const postArray = []
-         for(const key in responseData)
-         {
-           if(responseData.hasOwnProperty(key))
-           postArray.push(responseData[key]);
-           this.setcurrentHabitacionValue = postArray[0] 
-          }
+        // const postArray = []
+        //  for(const key in responseData)
+        //  {
+        //    if(responseData.hasOwnProperty(key))
+        //    postArray.push(responseData[key]);
+        //    this.setcurrentHabitacionValue = postArray[0] 
+        //   }
           return responseData
      })
      )
@@ -115,9 +153,9 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
     return this.http.post<Habitacion[]>(environment.apiUrl+'/habitacion/buscar',{habitacion})
   }
 
-  deleteHabitacion(_id:string){
+  deleteHabitacion(codigo:string){
     return this.http
-    .delete(environment.apiUrl+'/habitacion/delete/'+_id)
+    .delete(environment.apiUrl+'/habitacion/delete/'+codigo)
   }
 
   saveUrlToMongo(downloadURL:string,fileUploadName:string){

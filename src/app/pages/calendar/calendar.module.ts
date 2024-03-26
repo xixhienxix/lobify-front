@@ -9,6 +9,14 @@ import { ContentComponent } from './components/content/content.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { GanttComponent } from './components/gantt/gantt.component';
 import { BryntumSchedulerModule } from '@bryntum/scheduler-angular'; 
+import { CheckBoxAllModule, ButtonAllModule, SwitchAllModule } from '@syncfusion/ej2-angular-buttons';
+import { DatePickerAllModule, TimePickerAllModule, DateTimePickerAllModule } from '@syncfusion/ej2-angular-calendars';
+import { DropDownListAllModule, MultiSelectAllModule } from '@syncfusion/ej2-angular-dropdowns';
+import { NumericTextBoxAllModule, TextBoxAllModule, MaskedTextBoxModule, UploaderAllModule } from '@syncfusion/ej2-angular-inputs';
+import { ToolbarAllModule, ContextMenuAllModule, TreeViewModule, AppBarModule } from '@syncfusion/ej2-angular-navigations';
+import { ToastAllModule } from '@syncfusion/ej2-angular-notifications';
+import { ScheduleAllModule, RecurrenceEditorAllModule } from '@syncfusion/ej2-angular-schedule';
+import { DropDownButtonAllModule } from '@syncfusion/ej2-angular-splitbuttons';
 
 
 @NgModule({
@@ -18,6 +26,14 @@ import { BryntumSchedulerModule } from '@bryntum/scheduler-angular';
     CommonModule,
     SharedModule,
     BryntumSchedulerModule,
+
+    ScheduleAllModule, RecurrenceEditorAllModule,   
+    NumericTextBoxAllModule, TextBoxAllModule, DatePickerAllModule, 
+    TimePickerAllModule, DateTimePickerAllModule, CheckBoxAllModule,   
+    ToolbarAllModule, DropDownListAllModule, ContextMenuAllModule, MaskedTextBoxModule, 
+    UploaderAllModule, MultiSelectAllModule,   TreeViewModule, ButtonAllModule, 
+    DropDownButtonAllModule, SwitchAllModule,  ToastAllModule, AppBarModule,
+
     RouterModule.forChild([
       {
         path: '',
