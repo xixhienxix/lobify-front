@@ -17,5 +17,6 @@ export interface Habitacion
   Tarifa:number,
   URL?: string;
   hotel?:string;
+  Color?:string;
 
 }

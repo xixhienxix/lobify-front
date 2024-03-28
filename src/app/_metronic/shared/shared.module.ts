@@ -29,7 +29,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
-
+import { ScheduleModule, RecurrenceEditorModule, DayService, WeekService, WorkWeekService, MonthService, MonthAgendaService, TimelineMonthService } from '@syncfusion/ej2-angular-schedule'
 @NgModule({
   declarations: [
     KeeniconComponent,
@@ -63,7 +63,9 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatPaginatorModule,
     MatTableModule,
     MatRadioModule,
-    MatInputModule
+    MatInputModule,
+    ScheduleModule,
+    RecurrenceEditorModule
   ],
   exports: [
     KeeniconComponent,
@@ -96,7 +98,17 @@ import { MatNativeDateModule } from '@angular/material/core';
     MatInputModule,
     JsonPipe,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    ScheduleModule,
+    RecurrenceEditorModule
+  ],
+  providers:[
+    DayService,
+    WeekService,
+    WorkWeekService,
+    MonthAgendaService,
+    MonthService,
+    TimelineMonthService
   ]
 })
 export class SharedModule {

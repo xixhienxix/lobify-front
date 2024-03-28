@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { HabitacionesService, roomsTypeResolver } from '../services/habitaciones.service';
+import { inject } from '@angular/core';
 
 const Routing: Routes = [
   {
@@ -8,6 +10,7 @@ const Routing: Routes = [
   {
     path: 'calendar',
     loadChildren: () => import('./calendar/calendar.module').then((m) => m.CalendarModule),
+    resolve: { data: () => inject(HabitacionesService).getAll() }
   },
   {
     path: 'catalogs',

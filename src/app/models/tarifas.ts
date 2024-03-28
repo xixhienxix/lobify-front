@@ -3,7 +3,7 @@ export interface Tarifas {
 
     Tarifa:string;
     Habitacion:string[];
-    Llegada:Date;
+    Llegada:Date|null;
     Salida:Date;
     Plan:string;
     Politicas:string;

@@ -12,17 +12,6 @@ import { MatCheckboxChange } from '@angular/material/checkbox';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 
 type listaCamas = {key:number;value:string;}
-export const MY_FORMATS = {
-  parse: {
-    dateInput: 'LL',
-  },
-  display: {
-    dateInput: 'LL',
-    monthYearLabel: 'MMM YYYY',
-    dateA11yLabel: 'LL',
-    monthYearA11yLabel: 'MMMM YYYY',
-  },
-};
 @Component({
   selector: 'app-special-rates',
   templateUrl: './special-rates.component.html',
@@ -421,7 +410,7 @@ export class SpecialRatesComponent implements OnInit{
     let tarifa :Tarifas= {
       Tarifa:this.formControls["nombre"].value,
       Habitacion:this.resultLocationCamas,
-      Llegada:new Date(),
+      Llegada:this.range.controls["start"].value,
       Salida:new Date,
       Plan:this.plan,
       Adultos:this.preciosFormGroup.value.adultos,

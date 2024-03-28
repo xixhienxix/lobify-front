@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Inject, Injectable, OnDestroy } from '@angular/core';
+import { Inject, Injectable, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, catchError, map } from 'rxjs';
 import { Habitacion } from '../models/habitaciones.model';
 import { environment } from 'src/environments/environment';
@@ -8,6 +8,7 @@ import { TableService } from '../_metronic/shared/services/table.service';
 import { codigosCuarto } from '../models/codigosCuarto.model';
 import { LocalForageCache } from '../tools/cache/indexdb-expire';
 import { ParametrosService } from '../pages/parametros/_services/parametros.service';
+import { ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot } from '@angular/router';
 const DEFAULT_HABITACION = {
   _id:'',
   Codigo:'',
@@ -99,6 +100,7 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
   //   this.currentCodigosCuartoSubject.next(user);
   // }
 
+
    getAll() :Observable<Habitacion[]> {
     return this.http
      .get<Habitacion[]>(environment.apiUrl + '/habitaciones')
@@ -124,13 +126,6 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
      .get<string[]>(environment.apiUrl + '/habitaciones/codigos')
      .pipe(
        map(responseData=>{
-        // const postArray = []
-        //  for(const key in responseData)
-        //  {
-        //    if(responseData.hasOwnProperty(key))
-        //    postArray.push(responseData[key]);
-        //    this.setcurrentHabitacionValue = postArray[0] 
-        //   }
           return responseData
      })
      )
@@ -174,3 +169,10 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
     this.subscriptions.forEach(sb => sb.unsubscribe());
   }
 }
+
+export const roomsTypeResolver: ResolveFn<Habitacion[]> = (
+  route: ActivatedRouteSnapshot,
+  state: RouterStateSnapshot,
+) => {
+  return inject(HabitacionesService).getAll();
+};

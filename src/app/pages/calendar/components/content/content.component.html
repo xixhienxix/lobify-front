@@ -1,55 +1,44 @@
 <div class="control-section">
-  <div class="col-lg-9 content-wrapper">
-    <ejs-schedule #scheduleObj cssClass='schedule-block-events' width='100%' height='100%' [group]="group"
-    [currentView]="currentView" [selectedDate]="selectedDate" [eventSettings]="eventSettings" [rowAutoHeight]="true">
-      <e-resources>
-        <e-resource field='RoomId' title='Room Type' [dataSource]='resourceDataSource' [allowMultiple]='allowMultiple'
-          name='Room' textField='text' idField='id' colorField='color'>
-        </e-resource>
-      </e-resources>
-      <e-views>
-        <e-view option="TimelineDay"></e-view>
-        <e-view option="TimelineWeek"></e-view>
-        <e-view option="TimelineMonth"></e-view>
-      </e-views>
+  <div class="col-lg-12 content-wrapper">
+    <ejs-schedule #scheduleObj width='100%' cssClass='timeline-resource-grouping' height='500px'
+      [selectedDate]="selectedDate" [group]="group" [workDays]="workDays" [eventSettings]="eventSettings" [timeScale]="timeScale" 
+      [rowAutoHeight]="rowAutoHeight" [currentView]="currentView">
+      <ng-template #dateHeaderTemplate let-data>
+        <div class="date-text"></div>
+        <div [innerHTML]="getDateHeaderText(data.date)"></div>
+      </ng-template>
+        <e-resources>
+          <e-resource 
+            field='ProjectId' 
+            title='Choose Project' 
+            [dataSource]='tipoHabGroupDataSource'
+            [allowMultiple]='allowMultiple' 
+            name='Type' 
+            textField='text' 
+            idField='id' 
+            colorField='color'
+          >
+          </e-resource>
+          <e-resource 
+            field='TaskId' 
+            title='Category' 
+            [dataSource]='habitacionPorTipoDataSource' 
+            [allowMultiple]='allowMultiple'
+            name='Rooms' 
+            textField='text' 
+            idField='id' 
+            groupIDField='groupId' 
+            colorField='color'
+          >
+          </e-resource>
+        </e-resources>
+    <e-views>
+      <e-view option="TimelineDay"></e-view>
+      <e-view option="TimelineWeek"></e-view>
+      <e-view option="TimelineWorkWeek"></e-view>
+      <e-view option="TimelineMonth" [interval]="dayInterval"></e-view>
+      <e-view option="Agenda"></e-view>
+    </e-views>
     </ejs-schedule>
   </div>
 </div>
-<!-- <div class="control-section">
-  <div class="drag-sample-wrapper">
-    <div class="schedule-container">
-      <ejs-schedule #scheduleObj cssClass='schedule-block-events' width='100%' height='100%' [group]="group"
-        [currentView]="currentView" [selectedDate]="selectedDate" [eventSettings]="eventSettings" [allowResizing]="allowResizing">
-        <e-resources>
-          <e-resource field='EmployeeId' title='Rooms' name='Employee' [dataSource]='roomDataSource'
-            [allowMultiple]='allowMultiple' textField='Text' idField='Id' groupIDField="GroupId" colorField='Color'>
-          </e-resource>
-        </e-resources>
-        <ng-template #resourceHeaderTemplate let-data>
-          <div class="template-wrap">
-            <div class="employee-category">
-              <div>
-                <img src="https://ej2.syncfusion.com/angular/demos/assets/schedule/images/{{getEmployeeImageName(data)}}.png" class="employee-image" />
-              </div>
-              <div class="employee-name">{{getEmployeeName(data)}}</div>
-              <div class="employee-designation">{{getEmployeeDesignation(data)}}</div>
-            </div>
-          </div>
-        </ng-template>
-        <ng-template #eventSettingsTemplate let-data>
-          <div class='template-wrap'>
-            <div class="subject">{{data.Subject}}</div>
-          </div>
-        </ng-template>
-        <e-views>
-          <e-view option="Day"></e-view>
-          <e-view option="TimelineDay"></e-view>
-          <e-view option="TimelineMonth"></e-view>
-        </e-views>
-      </ejs-schedule>
-    </div>
-  </div>
-</div>
-    
-    
-     -->

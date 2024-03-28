@@ -10,6 +10,7 @@ import { TarifasService } from 'src/app/services/tarifas.service';
 import { EditExpressRateComponent } from './express-rates/edit-express-rate/edit-express-rate.component';
 import { ExpressRatesComponent } from './express-rates/express.rates.component';
 import { SpecialRatesComponent } from './special-rates/special-rates.component';
+import { EditSpecialRateComponent } from './special-rates/edit-special-rate/edit-standard-rate.component';
 
 
 @Component({
@@ -82,8 +83,10 @@ export class RatesComponent implements OnInit, AfterViewInit {
     this.tarifaRackArr=[]
     this.dataSource.data=[]
     this.tarifaRackCompleto=[]
-    this.tarifasService.getTarifaRack().subscribe(
-      (value)=>{
+    this.tarifasService.getTarifaRack().subscribe({
+      next:(value)=>{
+        this.isLoading=true
+
         this.tarifaRackArr=[]
         if(value){
           this.tarifaRackCompleto=value
@@ -111,11 +114,14 @@ export class RatesComponent implements OnInit, AfterViewInit {
           this.dataSource.data=this.tarifaRackArr
           // this.tarifaRackArrOnly=(value)
         }
+      },
+      error:(err)=>{
 
       },
-      (error)=>{
-
-      })
+      complete:()=>{
+        this.isLoading=false
+      }
+    })
   }
 
   getTarifas(){
@@ -139,7 +145,18 @@ export class RatesComponent implements OnInit, AfterViewInit {
         this.dataSourceEspecial.data=borraDuplicados
       },
       (error)=>{
-
+        const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+        modalRef.componentInstance.alertHeader = 'Error'
+        modalRef.componentInstance.mensaje='No se pudieron cargar las tarifas intente de nuevo mas tarde'
+        modalRef.result.then((result) => {
+          this.closeResult = `Closed with: ${result}`;
+          }, (reason) => {
+              this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+          });
+          setTimeout(() => {
+            modalRef.close('Close click');
+          },4000)
+          return
       })
   }
 
@@ -303,7 +320,8 @@ export class RatesComponent implements OnInit, AfterViewInit {
   }
 
   editTarifaEspecial(row:any){
-
+    const modalref = this.modalService.open(EditSpecialRateComponent,{size:'lg',backdrop:'static'})
+    modalref.componentInstance.tarifa=row
   }
 
   nuevaTarifaExpress(){

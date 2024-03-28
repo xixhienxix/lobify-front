@@ -1,5 +1,8 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ModalConfig, ModalComponent } from '../../_metronic/partials';
+import { HabitacionesService } from 'src/app/services/habitaciones.service';
+import { Habitacion } from 'src/app/models/habitaciones.model';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,7 +15,10 @@ export class DashboardComponent {
     dismissButtonLabel: 'Submit',
     closeButtonLabel: 'Cancel'
   };
+
   @ViewChild('modal') private modalComponent: ModalComponent;
+  
+
   constructor() {}
 
   async openModal() {

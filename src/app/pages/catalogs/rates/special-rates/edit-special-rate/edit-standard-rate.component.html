@@ -1,22 +1,66 @@
 <div class="card card-custom gutter-b">
     <div class="card-header">
-      <div class="card-title ">
+      <div style="flex-wrap: wrap;" class="card-title ">
         <h3 class="card-label">Ediciòn Tarifa Express</h3>
         <button class="btn btn-primary" style="float: right;">
             Ver Tarifas
         </button>
-        <button class="btn btn-primary" style="float: right;">
-            Precios Por Bloque
-        </button>
       </div>
     </div>
-    <div class="card" style="background-color: rgb(211, 207, 207);">
+    <div class="card-body" style="background-color: rgb(211, 207, 207);">
         <div class="row">
-            <div class="col-lg-12">
+            <div class="col-lg-3">
                 <label class="h4">Tarifa: </label>
                 <label class="h4"> {{tarifa.Tarifa}}</label>
-
+            </div>
+            <div class="col-lg-3">
+                <label class="h4">Habitacion</label>
+                <label class="h4"> Chardonay</label>
+            </div>
+            <div class="col-lg-3">
+                <label class="h4">Estado </label>
+                <mat-radio-button class="h4"> </mat-radio-button>
+            </div>
+            <div class="col-lg-3">
+                <button class="btn bg-danger">Edicion Express</button>
             </div>
         </div>
+        <div class="row">
+            <div class="col-lg-3">
+                <label class="h4">Noches Min: </label>
+                <label class="h4"> 1</label>
+            </div>
+            <div class="col-lg-3">
+                <label class="h4">Noches Max: </label>
+                <label class="h4"> 365</label>
+            </div>
+            <div class="col-lg-3">
+                <label class="h4">Alimentos</label>
+                <mat-form-field>
+                    <mat-label>Choose an option</mat-label>
+                    <select matNativeControl>
+                      <option value="" selected></option>
+                      <option value="volvo">Volvo</option>
+                      <option value="saab" disabled>Saab</option>
+                      <option value="mercedes">Mercedes</option>
+                      <option value="audi">Audi</option>
+                    </select>
+                  </mat-form-field>
+            </div>
+            <div class="col-lg-3">
+                <label class="h4">Cancelacion: </label>
+                <mat-form-field>
+                    <mat-label>Choose an option</mat-label>
+                    <select matNativeControl >
+                      <option value="" selected></option>
+                      <option value="volvo">Volvo</option>
+                      <option value="saab" disabled>Saab</option>
+                      <option value="mercedes">Mercedes</option>
+                      <option value="audi">Audi</option>
+                    </select>
+                  </mat-form-field>            
+                </div>
+        </div>
     </div>
+    <ejs-schedule></ejs-schedule>
 </div>
