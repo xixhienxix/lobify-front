@@ -65,11 +65,6 @@ export class RoomsComponent implements OnInit{
 
         }
       });
-      // this._habitacionService.getcurrentHabitacionValue.pipe(distinctUntilChanged()).subscribe({
-      //   next:(val)=>{
-      //     console.log(val)
-      //   }
-      // })
   }
 
   ngOnInit(){
@@ -146,7 +141,7 @@ export class RoomsComponent implements OnInit{
   
 
   delete(habitacion:any,index:number){
-    console.log(habitacion)
+    this.isLoading=true
     this._habitacionService.deleteHabitacion(habitacion.Codigo).subscribe({
       next:async (data)=>{
         if(data!=0 && data!= null)
@@ -162,16 +157,15 @@ export class RoomsComponent implements OnInit{
             }); 
           }
         else {
-          
-          this._habitacionService.getcurrentHabitacionValue.getValue().splice(index, 1);
-          const newDataSubject = this._habitacionService.getcurrentHabitacionValue.getValue();
 
-          const deleted = await this._habitacionService.deleteIndexDB("RoomCodes");
-          const re_created = await this._habitacionService.writeIndexDB("RoomCodes",newDataSubject)
-          this.buildDataSource(newDataSubject)
+          let newDataSubject = this._habitacionService.getcurrentHabitacionValue.getValue();
+          newDataSubject = newDataSubject.filter(roomCodes => roomCodes.Codigo !== habitacion.Codigo);
+          this._habitacionService.setcurrentHabitacionValue = newDataSubject
 
+          // const deleted = await this._habitacionService.deleteIndexDB("RoomCodes");
+          // const re_created = await this._habitacionService.writeIndexDB("RoomCodes",newDataSubject)
+          this.buildDataSource(newDataSubject);
 
-          console.log(this._habitacionService.getcurrentHabitacionValue)
           const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
             modalRef.componentInstance.alertsHeader='Error'
             modalRef.componentInstance.mensaje= "Habitacion eliminada con exito"
@@ -196,7 +190,7 @@ export class RoomsComponent implements OnInit{
             }); 
       },
       complete:()=>{
-
+        this.isLoading=false
       }
     })
   }

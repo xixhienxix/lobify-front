@@ -56,7 +56,9 @@ select {
 .cdk-overlay-container, .cdk-overlay-pane {
   z-index: 9999 !important;
 }
-
+.cdk-overlay-connected-position-bounding-box {
+  z-index: 99999 !important;
+}
 
 .mat-form-field {
   font-size: 14px;

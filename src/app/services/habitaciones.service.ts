@@ -9,22 +9,7 @@ import { codigosCuarto } from '../models/codigosCuarto.model';
 import { LocalForageCache } from '../tools/cache/indexdb-expire';
 import { ParametrosService } from '../pages/parametros/_services/parametros.service';
 import { ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot } from '@angular/router';
-const DEFAULT_HABITACION = {
-  _id:'',
-  Codigo:'',
-  Numero:[],
-  Tipo:'',
-  Descripcion:'',
-  Camas:1,
-  Adultos:1,
-  Ninos:1,
-  Inventario:1,
-  Vista:'',
-  Amenidades:[],
-  Tipos_Camas:[],
-  Orden:1,
-  Tarifa:0
-}
+
 const DEFAUL_CODIGOS = {
   nombreHabitacion:'',
   codigo:'',
@@ -76,10 +61,11 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
     return this.currentHabitacion$;
   }
 
-  set setcurrentHabitacionValue(Habitacion: any) {
-    this.currentHabitacion$.next(this.currentHabitacion$.getValue().concat(Habitacion))
+  set setcurrentHabitacionValue(habitacion: any) {
+    // this.currentHabitacion$.next(this.currentHabitacion$.getValue().concat(Habitacion))
+    // this.sendCustomFormNotification(true);
+    this.currentHabitacion$.next(habitacion);
     this.sendCustomFormNotification(true);
-
   }
 
   async sendCustomFormNotification(flag:boolean){
@@ -111,7 +97,6 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
          {
            if(responseData.hasOwnProperty(key))
            postArray.push(responseData[key]);
-          //  this.setcurrentHabitacionValue = postArray[0] 
           }
           this.writeIndexDB("RoomCodes",responseData);
           this.setcurrentHabitacionValue = responseData 

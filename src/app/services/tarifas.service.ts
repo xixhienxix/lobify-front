@@ -4,6 +4,7 @@ import { BehaviorSubject, forkJoin, Observable, Subject, Subscription } from 'rx
 import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Tarifas } from '../models/tarifas';
+import { LocalForageCache } from '../tools/cache/indexdb-expire';
 
 const DEFAULT_TARIFA = {
   Tarifa:'',
@@ -38,6 +39,11 @@ const DEFAULT_TARIFA = {
   providedIn: 'root'
 })
 export class TarifasService {
+  indexDBStorage = new LocalForageCache().createInstance({
+    name: 'Lobify',
+    storeName: 'Rates',
+    defaultExpiration: 10800
+});
 
   API_URL = `${environment.apiUrl}/tarifario/Tarifas`;
   private ngUnsubscribe = new Subject<void>();
@@ -67,12 +73,31 @@ export class TarifasService {
     this.currentTarifas$.next(Tarifas);
   }
 
+  async writeIndexDB(propertyName: string, propertyValue: any): Promise<void> {
+    if (propertyName && propertyValue) {
+        await this.indexDBStorage.setItem(propertyName, propertyValue);
+    }
+  }
+
+  async readIndexDB(propertyName: string): Promise<any> {
+      if (propertyName) {
+          return  await this.indexDBStorage.getItem(propertyName);
+      }
+  }
+
+  async deleteIndexDB(propertyName: string): Promise<void> {
+      if (propertyName) {
+          await this.indexDBStorage.removeItem(propertyName);
+      }
+  }
+
   getAll() :Observable<Tarifas[]> {
     return this.http
      .get<Tarifas[]>(environment.apiUrl + '/tarifario/tarifas')
      .pipe(
        map(responseData=>{
-       return responseData
+        this.writeIndexDB("Rates",responseData);
+        return responseData
      })
      )
 

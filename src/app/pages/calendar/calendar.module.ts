@@ -7,7 +7,6 @@ import { SharedModule } from 'src/app/_metronic/shared/shared.module';
 import { HeaderComponent } from './components/header/header.component';
 import { ContentComponent } from './components/content/content.component';
 import { FooterComponent } from './components/footer/footer.component';
-import { GanttComponent } from './components/gantt/gantt.component';
 import { BryntumSchedulerModule } from '@bryntum/scheduler-angular'; 
 import { CheckBoxAllModule, ButtonAllModule, SwitchAllModule } from '@syncfusion/ej2-angular-buttons';
 import { DatePickerAllModule, TimePickerAllModule, DateTimePickerAllModule } from '@syncfusion/ej2-angular-calendars';
@@ -17,16 +16,18 @@ import { ToolbarAllModule, ContextMenuAllModule, TreeViewModule, AppBarModule } 
 import { ToastAllModule } from '@syncfusion/ej2-angular-notifications';
 import { ScheduleAllModule, RecurrenceEditorAllModule } from '@syncfusion/ej2-angular-schedule';
 import { DropDownButtonAllModule } from '@syncfusion/ej2-angular-splitbuttons';
+import { ReactiveFormsModule } from '@angular/forms';
+import { NvaReservaComponent } from './components/nva-reserva/nva-reserva.component';
 
 
 @NgModule({
-  declarations: [CalendarComponent, HeaderComponent, ContentComponent, FooterComponent, GanttComponent],
+  declarations: [CalendarComponent, HeaderComponent, ContentComponent, FooterComponent, NvaReservaComponent],
   imports: [
     TranslateModule,
     CommonModule,
     SharedModule,
     BryntumSchedulerModule,
-
+    ReactiveFormsModule,
     ScheduleAllModule, RecurrenceEditorAllModule,   
     NumericTextBoxAllModule, TextBoxAllModule, DatePickerAllModule, 
     TimePickerAllModule, DateTimePickerAllModule, CheckBoxAllModule,   

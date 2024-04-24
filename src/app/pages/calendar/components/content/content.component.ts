@@ -20,7 +20,7 @@ import { Habitacion } from 'src/app/models/habitaciones.model';
 })
 
 export class ContentComponent implements OnInit{
-  @ViewChild('scheduleObj') public scheduleObj: ScheduleComponent;
+  @ViewChild("scheduleObj") public scheduleObj: ScheduleComponent;
 
   public selectedDate: Date = new Date(2024,2,28);
   public timeScale: TimeScaleModel = { enable: false };
@@ -50,7 +50,7 @@ export class ContentComponent implements OnInit{
   };
 
   public rowAutoHeight = true;
-  public currentView: View = 'TimelineMonth';
+  public currentView: View = 'TimelineDay';
   public allowMultiple:boolean = true;
   public group: GroupModel = {
     enableCompactView: false,
@@ -117,7 +117,7 @@ export class ContentComponent implements OnInit{
     const codigoArray = []
     
     const tipoCuarto = [...new Set(responseData.map(item => item.Tipo))];
-    const codigoCuarto = [...new Set(responseData.map(item => item.Codigo))];
+    // const codigoCuarto = [...new Set(responseData.map(item => item.Numero))];
 
     for( const key in tipoCuarto) {
       tipoArray.push({ text: tipoCuarto[key], id:parseInt(key+1), color: Math.floor(Math.random()*16777215).toString(16) });
@@ -130,7 +130,7 @@ export class ContentComponent implements OnInit{
         {  
           for(let x=0; x<tipoArray.length; x++){
             if(tipoArray[x].text === responseData[key].Tipo){
-              codigoArray.push({ text: responseData[key].Codigo, id:parseInt(key+1), groupId: tipoArray[x].id, color: tipoArray[x].color}); 
+              codigoArray.push({ text: responseData[key].Codigo + " - " + responseData[key].Numero + " - " + responseData[key].Adultos + ' + ' + responseData[key].Ninos , id:parseInt(key+1), groupId: tipoArray[x].id, color: tipoArray[x].color}); 
             }
           }
         }
@@ -143,19 +143,37 @@ export class ContentComponent implements OnInit{
     this.scheduleObj.rowAutoHeight = args.checked;
   }
 
-  public onRenderCell(args: RenderCellEventArgs): void {
-    if (args.element.classList.contains('e-work-cells')) {
-      if (args.date! < new Date(2021, 6, 31, 0, 0)) {
-        args.element.setAttribute('aria-readonly', 'true');
-        args.element.classList.add('e-read-only-cells');
-      }
-    }
-    if (args.elementType === 'emptyCells' && args.element.classList.contains('e-resource-left-td')) {
-      const target: HTMLElement = args.element.querySelector('.e-resource-text') as HTMLElement;
-      target.innerHTML = '<div class="name">Rooms</div><div class="type">Type</div><div class="capacity">Capacity</div>';
-    }
-  }
+  // public onRenderCell(args: RenderCellEventArgs): void {
+  //   if (args.element.classList.contains('e-work-cells')) {
+  //     if (args.date! < new Date(2021, 6, 31, 0, 0)) {
+  //       args.element.setAttribute('aria-readonly', 'true');
+  //       args.element.classList.add('e-read-only-cells');
+  //     }
+  //   }
+  //   if (args.elementType === 'emptyCells' && args.element.classList.contains('e-resource-left-td')) {
+  //     const target: HTMLElement = args.element.querySelector('.e-resource-text') as HTMLElement;
+  //     target.innerHTML = '<div class="name">Rooms</div><div class="type">Type</div><div class="capacity">Capacity</div>';
+  //   }
+  // }
 
+  onRenderCell(args: RenderCellEventArgs): void {
+    console.log("")
+    let filteredData: any;
+    if (args.elementType == 'resourceGroupCells' ) {
+      
+        const dataSource = Object.values(this.scheduleObj.eventSettings.dataSource!);
+        filteredData = dataSource.filter((data: any) => {
+            const dataDate = new Date(data.StartTime);
+            const argsDate = new Date(args.date!);
+            dataDate.setHours(0, 0, 0, 0);
+            argsDate.setHours(0, 0, 0, 0);
+            debugger
+            let groupIndex = this.scheduleObj.getResourcesByIndex(data.ProjectId);
+            let argsGroupIndex = this.scheduleObj.getResourcesByIndex(args.groupIndex!);
+             return data.ProjectId === argsGroupIndex.groupData!.ProjectId && dataDate.getTime() == argsDate.getTime(); 
+        });
+        (args.element as HTMLElement).innerText = filteredData.length.toString();
+  }
 }
 
-
+}

@@ -30,6 +30,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ScheduleModule, RecurrenceEditorModule, DayService, WeekService, WorkWeekService, MonthService, MonthAgendaService, TimelineMonthService } from '@syncfusion/ej2-angular-schedule'
+import { InlineSpinnerComponent } from 'src/app/services/_helpers/inlineSpinner/inline-spinner.component';
 @NgModule({
   declarations: [
     KeeniconComponent,
@@ -38,6 +39,7 @@ import { ScheduleModule, RecurrenceEditorModule, DayService, WeekService, WorkWe
     SortIconComponent,
     AlertsComponent,
     NgPagination,
+    InlineSpinnerComponent
   ],
   imports: [
     CommonModule,
@@ -79,7 +81,6 @@ import { ScheduleModule, RecurrenceEditorModule, DayService, WeekService, WorkWe
     MatTabsModule,
     MatExpansionModule,
     MatIconModule,
-    MatDatepickerModule,
     MatButtonModule,
     MatAutocompleteModule,
     MatListModule,
@@ -100,7 +101,8 @@ import { ScheduleModule, RecurrenceEditorModule, DayService, WeekService, WorkWe
     MatDatepickerModule,
     MatNativeDateModule,
     ScheduleModule,
-    RecurrenceEditorModule
+    RecurrenceEditorModule,
+    InlineSpinnerComponent
   ],
   providers:[
     DayService,

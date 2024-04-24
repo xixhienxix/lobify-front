@@ -410,7 +410,7 @@ export class SpecialRatesComponent implements OnInit{
     let tarifa :Tarifas= {
       Tarifa:this.formControls["nombre"].value,
       Habitacion:this.resultLocationCamas,
-      Llegada:this.range.controls["start"].value,
+      Llegada:this.range.controls["start"].value!,
       Salida:new Date,
       Plan:this.plan,
       Adultos:this.preciosFormGroup.value.adultos,

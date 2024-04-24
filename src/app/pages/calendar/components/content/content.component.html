@@ -2,7 +2,7 @@
   <div class="col-lg-12 content-wrapper">
     <ejs-schedule #scheduleObj width='100%' cssClass='timeline-resource-grouping' height='500px'
       [selectedDate]="selectedDate" [group]="group" [workDays]="workDays" [eventSettings]="eventSettings" [timeScale]="timeScale" 
-      [rowAutoHeight]="rowAutoHeight" [currentView]="currentView">
+      [rowAutoHeight]="rowAutoHeight" [currentView]="currentView" >
       <ng-template #dateHeaderTemplate let-data>
         <div class="date-text"></div>
         <div [innerHTML]="getDateHeaderText(data.date)"></div>
@@ -33,10 +33,10 @@
           </e-resource>
         </e-resources>
     <e-views>
-      <e-view option="TimelineDay"></e-view>
+      <e-view option="TimelineDay" [interval]="dayInterval"></e-view>
       <e-view option="TimelineWeek"></e-view>
       <e-view option="TimelineWorkWeek"></e-view>
-      <e-view option="TimelineMonth" [interval]="dayInterval"></e-view>
+      <e-view option="TimelineMonth"></e-view>
       <e-view option="Agenda"></e-view>
     </e-views>
     </ejs-schedule>
