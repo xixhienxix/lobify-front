@@ -1,12 +1,14 @@
 <div class="control-section">
   <div class="col-lg-12 content-wrapper">
-    <ejs-schedule #scheduleObj width='100%' cssClass='timeline-resource-grouping' height='500px'
+    <ejs-schedule cssClass='timeline-resource-grouping' #scheduleObj width='100%' cssClass='timeline-resource-grouping' height='500px'
       [selectedDate]="selectedDate" [group]="group" [workDays]="workDays" [eventSettings]="eventSettings" [timeScale]="timeScale" 
-      [rowAutoHeight]="rowAutoHeight" [currentView]="currentView" >
+      [rowAutoHeight]="rowAutoHeight" [currentView]="currentView" (actionComplete)="onActionComplete($event)" (renderCell)="onRenderCell($event)"
+      (dataBound)="onDataBound($event)">
       <ng-template #dateHeaderTemplate let-data>
         <div class="date-text"></div>
         <div [innerHTML]="getDateHeaderText(data.date)"></div>
       </ng-template>
+
         <e-resources>
           <e-resource 
             field='ProjectId' 
@@ -38,6 +40,7 @@
       <e-view option="TimelineWorkWeek"></e-view>
       <e-view option="TimelineMonth"></e-view>
       <e-view option="Agenda"></e-view>
+      
     </e-views>
     </ejs-schedule>
   </div>

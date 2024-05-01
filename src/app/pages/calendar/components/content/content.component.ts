@@ -3,7 +3,7 @@ import { Component, Inject, Input, OnInit, ViewChild, ViewEncapsulation } from '
 import { extend,Internationalization } from '@syncfusion/ej2-base';
 import { ChangeEventArgs } from '@syncfusion/ej2-buttons';
 import {
-  ScheduleComponent, DragAndDropService, TimelineViewsService, GroupModel, EventSettingsModel, ResizeService, View, TimelineMonthService, WorkHoursModel, RenderCellEventArgs, TimeScaleModel
+  ScheduleComponent, DragAndDropService, TimelineViewsService, GroupModel, EventSettingsModel, ResizeService, View, TimelineMonthService, WorkHoursModel, RenderCellEventArgs, TimeScaleModel, ActionEventArgs
 } from '@syncfusion/ej2-angular-schedule';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { DataManager, UrlAdaptor } from '@syncfusion/ej2-data';
@@ -16,21 +16,21 @@ import { Habitacion } from 'src/app/models/habitaciones.model';
     templateUrl   : './content.component.html',
     styleUrls     : ['./content.component.scss'],
     encapsulation : ViewEncapsulation.None,
-    providers: [TimelineViewsService, TimelineMonthService, ResizeService, DragAndDropService]
+    providers: [TimelineViewsService, TimelineMonthService, ResizeService, DragAndDropService],
 })
 
 export class ContentComponent implements OnInit{
   @ViewChild("scheduleObj") public scheduleObj: ScheduleComponent;
 
   public selectedDate: Date = new Date(2024,2,28);
-  public timeScale: TimeScaleModel = { enable: false };
+  public timeScale: TimeScaleModel = { enable: true, interval: 1440, slotCount: 1 };
   /**
    * Used to Set how many days displays on the Scheduler in one view
    *
    * @type {number}
    * @memberof ContentComponent
    */
-  public dayInterval: number = 31;
+  public dayInterval: number = 5;
   /**
    * Specify WorkDays, non workdays appear as gray columns on the schedule
    *
@@ -174,6 +174,51 @@ export class ContentComponent implements OnInit{
         });
         (args.element as HTMLElement).innerText = filteredData.length.toString();
   }
+}
+
+onDataBound(event:any){
+    const numberOfDaystoDisplay = 7;
+    const workCells = document.querySelectorAll(".e-work-cells.e-resource-group-cells");
+    workCells.forEach((cell, index) => {
+        let project1Events = [];    
+        const timestamp = Number(cell.getAttribute('data-date'));
+        const startDate = new Date(timestamp);
+        const endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 1); // add one day
+        const events = this.scheduleObj.getEvents(startDate, endDate);
+        events.forEach(event => {
+            if (event.ProjectId === 1) {
+                project1Events.push(event);
+            } 
+        });
+        (cell as HTMLElement).innerText = project1Events.length.toString();
+        project1Events = [];
+       
+    });
+  }
+
+ onActionComplete(args: ActionEventArgs): void {
+  if (args.requestType === 'dateNavigate') {
+    const selectedDate = this.selectedDate;
+      const workCells = this.scheduleObj.element.querySelectorAll('.e-work-cells');
+    this.applyStylesToCells(workCells, selectedDate);
+    const headerCells = this.scheduleObj.element.querySelectorAll('.e-date-header-wrap .e-header-cells');
+    this.applyStylesToCells(headerCells, selectedDate);
+  }
+
+}
+
+ applyStylesToCells(cells: NodeListOf<Element>, selectedDate: Date): void {
+  cells.forEach((cell: any) => {
+    const cellDate = this.scheduleObj.getDateFromElement(cell);
+    if (cellDate && cellDate.getDate() === selectedDate.getDate() &&
+        cellDate.getMonth() === selectedDate.getMonth() &&
+        cellDate.getFullYear() === selectedDate.getFullYear()) {
+      cell.style.backgroundColor = 'lightgray';
+    } else {
+      cell.style.backgroundColor = '';
+    }
+  });
 }
 
 }

@@ -65,6 +65,14 @@ select {
   width: 100%;
 }
 
+tr.mat-mdc-footer-row {
+  font-weight: bold;
+}
+
+.mat-mdc-table-sticky {
+  border-top: 1px solid #e0e0e0;
+}
+
 // .table-responsive {
 //   display: block;
 //   width: 100%;

@@ -1,6 +1,7 @@
 import {  Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { MatTableDataSource } from '@angular/material/table';
 import { NgbActiveModal, NgbDateAdapter, NgbDateParserFormatter, NgbDateStruct, } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime } from 'luxon';
 import { Observable, Subject, filter, first, firstValueFrom, map, takeUntil } from 'rxjs';
@@ -80,6 +81,12 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   dropDownHabValueIndex:any
   cuarto:string=''
 
+  /**Table */
+  displayedColumns: string[] = ['Tarifa', '$ Promedio x Noche', 'Total', 'Acciones'];
+  dataSource = new MatTableDataSource<any>();
+  displayedColumnsFooter: string[] = ['Habitacion', 'Numero'];
+
+
   /** Subscription */
   private ngUnsubscribe = new Subject<void>();
 
@@ -147,6 +154,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   buscaDispo(habitacion:any){
     // No Option Selected
     if(habitacion === '0'){
+      this.setStep(0);
+      this.resetDispo();
       return
     }
     this.resetDispo();
@@ -164,7 +173,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     //       new Date(val.Llegada).getTime() <= this.intialDate.getTime() && new Date(val.Salida).getTime() >= this.endDate.getTime() )
     //   }    
     // }
-    this.filterRatesAray
+    console.log("tarifas: ",this.filterRatesAray)
+
     this.maxPeopleCheck(habitacion);
 
     if(this.selectedRoom === '1'){
@@ -201,10 +211,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
                 }) 
               }
             })
-
-
-            console.log(this.infoRoomsAndCodes);
-            console.log(this.mySet);
+            this.setStep(1) 
           },
           error:()=>{
           },
@@ -265,6 +272,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
                       }
                     }
                   }
+
+                  this.filterRatesAray
                   /** */
                }    
   }
@@ -302,6 +311,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     this.accordionDisplay="display:none"
     this.cuarto=''
     this.availavilityRooms = [];
+    this.mySet.clear
   }
 
   addEventIntialDate(type: string, event: MatDatepickerInputEvent<Date>) {
@@ -327,6 +337,23 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 
     console.log("End Dates-> ",this.endDateEvent)
 
+  }
+
+  getRooms(){
+  //   <ng-container *ngFor="let habitacionesDisponibles of mySet">
+  //   <ng-container *ngFor="let tipocuarto of roomCodes">
+  //     <ng-container *ngIf="tipocuarto.Numero == habitacionesDisponibles">
+  //       <br><mat-checkbox  formControlName="checkbox"  #checked (change)="preAsignar(tipocuarto.Numero,tipocuarto.Codigo,checked.checked)"></mat-checkbox> &nbsp; <label style="margin-right: 7%">{{ tipocuarto.Numero }}</label>
+  //     </ng-container>
+  //   </ng-container>
+  // </ng-container>
+    this.mySet.forEach((element)=>{
+      this.roomCodes.forEach((roomsElemts)=>{
+        if(roomsElemts.Numero === element){
+          return roomsElemts.Numero
+        }
+      })
+    })
   }
 
   /** Mat-expansioln-Pane [Acordion] */
