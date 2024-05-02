@@ -153,12 +153,12 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 
   buscaDispo(habitacion:any){
     // No Option Selected
+    this.resetDispo();
+
     if(habitacion === '0'){
       this.setStep(0);
-      this.resetDispo();
       return
     }
-    this.resetDispo();
     const folio = 'No Folio'
     this.formGroup.controls['checkbox'].setValue(false);
     this.isLoading=true;
@@ -167,12 +167,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 
     this.filterRates();
 
-    // if(habitacion === '1'){
-    //   if(this.ratesArray){
-    //     this.filterRatesAray = this.ratesArray.filter((val) => 
-    //       new Date(val.Llegada).getTime() <= this.intialDate.getTime() && new Date(val.Salida).getTime() >= this.endDate.getTime() )
-    //   }    
-    // }
     console.log("tarifas: ",this.filterRatesAray)
 
     this.maxPeopleCheck(habitacion);
