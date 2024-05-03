@@ -2,35 +2,21 @@
     <div class="card-header">
       <div class="card-title ">
         <h3 class="card-label">Tarifas</h3>
-        <button disabled style="position: absolute; right: 0px; margin: 10px;" class="btn btn-danger" (click)="nuevaTarifaExpress()">Nueva Tarifa Express</button>
+        <a>  <span (click)="getTarifas(true)"
+          class="svg-icon svg-icon-md svg-icon-danger">
+          <i class="fa-solid fa-refresh"></i>
+        </span></a>
       </div>
 
     </div> 
   
     <div class="card-body">
 
-  
-      <!-- begin: Grouping -->
-      <!-- <ng-container *ngIf="grouping.getSelectedRowsCount()">
-        <div class="form">
-          <div class="row align-items-center form-group-actions margin-top-20 margin-bottom-20">
-            <div class="col-xl-12">
-              <div class="form-group form-group-inline">
-                <div class="form-label form-label-no-wrap">
-                  <label class="font-bold font-danger"><span>Selected records count:
-                      <b>{{ grouping.getSelectedRowsCount() }}</b></span></label>
-                </div>
-               
-              </div>
-            </div>
-          </div>
-        </div>
-      </ng-container> -->
-      <!-- end: Grouping -->
-  
       <!-- begin:Table -->
       <div class="table-responsive angular-bootstrap-table">
-          <table mat-table [dataSource]="dataSource">
+
+
+          <table *ngIf="!isLoading || !reloading" mat-table [dataSource]="dataSource">
             <!-- Position Column -->
             <ng-container matColumnDef="Tarifa">
               <th mat-header-cell *matHeaderCellDef> Tarifa </th>
@@ -64,35 +50,30 @@
             <!-- Estancia Column -->
             <ng-container matColumnDef="Estado">
               <th mat-header-cell *matHeaderCellDef> Estado </th>
-              <td mat-cell *matCellDef="let element"> {{element.Estado}} </td>
+              <td mat-cell *matCellDef="let element"> {{element.Estado==true ? 'Activa' : 'No Activa'}} </td>
             </ng-container>
   
             <!-- Estancia Column -->
             <ng-container matColumnDef="Acciones">
               <th mat-header-cell *matHeaderCellDef> Acciones </th>
               <td (click)="$event.stopPropagation()" mat-cell *matCellDef="let element"> 
-                <a
-                    title="Editar Tarifa"
-                    class="mx-3 btn btn-icon btn-light btn-hover-primary btn-sm"
-                    >
-                    <span (click)="editarTarifaExpress(element)"
-                      class="svg-icon svg-icon-md svg-icon-primary">
-                      <i class="fa-solid fa-pen"></i>
-                    </span>
-                  </a>
-              
-                  <a title="Borrar Tarifa" class="btn btn-icon btn-light btn-hover-danger btn-sm">
-                    <span (click)="promtDelete(element.Habitacion)"
-                      class="svg-icon svg-icon-md svg-icon-danger">
-                      <i class="fa-solid fa-trash"></i>
-                    </span>
-                  </a>   
               </td>
             </ng-container>
     
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayedColumns.length">
+                NO RATES
+              </td>
+            </tr>
           </table>
+          <!-- <mat-card *ngIf="isLoading || reloading" style="display: flex; justify-content: center; align-items: center">
+            <mat-progress-spinner 
+              color="primary" 
+              mode="indeterminate">
+            </mat-progress-spinner>
+          </mat-card> -->
         
           <mat-paginator [pageSizeOptions]="[5, 10, 20]"
                          showFirstLastButtons 
@@ -120,8 +101,10 @@
 
   
       <!-- begin:Table -->
+
       <div class="table-responsive angular-bootstrap-table">
-        <table mat-table [dataSource]="dataSourceEspecial">
+
+        <table *ngIf="!isLoading || !reloading" mat-table [dataSource]="dataSourceEspecial">
       
           <!-- Position Column -->
           <ng-container matColumnDef="Tarifa">
@@ -156,7 +139,7 @@
           <!-- Estancia Column -->
           <ng-container matColumnDef="Estado">
             <th mat-header-cell *matHeaderCellDef> Estado </th>
-            <td mat-cell *matCellDef="let element"> {{element.Estado}} </td>
+            <td mat-cell *matCellDef="let element"> {{element.Estado==true ? 'Activa' : 'No Activa'}} </td>
           </ng-container>
 
           <!-- Estancia Column -->
@@ -174,7 +157,7 @@
                 </a>
             
                 <a title="Borrar Tarifa" class="btn btn-icon btn-light btn-hover-danger btn-sm">
-                  <span (click)="promtDeleteEspecial(element)" 
+                  <span (click)="promtDelete(element)" 
                     class="svg-icon svg-icon-md svg-icon-danger">
                     <i class="fa-solid fa-trash"></i>
                   </span>
@@ -184,7 +167,18 @@
   
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
           <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayedColumns.length">
+              NO RATES
+            </td>
+          </tr>
         </table>
+        <!-- <mat-card *ngIf="isLoading || reloading" style="display: flex; justify-content: center; align-items: center">
+          <mat-progress-spinner 
+            color="primary" 
+            mode="indeterminate">
+          </mat-progress-spinner>
+        </mat-card> -->
       
         <mat-paginator [pageSizeOptions]="[5, 10, 20]"
                        showFirstLastButtons 
@@ -192,6 +186,6 @@
         </mat-paginator>
       </div>
       <!-- end: Table -->
-     
+     <app-loader-spinner *ngIf="isLoading || reloading"></app-loader-spinner>
     </div>
   </div>

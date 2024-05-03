@@ -111,7 +111,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   }
 
   async checkRoomCodesIndexDB(){
-    const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("RoomCodes");
+    const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("Rooms");
 
         /** Check if RoomsCode are on IndexDb */
         if(roomsCodesIndexDB){

@@ -69,6 +69,12 @@
                     <div class="row col-lg-12">
                         <div class="form-group col-lg-12">
                             <label style="color:#00506a; font-weight: bold;">Tipo de la Habitación</label>
+                            <a>  
+                                <span (click)="getCodigos(true)"
+                                class="svg-icon svg-icon-md svg-icon-danger">
+                                <i class="fa-solid fa-refresh"></i>
+                              </span>
+                            </a>
                             <div class="input-group">
                                 <mat-select #tipodeCuartoDropDown
                                 class="form-control form-control-lg "
@@ -81,10 +87,7 @@
                                 <mat-option value="0">-- Selecciona Tipo de Habitación --</mat-option>
                                     <mat-option *ngFor="let tipoCuarto of tiposArr" [value]="tipoCuarto.Descripcion">{{tipoCuarto.Descripcion}} </mat-option>
                                 </mat-select>
-                                <div class="input-group-append">
-                                    <button class="btn btn-secondary">
-                                        <i class="ki ki-reload" aria-hidden="true"></i>
-                                    </button>
+                                <div class="input-group-append">   
                                 </div>
                             </div>
                         </div>
@@ -154,8 +157,6 @@
                                 [value]="quantity"
                                 min="1"
                                 formControlName="adultos"
-                                [class.is-invalid]="isControlInvalid('adultos')"
-                                [class.is-valid]="isControlValid('adultos')"
                                 >
                                 <div class="input-group-append">
                                     <button style="border-right: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf; background-color: transparent;" class="btn btn-secondary" (click)="plus()" type="button">
@@ -181,8 +182,6 @@
                                 class="text-center input-group form-control form-control-lg form-control-solid" placeholder=""
                                 [value]="quantityExtra"
                                 formControlName="ninos"
-                                [class.is-invalid]="isControlInvalid('ninos')"
-                                [class.is-valid]="isControlValid('ninos')"
                                 >
                                 <div class="input-group-append">
                                     <button style="background-color: transparent; border-right: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;" class="btn btn-secondary" (click)="plusExtra()" type="button">
@@ -203,6 +202,8 @@
                                 multiple
                                 [formControl]="amenidadesFC"
                                 [(ngModel)]="resultLocation"
+                                [class.is-invalid]="resultLocation.length===0 && inicio!==true"
+                                [class.is-valid]="resultLocation.length!==0 && inicio!==true"
                                 >
                                 <footer class="col-sm-12">
                                   <button (click)="itemSelect.close()" mat-button class="col-sm-4 btn btn-success" style="color: white;">Confirmar</button>
@@ -248,7 +249,7 @@
                                 [formControl]="camasFC"
                                 [(ngModel)]="resultLocationCamas">
                                 <footer class="col-sm-12">
-                                  <button (click)="camasSelect.close()" mat-raised-button class="col-sm-4 btn btn-primary">Confirmar</button>
+                                  <button (click)="camasSelect.close()" mat-button class="col-sm-4 btn btn-primary">Confirmar</button>
                                 </footer>
                                 <mat-select-trigger>
                                      <button *ngIf="camasFC.value?.length > 0" class="button1">{{camasFC.value[0]}}

@@ -4,7 +4,7 @@ import { ModalDismissReasons, NgbActiveModal, NgbDate, NgbDateStruct, NgbDatepic
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { TarifasService } from 'src/app/services/tarifas.service';
 import { OverlayContainer } from '@angular/cdk/overlay';
-import { Subscription, map } from 'rxjs';
+import { Subject, Subscription, map, takeUntil } from 'rxjs';
 import { DateTime } from 'luxon';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { Tarifas } from 'src/app/models/tarifas';
@@ -83,10 +83,12 @@ export class SpecialRatesComponent implements OnInit{
 
   /**Subscription */
   subscription:Subscription[]=[]
+  private ngUnsubscribe = new Subject<void>();
+
   
   constructor(
     public modal:NgbActiveModal,
-    public habitacionService:HabitacionesService,
+    public _habitacionService:HabitacionesService,
     public fb:FormBuilder,
     public i18n: NgbDatepickerI18n,
     public tarifasService:TarifasService,
@@ -121,7 +123,7 @@ export class SpecialRatesComponent implements OnInit{
 
   
   ngOnInit(): void {
-    this.getTarifasRack();
+    // this.getTarifasRack();
 
     this.tarifaFormGroup = this.fb.group({
       nombre:['',Validators.required],
@@ -147,48 +149,10 @@ export class SpecialRatesComponent implements OnInit{
       this.descuentoNoAplicado=true
     });
 
-    this.getHabitaciones();
-    this.getCodigosCuarto();
+    this.getHabitaciones(false);
+    this.getCodigosCuarto(false);
   }
 
-
-
-  getTarifasRack(){
-    this.tarifaRackArr=[]
-    this.tarifasService.getTarifaRack().subscribe(
-      (value)=>{
-        this.tarifaRackArr=[]
-        if(value){
-          for(let e=0;e<value.length;e++){
-            for(let i=0;i<value[e].Habitacion.length;i++){
-              let tarifario = {
-                  Tarifa:value[e].Tarifa,
-                  Habitacion:value[e].Habitacion[i],
-                  Llegada:value[e].Llegada,
-                  Salida:value[e].Salida,
-                  Plan:value[e].Plan,
-                  Politicas:value[e].Politicas,
-                  EstanciaMinima:value[e].EstanciaMinima,
-                  EstanciaMaxima:value[e].EstanciaMaxima,
-                  Adultos:value[e].Adultos,
-                  Ninos:value[e].Ninos,
-                  TarifaRack:value[e].TarifaRack,
-                  TarifaXAdulto:value[e].TarifaXAdulto,
-                  TarifaXNino:value[e].TarifaXNino,
-                  Dias:value[e].Dias,
-                  Estado:value[e].Estado==true ? 'Activa' : 'No Activa'
-              }
-              this.tarifaRackArr.push(tarifario)
-          }
-        
-          }
-        }
-
-      },
-      (error)=>{
-
-      })
-  }
 
   preventCloseOnClickOut() {
     this.overlayContainer.getContainerElement().classList.add('disable-backdrop-click');
@@ -198,14 +162,37 @@ export class SpecialRatesComponent implements OnInit{
     this.overlayContainer.getContainerElement().classList.remove('disable-backdrop-click');
   }
 
-  getHabitaciones(){
-    const sb = this.habitacionService.getAll().subscribe(
-      (res)=>{
-        this.cuartosArray=res
-      },
-      (error)=>{
+  async getHabitaciones(refreshTable:boolean){
 
-      })
+    if(refreshTable){
+      this._habitacionService.getAll().pipe(
+        takeUntil(this.ngUnsubscribe)).subscribe({
+          next:(val:Habitacion[])=>{
+            this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
+        }
+      });
+    }
+
+    const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("Rooms");
+    if(roomsCodesIndexDB){
+      if(roomsCodesIndexDB.length !== 0){
+        this._habitacionService.setcurrentHabitacionValue = roomsCodesIndexDB
+        this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
+      }else{
+        this._habitacionService.getAll().pipe(
+          takeUntil(this.ngUnsubscribe)).subscribe(
+          (val:Habitacion[])=>{
+            this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
+        })
+      }
+    }else
+    {
+       this._habitacionService.getAll().pipe(
+        takeUntil(this.ngUnsubscribe)).subscribe(
+        (val:Habitacion[])=>{
+          this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
+      });
+    }
   }
 
   aplicaDescuento(){
@@ -235,29 +222,20 @@ export class SpecialRatesComponent implements OnInit{
   }
 
   //Date Helpers
-  getCodigosCuarto()
+  async getCodigosCuarto(refresh:boolean)
   {
-    this.codigoCuarto=[]
-    const sb = this.habitacionService.getCodigohabitaciones()
-    .pipe(map(
-      (responseData)=>{
-        const postArray = []
-        for(const key in responseData)
-        {
-          if(responseData.hasOwnProperty(key))
-          postArray.push(responseData[key]);
-        }
-        return postArray
-      }))
-      .subscribe((codigoCuarto: any)=>{
-        this.codigoCuarto=(codigoCuarto)
-        for(let i=0;i<codigoCuarto.length;i++){
-          this.disponiblesIndexadosCamas.push({key:i,value:codigoCuarto[i]})
-        }
-      })
-      this.subscription.push(sb)
-  }
+    const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("Rooms");
 
+    this.codigoCuarto = roomsCodesIndexDB.filter((value, index, self) =>
+      index === self.findIndex((t) => (
+        t.Codigo === value.Codigo
+      ))
+    )
+    for(let i=0;i<this.codigoCuarto.length;i++){
+      this.disponiblesIndexadosCamas.push({key:i,value:this.codigoCuarto[i].Codigo})
+    }
+
+  }
 
 
   fechaSeleccionadaInicial(event:NgbDate){

@@ -3,13 +3,12 @@
     <div class="card-header">
       <div class="card-title ">
         <h3 class="card-label">Tipos de Habitación</h3>
-        <ng-container *ngIf="reloading===true" >
-          <button  style="height: 2.5em; width: 2.5em;" class="btn btn-secondary"><div class="lds-ring"><div></div><div></div><div></div><div></div></div></button>
-        </ng-container>
-        <ng-container *ngIf="reloading===false">
-          <!--(click)="getHabitaciones(true)" -->
-          <button class="btn btn-secondary"><i aria-hidden="true" class="ki ki-reload"></i></button>
-        </ng-container>
+          <a>  
+            <span (click)="getHabitaciones(true)"
+            class="svg-icon svg-icon-md svg-icon-danger">
+            <i class="fa-solid fa-refresh"></i>
+          </span>
+        </a>        
         <button style="position: absolute; right: 0px; margin: 10px;" class="btn btn-primary" (click)="altaDehabitacion()">Agregar Nueva Habitación</button>
       </div>
     </div> 
@@ -74,16 +73,22 @@
 
             <tr class="mat-row" *matNoDataRow>
               <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayedColumns.length">
-                NO DATA
+                NO ROOMS
               </td>
             </tr>
           </table>
+          <!-- <mat-card *ngIf="isLoading" style="display: flex; justify-content: center; align-items: center">
+            <mat-progress-spinner 
+              color="primary" 
+              mode="indeterminate">
+            </mat-progress-spinner>
+          </mat-card> -->
 
           <mat-paginator [pageSizeOptions]="[5, 10, 25, 50]" aria-label="Select page of users"></mat-paginator>
         </div>
       </div>
   </div>
   
-  <ng-container *ngIf="isLoading">
+  <ng-container *ngIf="isLoading || reloading">
     <app-loader-spinner></app-loader-spinner>
   </ng-container>

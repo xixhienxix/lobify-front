@@ -29,14 +29,17 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
   private currentHabitacion$=new BehaviorSubject<Habitacion[]>([]);
   private currentHabitacionSubject =new Subject<any>();
 
+  private currentCodigosCaurto$=new BehaviorSubject<Habitacion[]>([]);
+  private currentCodigosCuartoSubject =new Subject<any>();
+
   API_URL_MAIN = `${environment.apiUrl}`
-  currentCodigosCuartoSubject: BehaviorSubject<codigosCuarto>;
+  // currentCodigosCuartoSubject: BehaviorSubject<codigosCuarto>;
 
 
   constructor(@Inject(HttpClient) http: any,
    ) { 
     super(http);
-    this.currentCodigosCuartoSubject = new BehaviorSubject<codigosCuarto>(DEFAUL_CODIGOS);
+    // this.currentCodigosCuartoSubject = new BehaviorSubject<codigosCuarto>(DEFAUL_CODIGOS);
   }
 
   async writeIndexDB(propertyName: string, propertyValue: any): Promise<void> {
@@ -62,30 +65,27 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
   }
 
   set setcurrentHabitacionValue(habitacion: any) {
-    // this.currentHabitacion$.next(this.currentHabitacion$.getValue().concat(Habitacion))
-    // this.sendCustomFormNotification(true);
     this.currentHabitacion$.next(habitacion);
-    this.sendCustomFormNotification(true);
   }
 
-  async sendCustomFormNotification(flag:boolean){
-    const deleted = await this.deleteIndexDB("RoomCodes");
-    const re_created = await this.writeIndexDB("RoomCodes",this.getcurrentHabitacionValue.getValue());
+  get getcurrentCodigosCuartoValue(){
+    return this.currentCodigosCaurto$;
+  }
 
-    this.currentHabitacionSubject.next(flag)
+  set setcurrentCodigosCuartoValue(habitacion: any) {
+    this.currentCodigosCuartoSubject.next(habitacion);
+  }
+
+  async sendCustomFormNotification(nuevoDatoAgregado:boolean){
+    if(nuevoDatoAgregado=true){
+      const deleted = await this.deleteIndexDB("Rooms");
+      this.currentHabitacionSubject.next(true)
+    }
   };
+
   getcustomFormNotification() {
     return this.currentHabitacionSubject.asObservable();
   }
-
-  // get getcurrentCodigosValue(): Habitacion[] {
-  //   return this.currentCodigosCuartoSubject.value;
-  // }
-
-  // set setcurrentCodigosValue(user: Habitacion[]) {
-  //   this.currentCodigosCuartoSubject.next(user);
-  // }
-
 
    getAll() :Observable<Habitacion[]> {
     return this.http
@@ -98,7 +98,7 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
            if(responseData.hasOwnProperty(key))
            postArray.push(responseData[key]);
           }
-          this.writeIndexDB("RoomCodes",responseData);
+          this.writeIndexDB("Rooms",responseData);
           this.setcurrentHabitacionValue = responseData 
 
           return responseData

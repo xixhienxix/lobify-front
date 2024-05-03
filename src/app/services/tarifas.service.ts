@@ -48,14 +48,16 @@ export class TarifasService {
   API_URL = `${environment.apiUrl}/tarifario/Tarifas`;
   private ngUnsubscribe = new Subject<void>();
   /*Oservables*/
-  TarifasUpdate$: Observable<Tarifas>;
-  private currentTarifas$=new BehaviorSubject<Tarifas>(DEFAULT_TARIFA);
+  TarifasUpdate$: Observable<Tarifas[]>;
+  private currentTarifas$=new BehaviorSubject<Tarifas[]>([]);
+  private currentTarifasSubject =new Subject<any>();
+
   private subject =new Subject<any>();
 
   constructor(private http: HttpClient) {
     this.TarifasUpdate$=this.currentTarifas$.asObservable();
-
   }
+
   sendNotification(value:any)
   {
       this.subject.next({text:value});
@@ -65,12 +67,14 @@ export class TarifasService {
       return this.subject.asObservable();
   }
 
-  get getCurrentTarifasValue(): Tarifas {
-    return this.currentTarifas$.value;
+  get getCurrentTarifasValue() {
+    return this.currentTarifas$;
   }
 
-  set setCurrentTarifasValue(Tarifas: Tarifas) {
+  set setCurrentTarifasValue(Tarifas: any) {
     this.currentTarifas$.next(Tarifas);
+    this.sendCustomFormNotification(true);
+
   }
 
   async writeIndexDB(propertyName: string, propertyValue: any): Promise<void> {
@@ -91,12 +95,21 @@ export class TarifasService {
       }
   }
 
+  async sendCustomFormNotification(flag:boolean){
+    const deleted = await this.deleteIndexDB("Rates");
+    this.getAll();
+    this.currentTarifasSubject.next(flag)
+
+  }
+
+
   getAll() :Observable<Tarifas[]> {
     return this.http
      .get<Tarifas[]>(environment.apiUrl + '/tarifario/tarifas')
      .pipe(
        map(responseData=>{
         this.writeIndexDB("Rates",responseData);
+        this.setCurrentTarifasValue = responseData 
         return responseData
      })
      )
@@ -152,18 +165,16 @@ export class TarifasService {
     .post(environment.apiUrl+'/tarifario/actualiza/tarifas',{codigo:codigo,numero:numero,llegada:llegada,salida:salida})
   }
 
-  deleteTarifas(tarifa:Tarifas){
+  // deleteTarifas(tarifa:Tarifas){
+  //   return this.http.post(environment.apiUrl+'/tarifas/rack/delete',{tarifa}).pipe(
+  //     map((data=>{
+  //       this.sendNotification(true);
+  //       }
+  //   )));
+  // }
 
-
-    return this.http.post(environment.apiUrl+'/tarifas/rack/delete',{tarifa}).pipe(
-      map((data=>{
-        this.sendNotification(true);
-        }
-    )));
-  }
-
-  deleteTarifaEspecial(tarifa:Tarifas){
-    return this.http.post(environment.apiUrl+'/tarifas/especial/delete',{tarifa}).pipe(
+  deleteTarifaEspecial(tarifa:string){
+    return this.http.delete(environment.apiUrl+'/tarifas/especial/delete/'+tarifa,).pipe(
       map((data=>{
         this.sendNotification(true);
         }

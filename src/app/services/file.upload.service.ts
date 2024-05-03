@@ -38,6 +38,8 @@ private basePath = '/uploads';
   }
 
   private saveFileData(fileUpload: FileUpload): void {
+    fileUpload.key = fileUpload.name.split('.')[0]
+    fileUpload.hotel = localStorage.getItem("HOTEL") || '';
     this.db.list(this.basePath).push(fileUpload);
   }
 

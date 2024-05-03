@@ -104,6 +104,7 @@ export class NewRoomComponent implements OnInit, OnDestroy{
 
   /**Subscription */
   private ngUnsubscribe = new Subject<void>();
+  subscriptions:Subscription[]=[]
 
   constructor(
     public fb : FormBuilder,
@@ -115,12 +116,14 @@ export class NewRoomComponent implements OnInit, OnDestroy{
     public _tarifasService:TarifasService,
     public _parametrosService:ParametrosService,
     private af :AngularFireStorage
+
+
   ) {
 
   }
 
   ngOnInit(): void {
-  this.getCodigos();
+  this.getCodigos(false);
   // this.checkEdicion();
 
     this.formGroup = this.fb.group({
@@ -135,7 +138,6 @@ export class NewRoomComponent implements OnInit, OnDestroy{
       nombreHabs: this.fb.array([]),
       tarifaBase:[0,Validators.required],
       etiqueta:[0,Validators.required],
-
     })
 
     this.inputForm = this.fb.group({
@@ -164,7 +166,6 @@ export class NewRoomComponent implements OnInit, OnDestroy{
       this.resultLocation.push(...this.habitacion.Amenidades);
       this.resultLocationCamas.push(...this.habitacion.Tipos_Camas);
     }
-    console.log("hol");
   };
 
   get inputs() {
@@ -175,25 +176,54 @@ export class NewRoomComponent implements OnInit, OnDestroy{
   }
 
 
-  getCodigos(){
-    this._codigosService.getAll()
+  async getCodigos(flag:boolean){
+
+    const roomsCodesIndexDB:Codigos[] = await this._codigosService.readIndexDB("Codes");
+
+    if(roomsCodesIndexDB){
+      if(roomsCodesIndexDB.length !== 0){
+        this._codigosService.setcurrentCodigosValue = roomsCodesIndexDB
+        this.constructCodesArray(roomsCodesIndexDB);
+
+      }else{
+        const sb = this._codigosService.getAll()
+        .pipe(
+          filter(array => array.length > 0),
+          map(results => results.filter(r => r.Tipo ==='HAB' || r.Tipo === 'AME' || r.Tipo === 'CAMA')),
+          takeUntil(this.ngUnsubscribe))
+          .subscribe((val)=>{
+            this.constructCodesArray(val);
+      })
+        this.subscriptions.push(sb)
+      }
+    }else
+    {
+      const sb = this._codigosService.getAll()
       .pipe(
         filter(array => array.length > 0),
         map(results => results.filter(r => r.Tipo ==='HAB' || r.Tipo === 'AME' || r.Tipo === 'CAMA')),
         takeUntil(this.ngUnsubscribe))
         .subscribe((val)=>{
-          this.tiposArr= val.filter(hab=> hab.Tipo === 'HAB');
-          this.amenidadesArr = val.filter(hab=> hab.Tipo === 'AME')
-          this.camasArr = val.filter(hab=> hab.Tipo === 'CAMA')
-
-          for(let i=0;i<this.amenidadesArr.length;i++){
-            this.disponiblesIndexados.push({key:i,value:this.amenidadesArr[i].Descripcion})
-          }
-          for(let i=0;i<this.camasArr.length;i++){
-            this.disponiblesIndexadosCamas.push({key:i,value:this.camasArr[i].Descripcion,cantidad:1})
-          }
-          this.checkEdicion();
+          this.constructCodesArray(val)
     })
+      this.subscriptions.push(sb)
+    }
+
+  }
+
+  constructCodesArray(val:Codigos[]){
+    this.tiposArr= val.filter(hab=> hab.Tipo === 'HAB');
+            this.amenidadesArr = val.filter(hab=> hab.Tipo === 'AME')
+            this.camasArr = val.filter(hab=> hab.Tipo === 'CAMA')
+  
+            for(let i=0;i<this.amenidadesArr.length;i++){
+              this.disponiblesIndexados.push({key:i,value:this.amenidadesArr[i].Descripcion})
+            }
+            for(let i=0;i<this.camasArr.length;i++){
+              this.disponiblesIndexadosCamas.push({key:i,value:this.camasArr[i].Descripcion,cantidad:1})
+            }
+            this.checkEdicion();
+            this._codigosService.setcurrentCodigosValue = val
   }
 
   camasValue(selected:any){
@@ -261,13 +291,19 @@ export class NewRoomComponent implements OnInit, OnDestroy{
     this.inicio=false
     const codigoHab = this.formGroup.value.nombre.replace(' ', '_')
 
-    if(this.formGroup.invalid){
+    if(this.formGroup.invalid || this.resultLocation.length === 0 || this.resultLocation.length === 0){
+      if(this.resultLocation.length === 0 ){
+        this.amenidadesFC.markAsUntouched();
+      }
+      if(this.resultLocationCamas.length === 0){
+        this.camasFC.markAllAsTouched();
+      }
       this.findInvalidControls()
       Object.keys(this.formGroup.controls).forEach(key => {
         this.formGroup.controls[key].markAsDirty();
       });
       return
-    }
+    }else {
     this.isLoading=true
 
     let conteoCamas=0;
@@ -340,15 +376,12 @@ export class NewRoomComponent implements OnInit, OnDestroy{
       }
     }
   }
-  
-  let fromDate = this.fromDate.day+"/"+this.fromDate.month+"/"+this.fromDate.year
-  let toDate = this.toDate.day+"/"+this.toDate.month+"/"+this.toDate.plus({ years: 1 });
 
   let tarifa : Tarifas= {
     Tarifa:'Tarifa Estandar',
     Habitacion:codigoHab,
     Llegada:new Date(),
-    Salida:new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+    Salida:new Date(new Date().setFullYear(new Date().getFullYear() + 99)),
     Plan:'Ninguno',
     Politicas:'Ninguno',
     Adultos:1,
@@ -370,6 +403,7 @@ export class NewRoomComponent implements OnInit, OnDestroy{
       {name:'Dom', value:6, checked:true}
     ]
   }
+    let promptFLag=false;
     const request1 = this.habitacionService.postHabitacion(habitacionNueva,this.editarHab,this.formGroup.value.image); 
     const request3 = this._tarifasService.postTarifa(tarifa)
     //concat(request1,request2,request3).pipe(
@@ -377,48 +411,26 @@ export class NewRoomComponent implements OnInit, OnDestroy{
       takeUntil(this.ngUnsubscribe))
       .subscribe({
         next: (val)=>{
+          if(!promptFLag){
+            this.promptMessage('Exito','Habitación(es) Generadas con éxito')
+            promptFLag=true;
+          }
             this.habitacionGenerada = true
-            this.mensajeDeHabitacionGenerada='Habitación(es) Generadas con éxito'
-
-            const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-            this.isLoading=false
-            modalRef.componentInstance.alertHeader = 'Exito'
-            modalRef.componentInstance.mensaje=this.mensajeDeHabitacionGenerada
-            modalRef.result.then((result) => {
-              this.closeResult = `Closed with: ${result}`;
-              }, (reason) => {
-                  this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-              });
-              setTimeout(() => {
-                modalRef.close('Close click');
-              },14000)
                 this.modal.close()
-
+                this.habitacionService.sendCustomFormNotification(true)
                 this.sendUpload=true
         },
         error: (error) =>{
             this.isLoading=false
-
-                this.habitacionGenerada = false
-                this.mensajeDeHabitacionGenerada='No se pudo guardar la habitación intente de nuevo mas tarde'
-                const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-                modalRef.componentInstance.alertHeader = 'Error'
-                modalRef.componentInstance.mensaje=this.mensajeDeHabitacionGenerada
-                modalRef.result.then((result) => {
-                  this.closeResult = `Closed with: ${result}`;
-                  }, (reason) => {
-                      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-                  });
-                  setTimeout(() => {
-                    modalRef.close('Close click');
-                  },14000)
+            if(!promptFLag){
+              this.promptMessage('Error','No se pudo guardar la habitación intente de nuevo mas tarde');
+              promptFLag=true;
+            }
                       
         }
       })  
+    }
   }
-
-
-
 
   public findInvalidControls() {
     const invalid = [];
@@ -516,6 +528,26 @@ export class NewRoomComponent implements OnInit, OnDestroy{
       } else {
           return  `with: ${reason}`;
       }
+    }
+
+    promptMessage(header:string,message:string, obj?:any){
+      const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+      modalRef.componentInstance.alertHeader = header
+      modalRef.componentInstance.mensaje= message    
+      modalRef.result.then((result) => {
+        if(result=='Aceptar')        
+        {
+          // this.deleteTarifaRackEspecial(element)
+          // this.tarifaEspecialArray=[]
+        } 
+        this.closeResult = `Closed with: ${result}`;
+        }, (reason) => {
+            this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+        });
+        setTimeout(() => {
+          modalRef.close('Close click');
+        },4000)
+        return
     }
 
     imageSelectedFunc(){

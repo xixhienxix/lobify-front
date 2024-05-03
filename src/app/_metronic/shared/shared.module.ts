@@ -31,6 +31,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { ScheduleModule, RecurrenceEditorModule, DayService, WeekService, WorkWeekService, MonthService, MonthAgendaService, TimelineMonthService } from '@syncfusion/ej2-angular-schedule'
 import { InlineSpinnerComponent } from 'src/app/services/_helpers/inlineSpinner/inline-spinner.component';
+import {MatCardModule} from '@angular/material/card';
+
 @NgModule({
   declarations: [
     KeeniconComponent,
@@ -67,7 +69,8 @@ import { InlineSpinnerComponent } from 'src/app/services/_helpers/inlineSpinner/
     MatRadioModule,
     MatInputModule,
     ScheduleModule,
-    RecurrenceEditorModule
+    RecurrenceEditorModule,
+    MatCardModule
   ],
   exports: [
     KeeniconComponent,
@@ -102,7 +105,8 @@ import { InlineSpinnerComponent } from 'src/app/services/_helpers/inlineSpinner/
     MatNativeDateModule,
     ScheduleModule,
     RecurrenceEditorModule,
-    InlineSpinnerComponent
+    InlineSpinnerComponent,
+    MatCardModule
   ],
   providers:[
     DayService,

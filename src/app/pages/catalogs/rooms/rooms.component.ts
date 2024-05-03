@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Subscription, distinctUntilChanged, distinctUntilKeyChanged, map } from 'rxjs';
+import { Subject, Subscription, distinctUntilChanged, distinctUntilKeyChanged, map, takeUntil } from 'rxjs';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { GroupingState } from 'src/app/_metronic/shared/models/grouping.model';
 import { PaginatorState } from 'src/app/_metronic/shared/models/paginator.model';
@@ -10,7 +10,6 @@ import { Habitacion } from 'src/app/models/habitaciones.model';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { NewRoomComponent } from './components/new-room/new-room.component';
 import { FileUploadService } from 'src/app/services/file.upload.service';
-import localforage from 'localforage';
 interface roomTable {
   Codigo:string,
   Tipo:string,
@@ -37,6 +36,8 @@ export class RoomsComponent implements OnInit{
   subscriptions:Subscription[]=[]
   habitacionesporCodigo:Habitacion[]=[]
   habitacionesArr:any[]=[]
+  private ngUnsubscribe = new Subject<void>();
+
 
     //Filters
     paginator: PaginatorState;
@@ -58,8 +59,14 @@ export class RoomsComponent implements OnInit{
     public uploadService : FileUploadService,
     ){
       this._habitacionService.getcustomFormNotification().subscribe({
-        next: (val)=>{
-          this.buildDataSource(this._habitacionService.getcurrentHabitacionValue.getValue())
+        next: async (val)=>{
+          // if(val){
+          //   this.promptMessage('Exito','Habitación(es) Generadas con éxito')
+          // }
+          // if(!val){
+          //   this.promptMessage('Error','No se pudo guardar la habitación intente de nuevo mas tarde')
+          // }
+          this.getHabitaciones(false)
         },
         error: (error)=>{
 
@@ -80,31 +87,38 @@ export class RoomsComponent implements OnInit{
     this.isLoading=false;
   }
 
-  async getHabitaciones(reloading:boolean){
+  async getHabitaciones(refreshTable:boolean){
+
+    let dataSourceBS
+    if(refreshTable){
+      this.getAllRoomsEndPoint();
+    }
+
+    const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("Rooms");
+    if(roomsCodesIndexDB){
+      if(roomsCodesIndexDB.length !== 0){
+        this._habitacionService.setcurrentHabitacionValue = roomsCodesIndexDB
+        dataSourceBS = this._habitacionService.getcurrentHabitacionValue.getValue()
+        this.buildDataSource(dataSourceBS);
+      }else{
+        this.getAllRoomsEndPoint();
+      }
+    }else
+    {
+       this.getAllRoomsEndPoint();
+    }
+  }
+
+  getAllRoomsEndPoint(){
     let dataSourceBS
 
-    if(!reloading)
-    {
-      // this.blockedTabled=true //
-    }
-    if(reloading){
-      this.reloading=true
-    }
-
-    const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("RoomCodes");
-    if(roomsCodesIndexDB){
-      this._habitacionService.setcurrentHabitacionValue = roomsCodesIndexDB
-      dataSourceBS = this._habitacionService.getcurrentHabitacionValue.getValue()
-      this.buildDataSource(dataSourceBS);
-    } else 
-    {
-      const sb  =  this._habitacionService.getAll().subscribe(
-        (val:Habitacion[])=>{
+    this._habitacionService.getAll().pipe(
+      takeUntil(this.ngUnsubscribe)).subscribe({
+        next:(val:Habitacion[])=>{
           dataSourceBS = this._habitacionService.getcurrentHabitacionValue.getValue()
           this.buildDataSource(dataSourceBS);
-      })
-      this.subscriptions.push(sb)
-    }
+      }
+    });
   }
 
   buildDataSource(data:Habitacion[]){
@@ -121,6 +135,9 @@ export class RoomsComponent implements OnInit{
           .map(({_id, Amenidades, Tipos_Camas, Numero, Descripcion, Vista, Camas, Tarifa, Orden, hotel, Ninos, URL, ...keepAttrs}) => keepAttrs)
 
         this.dataSource.data = newArray
+
+      this.reloading=false;
+      this.isLoading=false
   }
 
   add(habitacion:roomTable){
@@ -146,48 +163,18 @@ export class RoomsComponent implements OnInit{
       next:async (data)=>{
         if(data!=0 && data!= null)
           {
-            const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-            modalRef.componentInstance.alertsHeader='Error'
-            modalRef.componentInstance.mensaje= "Aun existen huespedes asignados a este codigo de cuarto, cambie el tipo de cuarto de los huespedes y vuelva a intentarlo"
-            modalRef.result.then((result) => {
-            this.habitacionesArr=[]
-            this.closeResult = `Closed with: ${result}`;
-            }, (reason) => {
-                this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-            }); 
+            this.promptMessage('Error','Aun existen huespedes asignados a este codigo de cuarto, cambie el tipo de cuarto de los huespedes y vuelva a intentarlo')
+            this.isLoading=false
           }
         else {
-
-          let newDataSubject = this._habitacionService.getcurrentHabitacionValue.getValue();
-          newDataSubject = newDataSubject.filter(roomCodes => roomCodes.Codigo !== habitacion.Codigo);
-          this._habitacionService.setcurrentHabitacionValue = newDataSubject
-
-          // const deleted = await this._habitacionService.deleteIndexDB("RoomCodes");
-          // const re_created = await this._habitacionService.writeIndexDB("RoomCodes",newDataSubject)
-          this.buildDataSource(newDataSubject);
-
-          const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-            modalRef.componentInstance.alertsHeader='Error'
-            modalRef.componentInstance.mensaje= "Habitacion eliminada con exito"
-            modalRef.result.then((result) => {
-            this.habitacionesArr=[]
-            this.closeResult = `Closed with: ${result}`;
-            }, (reason) => {
-                this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-            }); 
+          this._habitacionService.sendCustomFormNotification(true);
+          this.promptMessage('Exito','Habitacion eliminada con exito' )
         }
-        
       },
       error:(error)=>{
-        const modalRef = this.modalService.open(AlertsComponent,{ size: 'md', backdrop:'static' })
-            modalRef.componentInstance.alertsHeader='Error'
-            modalRef.componentInstance.mensaje='No se pudo eliminar la habitacion intente de nuevo'
-            modalRef.result.then((result) => {
-            this.habitacionesArr=[]
-            this.closeResult = `Closed with: ${result}`;
-            }, (reason) => {
-                this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-            }); 
+        this.isLoading=false
+        this.promptMessage('Error','No se pudo eliminar la habitacion intente de nuevo')
+
       },
       complete:()=>{
         this.isLoading=false
@@ -216,6 +203,26 @@ export class RoomsComponent implements OnInit{
         this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
 
+  }
+
+  promptMessage(header:string,message:string, obj?:any){
+    const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+    modalRef.componentInstance.alertHeader = header
+    modalRef.componentInstance.mensaje= message    
+    modalRef.result.then((result) => {
+      if(result=='Aceptar')        
+      {
+        // this.deleteTarifaRackEspecial(element)
+        // this.tarifaEspecialArray=[]
+      } 
+      this.closeResult = `Closed with: ${result}`;
+      }, (reason) => {
+          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      });
+      setTimeout(() => {
+        modalRef.close('Close click');
+      },4000)
+      return
   }
 
   getImagenesHabitaciones(){

@@ -8,6 +8,8 @@ export class AuthInterceptor implements HttpInterceptor {
         const authToken = localStorage.getItem("ACCESS_TOKEN") || '';
         const hotel = localStorage.getItem("HOTEL") || '';
 
+        
+
         if(authToken){
 
             const cloned = req.clone({

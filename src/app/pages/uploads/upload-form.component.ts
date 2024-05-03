@@ -58,7 +58,7 @@ export class UploadFormComponent implements OnInit, OnChanges {
 
   upload(): void {
 
-    this.selectedFiles = new FileList;
+    // this.selectedFiles = new FileList;
 
     this.currentFileUpload = new FileUpload(this.myRenamedFile);
     this.uploadService.pushFileToStorage(this.currentFileUpload).subscribe(
