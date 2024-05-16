@@ -4,7 +4,7 @@
 
 [data-kt-app-layout="dark-sidebar"] {
     .app-sidebar {
-        background-color: $app-sidebar-dark-bg-color;
+        background-color: var(--background-pink);
         border-right: 0;
 
         .scroll-y,
@@ -36,7 +36,7 @@
                 }
 
                 @include menu-link-default-state( 
-                    $title-color: $gray-700-dark, 
+                    $title-color: $gray-900-dark, 
                     $icon-color:  $gray-400-dark, 
                     $bullet-color:$gray-400-dark,  
                     $arrow-color: $gray-400-dark,  

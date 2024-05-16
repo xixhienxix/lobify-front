@@ -1,9 +1,26 @@
 <div class="control-section">
   <div class="col-lg-12 content-wrapper">
+    <mat-select
+      class="form-control form-control-lg "
+      placeholder="-- Choose DayInterval to display -- "
+      [(value)]='scheduleinterval'
+      (change)="onChange($event)"
+      >
+    <mat-option value="0">-- Choose DayInterval to display --</mat-option>
+        <mat-option *ngFor="let tipoCuarto of datas" [value]="tipoCuarto">{{tipoCuarto}} </mat-option>
+    </mat-select>
+    <ejs-dropdownlist  id="scheduleview" [dataSource]='datas' [(value)]='scheduleinterval'(change)="onChange($event)" >
+    </ejs-dropdownlist>
+
     <ejs-schedule cssClass='timeline-resource-grouping' #scheduleObj width='100%' cssClass='timeline-resource-grouping' height='500px'
       [selectedDate]="selectedDate" [group]="group" [workDays]="workDays" [eventSettings]="eventSettings" [timeScale]="timeScale" 
-      [rowAutoHeight]="rowAutoHeight" [currentView]="currentView" (actionComplete)="onActionComplete($event)" (renderCell)="onRenderCell($event)"
-      (dataBound)="onDataBound($event)">
+      [rowAutoHeight]="rowAutoHeight" [currentView]="currentView" 
+      (actionComplete)="onActionComplete($event)" 
+      (renderCell)="onRenderCell($event)"
+      (dataBound)="onDataBound($event)"
+      (popupOpen)="onPopupOpen($event)"
+      (dragStart)="onDragStart($event)"
+      >
       <ng-template #dateHeaderTemplate let-data>
         <div class="date-text"></div>
         <div [innerHTML]="getDateHeaderText(data.date)"></div>
@@ -40,8 +57,10 @@
       <e-view option="TimelineWorkWeek"></e-view>
       <e-view option="TimelineMonth"></e-view>
       <e-view option="Agenda"></e-view>
-      
     </e-views>
+    <!-- <ng-template #editorTemplate let-data>
+      <app-nva-reservation-template [data]="data"></app-nva-reservation-template>
+    </ng-template> -->
     </ejs-schedule>
   </div>
 </div>

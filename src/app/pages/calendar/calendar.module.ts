@@ -18,10 +18,11 @@ import { ScheduleAllModule, RecurrenceEditorAllModule } from '@syncfusion/ej2-an
 import { DropDownButtonAllModule } from '@syncfusion/ej2-angular-splitbuttons';
 import { ReactiveFormsModule } from '@angular/forms';
 import { NvaReservaComponent } from './components/nva-reserva/nva-reserva.component';
+import { NvaReservationTemplateComponent } from './components/content/templates/nva-reservation-template/nva-reservation-template.component';
 
 
 @NgModule({
-  declarations: [CalendarComponent, HeaderComponent, ContentComponent, FooterComponent, NvaReservaComponent],
+  declarations: [CalendarComponent, HeaderComponent, ContentComponent, FooterComponent, NvaReservaComponent, NvaReservationTemplateComponent],
   imports: [
     TranslateModule,
     CommonModule,

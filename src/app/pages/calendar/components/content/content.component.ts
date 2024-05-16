@@ -3,14 +3,26 @@ import { Component, Inject, Input, OnInit, ViewChild, ViewEncapsulation } from '
 import { extend,Internationalization } from '@syncfusion/ej2-base';
 import { ChangeEventArgs } from '@syncfusion/ej2-buttons';
 import {
-  ScheduleComponent, DragAndDropService, TimelineViewsService, GroupModel, EventSettingsModel, ResizeService, View, TimelineMonthService, WorkHoursModel, RenderCellEventArgs, TimeScaleModel, ActionEventArgs
+  ScheduleComponent, DragAndDropService, TimelineViewsService, GroupModel, EventSettingsModel, ResizeService, View, TimelineMonthService, WorkHoursModel, RenderCellEventArgs, TimeScaleModel, ActionEventArgs,
+  DragEventArgs
 } from '@syncfusion/ej2-angular-schedule';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { DataManager, UrlAdaptor } from '@syncfusion/ej2-data';
 import { environment } from 'src/environments/environment';
 import { ActivatedRoute } from '@angular/router';
 import { Habitacion } from 'src/app/models/habitaciones.model';
+import { L10n } from '@syncfusion/ej2-base';
 
+L10n.load({
+  'en-US': {
+      'schedule': {
+          'saveButton': 'Save',
+          'cancelButton': 'Close',
+          'deleteButton': 'Remove',
+          'newEvent': 'New Reservation',
+      },
+  }
+});
 @Component({
     selector      : 'app-content',
     templateUrl   : './content.component.html',
@@ -21,8 +33,7 @@ import { Habitacion } from 'src/app/models/habitaciones.model';
 
 export class ContentComponent implements OnInit{
   @ViewChild("scheduleObj") public scheduleObj: ScheduleComponent;
-
-  public selectedDate: Date = new Date(2024,2,28);
+  public selectedDate: Date = new Date();
   public timeScale: TimeScaleModel = { enable: true, interval: 1440, slotCount: 1 };
   /**
    * Used to Set how many days displays on the Scheduler in one view
@@ -48,6 +59,15 @@ export class ContentComponent implements OnInit{
   getDateHeaderText: Function = (value: Date) => {
       return this.instance.formatDate(value, { skeleton: 'MMMd' });
   };
+  /**
+   *Date interval for Scheduler
+   *
+   * @type {number[]}
+   * @memberof ContentComponent
+   */
+  public datas: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+  public scheduleinterval = 5;
+
 
   public rowAutoHeight = true;
   public currentView: View = 'TimelineDay';
@@ -100,6 +120,7 @@ export class ContentComponent implements OnInit{
 
   constructor(private _roomsService: HabitacionesService,
     private activatedRoute: ActivatedRoute) {
+
     this.activatedRoute.data.subscribe((val) => {
       console.log("ROUTER DATA:-----> ",val.data);
       this.createRack(val.data);
@@ -130,7 +151,7 @@ export class ContentComponent implements OnInit{
         {  
           for(let x=0; x<tipoArray.length; x++){
             if(tipoArray[x].text === responseData[key].Tipo){
-              codigoArray.push({ text: responseData[key].Codigo + " - " + responseData[key].Numero + " - " + responseData[key].Adultos + ' + ' + responseData[key].Ninos , id:parseInt(key+1), groupId: tipoArray[x].id, color: tipoArray[x].color}); 
+              codigoArray.push({ text: responseData[key].Codigo + " - " + responseData[key].Numero , id:parseInt(key+1), groupId: tipoArray[x].id, color: tipoArray[x].color}); 
             }
           }
         }
@@ -141,6 +162,10 @@ export class ContentComponent implements OnInit{
 
   onChange(args: ChangeEventArgs|any): void {
     this.scheduleObj.rowAutoHeight = args.checked;
+
+    //Used Change Day Vie Interval Dynamicaly with dropdown
+    (this.scheduleObj.views[0] as any).interval = this.scheduleinterval;
+    this.scheduleObj.refresh();
   }
 
   // public onRenderCell(args: RenderCellEventArgs): void {
@@ -155,6 +180,34 @@ export class ContentComponent implements OnInit{
   //     target.innerHTML = '<div class="name">Rooms</div><div class="type">Type</div><div class="capacity">Capacity</div>';
   //   }
   // }
+
+  /**
+   * Event that triggers when popup add event window triggers, and lets you interact with popup
+   * @param args This functions is to fill the dropdown of Time that appears whenever yo create or modifiy and existing reservation
+   */
+  onPopupOpen = (args:any) => {
+    // if (args.type === 'Editor') {
+    //   args.duration = 60;
+    // }
+    if (args.type === 'Editor' && !args.target?.classList.contains("e-appointment")) {
+      args.duration = 300;
+     // Set the start time to 9:00 AM
+     const startTime = new Date(args.data.StartTime);
+     startTime.setHours(9);
+     (args.element as any).querySelector('.e-start').ej2_instances[0].value =
+       startTime;
+   }
+  }
+  /**
+   * This function shows how to move a reservation in an estimated time of minutes, the interval parameter determines how many in how many minutes the event will be moved when you drag it across the calendar
+   *
+   * @param {DragEventArgs} args
+   * @memberof ContentComponent
+   */
+  onDragStart(args: DragEventArgs): void {
+    args.interval = 30;
+  }
+  
 
   onRenderCell(args: RenderCellEventArgs): void {
     console.log("")
@@ -204,6 +257,9 @@ onDataBound(event:any){
     this.applyStylesToCells(workCells, selectedDate);
     const headerCells = this.scheduleObj.element.querySelectorAll('.e-date-header-wrap .e-header-cells');
     this.applyStylesToCells(headerCells, selectedDate);
+  }
+  if(args.requestType === 'eventCreated'){
+    args.data
   }
 
 }

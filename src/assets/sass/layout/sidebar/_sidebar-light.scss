@@ -4,7 +4,7 @@
 
 [data-kt-app-layout="light-sidebar"] {
     .app-sidebar {
-        background-color: var(--#{$prefix}app-sidebar-light-bg-color);
+        background-color: var(--background-pink);
         border-right: 1px solid var(--#{$prefix}gray-200);
 
         .scroll-y,
