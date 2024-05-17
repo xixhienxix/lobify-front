@@ -1,5 +1,6 @@
 export interface Foliador
 {
-  Folio:number,
+  Folio:string,
   Letra:string;
+  hotel?:string;
 }

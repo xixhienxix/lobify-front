@@ -1,12 +1,12 @@
 <div class="modal-content">
-    <div style="background-color: #00506a;" class="modal-header">
+    <div style="background-color: var(--deep-red-background);" class="modal-header">
       <div style="text-align: center; color: white;" class="text-center modal-title h4 col-10"
         id="example-modal-sizes-title-lg">
         NUEVA RESERVA
         <!-- <label>
           {{huesped.folio}}</label> -->
       </div>
-      <button style="background-color:#fa6d7c; font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
+      <button style=" background-color:#fa6d7c; font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
     </div>
 </div>
 
@@ -103,7 +103,7 @@
               </div>
             </div>
 
-            <div class="row" style="margin-right: 12px; margin-top: 5px;">
+            <div class="row" style="margin-top: 5px;">
               <label style="color:#00506a; font-weight: bold;" class="form-group col-lg-6" >Habitación </label>
               <div class="col-lg-12" style="margin-top:10px">
                 <mat-select #tipodeCuartoDropDown
@@ -113,9 +113,8 @@
                 placeholder="-- Seleccione Tipo de Habitación -- "
                 required
                 (selectionChange)="buscaDispo($event.value)"
-
                 >
-                <mat-option value="0">-- Selecciona Habitación --</mat-option>
+                    <mat-option value="0">-- Selecciona Habitación --</mat-option>
                     <mat-option value="1">Todos los Tipos de Cuartos</mat-option>
                     <mat-option *ngFor="let tipoCuarto of roomCodes" [value]="tipoCuarto">{{tipoCuarto.Codigo.replace("_"," ")}} </mat-option>
                 </mat-select>
@@ -135,32 +134,31 @@
             <ng-container *ngIf="mySet.size !==0" style="margin-top: 10px;">
               <mat-accordion [style]="accordionDisplay" class="example-headers-align" multi>
                 <mat-expansion-panel  [expanded]="step === 1"  hideToggle>
-                  <div *ngIf="maxPeopleFlag" class="row">
+                  <!-- <div *ngIf="maxPeopleFlag" class="row">
                     <br>
                       <small> <label  style="font-weight:bold">El numero de Adultos seleccionado exede la cantidad maxima de personas permitida para ste tipo de habitacion, elija otro tipo de habitacion o disminuya la cantidad de Adultos</label></small>
-                  </div>
-                    <mat-expansion-panel-header [style]="maxPeople ? styleDisponibilidad : styleDisponibilidad">
+                  </div> -->
+
+                  <!-- HEADER DEL ACCORDION DE DISPONIBILIDAD -->
+                  <mat-expansion-panel-header [style]="maxPeople ? styleDisponibilidad : styleDisponibilidad">
                     <mat-panel-title>
                       CON DISPONIBILIDAD
                     </mat-panel-title>
                     <mat-panel-description *ngIf="maxPeopleFlag">
                       <small> <label  style="font-weight:bold">El numero de Adultos seleccionado exede la cantidad maxima de personas permitida para ste tipo de habitacion</label></small>
                     </mat-panel-description> 
-                    <!-- <mat-panel-description *ngIf="bandera==true">
-                     </mat-panel-description> -->
                   </mat-expansion-panel-header>
-        
-                  <!--Contenido del Accordion-->
+                  <!-- [FIN] HEADER DEL ACCORDION DE DISPONIBILIDAD -->
+
                   <div  class="table-responsive angular-bootstrap-table">
 
-                    <!-- TITULO DE CADA ROOMTYPE DISPONIBLE MAS CAP MAX DE PERSONAS -->
-                    <!-- CUANDO EL CUARTO SOLO ES UNO-->
+                    <!-- CUANDO ES UN SOLO TIPO DE CUARTO EN CONSULTA -->
                     <ng-container *ngIf="cuarto !== '1'">
                       <ng-container *ngFor="let codigosCuarto of availavilityRooms; ">
                         <div *ngIf="codigosCuarto.Codigo==cuarto" style="font-weight:bold; color: rgba(128, 128, 128, 0.623);" class=" modal-header"><h2 style="color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2> (Cap. Max.: {{codigosCuarto.Adultos}})</div>
                       </ng-container>
 
-                      <table mat-table [dataSource]="filterRatesAray">
+                      <table mat-table [dataSource]="roomRates(cuarto)">
                         <ng-container matColumnDef="Tarifa">
                           <th mat-header-cell *matHeaderCellDef> Tarifa </th>
                           <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
@@ -168,12 +166,12 @@
                     
                         <ng-container matColumnDef="$ Promedio x Noche">
                           <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-                          <td mat-cell *matCellDef="let element"> {{element.TarifaRack}} </td>
+                          <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights)/stayNights}} </td>
                         </ng-container>
                     
                         <ng-container matColumnDef="Total">
                           <th mat-header-cell *matHeaderCellDef> Total </th>
-                          <td mat-cell *matCellDef="let element"> {{element.TarifaRack * stayNights}} </td>
+                          <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights)}} </td>
                         </ng-container>
               
                         <ng-container matColumnDef="Acciones">
@@ -187,17 +185,15 @@
                         <ng-container matColumnDef="disclaimer">
                           <td mat-footer-cell *matFooterCellDef colspan="2">
                             <h4 style="margin-top: 10px;"> Habitación:</h4>
-                            <ng-container *ngFor="let habitacionesDisponibles of mySet">
-                                <ng-container *ngFor="let tipocuarto of roomCodes">
-                                  <ng-container *ngIf="tipocuarto.Numero == habitacionesDisponibles">
+                            <ng-container *ngFor="let habitacion of roomCodesComplete">
+                              <ng-container *ngIf="habitacion.Codigo === cuarto">
                                    <div class="parcel">
                                      <ul>
-                                       <mat-checkbox  formControlName="checkbox"  #checked (change)="preAsignar(tipocuarto.Numero,tipocuarto.Codigo,checked.checked)"></mat-checkbox> &nbsp; <label style="margin-right: 7%">{{ tipocuarto.Numero }}</label>
+                                       <mat-checkbox  formControlName="checkbox"  #checked (change)="preAsignar(habitacion.Numero,habitacion.Codigo,checked.checked)"></mat-checkbox> &nbsp; <label style="margin-right: 7%">{{ habitacion.Numero }}</label>
                                      </ul>
                                    </div>
                                   </ng-container>
                                 </ng-container>
-                             </ng-container>
                           </td>
                         </ng-container>
                 
@@ -208,67 +204,272 @@
 
 
                     </ng-container>
+                    <!-- [FIN] CUANDO ES UN SOLO TIPO DE CUARTO EN CONSULTA -->
 
-
-                    
-                    <!-- FIN DE SOLO UN CUARTO -->
+                    <!-- CUANDO SE CONSULTAN TODOS LOS TIPOS DE CUARTO -->
+                    <ng-container *ngIf="cuarto === '1'">
                     <!--CUANDO SE SELECCIONARON TODOS LOS CUARTOS-->
                     <ng-container *ngFor="let codigosCuarto of availavilityRooms; ">
                       <div style="color: rgba(128, 128, 128, 0.623);" class=" modal-header"><h2 style="font-weight: bold; color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2> (Cap. Max.: {{codigosCuarto.Adultos}})</div>
+                    
+                      <ng-container *ngFor="let habs of filterRatesAray">
+                        <ng-container *ngFor="let minihabs of habs.Habitacion">
+                          <ng-container *ngIf="minihabs === codigosCuarto.Codigo">
+                            <table mat-table [dataSource]="roomRates(minihabs)">                        
+                              <ng-container matColumnDef="Tarifa">
+                                <th mat-header-cell *matHeaderCellDef> Tarifa </th>
+                                <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
+                              </ng-container>
+                          
+                              <ng-container matColumnDef="$ Promedio x Noche">
+                                <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
+                                <td mat-cell *matCellDef="let element"> {{element.TarifaRack}} </td>
+                              </ng-container>
+                          
+                              <ng-container matColumnDef="Total">
+                                <th mat-header-cell *matHeaderCellDef> Total </th>
+                                <td mat-cell *matCellDef="let element"> {{element.TarifaRack * stayNights}} </td>
+                              </ng-container>
+                    
+                              <ng-container matColumnDef="Acciones">
+                                <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                                <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element"> 
+                                  <mat-radio-button  (change)="tarifaRadioButton(element)"></mat-radio-button>   
+                                </td>
+                              </ng-container>
+        
+                              <!--Habitacion List Column-->
+                              <ng-container matColumnDef="disclaimer">
+                                <td mat-footer-cell *matFooterCellDef colspan="2">
+                                  <h4 style="margin-top: 10px;"> Habitación:</h4>
+                                  <ng-container *ngFor="let habitacion of roomCodesComplete">
+                                    <ng-container *ngIf="habitacion.Codigo === minihabs">
+                                      <div class="parcel">
+                                        <ul>
+                                          <mat-checkbox  formControlName="checkbox"  #checked (change)="preAsignar(habitacion.Numero,habitacion.Codigo,checked.checked)"></mat-checkbox> &nbsp; <label style="margin-right: 7%">{{ habitacion.Numero }}</label>
+                                        </ul>
+                                      </div>
+                                    </ng-container>
+                                  </ng-container>
+                                  <!-- <ng-container *ngFor="let habitacionesDisponibles of mySet">
+                                      <ng-container *ngFor="let tipocuarto of roomCodes">
+                                        <ng-container *ngIf="tipocuarto.Numero == habitacionesDisponibles"> -->
+                                         <!-- <div class="parcel">
+                                           <ul>
+                                             <mat-checkbox  formControlName="checkbox"  #checked (change)="preAsignar(tipocuarto.Numero,tipocuarto.Codigo,checked.checked)"></mat-checkbox> &nbsp; <label style="margin-right: 7%">{{ tipocuarto.Numero }}</label>
+                                           </ul>
+                                         </div> -->
+                                        <!-- </ng-container>
+                                      </ng-container>
+                                   </ng-container> -->
+                                </td>
+                              </ng-container>
+                      
+                              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                              <tr mat-footer-row *matFooterRowDef="['disclaimer'] sticky: true"  class="example-second-footer-row"></tr>
+                            </table>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
                     </ng-container>
                     <!-- FIN DE SELECCION DE TODOS LOS CUARTOS -->
-                    <!-- [FIN] TITULO DE CADA ROOMTYPE DISPONIBLE MAS CAP MAX DE PERSONAS -->
-
-                    <table mat-table [dataSource]="filterRatesAray">
-                      <ng-container matColumnDef="Tarifa">
-                        <th mat-header-cell *matHeaderCellDef> Tarifa </th>
-                        <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
-                      </ng-container>
-                  
-                      <ng-container matColumnDef="$ Promedio x Noche">
-                        <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-                        <td mat-cell *matCellDef="let element"> {{element.TarifaRack}} </td>
-                      </ng-container>
-                  
-                      <ng-container matColumnDef="Total">
-                        <th mat-header-cell *matHeaderCellDef> Total </th>
-                        <td mat-cell *matCellDef="let element"> {{element.TarifaRack * stayNights}} </td>
-                      </ng-container>
-            
-                      <ng-container matColumnDef="Acciones">
-                        <th mat-header-cell *matHeaderCellDef> Acciones </th>
-                        <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element"> 
-                          <mat-radio-button  (change)="tarifaRadioButton(element)"></mat-radio-button>   
-                        </td>
-                      </ng-container>
-
-                      <!--Habitacion List Column-->
-                      <ng-container matColumnDef="disclaimer">
-                        <td mat-footer-cell *matFooterCellDef colspan="2">
-                          <h4 style="margin-top: 10px;"> Habitación:</h4>
-                          <ng-container *ngFor="let habitacionesDisponibles of mySet">
-                              <ng-container *ngFor="let tipocuarto of roomCodes">
-                                <ng-container *ngIf="tipocuarto.Numero == habitacionesDisponibles">
-                                 <div class="parcel">
-                                   <ul>
-                                     <mat-checkbox  formControlName="checkbox"  #checked (change)="preAsignar(tipocuarto.Numero,tipocuarto.Codigo,checked.checked)"></mat-checkbox> &nbsp; <label style="margin-right: 7%">{{ tipocuarto.Numero }}</label>
-                                   </ul>
-                                 </div>
-                                </ng-container>
-                              </ng-container>
-                           </ng-container>
-                        </td>
-                      </ng-container>
-              
-                      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-                      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-                      <tr mat-footer-row *matFooterRowDef="['disclaimer'] sticky: true"  class="example-second-footer-row"></tr>
-                    </table>
-
-                    </div>
+                    </ng-container>
+                    <!-- [FIN] CUANDO SE CONSULTAN TODOS LOS TIPOS DE CUARTO -->
+                  </div>
                 </mat-expansion-panel>
               </mat-accordion>
              </ng-container>
-    </form>
+<!--FIN DE DISPONIBILIDAD-->
+
+<br>
+
+    <div style="background-color:var(--deep-red-background);" class="modal-tittle">
+      <div style="color: white; padding-top: 1%; padding-bottom: 1%;" class="text-center modal-title h5 col-12">
+        Agrega Húesped
+      </div>
+     </div>
+
+    <div class="cursor-default  modal-body" style="background-color: #dadcdf">
+        <div class="row">
+          <div class="col-lg-12">
+            <label class="form-label">Nombre Completo</label>
+            <input
+              type="text"
+              class="form-control form-control-lg form-control-solid"
+              name="nombre"
+              placeholder="Nombre completo"
+              autocomplete="off"
+              [class.is-invalid]="isControlInvalid('nombre')"
+              formControlName="nombre"
+            /><!--[class.is-valid]="isControlValid('nombre')"-->
+            <div class="valid-feedback" *ngIf="isControlValid('nombre')">
+              Nombre Escrito Correctamente
+            </div>
+            <div
+              class="invalid-feedback"
+              *ngIf="controlHasError('required', 'nombre')"
+            >
+              Campo Requerido*
+            </div>
+            <div
+              class="invalid-feedback"
+              *ngIf="controlHasError('minlength', 'nombre')"
+            >
+              Minimo 3 letras
+            </div>
+            <div
+              class="invalid-feedback"
+              *ngIf="controlHasError('maxlength', 'nombre')"
+            >
+              Maximo 100 letras
+            </div>
+            <mat-error *ngIf="nombre!.errors?.required">
+              * Obligatorio
+            </mat-error>
+          </div>
+        </div>
+
+
+        <div class="form-group row">
+
+        <div class="col-lg-6">
+          <label class="form-label">Email</label>
+          <input
+            type="email"
+            class="form-control form-control-lg form-control-solid"
+            name="email"
+            placeholder="Email"
+            autocomplete="off"
+            formControlName="email"
+            [class.is-invalid]="isControlInvalid('email')"/>
+            <!--(input)="emailValidator($event.target.value)/>"-->
+          <!--
+          [class.is-invalid]="isControlInvalid('email')"
+            [class.is-valid]="isControlValid('email')"-->
+          <!-- <div class="valid-feedback" *ngIf="isControlValid('email')">
+            Email Escrito Correctamente
+          </div>
+          <div
+            class="invalid-feedback"
+            *ngIf="controlHasError('minlength', 'email')"
+          >
+            Minimo 3 letras
+          </div>
+          <div
+            class="invalid-feedback"
+            *ngIf="controlHasError('maxlength', 'email')"
+          >
+            Maximo 100 letras
+          </div>
+          <div
+          class="invalid-feedback"
+          *ngIf="controlHasError('pattern', 'email')"
+        >
+          Escriba un correo valido
+        </div> -->
+        </div>
+
+        <div class="col-lg-6">
+          <label class="form-label">Teléfono</label>
+          <input
+            type="tel"
+            class="form-control form-control-lg form-control-solid"
+            name="telefono"
+            placeholder="Teléfono"
+            autocomplete="off"
+            formControlName="telefono"
+            [class.is-invalid]="isControlInvalid('telefono')"
+            [class.is-valid]="isControlValid('telefono')"/>
+          <!-- <div class="invalid-feedback" *ngIf="isControlValid('telefono')">
+            Teléfono Invalido
+          </div> -->
+         <div class="valid-feedback" *ngIf="isControlValid('telefono')">
+            Teléfono Escrito Correctamente
+          </div>
+          <div
+            class="invalid-feedback"
+            *ngIf="controlHasError('minlength', 'telefono')"
+          >
+            Minimo 10 numeros
+          </div>
+          <div
+            class="invalid-feedback"
+            *ngIf="controlHasError('maxlength', 'telefono')"
+          >
+            Maximo 14 numeros
+          </div>
+          <div
+          class="invalid-feedback"
+          *ngIf="controlHasError('pattern', 'telefono')"
+          >
+           Solo se permiten letras
+        </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="background-color:var(--deep-red-background);" class="modal-header">
+      <div style="text-align: center; color: white;" class="text-center modal-title h4 col-12 "
+        id="example-modal-sizes-title-lg">
+       Confirmar el Tipo de Reserva
+          <div class="form-group row">
+            <div class="form-group col-lg-6 ">
+                  <button
+                  class="btn"
+                  style="background-color:var(--walkin-btn); width: 100%;"
+                  type="submit"
+                  name="estatus"
+                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !noDisabledCheckIn || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag"
+                  (click)="setEstatus(1)"
+                  >
+                    Realiza Walk-In
+                  </button>
+            </div>
+            <div class="form-group col-lg-6 ">
+                  <button
+                  class="btn"
+                  style="background-color:var(--rsv-btn); width: 100%;"
+                  type="submit"
+                  name="estatus"
+                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag"
+                  (click)="setEstatus(2); "
+                  >
+                    Agrega Reserva
+                  </button>
+            </div>
+            <div class="form-group col-lg-6 ">
+                  <button
+                  class="btn"
+                  style="background-color:var(--internal-use-btn); width: 100%;"
+                  type="submit"
+                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag"
+                  (click)="setEstatus(5)"
+                  >
+  
+                    Reserva Uso Interno
+                  </button>
+            </div>
+            <div class="form-group col-lg-6">
+                  <button
+                  
+                    class="btn"
+                    style="background-color:var(--temporal-rsv-btn); width: 100%;"
+                    type="submit"
+                    value="7"
+                    [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag"
+                    (click)="setEstatus(7)"
+                    >
+                    Reserva Temporal
+                  </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    
+
+</form>
 </div>
   
