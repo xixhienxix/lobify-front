@@ -1,7 +1,7 @@
 export interface Huesped {
 
   _id?: string;
-  folio?:number
+  folio?:string
   adultos:number;
   ninos:number;
   nombre: string;
@@ -17,20 +17,20 @@ export interface Huesped {
   habitacion: string;
   telefono:string;
   email:string;
-  motivo:string;
+  motivo?:string;
   //Otros Detalles
-  fechaNacimiento:string;
-  trabajaEn:string;
-  tipoDeID:string;
-  numeroDeID:string;
-  direccion:string;
-  pais:string;
-  ciudad:string;
-  codigoPostal:string;
-  lenguaje:string;
+  fechaNacimiento?:string;
+  trabajaEn?:string;
+  tipoDeID?:string;
+  numeroDeID?:string;
+  direccion?:string;
+  pais?:string;
+  ciudad?:string;
+  codigoPostal?:string;
+  lenguaje?:string;
   numeroCuarto:string;
   creada:string;
-  tipoHuesped:string;
+  tipoHuesped?:string;
   notas?:string;
   vip?:string;
   ID_Socio?:number;

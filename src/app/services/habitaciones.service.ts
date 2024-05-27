@@ -60,6 +60,7 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
       }
   }
 
+  
   get getcurrentHabitacionValue(){
     return this.currentHabitacion$;
   }

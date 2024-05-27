@@ -1,7 +1,7 @@
 export interface Huesped {
 
     _id?: string;
-    folio:number
+    folio:string
     adultos:number;
     ninos:number;
     nombre: string;

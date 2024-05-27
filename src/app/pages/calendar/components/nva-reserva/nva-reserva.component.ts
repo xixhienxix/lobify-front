@@ -1,18 +1,24 @@
 import {  Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
-import { NgbActiveModal, NgbDateAdapter, NgbDateParserFormatter, NgbDateStruct, } from '@ng-bootstrap/ng-bootstrap';
+import { ModalDismissReasons, NgbActiveModal, NgbDateAdapter, NgbDateParserFormatter, NgbDateStruct, NgbModal, } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime } from 'luxon';
 import { Observable, Subject, filter, first, firstValueFrom, map, takeUntil } from 'rxjs';
 import { Habitacion } from 'src/app/models/habitaciones.model';
-import { Tarifas } from 'src/app/models/tarifas';
+import { Tarifas, TarifasRadioButton } from 'src/app/models/tarifas';
 import { DisponibilidadService } from 'src/app/services/disponibilidad.service';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { TarifasService } from 'src/app/services/tarifas.service';
 import { CustomAdapter, CustomDateParserFormatter } from 'src/app/tools/date-picker.utils';
 import { Estatus } from '../../_models/estatus.model';
 import { Foliador } from '../../_models/foliador.model';
+import { EstatusService } from '../../_services/estatus.service';
+import { FoliosService } from '../../_services/folios.service';
+import { CustomerService } from '../../_services/customer_service';
+import { Huesped } from 'src/app/models/huesped.model';
+import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 @Component({
   selector: 'app-edit-customer-modal',
@@ -36,18 +42,26 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     private fb: FormBuilder,
     private _habitacionService: HabitacionesService,
     private _tarifasService: TarifasService,
-    private _disponibilidadService: DisponibilidadService){
+    private _disponibilidadService: DisponibilidadService,
+    private _folioservice: FoliosService,
+    private _estatusService:EstatusService,
+    private _customerService:CustomerService,
+    private modalService:NgbModal){
       
   }
 
   formGroup:FormGroup
+  formGroup2:FormGroup
   isLoading:boolean=false;
+  submitLoading:boolean=false
   accordionDisplay="";
   bandera:boolean=false;
+  closeResult:string
+
 
   /** Current Values */
   selectedRoom:any;
-  tarifaSeleccionada:Tarifas;
+  tarifaSeleccionada:TarifasRadioButton[]=[];
 
   /** Styling */
   styleDisponibilidad:string='background-color:#99d284;'
@@ -58,6 +72,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   ratesArray:Tarifas[]=[];
   ratesArrayComplete:Tarifas[]=[]
   infoRoomsAndCodes:any=[];
+  availavilityCodeRooms:Habitacion[]=[]
   availavilityRooms:Habitacion[]=[]
   filterRatesAray:Tarifas[]=[]
   filterRatesbyRoomName:Tarifas[]=[]
@@ -66,7 +81,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   standardRatesArray:Tarifas[]=[]
   estatusArray:Estatus[]=[];
   folios:Foliador[]=[];
-
+  huespedInformation:Huesped[]=[];
 
 
   /** Dates */
@@ -90,6 +105,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   /** Flags */
   dropDownHabValueIndex:any
   cuarto:string=''
+  variable:boolean[]=[]
+
 
   /**Table */
   displayedColumns: string[] = ['Tarifa', '$ Promedio x Noche', 'Total', 'Acciones'];
@@ -99,13 +116,15 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   //**AGREGAR HUESPED TEMPALTE */
   get nombre(){return this.formGroup.get('nombre')}
   currentStatus:string='';
-  currentFolio:string='';
+  currentFolio:Foliador;
   origenReserva:string='';
   noDisabledCheckIn:boolean;
   todayDate:Date = new Date();
   // closeResult: string;
 
-
+  get inputs() {
+    return this.formGroup.controls["nombreHabs"] as FormArray;
+  }
   /** Subscription */
   private ngUnsubscribe = new Subject<void>();
 
@@ -114,7 +133,111 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     this.loadForm();
     this.checkRoomCodesIndexDB();
     this.checkRatesIndexDB();
+    this.checkEstatusIndexDB();
+    this.checkFoliadorIndexDB();
     this.todaysDateComparer();
+  }
+
+  onSubmit(){
+    /**Check only one tarifa is selected per Room */
+
+
+    if(this.formGroup.valid){
+      this.save();
+    }else if(this.formGroup.invalid)
+    {
+      this.findInvalidControlsRecursive(this.formGroup);
+    }
+  }
+
+  save(){
+    this.submitLoading=true;
+
+    const formData = this.formGroup.value;
+
+      for(let i=0; i<this.preAsignadasArray.length; i++){
+        if(this.preAsignadasArray[i].checked === true){
+          const tarifa  = this.tarifaSeleccionada.find(obj =>
+            obj.Habitacion.some(item => item === this.preAsignadasArray[i].codigo));
+
+          const huesped = {
+            folio:this.currentFolio.Letra + this.currentFolio.Folio,
+            adultos:formData.adultos,
+            ninos:formData.ninos,
+            nombre:formData.nombre,
+            estatus: this.currentStatus,
+            llegada:this.intialDate.toISOString(),
+            salida:this.endDate.toISOString(),
+            noches:this.stayNights,
+            tarifa:tarifa === undefined ? '' : tarifa.Tarifa,
+            porPagar:tarifa === undefined ? 0 : tarifa.TarifaRack,
+            pendiente:tarifa === undefined ? 0 : tarifa.TarifaRack,
+            origen:this.origenReserva,
+            habitacion:this.preAsignadasArray[i].codigo,
+            telefono:formData.telefono,
+            email:formData.email,
+            numeroDeCuarto:this.preAsignadasArray[i].numero,
+            creada:new Date().toISOString(),
+            motivo:'',
+            fechaNacimiento:'',
+            trabajaEn:'',
+            tipoDeID:'',
+            numeroDeID:'',
+            direccion:'',
+            pais:'',
+            ciudad:'',
+            codigoPostal:'',
+            lenguaje:'',
+            numeroCuarto:this.preAsignadasArray[i].numero,
+            tipoHuesped:'',
+            notas:'',
+            vip:'',
+            ID_Socio:0,
+            estatus_Ama_De_Llaves:'Limpio',      
+          }
+    
+           this.huespedInformation.push(huesped)
+        }
+    }
+
+
+    this._customerService.addPost(this.huespedInformation).subscribe({
+      next:(data)=>{
+        this.modal.close();
+        this.promptMessage('Exito','Reservacion Guardada con exito')
+      },
+      error:()=>{
+        this.promptMessage('Error','La Reservacion no se pudo generar con exito intente nuevamente')
+      },
+      complete:()=>{
+        this.submitLoading=false
+      }
+      
+
+    })
+    
+  }
+
+  checkAvaibility(codigoCuarto:string){
+    if(codigoCuarto!='1'){
+      const dispo = this.availavilityRooms.find(item=> item.Codigo === codigoCuarto);
+    
+      if(dispo){
+        this.setStep(1)
+        return false;
+      }else{
+        // this.setStep(0);
+        return true
+      }
+    }else{
+      if(this.availavilityRooms.length===0){
+        // this.setStep(0);
+        return true
+      }else{
+        this.setStep(1)
+        return false
+      }
+    }
   }
 
   todaysDateComparer(){
@@ -159,6 +282,30 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
       }
   }
 
+  async checkEstatusIndexDB(){
+    const estatusCodesIndexDB:Estatus[] = await this._estatusService.readIndexDB("Rooms");
+        /** Check if EstatusCodes are on IndexDb */
+      if(estatusCodesIndexDB){
+          this.estatusArray = estatusCodesIndexDB;
+          console.log(this.estatusArray)
+
+      }else{
+          this.estatusArray = await firstValueFrom(this._estatusService.getAll());      
+          console.log(this.estatusArray)
+
+      }
+  }
+
+  async checkFoliadorIndexDB(){
+    const foliosIndexDB:Foliador[] = await this._folioservice.readIndexDB("Foliosr");
+        /** Check if EstatusCodes are on IndexDb */
+      if(foliosIndexDB){
+          this.folios = foliosIndexDB;
+      }else{
+          this.folios = await firstValueFrom(this._folioservice.getAll());      
+      }
+  }
+
   loadForm(){
     this.formGroup = this.fb.group({
       adultos:[1, Validators.required],
@@ -170,21 +317,49 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
       telefono: ['', Validators.compose([Validators.nullValidator,Validators.pattern('[0-9]+'),Validators.minLength(10),Validators.maxLength(14)])],
       searchTerm:['',Validators.maxLength(100)]
     });
+    this.formGroup2 = this.fb.group({
+      checkbox:[false,Validators.required],
+    })
   }
   
 
-  tarifaRadioButton(tarifa:any){
-    this.tarifaSeleccionada=tarifa
-    // for(let i=0;i<this.tarifasArrayCompleto.length;i++){
-    //   if(this.tarifasArrayCompleto[i].Tarifa=='Tarifa Estandar'){
-    //     for(let x=0;x<this.tarifasArrayCompleto[i].Habitacion.length;x++){
-    //       if(this.tarifasArrayCompleto[i].Habitacion[x]==this.cuarto){
-    //         this.tarifaEstandarSeleccionada=this.tarifasArrayCompleto[i]
-    //       }
-    //     }
-    //   }
-    // }
+
+  tarifaRadioButton(event:any, codigo:string){
+    const checkedStatus = event.source.checked
+    const tarifa = event.value
+
+      if(this.tarifaSeleccionada.length > 0){
+        const index  = this.tarifaSeleccionada.findIndex(obj =>
+          obj.Habitacion.some(item => item === codigo));
+
+          if(index != -1){
+            this.tarifaSeleccionada[index].checked = checkedStatus
+            this.tarifaSeleccionada.splice(index,1);
+            this.tarifaSeleccionada.push(tarifa)
+          }else{
+          }if(index === -1){
+            this.tarifaSeleccionada.push({...tarifa,checked:checkedStatus})
+          }
+      }
+    else{
+      this.tarifaSeleccionada.push({...tarifa,checked:checkedStatus})
+     }     
   }
+
+
+
+  preAsignar(numero:any,codigo:string,checked:boolean){
+    if(this.preAsignadasArray.length >= 0){
+      const index = this.preAsignadasArray.findIndex((item) => item.numero === numero)
+      if(index != -1){
+        this.preAsignadasArray[index].checked = checked
+      }else{
+        this.preAsignadasArray.push({numero,codigo,checked})
+      }
+    }else{
+      this.preAsignadasArray.push({numero,codigo,checked})
+    }
+}
 
   ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number){
     if(tarifa.Tarifa === 'Tarifa Estandar'){
@@ -208,19 +383,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
       }
       return tarifaTotal
     }
-  }
-
-  preAsignar(numero:any,codigo:string,checked:boolean){
-      if(this.preAsignadasArray.length >= 0){
-        const index = this.preAsignadasArray.findIndex((item) => item.numero === numero)
-        if(index != -1){
-          this.preAsignadasArray[index].checked = checked
-        }else{
-          this.preAsignadasArray.push({numero,codigo,checked})
-        }
-      }else{
-        this.preAsignadasArray.push({numero,codigo,checked})
-      }
   }
 
   buscaDispo(habitacion:any){
@@ -261,30 +423,34 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
       .subscribe(
         {      
           next:(response)=>{
-            if(!this.roomCodes){
-              this.checkRoomCodesIndexDB();
-            }else{
-              this.roomCodes.forEach((val)=>{ this.mySet.add(val.Numero) })
-              response.forEach((val)=>{this.mySet.delete(val)})   
-            }
-
-            this.mySet.forEach((value)=> {
-              const results = this.roomCodes.find((item) => item.Numero === value )  
-              const filterResultRoomCode = this.roomCodes.find((val)=> val.Numero === value);
-
-              if(filterResultRoomCode !== undefined){
-                this.availavilityRooms.push(filterResultRoomCode);
+            // if(response.length!=0){
+            //   console.log("cuartos ocupados")
+            // }else{
+              if(!this.roomCodesComplete){
+                this.checkRoomCodesIndexDB();
+              }else{
+                this.roomCodesComplete.forEach((val)=>{ this.mySet.add(val.Numero) })
+                //ELimina habitaciones no disponibles del Set
+                response.forEach((val)=>{this.mySet.delete(val)})   
               }
-
-              if(results !== undefined){
-                this.infoRoomsAndCodes.push({
-                  nombreHabitacion:value,
-                  tipodeCuarto:results.Codigo
-                }) 
-              }
-            })
-            console.log(this.availavilityRooms)
-            this.setStep(1) 
+  
+              this.mySet.forEach((value)=> {
+                const results = this.roomCodesComplete.find((item) => item.Numero === value )  
+                const filterResultRoomCode = this.roomCodes.find((val)=> val.Numero === value);
+  
+                if(filterResultRoomCode !== undefined){
+                  this.availavilityCodeRooms.push(filterResultRoomCode);
+                }
+  
+                if(results !== undefined){
+                  this.availavilityRooms.push(results);
+                  this.infoRoomsAndCodes.push({
+                    nombreHabitacion:value,
+                    tipodeCuarto:results.Codigo
+                  }) 
+                }
+              });
+            //}
           },
           error:()=>{
           },
@@ -308,13 +474,14 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
                 // this.ratesArray=this.ratesArrayComplete.filter(d => {
                 //     return (this.intialDate.getTime() >= new Date(d.Llegada).getTime() );
                 // });
+
                 if(this.ratesArray){
                        this.filterRatesAray = this.ratesArray.filter((val) => 
                          new Date(val.Llegada).getTime() <= this.intialDate.getTime() && new Date(val.Salida).getTime() >= this.endDate.getTime() )
                 } 
         
                 /**Comparador de Estancias Tarifario */
-                this.filterRatesAray=this.filterRatesAray.filter(x=>{
+                this.filterRatesAray = this.filterRatesAray.filter(x=>{
                   var estanciaMinima = x.EstanciaMinima
                   var estanciaMaxima = x.EstanciaMaxima
                   if(x.EstanciaMaxima==0){
@@ -356,7 +523,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 
                   this.filterRatesAray
                   /** */
-               }    
+               }   
+               console.log(this.filterRatesAray) 
   }
 
   maxPeopleCheck(habitacion:any){
@@ -394,11 +562,10 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     this.preAsignadasArray=[];
     this.accordionDisplay="display:none"
     this.cuarto=''
+    this.availavilityCodeRooms = [];
     this.availavilityRooms = [];
     this.mySet.clear;
     this.formGroup.patchValue({['habitacion']: 0});
-
-    
   }
 
   addEventIntialDate(type: string, event: MatDatepickerInputEvent<Date>) {
@@ -526,26 +693,25 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 
 
   setEstatus(value:any) {
-    
-    for(let i=0; i<this.estatusArray.length; i++)
-    {
-      if(value==this.estatusArray[i].id)
-      {
-        this.currentStatus = this.estatusArray[i].estatus;
-      }
+
+    if(this.estatusArray){
+      this.currentStatus = this.estatusArray.find(item=> item.id === value)?.estatus!;
     }
 
-    if(value==1)
-    {
-      this.currentFolio=this.folios[2].Folio
+    if(value===1){
+      this.currentFolio=this.folios[2]
       // this.estatusID=value
       this.origenReserva='Walk-In'
     }
-    else
-    {this.currentFolio=this.folios[0].Folio
+    else{
+    this.currentFolio=this.folios[0]
     // this.estatusID=value
     this.origenReserva='Recepción'}
+
+    this.onSubmit();
   }
+
+
   /**
    * 
    * @returns This function disables reservation button if user has not selected any room
@@ -557,7 +723,60 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     }else{
       return true
     }
-    
+  }
+
+  tarifaSeleccionadaCheck(){
+    const found = this.tarifaSeleccionada.findIndex((item)=> item.checked === true)
+    if(found != -1){
+      return false
+    }else{
+      return true
+    }
+  }
+
+  promptMessage(header:string,message:string, obj?:any){
+    const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+    modalRef.componentInstance.alertHeader = header
+    modalRef.componentInstance.mensaje= message    
+    modalRef.result.then((result) => {
+      if(result=='Aceptar')        
+      {
+
+      } 
+      this.closeResult = `Closed with: ${result}`;
+      }, (reason) => {
+          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      });
+      setTimeout(() => {
+        modalRef.close('Close click');
+      },4000)
+      return
+  }
+
+    //CheckEstatus Controls
+    public findInvalidControlsRecursive(formToInvestigate:FormGroup):string[] {
+      var invalidControls:string[] = [];
+      let recursiveFunc = (form:FormGroup) => {
+        Object.keys(form.controls).forEach(field => {
+          const control = form.get(field);
+          if (control?.invalid) invalidControls.push(field);
+          if (control instanceof FormGroup) {
+            recursiveFunc(control);
+          }
+        });
+      }
+      recursiveFunc(formToInvestigate);
+      return invalidControls;
+    }
+
+  private getDismissReason(reason: any): string {
+    if (reason === ModalDismissReasons.ESC) {
+        return 'by pressing ESC';
+    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
+        return 'by clicking on a backdrop';
+    } else {
+        return  `with: ${reason}`;
+    }
   }
 
 }

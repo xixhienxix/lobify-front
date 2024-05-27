@@ -52,3 +52,7 @@ Thumbs.db
 *.cache
 *.cache
 .firebase/hosting.ZGlzdC9sb2JpZnk.cache
+.firebase/hosting.ZGlzdC9sb2JpZnk.cache
+/.firebase
+proxy.conf.json
+proxy.conf.prod.json

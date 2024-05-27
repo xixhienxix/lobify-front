@@ -15,18 +15,18 @@ export class DisponibilidadService {
 
     getDisponibilidad(initialDate:Date, endDate:Date, habitacion: Habitacion | string, dias:number, folio:string) :Observable<Disponibilidad[]>{
 
-            const params = new HttpParams()
-            .set('initialDate', initialDate.toISOString())
-            .set('endDate', endDate.toISOString())
-            .set('codigoCuarto', typeof habitacion === 'string' ? habitacion : habitacion.Codigo)
-            .set('numCuarto',typeof habitacion === 'string' ? habitacion : habitacion.Numero.toString())
-            .set('cuarto', typeof habitacion === 'string' ? habitacion : '-1')
-            .set('dias', dias.toString())
-            .set('folio', folio)
-        
+        const params ={
+            initialDate:initialDate.toISOString(),
+            endDate:endDate.toISOString(),
+            codigoCuarto:typeof habitacion === 'string' ? habitacion : habitacion.Codigo,
+            numCuarto:typeof habitacion === 'string' ? habitacion : habitacion.Numero.toString(),
+            cuarto:typeof habitacion === 'string' ? habitacion : '-1',
+            dias:dias.toString(),
+            folio:folio
+        }
 
 
-        return this.http.get<Disponibilidad[]>(environment.apiUrl + '/reportes/disponibilidad', { params:params})
+        return this.http.post<Disponibilidad[]>(environment.apiUrl + '/disponibilidad/reservas', {params})
         .pipe(
             map(responseData=>{
             //  this.writeIndexDB("Rates",responseData);

@@ -90,7 +90,23 @@ export class ContentComponent implements OnInit{
    * @type {Record<string, any>[]}
    * @memberof ContentComponent
    */
-  tipoHabGroupDataSource: Record<string, any>[] = [];
+  tipoHabGroupDataSource: Record<string, any>[] = [
+    {
+      text: "Glam Camping",
+      id: 1,
+      color: "f855b1",
+    },
+    {
+      color:'2a7b84',
+      id:11,
+      text:'Cama'
+    },
+    {
+      text: "Casa de Verano",
+      id: 21,
+      color: "2f76e7",
+    }
+  ];
   habitacionPorTipoDataSource: Record<string, any>[] = [];
 
   public workHours: WorkHoursModel = { start: '08:00', end: '18:00' };
@@ -102,20 +118,18 @@ export class ContentComponent implements OnInit{
    * @memberof ContentComponent
    */
   public resourceDataSource: Record<string, any>[]
-  = [];
+  = [    {Id: 61,   // HERE THE DATA WILL BE FILLED FROM A DB CALLBACK ID 61 its just a sample data i added to see if calendar reflects it
+    Subject: 'Decoding',
+    StartTime: new Date(2023, 0, 4, 9, 30),
+    EndTime: new Date(2023, 0, 4, 10, 30),
+    IsAllDay: false,
+    ProjectId: 2,
+    TaskId: 2}];
 
 
   public eventSettings: EventSettingsModel = {
     //dataSource: extend([], this.resourceDataSource.concat(this.timelineResourceData), undefined, true) as Record<string, any>[]
     dataSource: extend([], this.resourceDataSource, undefined, true) as Record<string, any>[],
-    // fields: {
-    //   id: 'Id',
-    //   subject: { name: 'Subject', title: 'Summary' },
-    //   location: { name: 'Location', title: 'Location' },
-    //   description: { name: 'Description', title: 'Comments' },
-    //   startTime: { name: 'StartTime', title: 'From' },
-    //   endTime: { name: 'EndTime', title: 'To' }
-    // }
   };
 
   constructor(private _roomsService: HabitacionesService,
@@ -141,7 +155,7 @@ export class ContentComponent implements OnInit{
     // const codigoCuarto = [...new Set(responseData.map(item => item.Numero))];
 
     for( const key in tipoCuarto) {
-      tipoArray.push({ text: tipoCuarto[key], id:parseInt(key+1), color: Math.floor(Math.random()*16777215).toString(16) });
+      tipoArray.push({ text: tipoCuarto[key], id:parseInt(key+1), color:'#' + Math.floor(Math.random()*16777215).toString(16) });
     }
     this.tipoHabGroupDataSource = tipoArray;
 
@@ -159,7 +173,6 @@ export class ContentComponent implements OnInit{
     this.habitacionPorTipoDataSource = codigoArray
   }
 
-
   onChange(args: ChangeEventArgs|any): void {
     this.scheduleObj.rowAutoHeight = args.checked;
 
@@ -167,7 +180,6 @@ export class ContentComponent implements OnInit{
     (this.scheduleObj.views[0] as any).interval = this.scheduleinterval;
     this.scheduleObj.refresh();
   }
-
   // public onRenderCell(args: RenderCellEventArgs): void {
   //   if (args.element.classList.contains('e-work-cells')) {
   //     if (args.date! < new Date(2021, 6, 31, 0, 0)) {
@@ -220,7 +232,6 @@ export class ContentComponent implements OnInit{
             const argsDate = new Date(args.date!);
             dataDate.setHours(0, 0, 0, 0);
             argsDate.setHours(0, 0, 0, 0);
-            debugger
             let groupIndex = this.scheduleObj.getResourcesByIndex(data.ProjectId);
             let argsGroupIndex = this.scheduleObj.getResourcesByIndex(args.groupIndex!);
              return data.ProjectId === argsGroupIndex.groupData!.ProjectId && dataDate.getTime() == argsDate.getTime(); 
