@@ -139,9 +139,8 @@
       <div class="row" style="margin-top: 3%;">
         <div class="col-lg-6">
           <label style="color:#00506a; font-weight: bold;" class="form-label">Estancia minima de noches:
-           
             </label>
-          <input class="form-control" formControlName="minima" name="minima">
+          <input class="form-control" type="number" formControlName="minima" name="minima">
         </div>
         <div class="col-lg-6">
           <label style="color:#00506a; font-weight: bold;" class="form-label">Estancia maxima de noches:
@@ -151,7 +150,7 @@
             >
            </span>
           </label>
-          <input class="form-control" formControlName="maxima"  name="maxima">
+          <input class="form-control" formControlName="maxima" type="number" name="maxima">
         </div>
       </div>
       <br>
@@ -178,7 +177,7 @@
       <div class="row">
         <div class="col-lg-12">
           <section class="checkbox-section">
-            <mat-checkbox #checkboxEspecial [checked]="tarifaEspecialYVariantes" [disabled]="resultLocationCamas.length===0" (change)="tarifaEspecial($event)" style="color:#00506a; font-weight: bold;" class="form-label">Tarifa Especial y Variantes:</mat-checkbox>
+            <mat-radio-button #checkboxEspecial [checked]="tarifaEspecialYVariantes" (change)="tarifaEspecial($event)" style="color:#00506a; font-weight: bold;" class="form-label">Tarifa Especial y Variantes:</mat-radio-button>
           </section>
         </div>
       </div>
@@ -196,8 +195,25 @@
     </div>
   </div>
   <br> 
+  <ng-container *ngIf="checkboxEspecial.checked">
   <div class="row">
-    <ng-container *ngIf="checkboxEspecial.checked">
+    <div class="col-lg-6">
+      <label class="form-label">Precio para 1 Persona</label>
+      <input  type="number" class="form-control" formControlName="tarifa1persona" name="tarifa1persona">
+    </div>
+    <div class="col-lg-6">
+      <label class="form-label">Precio para 2 Persona</label>
+      <input  type="number" class="form-control" formControlName="tarifa2persona" name="tarifa2persona">
+    </div>
+    <div class="col-lg-6">
+      <label class="form-label">Precio para 3 Persona</label>
+      <input  type="number" class="form-control" formControlName="tarifa3persona" name="tarifa3persona">
+    </div>
+    <div class="col-lg-6">
+      <label class="form-label">Precio para 4 Persona</label>
+      <input  type="number" class="form-control" formControlName="tarifa4persona" name="tarifa4persona">
+    </div>
+    <!-- <ng-container *ngIf="checkboxEspecial.checked">
     <div class="col-lg-6" style="padding-bottom: 10px;">
       <label style="color:#00506a; font-weight: bold;" class="form-label">Número de Adutos:</label>
       <mat-select [(ngModel)]="adultos" class="form-control form-control-lg" formControlName="adultos">
@@ -227,10 +243,12 @@
         <mat-option [value]="7">7</mat-option>
         <mat-option [value]="8">8</mat-option>
       </mat-select>        
-    </div>
-    </ng-container>
+    </div>-->
   </div>
-  <div class="row">
+  <br>
+</ng-container>
+
+  <!-- <div class="row">
       <ng-container *ngFor="let item of precios.controls; let i = index">
         <div class="col-lg-6" style="padding-bottom: 10px;">
           <label style="color:#00506a; font-weight: bold;" class="form-label">Precio para {{i+2}} Adulto(s)</label>
@@ -245,32 +263,33 @@
         <input [disabled]="dehabilitaButtons" type="number" class="form-control"  [formControl]="$any(preciosNinos).controls[i]">
       </div>
     </ng-container>
-</div>
+</div> -->
   <div class="row">
     <div class="col-lg-6">
     <section class="checkbox-section">
-      <mat-checkbox [checked]="descuentoTotalProCheckbox" (change)="descuentoTotalProc($event)" style="color:#00506a; font-weight: bold;" class="form-label">Aplicar Descuento total en Porcentaje</mat-checkbox>
+      <mat-radio-button #descuentoTotalProCheckbox [checked]="descuentoTotalProCheckbox.checked" (change)="descuentoTotalProc($event)" style="color:#00506a; font-weight: bold;" class="form-label">Descuento Total en %</mat-radio-button>
     </section>
     </div>
   </div>
-  <ng-container *ngIf="descuentoTotalProCheckbox">
+  <br>
+  <ng-container *ngIf="descuentoTotalProCheckbox.checked">
     <div class="row">
       <div class="col-lg-6">
       <label style="color:#cf2121; font-weight: bold;" class="form-label">DESCUENTO % DEL:</label>
       </div>
     </div>
     <div class="row">
-      <div class="col-lg-6">
+      <div class="col-lg-12">
         <input type="number" class="form-control" formControlName="descuento" name="descuento">
       </div>
-      <div class="col-lg-6">
+      <!-- <div class="col-lg-6">
         <ng-container *ngIf="descuentoNoAplicado">
           <button class="btn btn-primary form-control" (click)="aplicaDescuento()">Aplicar Descuento</button>
         </ng-container>
         <ng-container *ngIf="!descuentoNoAplicado">
           <button disabled class="btn btn-success form-control" (click)="aplicaDescuento()">Aplicado</button>
         </ng-container>
-      </div>
+      </div> -->
     </div>
   </ng-container>
 </form>

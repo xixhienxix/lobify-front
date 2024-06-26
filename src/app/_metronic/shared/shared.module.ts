@@ -70,7 +70,8 @@ import {MatCardModule} from '@angular/material/card';
     MatInputModule,
     ScheduleModule,
     RecurrenceEditorModule,
-    MatCardModule
+    MatCardModule,
+    MatButtonModule
   ],
   exports: [
     KeeniconComponent,

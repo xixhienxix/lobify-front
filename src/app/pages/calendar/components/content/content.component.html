@@ -11,15 +11,27 @@
     </mat-select>
     <ejs-dropdownlist  id="scheduleview" [dataSource]='datas' [(value)]='scheduleinterval'(change)="onChange($event)" >
     </ejs-dropdownlist>
-
-    <ejs-schedule cssClass='timeline-resource-grouping' #scheduleObj width='100%' cssClass='timeline-resource-grouping' height='500px'
-      [selectedDate]="selectedDate" [group]="group" [workDays]="workDays" [eventSettings]="eventSettings" [timeScale]="timeScale" 
-      [rowAutoHeight]="rowAutoHeight" [currentView]="currentView" 
+    <!-- enableAdaptiveUI='true' use this on ejs-schedule for mobile resize -->
+    <ejs-schedule 
+    #scheduleObj 
+    width='100%' 
+    cssClass='timeline-resource-grouping' 
+    height='500px'
+      [selectedDate]="selectedDate" 
+      [group]="group" 
+      [workDays]="workDays" 
+      [eventSettings]="eventSettings" 
+      [timeScale]="timeScale" 
+      [rowAutoHeight]="rowAutoHeight" 
+      [currentView]="currentView" 
       (actionComplete)="onActionComplete($event)" 
       (renderCell)="onRenderCell($event)"
       (dataBound)="onDataBound($event)"
       (popupOpen)="onPopupOpen($event)"
       (dragStart)="onDragStart($event)"
+      (dragStop)="onDragStop($event)"
+      (eventRendered)="onEventRendered($event)"
+      (resizeStop)="onResizeStop($event)"
       >
       <ng-template #dateHeaderTemplate let-data>
         <div class="date-text"></div>
@@ -56,11 +68,10 @@
       <e-view option="TimelineWeek"></e-view>
       <e-view option="TimelineWorkWeek"></e-view>
       <e-view option="TimelineMonth"></e-view>
-      <e-view option="Agenda"></e-view>
     </e-views>
-    <!-- <ng-template #editorTemplate let-data>
-      <app-nva-reservation-template [data]="data"></app-nva-reservation-template>
-    </ng-template> -->
+
+
     </ejs-schedule>
+
   </div>
 </div>

@@ -17,12 +17,25 @@ import { ToastAllModule } from '@syncfusion/ej2-angular-notifications';
 import { ScheduleAllModule, RecurrenceEditorAllModule } from '@syncfusion/ej2-angular-schedule';
 import { DropDownButtonAllModule } from '@syncfusion/ej2-angular-splitbuttons';
 import { ReactiveFormsModule } from '@angular/forms';
-import { NvaReservaComponent } from './components/nva-reserva/nva-reserva.component';
-import { NvaReservationTemplateComponent } from './components/content/templates/nva-reservation-template/nva-reservation-template.component';
+import { NvaReservaComponent } from './reservations/nva-reserva/nva-reserva.component';
+import { WarningComponent } from './_helpers/warning.prompt.component';
+import { EditReservaComponent } from './reservations/edit-reserva/edit-reserva.component';
+import { ConfirmationModalComponent } from './reservations/_modals/confirmation-modal.component';
+import { ReservasComponent } from './reservations/edit-reserva/components/reservas/reservas.component';
 
 
 @NgModule({
-  declarations: [CalendarComponent, HeaderComponent, ContentComponent, FooterComponent, NvaReservaComponent, NvaReservationTemplateComponent],
+  declarations: [
+    CalendarComponent, 
+    HeaderComponent, 
+    ContentComponent, 
+    FooterComponent, 
+    NvaReservaComponent, 
+    EditReservaComponent, 
+    ConfirmationModalComponent,
+    WarningComponent,
+    ReservasComponent,
+  ],
   imports: [
     TranslateModule,
     CommonModule,

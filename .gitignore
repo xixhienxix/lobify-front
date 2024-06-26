@@ -56,3 +56,4 @@ Thumbs.db
 /.firebase
 proxy.conf.json
 proxy.conf.prod.json
+*.cache

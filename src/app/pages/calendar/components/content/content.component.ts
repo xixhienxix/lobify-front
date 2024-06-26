@@ -1,10 +1,12 @@
 
-import { Component, Inject, Input, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { extend,Internationalization } from '@syncfusion/ej2-base';
 import { ChangeEventArgs } from '@syncfusion/ej2-buttons';
 import {
   ScheduleComponent, DragAndDropService, TimelineViewsService, GroupModel, EventSettingsModel, ResizeService, View, TimelineMonthService, WorkHoursModel, RenderCellEventArgs, TimeScaleModel, ActionEventArgs,
-  DragEventArgs
+  DragEventArgs,
+  EventRenderedArgs,
+  ResizeEventArgs
 } from '@syncfusion/ej2-angular-schedule';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { DataManager, UrlAdaptor } from '@syncfusion/ej2-data';
@@ -12,6 +14,11 @@ import { environment } from 'src/environments/environment';
 import { ActivatedRoute } from '@angular/router';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { L10n } from '@syncfusion/ej2-base';
+import { HuespedService } from 'src/app/services/huesped.service';
+import { Observable, Subject, Subscription, firstValueFrom } from 'rxjs';
+import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
+import { Huesped } from 'src/app/models/huesped.model';
 
 L10n.load({
   'en-US': {
@@ -31,40 +38,30 @@ L10n.load({
     providers: [TimelineViewsService, TimelineMonthService, ResizeService, DragAndDropService],
 })
 
-export class ContentComponent implements OnInit{
-  @ViewChild("scheduleObj") public scheduleObj: ScheduleComponent;
+export class ContentComponent implements OnInit,OnDestroy{
+
+  private eventsSubscription: Subscription;
+
+  closeResult:string
   public selectedDate: Date = new Date();
+  todayDate = new Date();
   public timeScale: TimeScaleModel = { enable: true, interval: 1440, slotCount: 1 };
   /**
    * Used to Set how many days displays on the Scheduler in one view
-   *
-   * @type {number}
-   * @memberof ContentComponent
    */
   public dayInterval: number = 5;
   /**
    * Specify WorkDays, non workdays appear as gray columns on the schedule
-   *
-   * @type {number[]}
-   * @memberof ContentComponent
    */
   public workDays: number[] = [0, 1, 2, 3, 4, 5, 6 ,7];
   /**
    * Display Days in Specific format
-   *
-   * @type {Internationalization}
-   * @memberof ContentComponent
    */
   public instance: Internationalization = new Internationalization();
   getDateHeaderText: Function = (value: Date) => {
       return this.instance.formatDate(value, { skeleton: 'MMMd' });
   };
-  /**
-   *Date interval for Scheduler
-   *
-   * @type {number[]}
-   * @memberof ContentComponent
-   */
+
   public datas: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
   public scheduleinterval = 5;
 
@@ -73,7 +70,6 @@ export class ContentComponent implements OnInit{
   public currentView: View = 'TimelineDay';
   public allowMultiple:boolean = true;
   public group: GroupModel = {
-    enableCompactView: false,
     resources: ['Type', 'Rooms']
   };
 
@@ -83,31 +79,6 @@ export class ContentComponent implements OnInit{
     crossDomain:true
   })
 
-  /**
-   * Array of object to gruop type of data, 
-   * the data is grouped by groupId in the object
-   *
-   * @type {Record<string, any>[]}
-   * @memberof ContentComponent
-   */
-  tipoHabGroupDataSource: Record<string, any>[] = [
-    {
-      text: "Glam Camping",
-      id: 1,
-      color: "f855b1",
-    },
-    {
-      color:'2a7b84',
-      id:11,
-      text:'Cama'
-    },
-    {
-      text: "Casa de Verano",
-      id: 21,
-      color: "2f76e7",
-    }
-  ];
-  habitacionPorTipoDataSource: Record<string, any>[] = [];
 
   public workHours: WorkHoursModel = { start: '08:00', end: '18:00' };
 
@@ -117,46 +88,133 @@ export class ContentComponent implements OnInit{
    * @type {Record<string, any>[]}
    * @memberof ContentComponent
    */
-  public resourceDataSource: Record<string, any>[]
-  = [    {Id: 61,   // HERE THE DATA WILL BE FILLED FROM A DB CALLBACK ID 61 its just a sample data i added to see if calendar reflects it
-    Subject: 'Decoding',
-    StartTime: new Date(2023, 0, 4, 9, 30),
-    EndTime: new Date(2023, 0, 4, 10, 30),
-    IsAllDay: false,
-    ProjectId: 2,
-    TaskId: 2}];
-
+  public resourceDataSource: Record<string, any>[]= [];
 
   public eventSettings: EventSettingsModel = {
-    //dataSource: extend([], this.resourceDataSource.concat(this.timelineResourceData), undefined, true) as Record<string, any>[]
-    dataSource: extend([], this.resourceDataSource, undefined, true) as Record<string, any>[],
+    dataSource: this.resourceDataSource
   };
 
-  constructor(private _roomsService: HabitacionesService,
-    private activatedRoute: ActivatedRoute) {
+  /**Data Models */
+  colorDict={
+    0:'#99d284',
+    1:'#fab3db',
+    2:'#d0aaec',
+    3:'#fac34e'
 
+    //#fab3db - Reserva Temporal
+    //#d0aaec - Reserva Uso Temporal
+    //#fac34e - Reservacion
+  }
+  @Input() tipoHabGroupDataSource: Record<string, any>[]
+  @Input() habitacionPorTipoDataSource: Record<string, any>[]
+  @Input() changing: Subject<Record<string, any>[]>;
+  @Input() roomCodesComplete:Habitacion[];
+  @Input() roomCodes:Habitacion[];
+  @Input() datasourceArray :Record<string, any>[]=[]
+  @Input() onSavedReservation: Observable<Huesped[]>;
+
+  @Output() onResizeReserva: EventEmitter<Record<string, any>> = new EventEmitter();
+  @Output() honEditRsv: EventEmitter<Huesped[]> = new EventEmitter();
+  @ViewChild("scheduleObj") public scheduleObj: ScheduleComponent;
+
+  
+  constructor(
+    private modalService:NgbModal,
+    private activatedRoute: ActivatedRoute,
+    private _roomService: HabitacionesService
+  ) {
+    this.selectedDate = new Date(this.todayDate.getFullYear(), this.todayDate.getMonth(), this.todayDate.getDate())
     this.activatedRoute.data.subscribe((val) => {
-      console.log("ROUTER DATA:-----> ",val.data);
       this.createRack(val.data);
     });
   }
 
-  ngOnInit(){
-
+  async checkRoomCodesIndexDB(){
+    const roomsCodesIndexDB:Habitacion[] = await this._roomService.readIndexDB("Rooms");
+        /** Check if RoomsCode are on IndexDb */
+      if(roomsCodesIndexDB){
+          this.roomCodesComplete = [...roomsCodesIndexDB];
+          this.roomCodes = Object.values(
+            roomsCodesIndexDB.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
+        ); 
+      }else{
+          this.roomCodes = await firstValueFrom(this._roomService.getAll());
+          this.roomCodesComplete = [...this.roomCodes]
+          this.roomCodes = Object.values(
+            this.roomCodes.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
+        );         
+      }
+      console.log("RoomCodeCOmplete d mmain container: ", this.roomCodesComplete)
   }
 
-  
-  
+  async ngOnInit(){
+    await this.checkRoomCodesIndexDB();
+
+    this.changing.subscribe(dataSource => { 
+      dataSource.forEach((item, index)=>{
+        const llegada = new Date(item.llegada);
+        const salida = new Date(item.salida);
+
+        const pushArray = 
+          {
+            Id: index+1,   
+            Subject: item.nombre,
+            StartTime: new Date(llegada.getFullYear(), llegada.getMonth(), llegada.getDate(), llegada.getHours(), llegada.getMinutes()),
+            EndTime: new Date(salida.getFullYear(), salida.getMonth(), salida.getDate(), salida.getHours(), salida.getMinutes()),
+            IsAllDay: false,
+            ProjectId: this.checkGroupId(item.habitacion),
+            TaskId: this.checkTaskID(item.numeroCuarto),
+            Folio: item.folio,
+            Codigo: item.habitacion,
+            Numero: item.numeroCuarto,
+            CategoryColor:item.origen === 'Walk-In' ? this.colorDict[0] : item.origen === 'Reserva' ? this.colorDict[3] : item.origen === 'Temporal' ? this.colorDict[1] : item.origen === 'Interno' ? this.colorDict[2] : this.colorDict[3]
+          }
+        this.datasourceArray.push(pushArray)
+      })
+      this.refreshCalendar(this.datasourceArray);
+    });
+
+    // await this.checkReservationsIndexDB();
+  }
+
+  refreshCalendar(datasource:Record<string, any>[]){
+    this.scheduleObj.eventSettings.dataSource = [...datasource]
+  }
+
+  checkGroupId(codigo:string){
+    let codigosSet = new Set();
+    const habitacionesPorTipo = this.roomCodesComplete.find(item=>item.Codigo === codigo);
+    const foundGroupID = this.tipoHabGroupDataSource.find(item=>item.text === habitacionesPorTipo?.Tipo);
+    return foundGroupID?.id
+  }
+
+  checkTaskID(numero:string){
+    const foundTaskID = this.habitacionPorTipoDataSource.find(item=>item.text === numero);
+    return foundTaskID?.id
+  }
+
+
+  // async checkReservationsIndexDB(){
+  //   const reservationsIndexDB:Huesped[] = await this._huespedService.readIndexDB("Reservations");
+  //   /** Check if RoomsCode are on IndexDb */
+  //   if(reservationsIndexDB){
+  //     this.reservationsArrayComplete = reservationsIndexDB;
+  //   }else{
+  //       this.reservationsArrayComplete = await firstValueFrom(this._huespedService.getAll());     
+  //   }
+  // }
+
   createRack(responseData:Habitacion[]){
-    const tipoArray = []
-    const codigoArray = []
-    
+    const tipoArray:Record<string, any>[] = []
+    const codigoArray:Record<string, any>[] = []
+
     const tipoCuarto = [...new Set(responseData.map(item => item.Tipo))];
     // const codigoCuarto = [...new Set(responseData.map(item => item.Numero))];
 
-    for( const key in tipoCuarto) {
-      tipoArray.push({ text: tipoCuarto[key], id:parseInt(key+1), color:'#' + Math.floor(Math.random()*16777215).toString(16) });
-    }
+    tipoCuarto.forEach((item,index)=>{
+      tipoArray.push({ text: tipoCuarto[index], id:index+1, color:'#' + Math.floor(Math.random()*16777215).toString(16) });
+    }) 
+    // HERE THE GROUPS ARE CREATED
     this.tipoHabGroupDataSource = tipoArray;
 
     for(const key in responseData)
@@ -165,12 +223,13 @@ export class ContentComponent implements OnInit{
         {  
           for(let x=0; x<tipoArray.length; x++){
             if(tipoArray[x].text === responseData[key].Tipo){
-              codigoArray.push({ text: responseData[key].Codigo + " - " + responseData[key].Numero , id:parseInt(key+1), groupId: tipoArray[x].id, color: tipoArray[x].color}); 
+              if(tipoArray[x].id)
+              codigoArray.push({ text: responseData[key].Numero , id:Number(key)+1, groupId: tipoArray[x].id, color: tipoArray[x].color}); 
             }
           }
         }
     }
-    this.habitacionPorTipoDataSource = codigoArray
+     this.habitacionPorTipoDataSource = codigoArray
   }
 
   onChange(args: ChangeEventArgs|any): void {
@@ -180,35 +239,16 @@ export class ContentComponent implements OnInit{
     (this.scheduleObj.views[0] as any).interval = this.scheduleinterval;
     this.scheduleObj.refresh();
   }
-  // public onRenderCell(args: RenderCellEventArgs): void {
-  //   if (args.element.classList.contains('e-work-cells')) {
-  //     if (args.date! < new Date(2021, 6, 31, 0, 0)) {
-  //       args.element.setAttribute('aria-readonly', 'true');
-  //       args.element.classList.add('e-read-only-cells');
-  //     }
-  //   }
-  //   if (args.elementType === 'emptyCells' && args.element.classList.contains('e-resource-left-td')) {
-  //     const target: HTMLElement = args.element.querySelector('.e-resource-text') as HTMLElement;
-  //     target.innerHTML = '<div class="name">Rooms</div><div class="type">Type</div><div class="capacity">Capacity</div>';
-  //   }
-  // }
 
   /**
    * Event that triggers when popup add event window triggers, and lets you interact with popup
    * @param args This functions is to fill the dropdown of Time that appears whenever yo create or modifiy and existing reservation
    */
   onPopupOpen = (args:any) => {
-    // if (args.type === 'Editor') {
-    //   args.duration = 60;
-    // }
-    if (args.type === 'Editor' && !args.target?.classList.contains("e-appointment")) {
-      args.duration = 300;
-     // Set the start time to 9:00 AM
-     const startTime = new Date(args.data.StartTime);
-     startTime.setHours(9);
-     (args.element as any).querySelector('.e-start').ej2_instances[0].value =
-       startTime;
-   }
+   if (args.type === 'Editor' || args.type === 'QuickInfo')  {
+    args.cancel = true;
+    this.honEditRsv.emit(args);
+    }
   }
   /**
    * This function shows how to move a reservation in an estimated time of minutes, the interval parameter determines how many in how many minutes the event will be moved when you drag it across the calendar
@@ -218,6 +258,22 @@ export class ContentComponent implements OnInit{
    */
   onDragStart(args: DragEventArgs): void {
     args.interval = 30;
+    console.log("Drag Start : ", args)
+  }
+
+  onDragStop(args: DragEventArgs): void {
+    //this.onResizeReserva.emit(args.data) // <-- This data is from where the event start  and i need the data to which is moved to
+    console.log(args.data);
+    const scheduleObj = (document.querySelector('.e-schedule') as any).ej2_instances[0];
+    const targetElement:any = args.target;
+    const cellIndex = targetElement!.cellIndex;
+    const rowIndex = targetElement!.parentNode!.rowIndex;
+    const resourceDetails = scheduleObj.getResourcesByIndex(rowIndex);
+    const Codigo = this.roomCodesComplete.find((item)=> item.Numero === resourceDetails.resourceData.text)?.Codigo
+    args.data.Codigo = Codigo
+    args.data.Numero = resourceDetails.resourceData.text
+    this.onResizeReserva.emit(args.data)
+    console.log('Dropped resource data:', args.data);
   }
   
 
@@ -286,6 +342,63 @@ onDataBound(event:any){
       cell.style.backgroundColor = '';
     }
   });
+}
+
+
+/**
+ * This method is used to change the color of each event using its categoryColor
+ * @param args 
+ * @returns 
+ */
+onEventRendered(args: EventRenderedArgs): void {
+  const categoryColor: string = args.data.CategoryColor as string;
+  if (!args.element || !categoryColor) {
+    return;
+  }
+  if (this.currentView === 'Agenda') {
+    (args.element.firstChild as HTMLElement).style.borderLeftColor = categoryColor;
+  } else {
+    args.element.style.backgroundColor = categoryColor;
+  }
+}
+
+
+onEditRsv(event:any){
+  this.honEditRsv.emit(event);
+}
+
+onResizeStop(args: ResizeEventArgs){
+
+    this.onResizeReserva.emit(args.data)
+}
+
+promptMessage(header:string,message:string, obj?:any){
+  const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+  modalRef.componentInstance.alertHeader = header
+  modalRef.componentInstance.mensaje= message    
+  modalRef.result.then((result) => {
+    this.closeResult = `Closed with: ${result}`;
+    }, (reason) => {
+        this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+    });
+    setTimeout(() => {
+      modalRef.close('Close click');
+    },4000)
+    return
+}
+
+ngOnDestroy(){
+  this.eventsSubscription.unsubscribe();
+}
+
+private getDismissReason(reason: any): string {
+  if (reason === ModalDismissReasons.ESC) {
+      return 'by pressing ESC';
+  } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
+      return 'by clicking on a backdrop';
+  } else {
+      return  `with: ${reason}`;
+  }
 }
 
 }

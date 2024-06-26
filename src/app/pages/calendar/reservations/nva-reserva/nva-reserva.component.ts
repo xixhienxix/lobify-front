@@ -1,4 +1,4 @@
-import {  Component, OnDestroy, OnInit, ViewEncapsulation } from '@angular/core';
+import {  Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
@@ -15,7 +15,6 @@ import { Estatus } from '../../_models/estatus.model';
 import { Foliador } from '../../_models/foliador.model';
 import { EstatusService } from '../../_services/estatus.service';
 import { FoliosService } from '../../_services/folios.service';
-import { CustomerService } from '../../_services/customer_service';
 import { Huesped } from 'src/app/models/huesped.model';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { MatCheckboxChange } from '@angular/material/checkbox';
@@ -45,7 +44,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     private _disponibilidadService: DisponibilidadService,
     private _folioservice: FoliosService,
     private _estatusService:EstatusService,
-    private _customerService:CustomerService,
     private modalService:NgbModal){
       
   }
@@ -53,7 +51,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   formGroup:FormGroup
   formGroup2:FormGroup
   isLoading:boolean=false;
-  submitLoading:boolean=false
   accordionDisplay="";
   bandera:boolean=false;
   closeResult:string
@@ -122,6 +119,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   todayDate:Date = new Date();
   // closeResult: string;
 
+  @Output() onNvaReserva: EventEmitter<Huesped[]> = new EventEmitter();
+
   get inputs() {
     return this.formGroup.controls["nombreHabs"] as FormArray;
   }
@@ -151,8 +150,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   }
 
   save(){
-    this.submitLoading=true;
-
     const formData = this.formGroup.value;
 
       for(let i=0; i<this.preAsignadasArray.length; i++){
@@ -193,28 +190,14 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
             notas:'',
             vip:'',
             ID_Socio:0,
-            estatus_Ama_De_Llaves:'Limpio',      
+            estatus_Ama_De_Llaves:'LIMPIA',      
           }
     
            this.huespedInformation.push(huesped)
         }
     }
-
-
-    this._customerService.addPost(this.huespedInformation).subscribe({
-      next:(data)=>{
-        this.modal.close();
-        this.promptMessage('Exito','Reservacion Guardada con exito')
-      },
-      error:()=>{
-        this.promptMessage('Error','La Reservacion no se pudo generar con exito intente nuevamente')
-      },
-      complete:()=>{
-        this.submitLoading=false
-      }
-      
-
-    })
+    
+    this.onNvaReserva.emit(this.huespedInformation);
     
   }
 
@@ -324,9 +307,9 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   
 
 
-  tarifaRadioButton(event:any, codigo:string){
+  tarifaRadioButton(tarifas:Tarifas, event:any, codigo:string){
     const checkedStatus = event.source.checked
-    const tarifa = event.value
+    const tarifa = tarifas
 
       if(this.tarifaSeleccionada.length > 0){
         const index  = this.tarifaSeleccionada.findIndex(obj =>
@@ -335,7 +318,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
           if(index != -1){
             this.tarifaSeleccionada[index].checked = checkedStatus
             this.tarifaSeleccionada.splice(index,1);
-            this.tarifaSeleccionada.push(tarifa)
+            this.tarifaSeleccionada.push({...tarifa,checked:checkedStatus})
           }else{
           }if(index === -1){
             this.tarifaSeleccionada.push({...tarifa,checked:checkedStatus})
@@ -361,9 +344,9 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     }
 }
 
-  ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number){
+  ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cuarto){
     if(tarifa.Tarifa === 'Tarifa Estandar'){
-      return tarifa.TarifaRack*estanciaPorNoche
+      return Math.trunc(tarifa.TarifaRack*estanciaPorNoche)
     }else {
       let tarifaTotal=0
       const validDays = tarifa.Dias.filter((x)=> x.checked === true)    
@@ -376,12 +359,19 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
         if(validDay){
           tarifaTotal += tarifa.TarifaRack
         }else{
-          const tarifaEstandar  = this.standardRatesArray.filter(obj =>
-            obj.Habitacion.some(item => item === this.cuarto)); 
-          tarifaTotal += tarifaEstandar[0].TarifaRack  
+          if(this.cuarto==="1"){
+            const tarifaEstandar  = this.standardRatesArray.filter(obj =>
+              obj.Habitacion.some(item => item === codigosCuarto)); 
+            tarifaTotal += tarifaEstandar[0].TarifaRack  
+          }else{
+            const tarifaEstandar  = this.standardRatesArray.filter(obj =>
+              obj.Habitacion.some(item => item === this.cuarto)); 
+
+            tarifaTotal += tarifaEstandar[0].TarifaRack  
+          }
         }
       }
-      return tarifaTotal
+      return Math.trunc(tarifaTotal)
     }
   }
 
@@ -593,8 +583,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 
     this.resetDispo();
     this.todaysDateComparer();
-
-
   }
 
   getRooms(){
@@ -703,10 +691,10 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
       // this.estatusID=value
       this.origenReserva='Walk-In'
     }
-    else{
+    else if(value===2){
     this.currentFolio=this.folios[0]
     // this.estatusID=value
-    this.origenReserva='Recepción'}
+    this.origenReserva='Reserva'}
 
     this.onSubmit();
   }

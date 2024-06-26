@@ -1,0 +1,326 @@
+<div style="background-color: #00506a" class="modal-content">
+    <button
+      style="
+        position: absolute;
+        top: 2%;
+        right: 1%;
+        background-color: #fa6d7c;
+        font-weight: bold;
+        color: white;
+      "
+      class="btn"
+      (click)="closeModal()"
+    >
+      X
+    </button>
+    <br />
+    <div class="container">
+      <div
+        style="font: bold; color: white; pointer-events: none;"
+        class="modal-title h4 col-12"
+        id="example-modal-sizes-title-lg"
+      >
+        <div class="row col-md-12">
+          <h2 style="font-size: 1.5em; color: white;">{{currentHuesped.nombre}}</h2>
+        </div>
+        <div class="row">
+          <div class="col-lg-6">
+            <small style="color: white; font-size: 1em"
+            >ID RVA : &nbsp;
+            <small style="font-size: 1em; font-weight: bold; color: #319dd7">{{currentHuesped.folio}}</small>
+          </small>
+          </div>
+          <div class="col-lg-6">
+            &nbsp; &nbsp; &nbsp; &nbsp;
+            <small style="color: white; font-size: 1em"
+              >Hab.: &nbsp;
+              <small style="font-weight: bold; font-size: 1em; color: #319dd7"
+                > {{currentHuesped.numeroCuarto}} - {{currentHuesped.habitacion}}</small
+              >
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <br />
+    <!-- </div>  -->
+    <form [formGroup]="formGroup">
+    <div class="row container">
+        <div class="col-lg-7">
+            <ng-container *ngIf="currentHuesped.estatus==='Huesped en Casa'||currentHuesped.estatus==='Check-Out'||currentHuesped.estatus==='Uso Interno'||currentHuesped.estatus==='Bloqueo / Sin Llegadas'||currentHuesped.estatus==='Reserva Temporal'">
+              <mat-select formControlName='estatus' style="font-weight: bold; font-size: larger; " [style.background-color]="backgroundColor(currentHuesped.estatus)" name="filter_for" id="demo" class="btn">
+                <mat-option style="  font-weight: bold; font-size: larger;  " #option [style.background-color]="backgroundColor(currentHuesped.estatus)"  [value]="currentHuesped.estatus">{{currentHuesped.estatus}}</mat-option>
+              </mat-select>
+            </ng-container>
+            <ng-container *ngIf="currentHuesped.estatus==='Reserva Sin Pago'||currentHuesped.estatus==='Deposito Realizado'||currentHuesped.estatus==='Esperando Deposito'||currentHuesped.estatus==='Totalmente Pagada'||currentHuesped.estatus==='Reserva Confirmada'">
+              <mat-select formControlName='estatus' style="  font-weight: bold; font-size: larger;  " #selected  (selectionChange)="openDialog(currentHuesped,selected.value)" [style.background-color]="backgroundColor(currentHuesped.estatus)" name="filter_for" id="demo" class="btn" >
+                <ng-container *ngFor="let estatus of estatusArray">
+                  <ng-container  *ngIf="estatus.id===2||estatus.id===3||estatus.id===8||estatus.id===9||estatus.id===10">
+                    <mat-option style="  font-weight: bold; font-size: medium;  " #option [style.background-color]="estatus.color" [value]="estatus.estatus">{{estatus.estatus}}</mat-option>
+                  </ng-container>
+                </ng-container>
+              </mat-select>
+            </ng-container>
+            <ng-container  *ngIf="currentHuesped.estatus==='No Show'||currentHuesped.estatus==='Reserva Cancelada'">
+              <mat-select formControlName='estatus' [style.background-color]="backgroundColor(currentHuesped.estatus)" name="filter_for" id="demo" class="btn">
+                <mat-option style="  font-weight: bold; font-size: medium;  " #option [style.background-color]="backgroundColor(currentHuesped.estatus)" [value]="currentHuesped.estatus">{{currentHuesped.estatus}}</mat-option>
+              </mat-select>
+            </ng-container>
+        </div>
+          <div class="col-lg-5">
+            <!-- <ng-container *ngIf="!cargando"> -->
+              <mat-select #selectedAma (selectionChange)='onChangeAma(selectedAma.value)' formControlName='ama' style=" color: white; font-weight: bold; font-size: larger;" 
+              [style.background-color]="colorAma" 
+              name="estatusAma" id="amaDellaves" class="btn" >
+                <ng-container *ngFor="let estatusAmaDeLlaves of houseKeepingCodes" >
+                  <mat-option style="  font-weight: bold; font-size: medium;  " [value]="estatusAmaDeLlaves.Descripcion" [style.background-color]="estatusAmaDeLlaves.Color"> {{estatusAmaDeLlaves.Descripcion.toUpperCase()}}</mat-option>
+                </ng-container>
+              </mat-select>
+            <!-- </ng-container> -->
+          </div>
+    </div>
+  </form>
+  <br>
+
+    <div class="row container" style="text-align: center; margin:auto; margin-bottom:3%;">
+      <div
+        style="background-color: #0083b2; color: white"
+        class="col-sm-4"
+      >
+        <div>
+          <label style="color: white"> Su Cuenta: </label>
+        </div>
+        <label  style="color: white; font-size: large;">
+          $ {{ (currentHuesped.porPagar).toLocaleString("es-MX") }}.00
+        </label>
+      </div>
+  
+      <div
+        style="background-color: #da8f27; color: white"
+        class="col-sm-4"
+      >
+        <div>
+          <label style="color: white"> Pagos y Descuentos: </label>
+        </div>
+        <label style="color: white;font-size: large;"> $ {{(currentHuesped.porPagar-currentHuesped.pendiente).toLocaleString("es-MX")}}.00 </label>
+      </div>
+  
+      <div
+        style="background-color: #e43748; color: white"
+        class="col-sm-4"
+      >
+        <div>
+          <label style="color: white"> Pendiente: </label>
+        </div>
+        <label style="color: white;font-size: large;">
+          $ {{ (currentHuesped.pendiente).toLocaleString("es-MX") }}.00
+        </label>
+      </div>
+    </div>
+
+  </div>
+  
+  <mat-tab-group [selectedIndex]="selectedIndex" class="col-md-12" >
+  
+    <mat-tab label="Reserva">
+      <app-reservas-component 
+        [promesasDisplay]="promesasDisplay"
+        [adicionalSubject]="adicionalSubject"
+        [onSuccessResponse]="onSuccessResponse"
+        [changing]="changingPromesasValue"
+        (onAgregarPago)="honAgregarPago($event)"
+        (onUpdateEstatusHuesped)="honUpdateEstatusHuesped($event)"
+        (onAlertMessage)="honAlertMessage($event)"
+        (onGetPromesas)="honGetPromesas($event)"
+        (onGuardarPromesa)="honGuardarPromesa($event)" 
+        (onGetAdicionales)="honGetAdicionales($event)" 
+        [currentHuesped]="currentHuesped" 
+        (next)="setStep(2)"></app-reservas-component>
+    </mat-tab>
+  
+    <mat-tab  label="Huésped">
+      <!-- <app-huesped-component></app-huesped-component> -->
+    </mat-tab>
+  
+    <mat-tab label="Transacciones">
+      <!-- <app-transacciones-component></app-transacciones-component> -->
+    </mat-tab>
+  
+    <mat-tab label="Edo de Cuenta">
+      <!-- <app-edo-cuenta-component></app-edo-cuenta-component> -->
+    </mat-tab>
+  </mat-tab-group>
+  
+  
+  <div *ngIf="currentHuesped.estatus==='Reserva Confirmada'||currentHuesped.estatus==='Reserva Sin Pago'||currentHuesped.estatus==='Reserva Temporal'||currentHuesped.estatus==='Esperando Deposito'||currentHuesped.estatus==='Deposito Realizado'||currentHuesped.estatus==='Totalmente Pagada'">
+    <div style="background-color: #00506a; text-align: center; padding-top: 5px; padding-bottom: 5px;" class="h4 modal-content">
+      <label style="color: aliceblue"> Estado de Reserva / Folio </label>
+      <div style="justify-content: space-around;" class="row">
+  
+        <div class="col-lg-6">
+          <button 
+            [disabled]="currentHuesped.estatus!=='Reserva Sin Pago'"
+            class="btn btn-primary btn-block"
+            type="submit"
+            name="estatus"
+          >
+            Confirma Resereva
+          </button>
+          <br>
+        </div>
+        <div class="col-lg-6">
+          <button
+            [disabled]='todaysDateComparer()'
+            class="btn btn-success btn-block"
+            type="submit"
+            name="estatus"
+          >
+            Realiza Check-In
+          </button>
+        </div>
+  
+        <div class="col-lg-6">
+          <button 
+          (click)="setStep(2)"
+          class="btn btn-warning btn-block" 
+          type="submit">
+            Realiza un Pago
+          </button>
+          <br>
+        </div>
+        <br>
+  
+  
+  
+        <div class="f col-lg-6">
+          <button
+            [disabled]="!(currentHuesped.estatus==='Reserva Sin Pago'||currentHuesped.estatus==='Deposito Realizado'||currentHuesped.estatus==='Esperando Deposito'||currentHuesped.estatus==='Totalmente Pagada'||currentHuesped.estatus==='Reserva Confirmada')"
+            class="btn btn-secondary btn-block"
+            type="submit"
+            (click)="openEnviarConfirmacion()"
+            value="7"
+          >
+            Enviar Confirmacion
+          </button>
+        </div>
+        <br>
+  
+        <div class="col-lg-6">
+          <button
+           class="btn btn-danger btn-block" type="submit">
+            No se presento
+          </button>
+          <br>
+        </div>
+        <br>
+  
+        <div class="f col-lg-6">
+          <button
+            class="btn btn-danger btn-block"
+            type="submit"
+            value="7"
+          >
+            Cancela Reserva
+          </button>
+        </div>
+        <br>
+  
+        <div class="f col-lg-12">
+          <button
+          (click)="openModifica()"
+          class="btn btn-primary btn-block"
+            type="submit"
+            value="7"
+          >
+            Modifica Reserva
+          </button>
+          <br>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  <div *ngIf="currentHuesped.estatus==='Huesped en Casa' ">
+    <div style="background-color: #00506a; text-align: center; padding-top: 5px; padding-bottom: 5px;" class="h4 modal-content">
+      <label style="color: aliceblue"> Estado de Reserva / Folio </label>
+      <div style="justify-content: space-around;" class="row">
+  
+        <div class="col-lg-12">
+          <button disabled
+            class="btn btn-primary btn-block"
+            style="width: 100%; margin:auto"
+            type="submit"
+            name="estatus"
+          >
+            eFirma de Registro
+          </button>
+          <br>
+        </div>
+        
+  
+        <div class="col-lg-12">
+          <button 
+          class="btn btn-warning btn-block" 
+          style="width: 100%; margin:auto"
+          type="submit"
+          (click)="setStep(2)">
+            Realiza un Pago
+          </button>
+          <br>
+        </div>
+        <br>
+  
+      
+        <br>
+  
+        <div class="f col-lg-12">
+          <button
+            class="btn btn-danger btn-block"
+            style="width: 100%; margin:auto"
+            type="submit"
+            value="7"
+          >
+            Realiza Check-Out
+          </button>
+          <br>
+        </div>
+  
+        <div class="f col-lg-12">
+          <button
+            (click)="openModifica()"
+            class="btn btn-primary btn-block"
+            type="submit"
+            style="width: 100%; margin:auto"
+            value="7"
+          >
+            Modifica Húesped
+          </button>
+          <br>
+        </div>
+  
+      </div>
+    </div>
+  </div>
+  <div *ngIf="currentHuesped.estatus==='Reserva Cancelada'">
+    <div style="background-color: #00506a; text-align: center; padding-top: 5px; padding-bottom: 5px;" class="h4 modal-content">
+      <br>
+    <div class="f col-lg-12">
+      <button
+        class="btn btn-success btn-block"
+        style="width: 100%; margin:auto"
+        type="submit"
+        value="7">
+        Reactivar Reservación
+      </button>
+      <br>
+    </div>
+    </div>
+  </div>
+  
+  
+  
+  <ng-container *ngIf="isLoading">
+    <app-loader-spinner></app-loader-spinner>
+  </ng-container>
+  

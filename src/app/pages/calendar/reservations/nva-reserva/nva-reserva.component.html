@@ -183,7 +183,7 @@
                           <th mat-header-cell *matHeaderCellDef> Acciones </th>
                           <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element; let i = index "> 
                             <mat-radio-group [name]="cuarto">
-                              <mat-radio-button [value]="element[i]" (change)="tarifaRadioButton($event, cuarto)"></mat-radio-button>   
+                              <mat-radio-button [value]="element[i]" (change)="tarifaRadioButton(element,$event, cuarto)"></mat-radio-button>   
                             </mat-radio-group>
                           </td>
                         </ng-container>
@@ -227,19 +227,19 @@
                           
                               <ng-container matColumnDef="$ Promedio x Noche">
                                 <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-                                <td mat-cell *matCellDef="let element"> {{element.TarifaRack}} </td><!--{{ratesTotalCalc(element,stayNights)/stayNights}}-->
+                                <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights,codigosCuarto.Codigo)/stayNights}} </td><!--{{ratesTotalCalc(element,stayNights)/stayNights}}-->
                               </ng-container>
                           
                               <ng-container matColumnDef="Total">
                                 <th mat-header-cell *matHeaderCellDef> Total </th>
-                                <td mat-cell *matCellDef="let element"> {{element.TarifaRack}} </td><!--{{ratesTotalCalc(element,stayNights)}}-->
+                                <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights,codigosCuarto.Codigo)}} </td><!--{{ratesTotalCalc(element,stayNights)}}-->
                               </ng-container>
                     
                               <ng-container matColumnDef="Acciones">
                                 <th mat-header-cell *matHeaderCellDef> Acciones </th>
                                 <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element; let i = index"> 
                                     <mat-radio-group [name]="codigosCuarto.Codigo">
-                                      <mat-radio-button [value]="element" (change)="tarifaRadioButton($event, codigosCuarto.Codigo)"></mat-radio-button>
+                                      <mat-radio-button [value]="element" (change)="tarifaRadioButton(element, $event, codigosCuarto.Codigo)"></mat-radio-button>
                                   </mat-radio-group>                                  
                                 </td>
                               </ng-container>
@@ -257,17 +257,6 @@
                                       </div>
                                     </ng-container>
                                   </ng-container>
-                                  <!-- <ng-container *ngFor="let habitacionesDisponibles of mySet">
-                                      <ng-container *ngFor="let tipocuarto of roomCodes">
-                                        <ng-container *ngIf="tipocuarto.Numero == habitacionesDisponibles"> -->
-                                         <!-- <div class="parcel">
-                                           <ul>
-                                             <mat-checkbox  formControlName="checkbox"  #checked (change)="preAsignar(tipocuarto.Numero,tipocuarto.Codigo,checked.checked)"></mat-checkbox> &nbsp; <label style="margin-right: 7%">{{ tipocuarto.Numero }}</label>
-                                           </ul>
-                                         </div> -->
-                                        <!-- </ng-container>
-                                      </ng-container>
-                                   </ng-container> -->
                                 </td>
                               </ng-container>
                       
@@ -426,7 +415,7 @@
                   type="submit"
                   name="estatus"
                   [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !noDisabledCheckIn || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                  (click)="setEstatus(1)"
+                  (click)="setEstatus(1);closeModal()"
                   >
                     Realiza Walk-In
                   </button>
@@ -438,7 +427,7 @@
                   type="submit"
                   name="estatus"
                   [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                  (click)="setEstatus(2); "
+                  (click)="setEstatus(2); closeModal()"
                   >
                     Agrega Reserva
                   </button>
@@ -449,7 +438,7 @@
                   style="background-color:var(--internal-use-btn); width: 100%;"
                   type="submit"
                   [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                  (click)="setEstatus(5)"
+                  (click)="setEstatus(5);closeModal()"
                   >
   
                     Reserva Uso Interno
@@ -463,7 +452,7 @@
                     type="submit"
                     value="7"
                     [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                    (click)="setEstatus(7)"
+                    (click)="setEstatus(7); closeModal()"
                     >
                     Reserva Temporal
                   </button>
@@ -476,7 +465,5 @@
 
 </form>
 </div>
-<ng-container *ngIf="submitLoading">
-  <app-loader-spinner></app-loader-spinner>
-</ng-container>
+
   

@@ -1,13 +1,26 @@
 <div class="container" style="background-color: white;">
     <div class="card card-custom">
-        <app-header></app-header>
+        <app-header (onNvaReserva)="onNvaReserva($event)"
+        ></app-header>
     </div>
     <div class="card card-custom" style="overflow-y: auto; padding: 10px;">
-        <app-content ></app-content>
+        <app-content #calendar 
+        [datasourceArray]="datasourceArray"
+        [roomCodes]="roomCodes"
+        [roomCodesComplete]="roomCodesComplete"
+        [changing]="changingValue"
+        (honEditRsv)="onEditRsv($event)" 
+        [onSavedReservation]="eventsSubject.asObservable()" 
+        (onResizeReserva)="onResizeReservation($event)" 
+        (onChangedRate)="onChangedRate($event)" 
+        (onOpenEnviarReservacion)="openEnviarReservacion()"
+        (onOpenModifica)="onOpenModifica($event)">
+    </app-content>
     </div>
     <div class="card card-custom">
         <app-footer></app-footer>
     </div>
 </div>
-
-
+<ng-container *ngIf="submitLoading">
+    <app-loader-spinner></app-loader-spinner>
+</ng-container>

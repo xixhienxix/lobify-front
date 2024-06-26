@@ -10,6 +10,7 @@ import { Habitacion } from 'src/app/models/habitaciones.model';
 import { Tarifas } from 'src/app/models/tarifas';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
+import { MatRadioChange } from '@angular/material/radio';
 
 type listaCamas = {key:number;value:string;}
 @Component({
@@ -133,6 +134,10 @@ export class SpecialRatesComponent implements OnInit{
     })
     this.preciosFormGroup = this.fb.group({
       tarifaRack:[0,Validators.required],
+      tarifa1persona:[0,Validators.required],
+      tarifa2persona:[0,Validators.required],
+      tarifa3persona:[0,Validators.required],
+      tarifa4persona:[0,Validators.required],
       descuento:[0],
       precios: this.fb.array([]),
       preciosNinos: this.fb.array([]),
@@ -195,27 +200,28 @@ export class SpecialRatesComponent implements OnInit{
     }
   }
 
-  aplicaDescuento(){
-    this.dehabilitaButtons=true
-    this.preciosControls.tarifaRack.patchValue(this.preciosControls.tarifaRack.value-(this.preciosControls.tarifaRack.value*this.preciosControls.descuento.value/100))
+  //**Deprecated */
+  // aplicaDescuento(){
+  //   this.dehabilitaButtons=true
+  //   this.preciosControls.tarifaRack.patchValue(this.preciosControls.tarifaRack.value-(this.preciosControls.tarifaRack.value*this.preciosControls.descuento.value/100))
     
-    let preciosConDesc = []
-    let preciosConDescNinos = []
+  //   let preciosConDesc = []
+  //   let preciosConDescNinos = []
 
-    for(let i=0;i<this.precios.value.length;i++){
-      preciosConDesc.push(this.precios.value[i]-(this.precios.value[i]*this.preciosControls.descuento.value/100))
-    }
-    this.precios.patchValue(preciosConDesc)
+  //   for(let i=0;i<this.precios.value.length;i++){
+  //     preciosConDesc.push(this.precios.value[i]-(this.precios.value[i]*this.preciosControls.descuento.value/100))
+  //   }
+  //   this.precios.patchValue(preciosConDesc)
 
-    for(let i=0;i<this.preciosNinos.value.length;i++){
-      preciosConDescNinos.push(this.preciosNinos.value[i]-(this.preciosNinos.value[i]*this.preciosControls.descuento.value/100))
-    }
-    this.preciosNinos.patchValue(preciosConDescNinos)
+  //   for(let i=0;i<this.preciosNinos.value.length;i++){
+  //     preciosConDescNinos.push(this.preciosNinos.value[i]-(this.preciosNinos.value[i]*this.preciosControls.descuento.value/100))
+  //   }
+  //   this.preciosNinos.patchValue(preciosConDescNinos)
 
-    this.descuentoNoAplicado=false
+  //   this.descuentoNoAplicado=false
 
 
-  }
+  // }
 
   planSeleccionado(event:any){
     this.plan=event.value
@@ -257,9 +263,9 @@ export class SpecialRatesComponent implements OnInit{
 
   }
   
-  descuentoTotalProc(event:MatCheckboxChange){
+  descuentoTotalProc(event:MatRadioChange){
 
-    if(event.checked){
+    if(event.source.checked){
       this.descuentoTotalProCheckbox=true
       this.descuentoNoAplicado=true
     }else
@@ -281,8 +287,9 @@ export class SpecialRatesComponent implements OnInit{
     }
   }
 
-  tarifaEspecial(event:MatCheckboxChange){
-    if(!event.checked){
+  tarifaEspecial(event:MatRadioChange){
+    if(!event.source.checked){
+      this.descuentoTotalProCheckbox=false
       this.precios.clear();
       this.preciosNinos.clear();
     }else{
@@ -322,7 +329,7 @@ export class SpecialRatesComponent implements OnInit{
         this.preciosNinos.push(new FormControl(0));
       }
   
-      if(event.checked){
+      if(event.source.checked){
         this.tarifaEspecialYVariantes=true
       }else
       {
