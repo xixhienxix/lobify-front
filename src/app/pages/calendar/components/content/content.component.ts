@@ -113,6 +113,7 @@ export class ContentComponent implements OnInit,OnDestroy{
   @Input() datasourceArray :Record<string, any>[]=[]
   @Input() onSavedReservation: Observable<Huesped[]>;
 
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   @Output() onResizeReserva: EventEmitter<Record<string, any>> = new EventEmitter();
   @Output() honEditRsv: EventEmitter<Huesped[]> = new EventEmitter();
   @ViewChild("scheduleObj") public scheduleObj: ScheduleComponent;
