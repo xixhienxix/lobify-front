@@ -1,0 +1,57 @@
+<div class="control-section">
+    <div class="col-lg-9 content-wrapper">
+      <div class="schedule-demo-heading">
+Fare Calendar  
+    </div>
+      <ejs-schedule #scheduleObj width='100%' cssClass='schedule-resources' height='650px' [readonly]='readonly'
+        [selectedDate]="selectedDate" [eventSettings]="eventSettings" (dataBinding)="onDataBinding()"
+        (actionBegin)="onActionBegin($event)" (dataBound)="onDataBound()" (popupOpen)="onPopupOpen($event)">
+        <e-resources>
+          <e-resource field='AirlineId' title='Airline' [dataSource]='resourceDataSource' [allowMultiple]='allowMultiple'
+            name='Airlines' textField='text' idField='id'>
+          </e-resource>
+        </e-resources>
+        <e-views>
+          <e-view option="Month"></e-view>
+        </e-views>
+      </ejs-schedule>
+    </div>
+    <div class="col-lg-3 property-section">
+      <div class="property-panel-section">
+        <div class="property-panel-header">Properties</div>
+        <div class="property-panel-content">
+          <div id="property" class="property-panel-table" title="Properties">
+            <table id="property" title="Properties" style="width: 100%">
+              <tbody>
+                <tr style="height: 50px">
+                  <td>
+                    <div>
+                      <ejs-checkbox label="Airways 1" cssClass="e-resource e-airways-1" [checked]="true"
+                        (change)="onChange($event)"></ejs-checkbox>
+                    </div>
+                  </td>
+                </tr>
+                <tr style="height: 50px">
+                  <td>
+                    <div>
+                      <ejs-checkbox label="Airways 2" cssClass="e-resource e-airways-2" [checked]="true"
+                        (change)="onChange($event)"></ejs-checkbox>
+                    </div>
+                  </td>
+                </tr>
+                <tr style="height: 50px">
+                  <td>
+                    <div>
+                      <ejs-checkbox label="Airways 3" cssClass="e-resource e-airways-3" [checked]="true"
+                        (change)="onChange($event)"></ejs-checkbox>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  

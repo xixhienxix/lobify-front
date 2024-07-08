@@ -71,6 +71,39 @@
     },
     "DialogErros":{
         "errors.huesped.lenght": "There are reservations that were assigned to this room, do you still want to delete it?"
+    },
+    "RatesComponent":{
+        "baseRateTabTittle": "BASE RATE",
+        "especialRateTabTittle":"ESPECIAL RATES",
+        "editBaseRate":"EDIT BASE RATE",
+        "roomTypes":"ROOM TYPES",
+        "publicRates":"PUBLIC RATES",
+        "noVariantRate": "*NO VARIANT RATE WITHOUT EXTRAS*",
+        "ratesIncludes":"ONLY LODGING NO FOOD NOR DRINKS ",
+        "ratesQuestion":"¿ DO YOU OFFER ANY OF THIS EXTRA SERVICES ?",
+        "ratesBreakfast":"BREAKFAST INCLUDED RATE",
+        "ratesBreakfastIncludes":"INCLUDES LODGING + 1 BREAKFAST PER PERSON",
+        "allIncludedRatesCheckbox": "ALL INCLUDED RATE",
+        "allIncludedRatesIncludes": "INCLUDES LODGING + FOOD AND DRINKS PER PERSON",
+        "visibleRate": "THIS RATE IS ONLY VISIBLE IN",
+        "visibleRateRecepcion": "FRONT DESK",
+        "cancelPolicy": "CANCEL POLICY ",
+        "cancelPolicyDEsc": "NON REFUNDABLE"
+    },
+    "SpecialRatesComponent":{
+        "SpecialRateTabTittle": "NEW SPECIAL RATE",
+        "ActiveRate":"ACTIVE RATE",
+        "InactiveRate":"INACTIVE RATE",
+        "RateName": "VISIBLE NAME FOR SPECIAL RATE",
+        "SpecialRateTittle": "ESPECIAL RATE",
+        "FirstRateApply": "FIRST RATE TO APPLY", 
+        "SpecialRateQuestion": "¿ QUISIERAS OFRECER UNA SEGUNDA TARIFA ? ",
+        "RateOnePerson": "Price for 1 Person",
+        "RateTwoPerson": "Price for 2 Persons",
+        "RateThreePerson": "Price for Three Persons",
+        "RateKids": "Prices for Kids",
+        "SpecialRatesExample": "Example: WeekendRate"
+
     }
 
 }

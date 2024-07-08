@@ -11,8 +11,8 @@ export interface Huesped {
     salida: string;
     noches: number;
     tarifa:string;
-    porPagar: number;
-    pendiente: number;
+    porPagar?: number;
+    pendiente?: number;
     origen: string;
     habitacion: string;
     telefono:string;

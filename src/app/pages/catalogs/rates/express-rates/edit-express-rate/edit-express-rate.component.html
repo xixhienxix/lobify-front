@@ -1,22 +1,217 @@
-<div class="card card-custom gutter-b">
-    <div class="card-header">
-      <div class="card-title ">
-        <h3 class="card-label">Ediciòn Tarifa Express</h3>
-        <button class="btn btn-primary" style="float: right;">
-            Ver Tarifas
-        </button>
-        <button class="btn btn-primary" style="float: right;">
-            Precios Por Bloque
-        </button>
+<div class="modal-content">
+    <div style="background-color: var(--deep-red-background);" class="modal-header">
+        <div style="text-align: center; color: white;" class="text-center modal-title h4 col-10"
+          id="example-modal-sizes-title-lg">
+          {{ "RatesComponent.editBaseRate" | translate }}
+        </div>
+        <button style="background-color:#fa6d7c; font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
       </div>
-    </div>
-    <div class="card" style="background-color: rgb(211, 207, 207);">
-        <div class="row">
-            <div class="col-lg-12">
-                <label class="h4">Tarifa: </label>
-                <label class="h4"> {{tarifa.Tarifa}}</label>
+  </div>
+  <div class="modal-body">
 
-            </div>
+  <form [formGroup]="preciosFormGroup">
+    <div class="row">
+        <div class="col-lg-12">
+            <h2>{{ "RatesComponent.roomTypes" | translate }}</h2>
+            <ng-container *ngFor="let tiposDeHabitacion of tarifa.Habitacion">
+                <h1> {{tiposDeHabitacion}} </h1>
+            </ng-container>
         </div>
     </div>
-</div>
+
+    <br> 
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h2> {{ "RatesComponent.publicRates" | translate }} </h2>
+        </div>
+    </div>
+
+    <hr style="border: 5px solid red; border-radius: 5px;">
+
+    <br>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h3> {{ "RatesComponent.ratesIncludes" | translate }} </h3>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h3 style="color: red;"> {{ "RatesComponent.noVariantRate" | translate }} </h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <input  type="number" class="form-control" formControlName="tarifaBase" name="tarifaBase" [value]="tarifa.TarifaRack">
+    </div>
+
+    <br>
+
+    <div class="row">
+      <div class="col-lg-6">
+        <label class="form-label">Precio para 1 Persona</label>
+        <input  type="number" class="form-control" formControlName="tarifa1personaSin" name="tarifa1personaSin">
+      </div>
+      <div class="col-lg-6">
+        <label class="form-label">Precio para 2 Persona</label>
+        <input  type="number" class="form-control" formControlName="tarifa2personaSin" name="tarifa2personaSin">
+      </div>
+    </div>
+    <br>
+    <div class="row">
+      <div class="col-lg-6">
+        <label class="form-label">Precio para 3 Persona</label>
+        <input  type="number" class="form-control" formControlName="tarifa3personaSin" name="tarifa3personaSin">
+      </div>
+      <div class="col-lg-6">
+        <label class="form-label">Precio para Niños o Niñas </label>
+        <input  type="number" class="form-control" formControlName="tarifaNinosSin" name="tarifaNinosSin">
+      </div>
+    </div>
+
+    <!-- RATES BREAKFAST QUESTION BEGINS -->
+    <br>
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h3 style="color: red;"> {{ "RatesComponent.ratesQuestion" | translate }} </h3>
+        </div>
+    </div>
+
+    <br>
+
+    <mat-checkbox [checked]="tarifa.Tarifa_Extra_Sin.Activa" (change)="ratesBreakFastChecked($event)"> <h3> {{ "RatesComponent.ratesBreakfast" | translate }} </h3>   </mat-checkbox>
+
+    <br>
+
+    <ng-container *ngIf="breakfastFlag">
+
+        <hr style="border: 5px solid red; border-radius: 5px;">
+
+        <br>
+    
+        <div class="row">
+            <div class="col-lg-12">
+                <h4 style="color: grey;"> {{ "RatesComponent.ratesBreakfastIncludes" | translate }} </h4>
+            </div>
+        </div>
+    
+        <br>
+    
+        <div class="row">
+            <div class="col-lg-6">
+              <label class="form-label">Precio para 1 Persona</label>
+              <input  type="number" class="form-control" formControlName="tarifa1personaBreak" name="tarifa1personaBreak">
+            </div>
+            <div class="col-lg-6">
+              <label class="form-label">Precio para 2 Persona</label>
+              <input  type="number" class="form-control" formControlName="tarifa2personaBreak" name="tarifa2personaBreak">
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-lg-6">
+              <label class="form-label">Precio para 3 Persona</label>
+              <input  type="number" class="form-control" formControlName="tarifa3personaBreak" name="tarifa3personaBreak">
+            </div>
+            <div class="col-lg-6">
+              <label class="form-label">Precio para Niños o Niñas </label>
+              <input  type="number" class="form-control" formControlName="tarifaNinosBreak" name="tarifaNinosBreak">
+            </div>
+          </div>
+
+    </ng-container>
+
+    <!-- RATES BREAKFAST QUESTION END -->
+
+
+    <!-- RATES ALL INCLUDED QUESTION BEGINS -->
+
+    <br>
+
+    <mat-checkbox [checked]="tarifa.Tarifa_Extra_Con.Activa" (change)="allIncludedRatesCheckbox($event)"> <h3> {{ "RatesComponent.allIncludedRatesCheckbox" | translate }} </h3>   </mat-checkbox>
+
+    <br>
+
+    <ng-container *ngIf="allIncludedFlag">
+
+        <hr style="border: 5px solid red; border-radius: 5px;">
+
+        <br>
+    
+        <div class="row">
+            <div class="col-lg-12">
+                <h4 style="color: grey;"> {{ "RatesComponent.allIncludedRatesIncludes" | translate }} </h4>
+            </div>
+        </div>
+    
+        <br>
+    
+        <div class="row">
+            <div class="col-lg-6">
+              <label class="form-label">Precio para 1 Persona</label>
+              <input  type="number" class="form-control" formControlName="tarifa1personaAll" name="tarifa1personaAll">
+            </div>
+            <div class="col-lg-6">
+              <label class="form-label">Precio para 2 Persona</label>
+              <input  type="number" class="form-control" formControlName="tarifa2personaAll" name="tarifa2personaAll">
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-lg-6">
+              <label class="form-label">Precio para 3 Persona</label>
+              <input  type="number" class="form-control" formControlName="tarifa3personaAll" name="tarifa3personaAll">
+            </div>
+            <div class="col-lg-6">
+              <label class="form-label">Precio para Niños o Niñas </label>
+              <input  type="number" class="form-control" formControlName="tarifaNinosAll" name="tarifaNinosAll">
+            </div>
+          </div>
+
+    </ng-container>
+
+    <!-- RATES ALL INCLUDED QUESTION END -->
+
+    <br>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <h4 style="color: grey;"> {{ "RatesComponent.visibleRate" | translate }} </h4>
+        </div>
+    </div>
+
+      <div class="col-lg-12">
+        <ng-container *ngFor="let visibilite of visibility().subTask let i = index">
+          <mat-checkbox [disabled]="visibilite.name === 'Channel Manager OTAs' " [checked]="visibilite.value" (change)="updateVisibilityArray($event.checked, i)" style="font-weight: bold;"> {{visibilite.name}}  </mat-checkbox>
+        </ng-container>
+      </div>
+
+    <br>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <h4 style="color: grey;"> {{ "RatesComponent.cancelPolicy" | translate }} </h4>
+        </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-12">
+      <ng-container *ngFor="let politicas of politicas(); let i = index">
+        <mat-radio-button [value]="politicas.name" (change)="setPoliticas($event.source.checked, i)">{{politicas.name}}</mat-radio-button>
+      </ng-container>
+      </div>
+    </div>
+
+  </form>
+
+  </div>
+  
+  
+  <div class="card-footer" style="text-align: center;">
+  <button (click)="onSubmit()" class="btn btn-success col-lg-12" [disabled]="!preciosFormGroup.valid">Aceptar</button>
+  </div>

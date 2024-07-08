@@ -16,7 +16,8 @@ const DEFAULT_PARAMS ={
   checkIn:'',
   zona:'',
   divisa:'',
-  codigoZona:''
+  codigoZona:'',
+  tarifasCancelacion:''
 }
 
 @Injectable({

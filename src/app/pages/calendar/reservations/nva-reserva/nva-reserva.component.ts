@@ -119,6 +119,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   todayDate:Date = new Date();
   // closeResult: string;
 
+  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   @Output() onNvaReserva: EventEmitter<Huesped[]> = new EventEmitter();
 
   get inputs() {
@@ -346,10 +347,10 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 
   ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cuarto){
     if(tarifa.Tarifa === 'Tarifa Estandar'){
-      return Math.trunc(tarifa.TarifaRack*estanciaPorNoche)
+      return Math.trunc(tarifa.TarifaRack!*estanciaPorNoche)
     }else {
       let tarifaTotal=0
-      const validDays = tarifa.Dias.filter((x)=> x.checked === true)    
+      const validDays = tarifa.Dias!.filter((x)=> x.checked === true)    
       const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"]
 
       for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
@@ -357,17 +358,17 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
         const validDay = validDays.find((item) => item.name === dayNames[day])?.checked
         
         if(validDay){
-          tarifaTotal += tarifa.TarifaRack
+          tarifaTotal += tarifa.TarifaRack!
         }else{
           if(this.cuarto==="1"){
             const tarifaEstandar  = this.standardRatesArray.filter(obj =>
               obj.Habitacion.some(item => item === codigosCuarto)); 
-            tarifaTotal += tarifaEstandar[0].TarifaRack  
+            tarifaTotal += tarifaEstandar[0].TarifaRack!  
           }else{
             const tarifaEstandar  = this.standardRatesArray.filter(obj =>
               obj.Habitacion.some(item => item === this.cuarto)); 
 
-            tarifaTotal += tarifaEstandar[0].TarifaRack  
+            tarifaTotal += tarifaEstandar[0].TarifaRack! 
           }
         }
       }
@@ -501,8 +502,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
                         var diaDeLlegada = fromDate.setLocale("es").weekdayShort
                         var diaDeLlegadaMayus = diaDeLlegada!.charAt(0).toUpperCase() + diaDeLlegada!.slice(1);
                         
-                        for(let x=0;x<this.filterRatesAray[i].Dias.length;x++){
-                          if(this.filterRatesAray[i].Dias[x].name==diaDeLlegadaMayus && this.filterRatesAray[i].Dias[x].checked==false){
+                        for(let x=0;x<this.filterRatesAray[i].Dias!.length;x++){
+                          if(this.filterRatesAray[i].Dias![x].name==diaDeLlegadaMayus && this.filterRatesAray[i].Dias![x].checked==false){
                             this.filterRatesAray = this.filterRatesAray.filter( obj => obj.Tarifa !== this.filterRatesAray[i].Tarifa);
                             break;
                           }

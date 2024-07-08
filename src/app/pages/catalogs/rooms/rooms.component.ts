@@ -164,7 +164,6 @@ export class RoomsComponent implements OnInit{
         if(data!=0 && data!= null)
           {
             this.promptMessage('Error','Aun existen huespedes asignados a este codigo de cuarto, cambie el tipo de cuarto de los huespedes y vuelva a intentarlo')
-            this.isLoading=false
           }
         else {
           this._habitacionService.sendCustomFormNotification(true);

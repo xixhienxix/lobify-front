@@ -57,15 +57,11 @@ export class LoginComponent implements OnInit, OnDestroy {
       username: ['',
         Validators.compose([
           Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(20), // https://stackoverflow.com/questions/386294/what-is-the-maximum-length-of-a-valid-email-address
         ]),
       ],
       password: ['',
         Validators.compose([
           Validators.required,
-          Validators.minLength(3),
-          Validators.maxLength(15),
         ]),
       ],
     });

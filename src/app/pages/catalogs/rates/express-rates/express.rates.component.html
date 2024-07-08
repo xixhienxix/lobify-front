@@ -197,15 +197,14 @@
     <br>
     <div class="row">
       <div class="col-lg-12">
-        <label style="color:#00506a; font-weight: bold;" class="form-label">Política de cancelación</label>
+          <h4 style="color: grey;"> {{ "RatesComponent.cancelPolicy" | translate }} </h4>
       </div>
     </div>
     <div class="row">
-      <div class="col-lg-6">
-        <mat-radio-button [checked]="gratis">Gratis</mat-radio-button>
-      </div>
-      <div class="col-lg-6">
-        <mat-radio-button [checked]="sinRembolso">No Reembolsable</mat-radio-button>
+      <div class="col-lg-12">
+      <ng-container *ngFor="let politicas of politicas(); let i = index">
+        <mat-radio-button [value]="politicas.name" (change)="setPoliticas($event.source.checked, i)">{{politicas.name}}</mat-radio-button>
+      </ng-container>
       </div>
     </div>
 </div>

@@ -105,9 +105,14 @@ export class TarifasService {
 
   getAll() :Observable<Tarifas[]> {
     return this.http
-     .get<Tarifas[]>(environment.apiUrl + '/tarifario/tarifas')
+     .get<any[]>(environment.apiUrl + '/tarifario/tarifas')
      .pipe(
        map(responseData=>{
+        responseData.forEach((item)=>{
+          if(item.hasOwnProperty('_id')){
+            delete item._id;   
+          }
+        })
         this.writeIndexDB("Rates",responseData);
         this.setCurrentTarifasValue = responseData 
         return responseData
@@ -138,6 +143,7 @@ export class TarifasService {
     )))
   }
 
+
   postTarifaEspecial(tarifa:Tarifas){
     return this.http.post(environment.apiUrl+'/tarifas/especial/agregar',{tarifa}).pipe(
       map((data=>{
@@ -146,9 +152,16 @@ export class TarifasService {
     )));
   }
 
-  updateTarifas(Tarifas:Tarifas)
-  {
-    return this.http.post(environment.apiUrl+'/tarifario/actualiza/tarifas',{Tarifas})
+  updateTarifas(tarifas:Tarifas){
+    return this.http.post(environment.apiUrl+'/tarifario/actualiza/tarifas',{tarifas}).pipe(
+      map((data=>{
+        this.sendNotification(true);
+        }
+    )))
+  }
+
+  updateTarifaEspecial(tarifas:Tarifas){
+
   }
 
   updateTarifasModifica(TarifasAnterior:any)

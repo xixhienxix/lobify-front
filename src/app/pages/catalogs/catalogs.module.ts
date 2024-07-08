@@ -21,8 +21,16 @@ import { UploadListComponent } from '../uploads/upload-list.component';
 import { SpecialRatesComponent } from './rates/special-rates/special-rates.component';
 import { ExpressRatesComponent } from './rates/express-rates/express.rates.component';
 import { EditExpressRateComponent } from './rates/express-rates/edit-express-rate/edit-express-rate.component';
-import { EditSpecialRateComponent } from './rates/special-rates/edit-special-rate/edit-standard-rate.component';
-import { ButtonModule } from '@syncfusion/ej2-angular-buttons';
+import { ButtonAllModule, ButtonModule, CheckBoxAllModule, SwitchAllModule } from '@syncfusion/ej2-angular-buttons';
+import { BryntumSchedulerModule } from '@bryntum/scheduler-angular'; 
+import { RecurrenceEditorAllModule, ScheduleAllModule } from '@syncfusion/ej2-angular-schedule';
+import { DatePickerAllModule, TimePickerAllModule, DateTimePickerAllModule } from '@syncfusion/ej2-angular-calendars';
+import { DropDownListAllModule, MultiSelectAllModule } from '@syncfusion/ej2-angular-dropdowns';
+import { NumericTextBoxAllModule, TextBoxAllModule, MaskedTextBoxModule, UploaderAllModule } from '@syncfusion/ej2-angular-inputs';
+import { ToolbarAllModule, ContextMenuAllModule, TreeViewModule, AppBarModule } from '@syncfusion/ej2-angular-navigations';
+import { ToastAllModule } from '@syncfusion/ej2-angular-notifications';
+import { DropDownButtonAllModule } from '@syncfusion/ej2-angular-splitbuttons';
+import { FareCalendarComponent } from './rates/fare-calendar/fare.calendar.component';
 
 
 
@@ -39,7 +47,7 @@ import { ButtonModule } from '@syncfusion/ej2-angular-buttons';
     SpecialRatesComponent,
     ExpressRatesComponent,
     EditExpressRateComponent,
-    EditSpecialRateComponent
+    FareCalendarComponent
   ],
   imports: [
     CommonModule,
@@ -47,6 +55,13 @@ import { ButtonModule } from '@syncfusion/ej2-angular-buttons';
     SharedModule,
     WidgetsModule,
     ButtonModule,
+    BryntumSchedulerModule,
+    ScheduleAllModule, RecurrenceEditorAllModule,   
+    NumericTextBoxAllModule, TextBoxAllModule, DatePickerAllModule, 
+    TimePickerAllModule, DateTimePickerAllModule, CheckBoxAllModule,   
+    ToolbarAllModule, DropDownListAllModule, ContextMenuAllModule, MaskedTextBoxModule, 
+    UploaderAllModule, MultiSelectAllModule,   TreeViewModule, ButtonAllModule, 
+    DropDownButtonAllModule, SwitchAllModule,  ToastAllModule, AppBarModule,
   ]
 })
 export class CatalogsModule { }

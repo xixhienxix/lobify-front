@@ -1,4 +1,4 @@
-import { AfterContentChecked, AfterContentInit, AfterViewChecked, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterContentChecked, AfterContentInit, AfterViewChecked, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation, signal } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { FormGroup, FormControl, FormBuilder, Validators, FormArray, FormGroupDirective, NgForm } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
@@ -17,6 +17,8 @@ import { TarifasService } from 'src/app/services/tarifas.service';
 import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
 import { Tarifas } from 'src/app/models/tarifas';
 import { Codigos } from 'src/app/models/codigos.model';
+import { VisibilityRates } from 'src/app/models/visibility.model';
+import { Politicas } from 'src/app/models/politicas.model';
 
 type listaAmenidades = {key:number;value:string}
 type listaCamas = {key:number;value:string;cantidad:number}
@@ -101,6 +103,26 @@ export class NewRoomComponent implements OnInit, OnDestroy{
   imagen:any;
   imageSelected:boolean=false
 
+  readonly visibility = signal<VisibilityRates>({
+    name: 'Visibility Rates',
+    value: true,
+    subTask: [
+      { name: 'Recepción', value: true },
+      { name: 'Booking', value:false },
+      { name: 'Channel Manager OTAs', value: false  }
+    ]
+  });
+  readonly politicas = signal<Politicas[]>([{
+      name:'Gratis',
+      value:true
+    },{
+      name:'No Reembolsable',
+      value: false
+    },{
+      name:'Reembolsable Parcial',
+      value: false
+    }
+  ]);
 
   /**Subscription */
   private ngUnsubscribe = new Subject<void>();
@@ -378,13 +400,13 @@ export class NewRoomComponent implements OnInit, OnDestroy{
   }
 
   let tarifa : Tarifas= {
-    Tarifa:'Tarifa Estandar',
+    Tarifa:'Tarifa Base',
     Habitacion:codigoHab,
     Llegada:new Date(),
     Salida:new Date(new Date().setFullYear(new Date().getFullYear() + 99)),
     Plan:'Ninguno',
-    Politicas:'Ninguno',
     Adultos:1,
+    Politicas:this.politicas(),
     Ninos:0,
     EstanciaMinima:1,
     EstanciaMaxima:0,
@@ -392,6 +414,62 @@ export class NewRoomComponent implements OnInit, OnDestroy{
     TarifaRack:this.formGroup.value.tarifaBase,
     TarifaXAdulto:[this.formGroup.value.tarifaBase],
     TarifaXNino:[this.formGroup.value.tarifaBase],
+    Tarifa_Especial_1: {
+      Activa:true,
+      Descripcion:'Solo Hospedaje',
+      Tarifa_1:this.formGroup.value.tarifaBase,
+      Tarifa_2:this.formGroup.value.tarifaBase,
+      Tarifa_3:this.formGroup.value.tarifaBase,
+      Tarifa_N:this.formGroup.value.tarifaBase,
+      Dias:[
+        {
+          name: '',
+          value: 0,
+          checked: false,
+        }
+      ]
+    },
+    Tarifa_Especial_2: {
+      Activa:true,
+      Descripcion:'Solo Hospedaje',
+      Tarifa_1:this.formGroup.value.tarifaBase,
+      Tarifa_2:this.formGroup.value.tarifaBase,
+      Tarifa_3:this.formGroup.value.tarifaBase,
+      Tarifa_N:this.formGroup.value.tarifaBase,
+      Dias:[
+        {
+          name: '',
+          value: 0,
+          checked: false,
+        }
+      ]
+    },
+    Tarifa_Sin_Variantes: {
+      Activa:true,
+      Descripcion:'Solo Hospedaje',
+      Tarifa_1:this.formGroup.value.tarifaBase,
+      Tarifa_2:this.formGroup.value.tarifaBase,
+      Tarifa_3:this.formGroup.value.tarifaBase,
+      Tarifa_N:this.formGroup.value.tarifaBase
+    },
+  Tarifa_Extra_Sin: {
+      Activa:false,
+      Descripcion:'Desayunos Incluidos',
+      Tarifa_1:this.formGroup.value.tarifaBase,
+      Tarifa_2:this.formGroup.value.tarifaBase,
+      Tarifa_3:this.formGroup.value.tarifaBase,
+      Tarifa_N:this.formGroup.value.tarifaBase
+  },
+  Tarifa_Extra_Con: {
+      Activa:false,
+      Descripcion:'Todo Incluido',
+      Tarifa_1:this.formGroup.value.tarifaBase,
+      Tarifa_2:this.formGroup.value.tarifaBase,
+      Tarifa_3:this.formGroup.value.tarifaBase,
+      Tarifa_N:this.formGroup.value.tarifaBase
+  },
+  Visibilidad:this.visibility(),
+  Cancelacion:this.politicas(),
 
     Dias:[
       {name:'Lun', value:0, checked:true},

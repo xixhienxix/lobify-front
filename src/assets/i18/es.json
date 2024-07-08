@@ -73,5 +73,49 @@
     },
     "DialogErros":{
         "errors.huesped.lenght": "Existen reservaciones que fueron asignadas a esta habitacion aun asi desea eliminarla?"
+    },
+    "RatesComponent":{
+        "baseRateTabTittle": "TARIFA BASE",
+        "especialRateTabTittle":"TARIFA ESPECIAL",
+        "editBaseRate":"EDITAR TARIFA BASE",
+        "roomTypes":"TIPOS DE HABITACION",
+        "publicRates":"TARIFA PUBLICA",
+        "noVariantRate": "*TARIFA SIN VARIANTES Y APLICA TODOS LOS DIAS*",
+        "ratesIncludes":"INCLUYE SOLO HOSPEDAJE SIN ALIMENTOS NI BEBIDAS",
+        "ratesQuestion":"¿ SU HOTEL OFRECE LOS SIGUIENTES SERVICIOS ?",
+        "ratesBreakfast":"TARIFA CON DESAYUNO INCLUIDO",
+        "ratesBreakfastIncludes":"INCLUYE HOSPEDAJE + 1 DESAYUNO POR PERSONA",
+        "allIncludedRatesCheckbox": "TARIFA TODO INCLUIDO",
+        "allIncludedRatesIncludes": "INCLUYE HOSPEDAJE + ALIMENTOS Y BEBIDAS POR PERSONA",
+        "visibleRate": "ESTA TARIFA SOLO SERA VISIBLE EN",
+        "visibleRateRecepcion": "RECEPCIÓN",
+        "cancelPolicy": "POLITICA DE CANCELACIÓN",
+        "cancelPolicyDEsc": "NO REEMBOLSABLE",
+        "visibleBooking": "BOOKING",
+        "visibleOTAS": "CHANNEL MANAGER OTA's"
+
+    },
+    "SpecialRatesComponent":{
+        "SpecialRateTabTittle": "NUEVA TARFIA ESPECIAL",
+        "ActiveRate":"TARIFA ACTIVA",
+        "InactiveRate":"TARIFA INACTIVA",
+        "RateName": "NOMBRE VISIBLE PARA LA NUEVA TARIFA" ,
+        "SpecialRateTittle": "TARIFA ESPECIAL", 
+        "FirstRateApply": "TARIFA 1 QUE SE APLICARA",
+        "SpecialRateQuestion": "¿ QUISIERAS OFRECER UNA SEGUNDA TARIFA ? ",
+        "RateOnePerson": "Precio para 1 Persona",
+        "RateTwoPerson": "Precio para 2 Persona",
+        "RateThreePerson": "Precio para 3 Persona",
+        "RateKids": "Precio para Niños y Niñas",
+        "SpecialRatesExample": "Ejemplo: Tarifa Fin de Semana",
+        "ExtraOnePersonRate": "Precio para 1 Persona",
+        "ExtraTwoPersonRate": "Precio para 2 Persona",
+        "ExtraThreePersonRate": "Precio para 3 Persona",
+        "ExtraKidsRate": "Precio para Niños y Niñas",
+        "SecondRateApply": "TARIFA 2 QUE SE APLICARA",
+        "RateApplyTemp": "LA TARIFA APLICARA PARA LA TEMPORADA DE: ",
+        "visibleOTAS": "CHANNEL MANAGER OTA's",
+        "tarifaEspecialQuestion": "¿Maneja Tarifas por persona?"
     }
+
 }

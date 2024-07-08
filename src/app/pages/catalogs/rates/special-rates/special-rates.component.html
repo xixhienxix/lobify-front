@@ -1,9 +1,9 @@
 <div class="modal-content">
-  <div style="background-color: #00506a;" class="modal-header">
-      <div style="text-align: center; color: white;" class="text-center modal-title h4 col-10"
+  <div style="background-color: var(--background-pink);" class="modal-header">
+      <h1 style="text-align: center; color: white;" class="text-center modal-title h4 col-10"
         id="example-modal-sizes-title-lg">
-        Nueva Tarifa Especial
-      </div>
+        {{"SpecialRatesComponent.SpecialRateTabTittle" | translate }}
+  </h1>
       <button style="background-color:#fa6d7c; font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
     </div>
 </div>
@@ -11,28 +11,233 @@
   <form [formGroup]="tarifaFormGroup">
     <div class="row">
       <mat-radio-group formControlName="estado" class="col-lg-12" aria-label="Select an option">
-        <mat-radio-button [checked]="activa" value="1">Activa</mat-radio-button>
-        <mat-radio-button value="2">Inactiva</mat-radio-button>
+        <mat-radio-button [checked]="activa" value="1">{{"SpecialRatesComponent.ActiveRate" | translate}}</mat-radio-button>
+        <mat-radio-button value="2">{{"SpecialRatesComponent.InactiveRate" | translate}}</mat-radio-button>
       </mat-radio-group>
     </div>
     <br>
     <div class="row">
       <div class="col-lg-12">
-        <label style="font-weight: bold;" class="form-label">Nombre Público de la Tarifa</label>
-        <input class="form-control" formControlName="nombre" name="nombre">
-
+        <label style="font-weight: bold;" class="form-label">{{"SpecialRatesComponent.RateName" | translate}}</label>
+        <input id="name" name="name"class="form-control" formControlName="nombre" name="nombre">
       </div>
     </div>
+    <!-- <div class="row">
+      <div class="col-lg-12">
+        <div
+        *ngIf="name.invalid && (name.dirty || name.touched)"
+        class="alert"
+      >
+        <div *ngIf="name.errors?.['required']">Name is required.</div>
+        <div *ngIf="name.errors?.['minlength']">
+          Name must be at least 4 characters long.
+        </div>
+        <div *ngIf="name.errors?.['forbiddenName']">
+          Name cannot be Bob.
+        </div>
+      </div>
+      </div>
+    </div> -->
+
     <br>
+
+
+    <h1 class="modal-title h4 col-10" id="example-modal-sizes-title-lg">
+        {{"SpecialRatesComponent.SpecialRateTittle" | translate }}
+    </h1>
+
+  
+
+    <hr style="border: 5px solid red; border-radius: 5px;">
+
+    <br>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <label style="font-weight: bold;" class="form-label">{{ "SpecialRatesComponent.FirstRateApply" | translate }}</label>
+        <input class="form-control" formControlName="tarifaBase" name="tarifaBase">
+      </div>
+    </div>
+
+    <br>
+
+    <div class="row">
+      <div class="col-lg-12">
+        <mat-checkbox #checkbox [checked]="tarifaVariante" (change)="tarifasVariantes($event.checked)" > <h3> {{ "SpecialRatesComponent.tarifaEspecialQuestion" | translate }} </h3>   </mat-checkbox>
+      </div>
+  </div>
+
+  <br>
+<ng-container *ngIf="tarifaVariante">
+  <div class="row">
+    <div class="col-lg-6">
+      <label class="form-label">{{"SpecialRatesComponent.RateOnePerson" | translate}}</label>
+      <input  type="number" class="form-control" formControlName="tarifa1persona" name="tarifa1persona">
+    </div>
+    <div class="col-lg-6">
+      <label class="form-label">{{"SpecialRatesComponent.RateTwoPerson"| translate}}</label>
+      <input  type="number" class="form-control" formControlName="tarifa2persona" name="tarifa2persona">
+    </div>
+  </div>
+  <br>
+  <div class="row">
+    <div class="col-lg-6">
+      <label class="form-label">{{"SpecialRatesComponent.RateThreePerson"| translate}}</label>
+      <input  type="number" class="form-control" formControlName="tarifa3persona" name="tarifa3persona">
+    </div>
+    <div class="col-lg-6">
+      <label class="form-label">{{"SpecialRatesComponent.RateKids"| translate}} </label>
+      <input  type="number" class="form-control" formControlName="tarifaNinos" name="tarifaNinos">
+    </div>
+  </div>
+  
+  <br>
+  <div class="row">
+    <div class="col-lg-12">
+      <label style="color:#00506a; font-weight: bold;" class="form-label">Aplica los dias: <small>Si no se selecciona ninguna la tarifa aplicara para todos los días</small></label>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <section class="checkbox-section">
+        <ng-container *ngFor="let option of options(); let i = index">
+          <mat-checkbox 
+          class="checkbox-margin" value="{{option}}"
+          [checked]="option.checked"
+          (change)="getOption($event.checked,i)">
+          {{option.name}}
+          </mat-checkbox>
+        </ng-container>
+      </section>
+    </div>
+  </div>
+</ng-container>
+
+    <br>
+
+    <ng-container *ngIf="tarifaVariante">
+      <div class="row">
+        <div class="col-lg-12">
+          <mat-checkbox [checked]="firstRateCheckbox" (change)="onFirstRateCheckbox($event)"> <h3> {{ "SpecialRatesComponent.SpecialRateQuestion" | translate }} </h3>   </mat-checkbox>
+        </div>
+    </div>
+    <hr style="border: 5px solid red; border-radius: 5px;">
+    </ng-container>
+
+
+
+  <ng-container *ngIf="firstRateCheckbox && tarifaVariante">
+    <div class="row">
+      <div class="col-lg-12">
+          <small style="color: red;"> {{ "SpecialRatesComponent.SpecialRatesExample" | translate }} </small>
+      </div>
+  </div>
+  
+  <br>
+  
+  <!-- <div class="row">
+  <div class="col-lg-12">
+    <label style="font-weight: bold;" class="form-label">{{ "SpecialRatesComponent.SecondRateApply" | translate }}</label>
+    <input class="form-control" formControlName="tarifaBase2" name="tarifaBase2">
+  </div>
+  </div>
+  
+  <br> -->
+  
+  <div class="row">
+  <div class="col-lg-6">
+    <label class="form-label">{{"SpecialRatesComponent.ExtraOnePersonRate" | translate}}</label>
+    <input  type="number" class="form-control" formControlName="tarifa1persona2" name="tarifa1persona2">
+  </div>
+  <div class="col-lg-6">
+    <label class="form-label">{{"SpecialRatesComponent.ExtraTwoPersonRate"| translate}}</label>
+    <input  type="number" class="form-control" formControlName="tarifa2persona2" name="tarifa2persona2">
+  </div>
+  </div>
+  <br>
+  <div class="row">
+  <div class="col-lg-6">
+    <label class="form-label">{{"SpecialRatesComponent.ExtraThreePersonRate"| translate}}</label>
+    <input  type="number" class="form-control" formControlName="tarifa3persona2" name="tarifa3persona2">
+  </div>
+  <div class="col-lg-6">
+    <label class="form-label">{{"SpecialRatesComponent.ExtraKidsRate"| translate}} </label>
+    <input  type="number" class="form-control" formControlName="tarifaNinos2" name="tarifaNinos2">
+  </div>
+  </div>
+  
+  <br>
+  
+  <div class="row">
+  <div class="col-lg-12">
+    <label style="color:#00506a; font-weight: bold;" class="form-label">Aplica los dias: <small>Si no se selecciona ninguna la tarifa aplicara para todos los días</small></label>
+  </div>
+  </div>
+  <div class="row">
+  <div class="col-lg-12">
+    <section class="checkbox-section">
+      <ng-container *ngFor="let option of options2(); let i = index">
+        <mat-checkbox 
+        class="checkbox-margin" value="{{option}}"
+        [checked]="option.checked"
+        (change)="getOption2($event.checked, i)">
+        {{option.name}}
+        </mat-checkbox>
+      </ng-container>
+    </section>
+  </div>
+  </div>
+  
+  <br>
+
+  <hr style="border: 5px solid red; border-radius: 5px;">
+
+  </ng-container>
+  
+  <h1 class="modal-title h4 col-10" id="example-modal-sizes-title-lg">
+    {{"SpecialRatesComponent.RateApplyTemp" | translate }}
+</h1>
+
+
+<mat-form-field style="width:-webkit-fill-available">
+  <mat-label>Rango de Fechas</mat-label>
+  <mat-date-range-input [formGroup]="range" [rangePicker]="picker">
+    <input matStartDate formControlName="start" placeholder="Llegada">
+    <input matEndDate formControlName="end" placeholder="Salida">
+  </mat-date-range-input>
+  <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+  <mat-date-range-picker #picker></mat-date-range-picker>
+
+    <mat-error *ngIf="(range.controls.start.hasError('matStartDateInvalid'))">Fehca Inicial invalida</mat-error>
+    <mat-error *ngIf="(range.controls.end.hasError('matEndDateInvalid'))  ">Fecha Final invalida</mat-error>
+</mat-form-field>
+
+<br>
+
+<div class="row" style="margin-top: 3%;">
+  <div class="col-lg-6">
+    <label style="color:#00506a; font-weight: bold;" class="form-label">Estancia minima de noches:
+      </label>
+    <input class="form-control" type="number" formControlName="minima" name="minima">
+  </div>
+  <div class="col-lg-6">
+    <label style="color:#00506a; font-weight: bold;" class="form-label">Estancia maxima de noches:
+      <span
+      class="fa fa-question-circle"
+      ngbTooltip="Si coloca un 0 la tarifa no tendra maximo de noches" 
+      >
+     </span>
+    </label>
+    <input class="form-control" formControlName="maxima" type="number" name="maxima">
+  </div>
+</div>
+<br>
+
+
     <div class="row ">
       <div class="col-lg-12">
           <label style="font-weight: bold;" class="form-label">Tarifa Estandar Global de la Habitación(es)</label>
-          <a>  
-            <span (click)="getHabitaciones(true)"
-            class="svg-icon svg-icon-md svg-icon-danger">
-            <i class="fa-solid fa-refresh"></i>
-          </span>
-        </a> 
       </div>
   </div>
       <div class="row">
@@ -68,11 +273,6 @@
                   <mat-option #matOption [value]="camas.value" *ngFor="let camas of disponiblesIndexadosCamas; let i = index" >{{camas.value}}</mat-option>
                 </div>
               </mat-select>
-                  <div class="input-group-append">
-                    <button class="btn btn-secondary">
-                        <i class="ki ki-reload" aria-hidden="true"></i>
-                    </button>
-                  </div>
             </div>
             <div *ngIf="camaFCVacio===true">
               <mat-error>Debe Seleccionar almenos un tipo de Cuarto</mat-error>
@@ -81,256 +281,42 @@
       </div>   
       <br>
 
-      <div class="row ">
-          <div class="col-lg-12">
-              <label style="font-weight: bold;" class="form-label">HOSPEDANDOTE EN ESTA HABITCIÓN</label>
-          </div>
-      </div>
-      <mat-form-field style="width:-webkit-fill-available">
-        <mat-label>Rango de Fechas</mat-label>
-        <mat-date-range-input [formGroup]="range" [rangePicker]="picker">
-          <input matStartDate formControlName="start" placeholder="Llegada">
-          <input matEndDate formControlName="end" placeholder="Salida">
-        </mat-date-range-input>
-        <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-date-range-picker #picker></mat-date-range-picker>
-      
-          <mat-error *ngIf="(range.controls.start.hasError('matStartDateInvalid'))">Fehca Inicial invalida</mat-error>
-          <mat-error *ngIf="(range.controls.end.hasError('matEndDateInvalid'))  ">Fecha Final invalida</mat-error>
-      </mat-form-field>
-      
-      <!-- <div class="row " style="margin-top: 3%;">
-          <div class="col-lg-6">
-              <div class="form-group">
-                  <label style="color:#00506a; font-weight: bold;" class="form-label">Llegando el:</label>
-                  <div class="input-group">
-                    <input hidden class="form-control" placeholder="yyyy-mm-dd" name="dp" ngbDatepicker 
-                       (dateSelect)="fechaSeleccionadaInicial($event)" [minDate]="today" [startDate]="fromDate" #d="ngbDatepicker">
-          
-                      <input class="form-control" placeholder="yyyy-mm-dd" name="dpnotHidden" #dd [value]="fechaInicial" >
-          
-                      <div class="input-group-append" >
-                      <button class="btn btn-primary" (click)="d.toggle()" type="button">
-                        <i class="fa fa-calendar icon"></i>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-          </div>
-          <div class="col-lg-6">
-              <div class="form-group" >
-                <label style="color:#00506a; font-weight: bold;" class="form-label">Saliendo el:</label>
-                <div class="input-group" >
-                  <input hidden class="form-control" [minDate]="tomorrow" [startDate]="toDate" placeholder="yyyy-mm-dd" name="dp"  ngbDatepicker
-                  (dateSelect)="fechaSeleccionadaFinal($event)" #f="ngbDatepicker">
-        
-                  <input class="form-control"  placeholder="yyyy-mm-dd" name="dpnotHidden" #ff  [value]="fechaFinal" >
-        
-                  <div class="input-group-append">
-                    <button class="btn btn-primary" (click)="f.toggle()" type="button">
-                      <i class="fa fa-calendar icon"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-      </div> -->
-      <div class="row" style="margin-top: 3%;">
-        <div class="col-lg-6">
-          <label style="color:#00506a; font-weight: bold;" class="form-label">Estancia minima de noches:
-            </label>
-          <input class="form-control" type="number" formControlName="minima" name="minima">
-        </div>
-        <div class="col-lg-6">
-          <label style="color:#00506a; font-weight: bold;" class="form-label">Estancia maxima de noches:
-            <span
-            class="fa fa-question-circle"
-            ngbTooltip="Si coloca un 0 la tarifa no tendra maximo de noches" 
-            >
-           </span>
-          </label>
-          <input class="form-control" formControlName="maxima" type="number" name="maxima">
-        </div>
-      </div>
-      <br>
-      <div class="row">
-        <div class="col-lg-12">
-          <label style="color:#00506a; font-weight: bold;" class="form-label">Aplica los dias: <small>Si no se selecciona ninguna la tarifa aplicara para todos los días</small></label>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12">
-          <section class="checkbox-section">
-            <ng-container *ngFor="let option of options; let i = index">
-              <mat-checkbox 
-              class="checkbox-margin" value="{{option}}"
-              [checked]="option.checked"
-              (change)="getOption(option, $event)">
-              {{option.name}}
-              </mat-checkbox>
-            </ng-container>
-          </section>
-        </div>
-      </div>
-      <hr>
-      <div class="row">
-        <div class="col-lg-12">
-          <section class="checkbox-section">
-            <mat-radio-button #checkboxEspecial [checked]="tarifaEspecialYVariantes" (change)="tarifaEspecial($event)" style="color:#00506a; font-weight: bold;" class="form-label">Tarifa Especial y Variantes:</mat-radio-button>
-          </section>
-        </div>
-      </div>
+      <hr style="border: 5px solid red; border-radius: 5px;">
   </form>
-<form [formGroup]="preciosFormGroup">
-  <div class="row">
-    <div class="col-lg-6">
-      <label style="color:#cf2121; font-weight: bold;" class="form-label">Tarifa Estandar<span
-        class="fa fa-question-circle"
-        ngbTooltip="Tarifa que aplicara para las habitaciones seleccionadas" 
-        >
-       </span></label>
-     <!--[attr.disabled]="descuentoTotalProCheckbox ? false : null"-->
-      <input [disabled]="dehabilitaButtons" type="number" class="form-control" formControlName="tarifaRack" name="rack">
-    </div>
-  </div>
-  <br> 
-  <ng-container *ngIf="checkboxEspecial.checked">
-  <div class="row">
-    <div class="col-lg-6">
-      <label class="form-label">Precio para 1 Persona</label>
-      <input  type="number" class="form-control" formControlName="tarifa1persona" name="tarifa1persona">
-    </div>
-    <div class="col-lg-6">
-      <label class="form-label">Precio para 2 Persona</label>
-      <input  type="number" class="form-control" formControlName="tarifa2persona" name="tarifa2persona">
-    </div>
-    <div class="col-lg-6">
-      <label class="form-label">Precio para 3 Persona</label>
-      <input  type="number" class="form-control" formControlName="tarifa3persona" name="tarifa3persona">
-    </div>
-    <div class="col-lg-6">
-      <label class="form-label">Precio para 4 Persona</label>
-      <input  type="number" class="form-control" formControlName="tarifa4persona" name="tarifa4persona">
-    </div>
-    <!-- <ng-container *ngIf="checkboxEspecial.checked">
-    <div class="col-lg-6" style="padding-bottom: 10px;">
-      <label style="color:#00506a; font-weight: bold;" class="form-label">Número de Adutos:</label>
-      <mat-select [(ngModel)]="adultos" class="form-control form-control-lg" formControlName="adultos">
-        <ng-container *ngFor="let adulto of resultLocationCamas">
 
-        </ng-container>
-        <mat-option [value]="1">1</mat-option>
-        <mat-option [value]="2">2</mat-option>
-        <mat-option [value]="3">3</mat-option>
-        <mat-option [value]="4">4</mat-option>
-        <mat-option [value]="5">5</mat-option>
-        <mat-option [value]="6">6</mat-option>
-        <mat-option [value]="7">7</mat-option>
-        <mat-option [value]="8">8</mat-option>
-      </mat-select>
-    </div>
-    <div class="col-lg-6" style="padding-bottom: 10px;">
-      <label style="color:#00506a; font-weight: bold;" class="form-label">Número de niños:</label>
-      <mat-select [(ngModel)]="ninos" class="form-control form-control-lg" formControlName="ninos">
-        <mat-option [value]="0">0</mat-option>
-        <mat-option [value]="1">1</mat-option>
-        <mat-option [value]="2">2</mat-option>
-        <mat-option [value]="3">3</mat-option>
-        <mat-option [value]="4">4</mat-option>
-        <mat-option [value]="5">5</mat-option>
-        <mat-option [value]="6">6</mat-option>
-        <mat-option [value]="7">7</mat-option>
-        <mat-option [value]="8">8</mat-option>
-      </mat-select>        
-    </div>-->
-  </div>
   <br>
-</ng-container>
-
-  <!-- <div class="row">
-      <ng-container *ngFor="let item of precios.controls; let i = index">
-        <div class="col-lg-6" style="padding-bottom: 10px;">
-          <label style="color:#00506a; font-weight: bold;" class="form-label">Precio para {{i+2}} Adulto(s)</label>
-          <input [disabled]="dehabilitaButtons" type="number" class="form-control"  [formControl]="$any(precios).controls[i]">
-        </div>
-      </ng-container>
-  </div>
+    
   <div class="row">
-    <ng-container *ngFor="let item of preciosNinos.controls; let i = index">
-      <div class="col-lg-6" style="padding-bottom: 10px;">
-        <label style="color:#00506a; font-weight: bold;" class="form-label">Precio para {{i+1}} Niños(s)</label>
-        <input [disabled]="dehabilitaButtons" type="number" class="form-control"  [formControl]="$any(preciosNinos).controls[i]">
-      </div>
-    </ng-container>
-</div> -->
-  <div class="row">
-    <div class="col-lg-6">
-    <section class="checkbox-section">
-      <mat-radio-button #descuentoTotalProCheckbox [checked]="descuentoTotalProCheckbox.checked" (change)="descuentoTotalProc($event)" style="color:#00506a; font-weight: bold;" class="form-label">Descuento Total en %</mat-radio-button>
-    </section>
-    </div>
-  </div>
-  <br>
-  <ng-container *ngIf="descuentoTotalProCheckbox.checked">
-    <div class="row">
-      <div class="col-lg-6">
-      <label style="color:#cf2121; font-weight: bold;" class="form-label">DESCUENTO % DEL:</label>
-      </div>
-    </div>
-    <div class="row">
       <div class="col-lg-12">
-        <input type="number" class="form-control" formControlName="descuento" name="descuento">
+          <h4 style="color: grey;"> {{ "RatesComponent.visibleRate" | translate }} </h4>
       </div>
-      <!-- <div class="col-lg-6">
-        <ng-container *ngIf="descuentoNoAplicado">
-          <button class="btn btn-primary form-control" (click)="aplicaDescuento()">Aplicar Descuento</button>
-        </ng-container>
-        <ng-container *ngIf="!descuentoNoAplicado">
-          <button disabled class="btn btn-success form-control" (click)="aplicaDescuento()">Aplicado</button>
-        </ng-container>
-      </div> -->
+  </div>
+
+  <mat-radio-group>
+    <div class="col-lg-12">
+      <ng-container *ngFor="let visibilite of visibility().subTask let i = index">
+        <mat-checkbox [disabled]="visibilite.name === 'Channel Manager OTAs' " [checked]="visibilite.value" (change)="updateVisibilityArray($event.checked, i)" style="font-weight: bold;"> {{visibilite.name}}  </mat-checkbox>
+      </ng-container>
     </div>
-  </ng-container>
-</form>
-<br>
-      <div class="row">
-        <div class="col-lg-12">
-          <label style="color:#00506a; font-weight: bold;" class="form-label">Alimentos</label>
-            <div class="input-group">
-              <mat-select 
-                #itemSelect
-                class="form-control form-control-lg"
-                [(ngModel)]="plan"
-                placeholder="-- Seleccione Plan Alimenticio--"
-                (selectionChange)="planSeleccionado($event)"
-                >
-                <footer class="col-sm-12">
-                  <button style="color: white;" (click)="itemSelect.close()" mat-button class="col-sm-4 btn btn-primary">Confirmar</button>
-                </footer>
-                <mat-option value="No Aplica"> No Aplica</mat-option>
-                <mat-option value="Plan Europeo" >Plan Europeo</mat-option>
-              </mat-select>
-            </div>
-        </div>
-      </div>
+  </mat-radio-group>
+
       <br>
+
       <div class="row">
         <div class="col-lg-12">
           <label style="color:#00506a; font-weight: bold;" class="form-label">Política de cancelación</label>
         </div>
       </div>
       <div class="row">
-        <div class="col-lg-6">
-          <mat-radio-button (change)="setPoliticas('Gratis')">Gratis</mat-radio-button>
-        </div>
-        <div class="col-lg-6">
-          <mat-radio-button (change)="setPoliticas('No Reembolsable')" [checked]="true">No Reembolsable</mat-radio-button>
+        <div class="col-lg-12">
+        <ng-container *ngFor="let politicas of politicas(); let i = index">
+          <mat-radio-button [checked]="politicas.value" [value]="politicas.name" (change)="setPoliticas($event.source.checked, i)">{{politicas.name}}</mat-radio-button>
+        </ng-container>
         </div>
       </div>
 </div>
 
 
 <div class="card-footer" style="text-align: center;">
-<button [disabled]="descuentoNoAplicado" (click)="onSubmit()" class="btn btn-success col-lg-12">Aceptar</button>
+<button  (click)="onSubmit()" class="btn btn-success col-lg-12">Aceptar</button>
 </div>

@@ -38,7 +38,7 @@ L10n.load({
     providers: [TimelineViewsService, TimelineMonthService, ResizeService, DragAndDropService],
 })
 
-export class ContentComponent implements OnInit,OnDestroy{
+export class ContentComponent implements OnInit{
 
   private eventsSubscription: Subscription;
 
@@ -388,9 +388,7 @@ promptMessage(header:string,message:string, obj?:any){
     return
 }
 
-ngOnDestroy(){
-  this.eventsSubscription.unsubscribe();
-}
+
 
 private getDismissReason(reason: any): string {
   if (reason === ModalDismissReasons.ESC) {

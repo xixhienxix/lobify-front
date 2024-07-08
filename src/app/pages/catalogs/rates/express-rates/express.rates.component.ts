@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormGroup, FormControl, FormArray, FormBuilder, FormGroupDirective, NgForm, Validators } from '@angular/forms';
 import { MatCheckboxChange } from '@angular/material/checkbox';
 import { ModalDismissReasons, NgbActiveModal, NgbDate, NgbDateStruct, NgbDatepickerI18n, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -6,7 +6,9 @@ import { DateTime } from 'luxon';
 import { Subscription, map } from 'rxjs';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Habitacion } from 'src/app/models/habitaciones.model';
+import { Politicas } from 'src/app/models/politicas.model';
 import { Tarifas } from 'src/app/models/tarifas';
+import { VisibilityRates } from 'src/app/models/visibility.model';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { TarifasService } from 'src/app/services/tarifas.service';
 type listaCamas = {key:number;value:string;}
@@ -16,7 +18,7 @@ type listaCamas = {key:number;value:string;}
   templateUrl: './express.rates.component.html',
   styleUrls: ['./express.rates.component.scss']
 })
-export class ExpressRatesComponent {
+export class ExpressRatesComponent implements OnInit{
 
   /**CheckBoxes */
   options = [
@@ -66,7 +68,48 @@ export class ExpressRatesComponent {
   /**DOM */
   tarifaEspecialYVariantes:boolean=false
 
+  readonly politicas = signal<Politicas[]>([{
+      name:'Gratis',
+      value:true
+    },{
+      name:'No Reembolsable',
+      value: false
+    },{
+      name:'Reembolsable Parcial',
+      value: false
+    }
+  ]);
+  readonly visibility = signal<VisibilityRates>({
+    name: 'Visibility Rates',
+    value: true,
+    subTask: [
+      { name: 'Recepción', value: true },
+      { name: 'Booking', value:false },
+      { name: 'Channel Manager OTAs', value: false  }
+    ]
+  });
 
+  setPoliticas(checked:boolean, index:number){
+    this.politicas.update(item=>{
+        if(index!== undefined){
+          item.forEach(item=>{
+            item.value = false;
+          })
+          item[index].value = checked;
+        }
+      return item
+    });
+  }
+
+  updateVisibilityArray(checked:boolean, index?:number){
+    this.visibility.update(task =>{
+      if(index !== undefined){
+        task.subTask![index].value = checked;
+      }
+      return {...task}
+    });
+  }
+  
   /**Subscription */
   subscription:Subscription[]=[]
 
@@ -100,8 +143,6 @@ export class ExpressRatesComponent {
   get f(){
     return this.tarifaFormGroup.controls;
   }
-
-  
 
 
   ngOnInit(): void {
@@ -239,7 +280,7 @@ export class ExpressRatesComponent {
       Llegada:new Date(),
       Salida:new Date(),
       Plan:this.plan,
-      Politicas: this.gratis!=true ? 'Gratis' : 'Ninguno' || this.sinRembolso!=true ? 'No Reembolsable' : 'Ninguno',
+      Politicas: this.politicas(),
       EstanciaMinima:this.formControls['minima'].value,
       EstanciaMaxima:this.formControls['maxima'].value,
       Estado:true,
@@ -249,7 +290,62 @@ export class ExpressRatesComponent {
       Dias:this.options,
       Adultos:1,
       Ninos:0,
-      Descuento:0
+      Descuento:0,
+      Tarifa_Especial_1: {
+        Activa:false,
+        Descripcion:'',
+        Tarifa_1:0,
+        Tarifa_2:0,
+        Tarifa_3:0,
+        Tarifa_N:0,
+        Dias:[
+        {
+          name: '',
+          value: 0,
+          checked: false,
+        }
+      ]
+    },Tarifa_Especial_2: {
+      Activa:false,
+      Descripcion:'',
+      Tarifa_1:0,
+      Tarifa_2:0,
+      Tarifa_3:0,
+      Tarifa_N:0,
+      Dias:[
+        {
+          name: '',
+          value: 0,
+          checked: false,
+        }
+      ]
+    },
+      Tarifa_Sin_Variantes: {
+        Activa:true,
+        Descripcion:'Solo Hospedaje',
+        Tarifa_1:0,
+        Tarifa_2:0,
+        Tarifa_3:0,
+        Tarifa_N:0
+    },
+    Tarifa_Extra_Sin: {
+        Activa:false,
+        Descripcion:'Desayunos Incluidos',
+        Tarifa_1:0,
+        Tarifa_2:0,
+        Tarifa_3:0,
+        Tarifa_N:0
+    },
+    Tarifa_Extra_Con: {
+        Activa:false,
+        Descripcion:'Todo Incluido',
+        Tarifa_1:0,
+        Tarifa_2:0,
+        Tarifa_3:0,
+        Tarifa_N:0
+    },
+    Visibilidad:this.visibility(),
+    Cancelacion:this.politicas(),
     }
 
     this.tarifasService.postTarifa(tarifa).subscribe(

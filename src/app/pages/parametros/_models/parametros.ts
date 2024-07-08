@@ -11,4 +11,5 @@ export interface Parametros {
     codigoZona:string,
     id?:string,
     hotel?:string;
+    tarifasCancelacion:string;
 }

@@ -10,8 +10,9 @@ import { TarifasService } from 'src/app/services/tarifas.service';
 import { EditExpressRateComponent } from './express-rates/edit-express-rate/edit-express-rate.component';
 import { ExpressRatesComponent } from './express-rates/express.rates.component';
 import { SpecialRatesComponent } from './special-rates/special-rates.component';
-import { EditSpecialRateComponent } from './special-rates/edit-special-rate/edit-standard-rate.component';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
+import { Habitacion } from 'src/app/models/habitaciones.model';
+import { Prompt } from 'src/app/models/prompt.model';
 
 
 @Component({
@@ -26,9 +27,9 @@ export class RatesComponent implements OnInit, AfterViewInit {
   isLoading: boolean;
 
   //Table
-  displayedColumns: string[] = ['Tarifa', 'Habitacion', 'Plan', 'Politicas','Estancia','Estado','Acciones'];
+  displayedColumns: string[] = ['Tarifa', 'Habitacion', 'Tarifas_Activa', 'Visible_en','Cancelacion','Acciones'];
   dataSource = new MatTableDataSource<any>();
-  displayedColumnsEspecial: string[] = ['Tarifa', 'Habitacion', 'Plan', 'Politicas','Estancia','Estado','Acciones'];
+  displayedColumnsEspecial: string[] = ['Tarifa', 'Temporada', 'Tarifas Activas', 'Habitacion', 'Visibilidad', 'Cancelacion','Estado','Acciones'];
   dataSourceEspecial = new MatTableDataSource<any>();
 
   //Forms
@@ -39,6 +40,9 @@ export class RatesComponent implements OnInit, AfterViewInit {
   reloading:boolean=false;
 
   /**Models */
+  cuartosArray:Habitacion[]=[];
+  codigoCuarto:Habitacion[]=[]
+
   options = [
     {name:'Lun', value:'0', checked:false},
     {name:'Mar', value:'1', checked:false},
@@ -80,6 +84,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.getTarifas(false);
+    this.getHabitaciones(true);
   }
 
   ngAfterViewInit() {
@@ -168,8 +173,8 @@ export class RatesComponent implements OnInit, AfterViewInit {
 
     this.tarifaRackCompleto = data
 
-    this.tarifaEspecialArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa !== 'Tarifa Estandar' )
-    this.tarifaRackArr = this.tarifaRackCompleto.filter((val)=> val.Tarifa === 'Tarifa Estandar' )
+    this.tarifaEspecialArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa !== 'Tarifa Base' );
+    this.tarifaRackArr = this.tarifaRackCompleto.filter((val)=> val.Tarifa === 'Tarifa Base' );
 
             /*Borra Duplicados*/
     var borraDuplicados = this.tarifaEspecialArray.filter((value, index, self) =>
@@ -182,10 +187,112 @@ export class RatesComponent implements OnInit, AfterViewInit {
     this.dataSourceEspecial.data=borraDuplicados   
     this.isLoading = false
     this.reloading = false
+  }
 
+  formatDates(element:Tarifas){
+    const llegada = new Date(element.Llegada);
+    const salida = new Date(element.Salida);
+
+    return llegada.toDateString() + '<br>' + salida.toDateString();
+  }
+
+  tarifasActivas(element:Tarifas){
+    let tarifasActivas=''
+    const validDaysTarifa1 = element.Tarifa_Especial_1.Dias.filter(item=> item.checked === true).map(element=> {return element.name}).join('-');
+    const validDaysTarifa2 = element.Tarifa_Especial_2.Dias.filter(item=> item.checked === true).map(element=> {return element.name}).join('-');
+
+    if(element.Tarifa_Especial_1.Activa){
+      tarifasActivas += 'Tarifa 1: <br>' +  validDaysTarifa1 + '<br>'
+    }
+    if(element.Tarifa_Especial_2.Activa){
+      tarifasActivas += 'Tarifa 2: <br>' + validDaysTarifa2
+    } 
+
+    if(element.Tarifa_Especial_1.Activa === false && element.Tarifa_Especial_2.Activa === false){
+      return 'Tarifa 1: <br>' +  'Lun-Mar-Mie-Jue-Vie-Sab-Dom' + '<br>'
+    }
+
+    return tarifasActivas
+  }
+
+  async getHabitaciones(refreshTable:boolean){
+
+    if(refreshTable){
+      this._habitacionService.getAll().pipe(
+        takeUntil(this.ngUnsubscribe)).subscribe({
+          next:(val:Habitacion[])=>{
+            this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
+        }
+      });
+    }
+
+    const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("Rooms");
+    if(roomsCodesIndexDB){
+      if(roomsCodesIndexDB.length !== 0){
+        this._habitacionService.setcurrentHabitacionValue = roomsCodesIndexDB
+        this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
+      }else{
+        this._habitacionService.getAll().pipe(
+          takeUntil(this.ngUnsubscribe)).subscribe(
+          (val:Habitacion[])=>{
+            this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
+        })
+      }
+    }else
+    {
+       this._habitacionService.getAll().pipe(
+        takeUntil(this.ngUnsubscribe)).subscribe(
+        (val:Habitacion[])=>{
+          this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
+      });
+    }
+  }
+
+  activeRates(row:Tarifas){
+    let tarifasActivas = '';
+
+    if(row.Tarifa_Extra_Con.Activa){
+      tarifasActivas += row.Tarifa_Extra_Con.Descripcion + '<br>';
+    }
+    if(row.Tarifa_Extra_Sin.Activa){
+      tarifasActivas += row.Tarifa_Extra_Sin.Descripcion + '<br>';
+    }
+    if(row.Tarifa_Sin_Variantes.Activa){
+      tarifasActivas += row.Tarifa_Sin_Variantes.Descripcion+ '<br>';
+    }
+    
+    return tarifasActivas
+  }
+
+  listaHabitacionesActivas(row:Tarifas){
+    return row.Habitacion.join('<br>');
+  }
+
+  visibleEn(row:Tarifas){
+    return row.Visibilidad.subTask?.filter(item=>item.value === true).map(item=>{ return item.name }).join('<br>');
+  }
+
+  politicasTable(row:Tarifas){
+    return row.Politicas?.filter(item=> item.value === true).map(item => { return item.name }).join('<br>');
   }
 
   promtDelete(tarifa:Tarifas){
+    const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+        modalRef.componentInstance.alertHeader = 'Advertencia'
+        modalRef.componentInstance.mensaje='Estas seguro que deseas eliminar la tarifa para la habitación '+tarifa.Tarifa+''          
+        modalRef.result.then((result) => {
+          if(result=='Aceptar')        
+          {
+            this.deleteTarifaRackEspecial(tarifa.Tarifa)
+            this.tarifaEspecialArray=[]
+          } 
+          this.closeResult = `Closed with: ${result}`;
+          }, (reason) => {
+              this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+          });
+  }
+
+  promtDeleteBaseRate(tarifa:Tarifas){
     const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
         modalRef.componentInstance.alertHeader = 'Advertencia'
         modalRef.componentInstance.mensaje='Estas seguro que deseas eliminar la tarifa para la habitación '+tarifa.Tarifa+''          
@@ -239,16 +346,104 @@ export class RatesComponent implements OnInit, AfterViewInit {
   }
 
   editTarifaEspecial(row:any){
-    const modalref = this.modalService.open(EditSpecialRateComponent,{size:'lg',backdrop:'static'})
+    const modalref = this.modalService.open(SpecialRatesComponent,{size:'md',backdrop:'static'})
     modalref.componentInstance.tarifa=row
+    modalref.componentInstance.cuartosArray = this.cuartosArray
+    modalref.componentInstance.onTarifaSubmit.subscribe({
+      next:(tarifa:Tarifas)=>{
+        this._tarifasService.updateTarifas(tarifa).subscribe({
+          next:(value)=>{
+            this.promptMessage('Exito','Tarifa(s) Generada(s) con éxito')
+            this._tarifasService.sendNotification(true);
+            this,modalref.close();        
+          },
+          error:(error)=>{
+            this.promptMessage('Error','No se pudo guardar la tarifa intente de nuevo mas tarde')
+          }
+        })
+      },
+      error:()=>{
+
+      }
+    });
+    modalref.componentInstance.onAlertsEvent.subscribe({
+      next:(value:Prompt)=>{
+        this.promptMessage(value.title,value.message);
+      }
+    })
   }
 
-  nuevaTarifaEspecial(){
-    const modalRef = this.modalService.open(SpecialRatesComponent, { size: 'md',backdrop: 'static' });
+  updateTarifaBase(tarifa:Tarifas){
+    this._tarifasService.updateTarifas(tarifa).subscribe({
+      next:(val)=>{
+        this.getTarifas(true);
+        this.promptMessage('Exito', 'Tarifa Actualizada con Exito');
+      },
+      error:(error)=>{
+        this.promptMessage('Error','No se pudo guardar el cambio en la tarifa, intente de nuevo');
+      }
+    });
+  }
 
-      modalRef.result.then( () =>
-      () => { }
-      );
+  nvaTarifaTemporada(){
+    const modalRef = this.modalService.open(SpecialRatesComponent,{size:'md',backdrop:'static'});
+    modalRef.componentInstance.cuartosArray = this.cuartosArray
+    modalRef.componentInstance.onNameAlreadyExist.subscribe({
+      next:(value:boolean)=>{
+        if(value){
+          this.promptMessage('Error','El Nombre de la Tarifa ya existe, utilize otro')
+        }
+      }
+    })
+    modalRef.componentInstance.tarifasArray = this.tarifaRackCompleto
+    modalRef.componentInstance.onTarifaSubmit.subscribe({
+      next:(tarifa:Tarifas)=>{
+        this._tarifasService.postTarifa(tarifa).subscribe({
+          next:(value)=>{
+            this.promptMessage('Exito','Tarifa(s) Generada(s) con éxito')
+            this._tarifasService.sendNotification(true);
+            this,modalRef.close();        
+          },
+          error:(error)=>{
+            this.promptMessage('Error','No se pudo guardar la tarifa intente de nuevo mas tarde')
+          }
+        })
+      },
+      error:()=>{
+
+      }
+    });
+    modalRef.componentInstance.onAlertsEvent.subscribe({
+      next:(value:Prompt)=>{
+        this.promptMessage(value.title,value.message);
+      }
+    })
+  }
+
+  editBaseRate(row:any){
+    const modalref = this.modalService.open(EditExpressRateComponent,{size:'md',backdrop:'static'})
+    modalref.componentInstance.tarifa=row
+    modalref.componentInstance.cuartosArray= this.cuartosArray;
+    modalref.componentInstance.honRefreshRooms.subscribe({
+      next:(val:boolean)=>{
+        if(val){
+          this.getHabitaciones(val);
+        }
+      },
+      error:(error:any)=>{
+        this.promptMessage('Error',error);
+      }
+    });
+    modalref.componentInstance.onPostTarifa.subscribe({
+      next:(val:Tarifas)=>{
+        if(val){
+          this.updateTarifaBase(val);
+        }
+      },
+      error:(error:any)=>{
+        this.promptMessage('Error',error);
+      }
+    });
   }
 
   private getDismissReason(reason: any): string {

@@ -78,10 +78,10 @@ export class WarningComponent implements OnInit {
 
   ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number){
     if(tarifa.Tarifa === 'Tarifa Estandar'){
-      return tarifa.TarifaRack*estanciaPorNoche
+      return tarifa.TarifaRack!*estanciaPorNoche
     }else {
       let tarifaTotal=0
-      const validDays = tarifa.Dias.filter((x)=> x.checked === true)    
+      const validDays = tarifa.Dias!.filter((x)=> x.checked === true)    
       const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"]
 
       for (let start = new Date(this.StartTime); start < this.EndTime; start.setDate(start.getDate() + 1)) {
@@ -89,11 +89,11 @@ export class WarningComponent implements OnInit {
         const validDay = validDays.find((item) => item.name === dayNames[day])?.checked
         
         if(validDay){
-          tarifaTotal += tarifa.TarifaRack
+          tarifaTotal += tarifa.TarifaRack!
         }else{
           const tarifaEstandar  = this.tarifaEstandarArray.filter(obj =>
             obj.Habitacion.some(item => item === this.cuarto)); 
-          tarifaTotal += tarifaEstandar[0].TarifaRack  
+          tarifaTotal += tarifaEstandar[0].TarifaRack!
         }
       }
       return Math.trunc(tarifaTotal)

@@ -1,100 +1,141 @@
-<div class="card card-custom gutter-b">
-    <div class="card-header">
-      <div class="card-title ">
-        <h3 class="card-label">Tarifas</h3>
-        <a>  <span (click)="getTarifas(true)"
-          class="svg-icon svg-icon-md svg-icon-danger">
-          <i class="fa-solid fa-refresh"></i>
-        </span></a>
-      </div>
-
-    </div> 
-  
-    <div class="card-body">
-
-      <!-- begin:Table -->
-      <div class="table-responsive angular-bootstrap-table">
 
 
-          <table *ngIf="!isLoading || !reloading" mat-table [dataSource]="dataSource">
-            <!-- Position Column -->
-            <ng-container matColumnDef="Tarifa">
-              <th mat-header-cell *matHeaderCellDef> Tarifa </th>
-              <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
-            </ng-container>
-        
-            <!-- Name Column -->
-            <ng-container matColumnDef="Habitacion">
-              <th mat-header-cell *matHeaderCellDef> Habitacion </th>
-              <td mat-cell *matCellDef="let element"> {{element.Habitacion}} </td>
-            </ng-container>
-        
-            <!-- Weight Column -->
-            <ng-container matColumnDef="Plan">
-              <th mat-header-cell *matHeaderCellDef> Plan </th>
-              <td mat-cell *matCellDef="let element"> {{element.Plan}} </td>
-            </ng-container>
-        
-            <!-- Symbol Column -->
-            <ng-container matColumnDef="Politicas">
-              <th mat-header-cell *matHeaderCellDef> Politicas </th>
-              <td mat-cell *matCellDef="let element"> {{element.Politicas}} </td>
-            </ng-container>
-  
-            <!-- Estancia Column -->
-            <ng-container matColumnDef="Estancia">
-              <th mat-header-cell *matHeaderCellDef> Min/Max </th>
-              <td mat-cell *matCellDef="let element"> {{element.EstanciaMinima}}/{{element.EstanciaMaxima ? 0 : '-'}}  </td>
-            </ng-container>
-  
-            <!-- Estancia Column -->
-            <ng-container matColumnDef="Estado">
-              <th mat-header-cell *matHeaderCellDef> Estado </th>
-              <td mat-cell *matCellDef="let element"> {{element.Estado===true ? 'Activa' : 'No Activa'}} </td>
-            </ng-container>
-  
-            <!-- Estancia Column -->
-            <ng-container matColumnDef="Acciones">
-              <th mat-header-cell *matHeaderCellDef> Acciones </th>
-              <td (click)="$event.stopPropagation()" mat-cell *matCellDef="let element"> 
-              </td>
-            </ng-container>
+  <mat-tab-group mat-stretch-tabs>
+    <mat-tab style="border: solid; color: grey;">
+      <ng-template mat-tab-label>
+        {{"RatesComponent.baseRateTabTittle" | translate}}
+
+        <button class="btn btn-active-color-primary" style="margin-left: 10%;">
+          <a>  
+            <span (click)="getTarifas(true)"
+              class="svg-icon svg-icon-md svg-icon-danger">
+              <i class="fa-solid fa-refresh"></i>
+            </span>
+          </a>
+        </button>        
+      </ng-template>
+      <div class="card card-custom gutter-b">
+        <!-- <div class="card-header">
+          <div class="card-title ">
+            <h3 class="card-label">Tarifas</h3>
+            <a>  <span (click)="getTarifas(true)"
+              class="svg-icon svg-icon-md svg-icon-danger">
+              <i class="fa-solid fa-refresh"></i>
+            </span></a>
+          </div>
+        </div>  -->
+      
+        <div class="card-body">
     
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            <tr class="mat-row" *matNoDataRow>
-              <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayedColumns.length">
-                NO RATES
-              </td>
-            </tr>
-          </table>
-          <!-- <mat-card *ngIf="isLoading || reloading" style="display: flex; justify-content: center; align-items: center">
-            <mat-progress-spinner 
-              color="primary" 
-              mode="indeterminate">
-            </mat-progress-spinner>
-          </mat-card> -->
+          <!-- begin:Table -->
+          <div class="table-responsive angular-bootstrap-table">
+    
+    
+              <table *ngIf="!isLoading || !reloading" mat-table [dataSource]="dataSource">
+                <!-- Position Column -->
+                <ng-container matColumnDef="Tarifa">
+                  <th mat-header-cell *matHeaderCellDef> Tarifa </th>
+                  <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
+                </ng-container>
+            
+                <!-- Name Column -->
+                <ng-container matColumnDef="Habitacion">
+                  <th mat-header-cell *matHeaderCellDef> Habitacion </th>
+                  <td mat-cell *matCellDef="let element"> {{element.Habitacion}} </td>
+                </ng-container>
+            
+                <!-- Weight Column -->
+                <ng-container matColumnDef="Tarifas_Activa">
+                  <th mat-header-cell *matHeaderCellDef> Tarifas Activa </th>
+                  <td mat-cell *matCellDef="let element">
+                    <div [innerHTML]="activeRates(element)"></div>
+                  </td>
+                </ng-container>
+            
+                <!-- Symbol Column -->
+                <ng-container matColumnDef="Visible_en">
+                  <th mat-header-cell *matHeaderCellDef> Visible en </th>
+                  <td mat-cell *matCellDef="let element"> {{element.Visibilidad === 0 ? 'Recepción' : 'Recepción'}} </td>
+                </ng-container>
+      
+                <!-- Estancia Column -->
+                <ng-container matColumnDef="Cancelacion">
+                  <th mat-header-cell *matHeaderCellDef> Cancelacion </th>
+                  <td mat-cell *matCellDef="let element"> {{element.Cancelacion}}  </td>
+                </ng-container>
+    
+      
+                <!-- Estancia Column -->
+                <ng-container matColumnDef="Acciones">
+                  <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                  <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element"> 
+                    <a
+                        title="Editar Tarifa"
+                        class="mx-3 btn btn-icon btn-light btn-hover-primary btn-sm"
+                        >
+                        <span (click)="editBaseRate(element)"
+                          class="svg-icon svg-icon-md svg-icon-primary">
+                          <i class="fa-solid fa-pen"></i>
+                        </span>
+                      </a>
+                  
+                      <a title="Borrar Tarifa" class="btn btn-icon btn-light btn-hover-danger btn-sm">
+                        <span (click)="promtDeleteBaseRate(element)" 
+                          class="svg-icon svg-icon-md svg-icon-danger">
+                          <i class="fa-solid fa-trash"></i>
+                        </span>
+                      </a>   
+                  </td>
+                </ng-container>
         
-          <mat-paginator [pageSizeOptions]="[5, 10, 20]"
-                         showFirstLastButtons 
-                         aria-label="Select page of periodic elements">
-          </mat-paginator>
-
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                <tr class="mat-row" *matNoDataRow>
+                  <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayedColumns.length">
+                    NO RATES
+                  </td>
+                </tr>
+              </table>
+              <!-- <mat-card *ngIf="isLoading || reloading" style="display: flex; justify-content: center; align-items: center">
+                <mat-progress-spinner 
+                  color="primary" 
+                  mode="indeterminate">
+                </mat-progress-spinner>
+              </mat-card> -->
+            
+              <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                             showFirstLastButtons 
+                             aria-label="Select page of periodic elements">
+              </mat-paginator>
+    
+          </div>
+    
+          <!-- end: Table -->
+         
+        </div>
       </div>
-
-      <!-- end: Table -->
-     
-    </div>
-  </div>
-
+    </mat-tab>
+  
+    <mat-tab>
+      <ng-template mat-tab-label>
+        {{"RatesComponent.especialRateTabTittle" | translate}}
+        <button class="btn btn-active-color-primary" style="margin-left: 10%;">
+          <a>  
+            <span (click)="getTarifas(true)"
+              class="svg-icon svg-icon-md svg-icon-danger">
+              <i class="fa-solid fa-refresh"></i>
+            </span>
+          </a>
+        </button>
+      </ng-template>
+      
   <div class="card card-custom gutter-b">
-    <div class="card-header">
+    <!-- <div class="card-header">
       <div class="card-title ">
         <h3 class="card-label">Tarifas Especiales</h3>
         <button style="position: absolute; right: 0px; margin: 10px;" class="btn btn-primary" (click)="nuevaTarifaEspecial()">Nueva Tarifa Especial</button>
       </div>
-
-    </div> 
+    </div>  -->
   
     <div class="card-body">
 
@@ -105,7 +146,7 @@
       <div class="table-responsive angular-bootstrap-table">
 
         <table *ngIf="!isLoading || !reloading" mat-table [dataSource]="dataSourceEspecial">
-      
+
           <!-- Position Column -->
           <ng-container matColumnDef="Tarifa">
             <th mat-header-cell *matHeaderCellDef> Tarifa </th>
@@ -113,33 +154,51 @@
           </ng-container>
       
           <!-- Name Column -->
-          <ng-container matColumnDef="Habitacion">
-            <th mat-header-cell *matHeaderCellDef> Habitacion </th>
-            <td mat-cell *matCellDef="let element"> {{element.Habitacion}} </td>
+          <ng-container matColumnDef="Temporada">
+            <th mat-header-cell *matHeaderCellDef> Temporada </th>
+            <td mat-cell *matCellDef="let element"> 
+              <div [innerHTML]="formatDates(element)"></div>
+            </td>
           </ng-container>
       
           <!-- Weight Column -->
-          <ng-container matColumnDef="Plan">
-            <th mat-header-cell *matHeaderCellDef> Plan </th>
-            <td mat-cell *matCellDef="let element"> {{element.Plan}} </td>
+          <ng-container matColumnDef="Tarifas Activas">
+            <th mat-header-cell *matHeaderCellDef> Tarifas Activas </th>
+            <td mat-cell *matCellDef="let element"> 
+              <div [innerHTML]="tarifasActivas(element)"></div>
+            </td>
           </ng-container>
       
           <!-- Symbol Column -->
-          <ng-container matColumnDef="Politicas">
-            <th mat-header-cell *matHeaderCellDef> Politicas </th>
-            <td mat-cell *matCellDef="let element"> {{element.Politicas}} </td>
+          <ng-container matColumnDef="Habitacion">
+            <th mat-header-cell *matHeaderCellDef> Habitacion </th>
+            <td mat-cell *matCellDef="let element"> 
+              <div [innerHTML]="listaHabitacionesActivas(element)"></div>
+            </td>
           </ng-container>
 
           <!-- Estancia Column -->
-          <ng-container matColumnDef="Estancia">
-            <th mat-header-cell *matHeaderCellDef> Min/Max </th>
-            <td mat-cell *matCellDef="let element"> {{element.EstanciaMinima}}/{{element.EstanciaMaxima}}  </td>
+          <ng-container matColumnDef="Visibilidad">
+            <th mat-header-cell *matHeaderCellDef> Visible en: </th>
+            <td mat-cell *matCellDef="let element"> 
+              <div [innerHTML]="visibleEn(element)"></div>
+            </td>
+          </ng-container>
+
+          <!-- Estancia Column -->
+          <ng-container matColumnDef="Cancelacion">
+            <th mat-header-cell *matHeaderCellDef> Cancelacion </th>
+            <td mat-cell *matCellDef="let element"> 
+              <div [innerHTML]="politicasTable(element)"></div>
+            </td>
           </ng-container>
 
           <!-- Estancia Column -->
           <ng-container matColumnDef="Estado">
             <th mat-header-cell *matHeaderCellDef> Estado </th>
-            <td mat-cell *matCellDef="let element"> {{element.Estado===true ? 'Activa' : 'No Activa'}} </td>
+            <td mat-cell *matCellDef="let element"> 
+              {{element.Estado===true ? 'Activa' : 'No Activa'}} 
+            </td>
           </ng-container>
 
           <!-- Estancia Column -->
@@ -165,10 +224,10 @@
             </td>
           </ng-container>
   
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr mat-header-row *matHeaderRowDef="displayedColumnsEspecial"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnsEspecial;"></tr>
           <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayedColumns.length">
+            <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayedColumnsEspecial.length">
               NO RATES
             </td>
           </tr>
@@ -189,3 +248,9 @@
      <app-loader-spinner *ngIf="isLoading || reloading"></app-loader-spinner>
     </div>
   </div>
+  <button mat-button class="btn" style="background-color: var(--background-pink); color: white;" (click)="nvaTarifaTemporada()"> Nueva Tarifa Especial </button>
+
+    </mat-tab>
+  </mat-tab-group>
+
+
