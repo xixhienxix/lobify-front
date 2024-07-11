@@ -7,7 +7,6 @@ import { Subject, Subscription, firstValueFrom, takeUntil } from 'rxjs';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { TarifasService } from 'src/app/services/tarifas.service';
-import { EditExpressRateComponent } from './express-rates/edit-express-rate/edit-express-rate.component';
 import { ExpressRatesComponent } from './express-rates/express.rates.component';
 import { SpecialRatesComponent } from './special-rates/special-rates.component';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
@@ -197,22 +196,56 @@ export class RatesComponent implements OnInit, AfterViewInit {
   }
 
   tarifasActivas(element:Tarifas){
-    let tarifasActivas=''
-    const validDaysTarifa1 = element.Tarifa_Especial_1.Dias.filter(item=> item.checked === true).map(element=> {return element.name}).join('-');
-    const validDaysTarifa2 = element.Tarifa_Especial_2.Dias.filter(item=> item.checked === true).map(element=> {return element.name}).join('-');
+    if(element.Tarifa === 'Tarifa Base' && element.TarifasActivas.length === 0){
+      return element.TarifasActivas.map((item)=>{
+        if(item.Activa===true){
+          let nameTarifa = item.Descripcion
 
-    if(element.Tarifa_Especial_1.Activa){
-      tarifasActivas += 'Tarifa 1: <br>' +  validDaysTarifa1 + '<br>'
+          return nameTarifa + '<br>' 
+        }
+      }); 
+    }else{
+      const tableString = element.TarifasActivas.map((item,index)=>{
+        if(item.Activa===true){
+          let nameTarifa = item.Descripcion
+          const dias_validos:any=[]
+          let diasValidos = item.Dias.map((item2)=>{
+              if(item2.checked === true){
+                dias_validos.push(item2.name);
+                return item2.name
+              }
+            
+          })
+          const joiningDias = dias_validos.join('-');
+          return nameTarifa + '<br>' +  joiningDias
+        }
+      }); 
+      return tableString.join('<br>')
     }
-    if(element.Tarifa_Especial_2.Activa){
-      tarifasActivas += 'Tarifa 2: <br>' + validDaysTarifa2
-    } 
 
-    if(element.Tarifa_Especial_1.Activa === false && element.Tarifa_Especial_2.Activa === false){
-      return 'Tarifa 1: <br>' +  'Lun-Mar-Mie-Jue-Vie-Sab-Dom' + '<br>'
-    }
 
-    return tarifasActivas
+
+    // const tarifasActivasArray = element.TarifasActivas.filter(item=>{
+    //   item.Activa == true;
+    // });
+
+    // const validTarifaDays = tarifasActivasArray.map(element => { return element.Descripcion }).join('-');
+
+    // const validDaysTarifa1 = element.Tarifa_Especial_1.Dias.filter(item=> item.checked === true).map(element=> {return element.name}).join('-');
+    // const validDaysTarifa2 = element.Tarifa_Especial_2.Dias.filter(item=> item.checked === true).map(element=> {return element.name}).join('-');
+
+    // if(element.Tarifa_Especial_1.Activa){
+    //   tarifasActivas += 'Tarifa 1: <br>' +  validDaysTarifa1 + '<br>'
+    // }
+    // if(element.Tarifa_Especial_2.Activa){
+    //   tarifasActivas += 'Tarifa 2: <br>' + validDaysTarifa2
+    // } 
+
+    // if(element.Tarifa_Especial_1.Activa === false && element.Tarifa_Especial_2.Activa === false){
+    //   return 'Tarifa 1: <br>' +  'Lun-Mar-Mie-Jue-Vie-Sab-Dom' + '<br>'
+    // }
+
+    // return tarifasActivas
   }
 
   async getHabitaciones(refreshTable:boolean){
@@ -246,22 +279,6 @@ export class RatesComponent implements OnInit, AfterViewInit {
           this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
       });
     }
-  }
-
-  activeRates(row:Tarifas){
-    let tarifasActivas = '';
-
-    if(row.Tarifa_Extra_Con.Activa){
-      tarifasActivas += row.Tarifa_Extra_Con.Descripcion + '<br>';
-    }
-    if(row.Tarifa_Extra_Sin.Activa){
-      tarifasActivas += row.Tarifa_Extra_Sin.Descripcion + '<br>';
-    }
-    if(row.Tarifa_Sin_Variantes.Activa){
-      tarifasActivas += row.Tarifa_Sin_Variantes.Descripcion+ '<br>';
-    }
-    
-    return tarifasActivas
   }
 
   listaHabitacionesActivas(row:Tarifas){
@@ -398,11 +415,11 @@ export class RatesComponent implements OnInit, AfterViewInit {
     modalRef.componentInstance.tarifasArray = this.tarifaRackCompleto
     modalRef.componentInstance.onTarifaSubmit.subscribe({
       next:(tarifa:Tarifas)=>{
-        this._tarifasService.postTarifa(tarifa).subscribe({
+        this._tarifasService.postTarifaEspecial(tarifa).subscribe({
           next:(value)=>{
             this.promptMessage('Exito','Tarifa(s) Generada(s) con éxito')
             this._tarifasService.sendNotification(true);
-            this,modalRef.close();        
+            modalRef.close();        
           },
           error:(error)=>{
             this.promptMessage('Error','No se pudo guardar la tarifa intente de nuevo mas tarde')
@@ -421,23 +438,15 @@ export class RatesComponent implements OnInit, AfterViewInit {
   }
 
   editBaseRate(row:any){
-    const modalref = this.modalService.open(EditExpressRateComponent,{size:'md',backdrop:'static'})
+    const modalref = this.modalService.open(ExpressRatesComponent,{size:'md',backdrop:'static'})
     modalref.componentInstance.tarifa=row
+    modalref.componentInstance.tarifasArray = this.tarifaRackCompleto
     modalref.componentInstance.cuartosArray= this.cuartosArray;
-    modalref.componentInstance.honRefreshRooms.subscribe({
-      next:(val:boolean)=>{
-        if(val){
-          this.getHabitaciones(val);
-        }
-      },
-      error:(error:any)=>{
-        this.promptMessage('Error',error);
-      }
-    });
-    modalref.componentInstance.onPostTarifa.subscribe({
+    modalref.componentInstance.onTarifaSubmit.subscribe({
       next:(val:Tarifas)=>{
         if(val){
           this.updateTarifaBase(val);
+          modalref.close();        
         }
       },
       error:(error:any)=>{

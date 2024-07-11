@@ -1,74 +1,55 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { FormGroup, FormControl, FormArray, FormBuilder, FormGroupDirective, NgForm, Validators } from '@angular/forms';
-import { MatCheckboxChange } from '@angular/material/checkbox';
-import { ModalDismissReasons, NgbActiveModal, NgbDate, NgbDateStruct, NgbDatepickerI18n, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { DateTime } from 'luxon';
-import { Subscription, map } from 'rxjs';
-import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
+/* eslint-disable @angular-eslint/no-output-on-prefix */
+import { AfterViewInit, Component, EventEmitter, Input, OnInit, Output, ViewChild, ChangeDetectorRef, signal } from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Habitacion } from 'src/app/models/habitaciones.model';
-import { Politicas } from 'src/app/models/politicas.model';
+import { OverlayContainer } from '@angular/cdk/overlay';
+import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
 import { Tarifas } from 'src/app/models/tarifas';
 import { VisibilityRates } from 'src/app/models/visibility.model';
-import { HabitacionesService } from 'src/app/services/habitaciones.service';
-import { TarifasService } from 'src/app/services/tarifas.service';
-type listaCamas = {key:number;value:string;}
+import { Politicas } from 'src/app/models/politicas.model';
+import { Dias } from 'src/app/models/days.model';
+import { Prompt } from 'src/app/models/prompt.model';
 
 @Component({
   selector: 'app-express-rates',
   templateUrl: './express.rates.component.html',
   styleUrls: ['./express.rates.component.scss']
 })
-export class ExpressRatesComponent implements OnInit{
+export class ExpressRatesComponent implements OnInit, AfterViewInit{
 
-  /**CheckBoxes */
-  options = [
-    {name:'Lun', value:0, checked:false},
-    {name:'Mar', value:1, checked:false},
-    {name:'Mie', value:2, checked:false},
-    {name:'Jue', value:3, checked:false},
-    {name:'Vie', value:4, checked:false},
-    {name:'Sab', value:5, checked:false},
-    {name:'Dom', value:6, checked:false}
-  ]
-  gratis:boolean=false
-  sinRembolso:boolean=false
+  constructor(
+    private fb: FormBuilder,
+    private modal:NgbActiveModal,
+    private overlayContainer: OverlayContainer,
+    private changeDetector: ChangeDetectorRef
+    )
+    {}
 
-  /**DATES */
-  today: DateTime | NgbDateStruct;
-  fromDate: DateTime;
-  fechaInicial:string
-  comparadorInicial:Date
-  tomorrow: DateTime | NgbDateStruct;
-  toDate: DateTime;
-  fechaFinal:string
-  comparadorFinal:Date
-  
-  /**FormGroup */
-  tarifaFormGroup:FormGroup
-  preciosFormGroup:FormGroup
-  camasFC:any
-  precios:any
+  tarifa:Tarifas
+  tarifatoModify:Tarifas
+  preciosFormGroup:FormGroup;
 
+  /** Models */
+  tarifasArray:Tarifas[]=[];
 
-  /**Models & Arrays */
-  codigoCuarto:Habitacion[]=[]
-  tipodeCaurto:string;
-  resultLocationCamas = []
-  disponiblesIndexadosCamas:listaCamas[]=[]
-  cuartosArray:Habitacion[]=[]
-  numbers:any;
-  tarifas = []
+  /**DOm */
+  dehabilitaButtons:boolean=false;
+  tarifaEspecialYVariantes:boolean=false;
+  breakfastFlag:boolean=false;
+  allIncludedFlag:boolean=false;
+  editMode:boolean=true;
 
-  /**Variables */
-  closeResult:string
-  plan:string="No Aplica"
-  camaFCVacio:boolean=false
-  maximoDePersonas:number
-
-  /**DOM */
-  tarifaEspecialYVariantes:boolean=false
-
-  readonly politicas = signal<Politicas[]>([{
+  readonly visibility = signal<VisibilityRates>({
+    name: 'Visibility Rates',
+    value: true,
+    subTask: [
+      { name: 'Recepción', value: true },
+      { name: 'Booking', value:false },
+      { name: 'Channel Manager OTAs', value: false  }
+    ]
+  });
+    readonly politicas = signal<Politicas[]>([{
       name:'Gratis',
       value:true
     },{
@@ -79,15 +60,151 @@ export class ExpressRatesComponent implements OnInit{
       value: false
     }
   ]);
-  readonly visibility = signal<VisibilityRates>({
-    name: 'Visibility Rates',
-    value: true,
-    subTask: [
-      { name: 'Recepción', value: true },
-      { name: 'Booking', value:false },
-      { name: 'Channel Manager OTAs', value: false  }
-    ]
-  });
+  @ViewChild('checkbox') private firstCheckBox: MatCheckbox;
+
+  /**Models */
+  @Input() cuartosArray:Habitacion[]=[];
+  @Output() onPostTarifa: EventEmitter<Tarifas> = new EventEmitter();
+  @Output() onAlertsEvent : EventEmitter<Prompt> = new EventEmitter();
+  @Output() onNameAlreadyExist: EventEmitter<boolean> = new EventEmitter();
+  @Output() onTarifaSubmit: EventEmitter<Tarifas> = new EventEmitter();
+
+
+
+  get preciosControls (){
+    return this.preciosFormGroup.controls
+  }
+
+  get tarifasActivasControls() {
+    return this.preciosFormGroup.get('tarifasActivas') as FormArray;
+  }
+
+  ngOnInit(){
+    this.tarifatoModify =  JSON.parse(JSON.stringify(this.tarifa));
+
+
+    if(this.tarifatoModify.TarifasActivas.length>1){
+      this.preciosFormGroup = this.fb.group({
+        estado:[this.tarifatoModify.Estado,Validators.required],
+        tarifaBase:[{value:this.tarifatoModify.TarifaRack, disabled:false},Validators.required],
+        tarifa_1:[0,Validators.required],
+        tarifa_2:[0,Validators.required],
+        tarifa_3:[0,Validators.required],
+        tarifa_n:[0,Validators.required],
+        tarifasActivas: this.fb.array([]),
+        minima:[1,Validators.required],
+        maxima:[0,Validators.required],
+      });
+    }else{
+      this.preciosFormGroup = this.fb.group({
+        estado:[true,Validators.required],
+        tarifaBase:[{value:this.tarifatoModify.TarifaRack, disabled:false},Validators.required],
+        tarifa_1:[0,Validators.required],
+        tarifa_2:[0,Validators.required],
+        tarifa_3:[0,Validators.required],
+        tarifa_n:[0,Validators.required],
+        tarifasActivas: this.fb.array([]),
+        minima:[1,Validators.required],
+        maxima:[0,Validators.required],
+      });
+      this.addTarifaActiva();
+  
+    }
+  }
+  ngAfterViewInit() {
+    this.tarifasActivasInitialize();
+    this.firstCheckBox.checked=true;
+    this.editMode=true;
+    this.changeDetector.detectChanges();
+
+  }
+
+  tarifasActivasInitialize(){
+    const control = <FormArray>this.preciosFormGroup.controls["tarifasActivas"];
+
+    for(let i=0; i<this.tarifatoModify.TarifasActivas.length; i++){
+      const lastQuest = false;
+      if(i===(this.tarifatoModify.TarifasActivas.length-1)){
+        control.push(new FormGroup({
+          'Descripcion': new FormControl(this.tarifatoModify.TarifasActivas[i].Descripcion),
+          'Activa': new FormControl(false),
+          'Tarifa_1': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_1, Validators.required),
+          'Tarifa_2': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_2, Validators.required),
+          'Tarifa_3': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_3, Validators.required),
+          'Tarifa_N': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_N, Validators.required),
+          'Dias': new FormControl(this.tarifatoModify.TarifasActivas[i].Dias),
+        }));
+      }else{
+        control.push(new FormGroup({
+          'Descripcion': new FormControl(this.tarifatoModify.TarifasActivas[i].Descripcion),
+          'Activa': new FormControl(this.tarifatoModify.TarifasActivas[i].Activa),
+          'Tarifa_1': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_1, Validators.required),
+          'Tarifa_2': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_2, Validators.required),
+          'Tarifa_3': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_3, Validators.required),
+          'Tarifa_N': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_N, Validators.required),
+          'Dias': new FormControl(this.tarifatoModify.TarifasActivas[i].Dias),
+        }));
+      }
+    }
+
+  }
+
+  private createTarifasActivasControls(): FormGroup {
+    const lenght = this.preciosFormGroup.controls["tarifasActivas"].value.lenght
+        const options = signal<Dias[]> ([      
+          {rateIndex:lenght, name:'Lun', value:0, checked:true},
+          {rateIndex:lenght, name:'Mar', value:1, checked:true},
+          {rateIndex:lenght, name:'Mie', value:2, checked:true},
+          {rateIndex:lenght, name:'Jue', value:3, checked:true},
+          {rateIndex:lenght, name:'Vie', value:4, checked:true},
+          {rateIndex:lenght, name:'Sab', value:5, checked:true},
+          {rateIndex:lenght, name:'Dom', value:6, checked:true}]);
+
+      return new FormGroup({
+        'Descripcion': new FormControl(''),
+        'Activa': new FormControl(true),
+        'Tarifa_1': new FormControl(0, Validators.required),
+        'Tarifa_2': new FormControl(0, Validators.required),
+        'Tarifa_3': new FormControl(0, Validators.required),
+        'Tarifa_N': new FormControl(0, Validators.required),
+        'Dias': new FormControl(options()),
+      });
+  }
+
+  onDisableBaseRate(checked:boolean){
+    
+    if(!checked){
+      this.preciosFormGroup.get('tarifaBase')?.enable();
+    }else{
+      this.preciosFormGroup.get('tarifaBase')?.disable();
+    }
+
+  }
+
+  onNewRate(checked:boolean,index:number){
+    if(checked){
+      this.addTarifaActiva();
+    }else{
+      this.removeTarifaActiva(index+1);
+    }
+  }
+
+  addTarifaActiva() {
+    const control = <FormArray>this.preciosFormGroup.controls["tarifasActivas"];
+    control.push(this.createTarifasActivasControls());
+  }
+
+  removeTarifaActiva(index: number) {
+    const control = <FormArray>this.preciosFormGroup.controls["tarifasActivas"];
+    if(index in this.tarifatoModify.TarifasActivas){
+      this.tarifatoModify.TarifasActivas.splice(index,1);
+      this.tarifasActivasControls.clear();
+      this.tarifasActivasInitialize();
+    }else{
+      control.removeAt(index);
+    }
+        
+  }
 
   setPoliticas(checked:boolean, index:number){
     this.politicas.update(item=>{
@@ -108,345 +225,50 @@ export class ExpressRatesComponent implements OnInit{
       }
       return {...task}
     });
-  }
-  
-  /**Subscription */
-  subscription:Subscription[]=[]
-
-  constructor(
-    public modal:NgbActiveModal,
-    public habitacionService:HabitacionesService,
-    public fb:FormBuilder,
-    public i18n: NgbDatepickerI18n,
-    public tarifasService:TarifasService,
-    public modalService:NgbModal,
-  ){
-    this.toDate = this.toDate.plus({ days: 1 });
-    this.fechaInicial=this.fromDate.day+" de "+this.i18n.getMonthFullName(this.fromDate.month)+" del "+this.fromDate.year
-    this.fechaFinal=this.toDate.day+" de "+this.i18n.getMonthFullName(this.toDate.month)+" del "+this.toDate.year
-  }
-
-   /**Getters */
-   get formControls (){
-    return this.tarifaFormGroup.controls
-  }
-  get tipoCuarto() 
-  { 
-    return this.tarifaFormGroup.get('tipoCuarto') 
-  }
-  get selectedOptions() { // right now: ['1','3']
-    return this.options
-              .filter(opt => opt.checked)
-              .map(opt => opt.value)
-  }
-
-  get f(){
-    return this.tarifaFormGroup.controls;
-  }
-
-
-  ngOnInit(): void {
-    this.tarifaFormGroup = this.fb.group({
-      tarifaRack:[0,Validators.required],
-      minima:[1,Validators.required],
-      maxima:[0,Validators.required],
-    })
-    this.preciosFormGroup = this.fb.group({
-      precios: this.fb.array([])
-    })
-
-    this.getHabitaciones();
-    //this.getCodigosCuarto();
-  }
-
-  getHabitaciones(){
-    const sb = this.habitacionService.getAll().subscribe(
-      (res)=>{
-        this.cuartosArray=res
-      },
-      (error)=>{
-
-      })
-  }
-
-  //Date Helpers
-  // getCodigosCuarto()
-  // {
-  //   this.codigoCuarto=[]
-  //   const sb = this.habitacionService.getCodigohabitaciones()
-  //   .pipe(map(
-  //     (responseData: { [x: string]: any; hasOwnProperty: (arg0: string) => any; })=>{
-  //       const postArray = []
-  //       for(const key in responseData)
-  //       {
-  //         if(responseData.hasOwnProperty(key))
-  //         postArray.push(responseData[key]);
-  //       }
-  //       return postArray
-  //     }))
-  //     .subscribe((codigoCuarto: string | any[])=>{
-  //       this.codigoCuarto=(codigoCuarto)
-  //       for(let i=0;i<codigoCuarto.length;i++){
-  //         this.disponiblesIndexadosCamas.push({key:i,value:codigoCuarto[i]})
-  //       }
-  //     })
-  //     this.subscription.push(sb)
-  // }
-
-  getOption(option:any,event:MatCheckboxChange){
-    if(event.checked==true){
-        for(let i=0; i<this.options.length;i++){
-         if(this.options[i].name==option.name){
-          this.options[i].checked=true
-         }
-        }
-    }
-    
-  }
-
-  public findInvalidControls() {
-    const invalid = [];
-    const controls = this.tarifaFormGroup.controls;
-    for (const name in controls) {
-        if (controls[name].invalid) {
-            invalid.push(name);
-        }
-    }
-    return invalid;
-  }
-
-  planSeleccionado(event:any){
-    this.plan=event.value[0]
-  }
-
-  tarifaEspecial(event:MatCheckboxChange){
-    if(!event.checked){
-      this.precios.clear();
-    }else{
-
-      var cuartosFiltrados:Habitacion[]=[];
-      let filtro:any
-  
-      for(let j=0;j<this.resultLocationCamas.length;j++){
-  
-         filtro = this.cuartosArray.find(object => {
-          return object.Codigo == this.resultLocationCamas[j];
-        });
-        
-        cuartosFiltrados.push(filtro)
-  
-  
-      }
-  
-      if(cuartosFiltrados.length==0){
-        this.maximoDePersonas=cuartosFiltrados[0].Adultos
-      }else{
-        this.maximoDePersonas= Math.max(...cuartosFiltrados.map(o => o.Adultos))
-        
-      }
-      this.numbers = Array(this.maximoDePersonas);
-      this.numbers = this.numbers.fill().map((x: any,i: any)=>i)
-  
-      for(let e=0; e<this.numbers.length;e++){
-        this.precios.push(new FormControl(''));
-      }
-  
-      if(event.checked){
-        this.tarifaEspecialYVariantes=true
-      }else
-      {
-        this.tarifaEspecialYVariantes=false
-      }
-  
-    }
-
-  }
+}
 
   onSubmit(){
 
-
-    // let fromDate = this.fromDate.day+"/"+this.fromDate.month+"/"+this.fromDate.year
-    // let toDate = this.toDate.day+"/"+this.toDate.month+"/"+this.toDate.year
-
-
-    if(this.resultLocationCamas.length==0){
-      this.camaFCVacio=true
-      return
+    if(this.preciosFormGroup.invalid){
+      this.onAlertsEvent.emit({title:'Advertencia',message:'Faltan Datos por Capturar'})
     }
-
-    let tarifa :Tarifas= {
-      Tarifa:'Tarifa Estandar',
-      Habitacion:this.resultLocationCamas,
-      Llegada:new Date(),
-      Salida:new Date(),
-      Plan:this.plan,
-      Politicas: this.politicas(),
-      EstanciaMinima:this.formControls['minima'].value,
-      EstanciaMaxima:this.formControls['maxima'].value,
-      Estado:true,
-      TarifaRack:this.formControls['tarifaRack'].value,
-      TarifaXAdulto:this.precios.value,
-      TarifaXNino:this.precios.value,
-      Dias:this.options,
-      Adultos:1,
-      Ninos:0,
-      Descuento:0,
-      Tarifa_Especial_1: {
-        Activa:false,
-        Descripcion:'',
-        Tarifa_1:0,
-        Tarifa_2:0,
-        Tarifa_3:0,
-        Tarifa_N:0,
-        Dias:[
-        {
-          name: '',
-          value: 0,
-          checked: false,
+    else{
+      
+        let tarifa: Tarifas= {
+          Tarifa:this.tarifatoModify.Tarifa,
+          Habitacion:this.tarifatoModify.Habitacion,
+          Llegada:this.tarifatoModify.Llegada,
+          Salida:this.tarifatoModify.Salida,
+          Plan:'Ninguno',
+          Adultos:this.tarifatoModify.Adultos,
+          TarifaRack:this.tarifatoModify.TarifaRack,
+          Ninos:this.tarifatoModify.Ninos,
+          Dias:this.tarifatoModify.Dias,
+          Politicas: this.tarifatoModify.Politicas,
+          Descuento:0,
+          EstanciaMinima:this.tarifatoModify.EstanciaMinima,
+          EstanciaMaxima:this.tarifatoModify.EstanciaMaxima,
+          Estado:this.tarifatoModify.Estado,
+          TarifasActivas:this.preciosFormGroup.controls.tarifasActivas.value,
+          Visibilidad:this.visibility(),
+          Cancelacion:this.politicas(),
         }
-      ]
-    },Tarifa_Especial_2: {
-      Activa:false,
-      Descripcion:'',
-      Tarifa_1:0,
-      Tarifa_2:0,
-      Tarifa_3:0,
-      Tarifa_N:0,
-      Dias:[
-        {
-          name: '',
-          value: 0,
-          checked: false,
-        }
-      ]
-    },
-      Tarifa_Sin_Variantes: {
-        Activa:true,
-        Descripcion:'Solo Hospedaje',
-        Tarifa_1:0,
-        Tarifa_2:0,
-        Tarifa_3:0,
-        Tarifa_N:0
-    },
-    Tarifa_Extra_Sin: {
-        Activa:false,
-        Descripcion:'Desayunos Incluidos',
-        Tarifa_1:0,
-        Tarifa_2:0,
-        Tarifa_3:0,
-        Tarifa_N:0
-    },
-    Tarifa_Extra_Con: {
-        Activa:false,
-        Descripcion:'Todo Incluido',
-        Tarifa_1:0,
-        Tarifa_2:0,
-        Tarifa_3:0,
-        Tarifa_N:0
-    },
-    Visibilidad:this.visibility(),
-    Cancelacion:this.politicas(),
-    }
-
-    this.tarifasService.postTarifa(tarifa).subscribe(
-      (value)=>{
-        const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-        modalRef.componentInstance.alertHeader = 'Exito'
-        modalRef.componentInstance.mensaje='Tarifa(s) Generada(s) con éxito'          
-        modalRef.result.then((result) => {
-          this.closeResult = `Closed with: ${result}`;
-          }, (reason) => {
-              this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-          });
-          setTimeout(() => {
-            modalRef.close('Close click');
-          },4000)
-          this.tarifasService.sendNotification(true)
-          this.modal.close();
-          
-      },
-      (error)=>{
-        const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-        modalRef.componentInstance.alertHeader = 'Error'
-        modalRef.componentInstance.mensaje='No se pudo guardar la tarifa intente de nuevo mas tarde'
-        modalRef.result.then((result) => {
-          this.closeResult = `Closed with: ${result}`;
-          }, (reason) => {
-              this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-          });
-          setTimeout(() => {
-            modalRef.close('Close click');
-          },4000)
-          return
-      })
+  
+        this.onTarifaSubmit.emit(tarifa);
+  
+      }
   }
 
-  fechaSeleccionadaInicial(event:NgbDate){
-
-    this.fromDate = DateTime.fromObject({day:event.day,month:event.month,year:event.year})
-  
-    this.comparadorInicial = new Date(event.year,event.month-1,event.day)
-  
-    this.fechaInicial= event.day+" de "+this.i18n.getMonthFullName(event.month)+" del "+event.year
-
+  preventCloseOnClickOut() {
+    this.overlayContainer.getContainerElement().classList.add('disable-backdrop-click');
   }
 
-  fechaSeleccionadaFinal(event:NgbDate){
-
-    this.toDate = DateTime.fromObject({day:event.day,month:event.month,year:event.year})
-
-    this.comparadorFinal = new Date(event.year,event.month-1,event.day)
-
-    this.fechaFinal= event.day+" de "+this.i18n.getMonthFullName(event.month)+" del "+event.year
-
+  allowCloseOnClickOut() {
+    this.overlayContainer.getContainerElement().classList.remove('disable-backdrop-click');
   }
 
-  camasValue(selected:any){
-    this.resultLocationCamas = this.resultLocationCamas.filter((option) => {
-      return option !== selected;
-    });
-  
-  }
-  
-  private getDismissReason(reason: any): string {
-    if (reason === ModalDismissReasons.ESC) {
-        return 'by pressing ESC';
-    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
-        return 'by clicking on a backdrop';
-    } else {
-        return  `with: ${reason}`;
-    }
-  }
-  
   closeModal(){
     this.modal.close();
   }
 
-  /*FORM HELPERS*/
-  isControlValid(controlName: string): boolean {
-    const control = this.tarifaFormGroup.controls[controlName];
-    return control.valid && (control.dirty || control.touched);
-  }
-
-  isControlInvalid(controlName: string): boolean {
-    const control = this.tarifaFormGroup.controls[controlName];
-    return control.invalid && (control.dirty || control.touched);
-  }
-
-  controlHasError(validation: string, controlName: string | number): boolean {
-    const control = this.tarifaFormGroup.controls[controlName];
-    return control.hasError(validation) && (control.dirty || control.touched);
-  }
-
-  isControlTouched(controlName: string | number): boolean {
-    const control = this.tarifaFormGroup.controls[controlName];
-    return control.dirty || control.touched;
-  }
-
-  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
-      const invalidCtrl = !!(control?.invalid && control?.parent?.dirty);
-      const invalidParent = !!(control?.parent?.invalid && control?.parent?.dirty);
-  
-      return invalidCtrl || invalidParent;
-  }
 }

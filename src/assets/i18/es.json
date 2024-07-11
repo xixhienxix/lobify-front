@@ -82,7 +82,7 @@
         "publicRates":"TARIFA PUBLICA",
         "noVariantRate": "*TARIFA SIN VARIANTES Y APLICA TODOS LOS DIAS*",
         "ratesIncludes":"INCLUYE SOLO HOSPEDAJE SIN ALIMENTOS NI BEBIDAS",
-        "ratesQuestion":"¿ SU HOTEL OFRECE LOS SIGUIENTES SERVICIOS ?",
+        "ratesQuestion":"¿ SU HOTEL OFRECE DIFERENTES TARIFAS Y/O VARIANTES ?",
         "ratesBreakfast":"TARIFA CON DESAYUNO INCLUIDO",
         "ratesBreakfastIncludes":"INCLUYE HOSPEDAJE + 1 DESAYUNO POR PERSONA",
         "allIncludedRatesCheckbox": "TARIFA TODO INCLUIDO",
@@ -92,8 +92,9 @@
         "cancelPolicy": "POLITICA DE CANCELACIÓN",
         "cancelPolicyDEsc": "NO REEMBOLSABLE",
         "visibleBooking": "BOOKING",
-        "visibleOTAS": "CHANNEL MANAGER OTA's"
-
+        "visibleOTAS": "CHANNEL MANAGER OTA's",
+        "extraRateName": "NOMBRE DE SU TARIFA VARIANTE",
+        "newRatesQuestion":"¿ AGREGAR OTRA TARFIA ?"
     },
     "SpecialRatesComponent":{
         "SpecialRateTabTittle": "NUEVA TARFIA ESPECIAL",
@@ -115,7 +116,7 @@
         "SecondRateApply": "TARIFA 2 QUE SE APLICARA",
         "RateApplyTemp": "LA TARIFA APLICARA PARA LA TEMPORADA DE: ",
         "visibleOTAS": "CHANNEL MANAGER OTA's",
-        "tarifaEspecialQuestion": "¿Maneja Tarifas por persona?"
+        "tarifaEspecialQuestion": "¿ QUISIERAS OFRECER UNA SEGUNDA TARIFA ?"
     }
 
 }

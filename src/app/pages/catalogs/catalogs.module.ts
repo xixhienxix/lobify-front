@@ -20,7 +20,6 @@ import { UploadDetailsComponent } from '../uploads/upload-details.component';
 import { UploadListComponent } from '../uploads/upload-list.component';
 import { SpecialRatesComponent } from './rates/special-rates/special-rates.component';
 import { ExpressRatesComponent } from './rates/express-rates/express.rates.component';
-import { EditExpressRateComponent } from './rates/express-rates/edit-express-rate/edit-express-rate.component';
 import { ButtonAllModule, ButtonModule, CheckBoxAllModule, SwitchAllModule } from '@syncfusion/ej2-angular-buttons';
 import { BryntumSchedulerModule } from '@bryntum/scheduler-angular'; 
 import { RecurrenceEditorAllModule, ScheduleAllModule } from '@syncfusion/ej2-angular-schedule';
@@ -46,7 +45,6 @@ import { FareCalendarComponent } from './rates/fare-calendar/fare.calendar.compo
     UploadFormComponent,
     SpecialRatesComponent,
     ExpressRatesComponent,
-    EditExpressRateComponent,
     FareCalendarComponent
   ],
   imports: [

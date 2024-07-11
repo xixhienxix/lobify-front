@@ -19,6 +19,7 @@ import { Tarifas } from 'src/app/models/tarifas';
 import { Codigos } from 'src/app/models/codigos.model';
 import { VisibilityRates } from 'src/app/models/visibility.model';
 import { Politicas } from 'src/app/models/politicas.model';
+import { Dias } from 'src/app/models/days.model';
 
 type listaAmenidades = {key:number;value:string}
 type listaCamas = {key:number;value:string;cantidad:number}
@@ -122,6 +123,16 @@ export class NewRoomComponent implements OnInit, OnDestroy{
       name:'Reembolsable Parcial',
       value: false
     }
+  ]);
+
+  readonly options =signal<Dias[]> ([
+    {rateIndex:0, name:'Lun', value:0, checked:false},
+    {rateIndex:0, name:'Mar', value:1, checked:false},
+    {rateIndex:0, name:'Mie', value:2, checked:false},
+    {rateIndex:0, name:'Jue', value:3, checked:false},
+    {rateIndex:0, name:'Vie', value:4, checked:false},
+    {rateIndex:0, name:'Sab', value:5, checked:false},
+    {rateIndex:0, name:'Dom', value:6, checked:false}
   ]);
 
   /**Subscription */
@@ -412,74 +423,19 @@ export class NewRoomComponent implements OnInit, OnDestroy{
     EstanciaMaxima:0,
     Estado:true,
     TarifaRack:this.formGroup.value.tarifaBase,
-    TarifaXAdulto:[this.formGroup.value.tarifaBase],
-    TarifaXNino:[this.formGroup.value.tarifaBase],
-    Tarifa_Especial_1: {
+    TarifasActivas:[{
       Activa:true,
-      Descripcion:'Solo Hospedaje',
+      Descripcion:'Tarifa Base',
       Tarifa_1:this.formGroup.value.tarifaBase,
       Tarifa_2:this.formGroup.value.tarifaBase,
       Tarifa_3:this.formGroup.value.tarifaBase,
-      Tarifa_N:this.formGroup.value.tarifaBase,
-      Dias:[
-        {
-          name: '',
-          value: 0,
-          checked: false,
-        }
-      ]
-    },
-    Tarifa_Especial_2: {
-      Activa:true,
-      Descripcion:'Solo Hospedaje',
-      Tarifa_1:this.formGroup.value.tarifaBase,
-      Tarifa_2:this.formGroup.value.tarifaBase,
-      Tarifa_3:this.formGroup.value.tarifaBase,
-      Tarifa_N:this.formGroup.value.tarifaBase,
-      Dias:[
-        {
-          name: '',
-          value: 0,
-          checked: false,
-        }
-      ]
-    },
-    Tarifa_Sin_Variantes: {
-      Activa:true,
-      Descripcion:'Solo Hospedaje',
-      Tarifa_1:this.formGroup.value.tarifaBase,
-      Tarifa_2:this.formGroup.value.tarifaBase,
-      Tarifa_3:this.formGroup.value.tarifaBase,
-      Tarifa_N:this.formGroup.value.tarifaBase
-    },
-  Tarifa_Extra_Sin: {
-      Activa:false,
-      Descripcion:'Desayunos Incluidos',
-      Tarifa_1:this.formGroup.value.tarifaBase,
-      Tarifa_2:this.formGroup.value.tarifaBase,
-      Tarifa_3:this.formGroup.value.tarifaBase,
-      Tarifa_N:this.formGroup.value.tarifaBase
-  },
-  Tarifa_Extra_Con: {
-      Activa:false,
-      Descripcion:'Todo Incluido',
-      Tarifa_1:this.formGroup.value.tarifaBase,
-      Tarifa_2:this.formGroup.value.tarifaBase,
-      Tarifa_3:this.formGroup.value.tarifaBase,
-      Tarifa_N:this.formGroup.value.tarifaBase
-  },
-  Visibilidad:this.visibility(),
-  Cancelacion:this.politicas(),
+      Tarifa_N:0,
+      Dias:this.options()
+    }],
+    Visibilidad:this.visibility(),
+    Cancelacion:this.politicas(),
 
-    Dias:[
-      {name:'Lun', value:0, checked:true},
-      {name:'Mar', value:1, checked:true},
-      {name:'Mie', value:2, checked:true},
-      {name:'Jue', value:3, checked:true},
-      {name:'Vie', value:4, checked:true},
-      {name:'Sab', value:5, checked:true},
-      {name:'Dom', value:6, checked:true}
-    ]
+    Dias:this.options()
   }
     let promptFLag=false;
     const request1 = this.habitacionService.postHabitacion(habitacionNueva,this.editarHab,this.formGroup.value.image); 

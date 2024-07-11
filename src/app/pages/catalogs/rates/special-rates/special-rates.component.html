@@ -22,177 +22,129 @@
         <input id="name" name="name"class="form-control" formControlName="nombre" name="nombre">
       </div>
     </div>
-    <!-- <div class="row">
-      <div class="col-lg-12">
-        <div
-        *ngIf="name.invalid && (name.dirty || name.touched)"
-        class="alert"
-      >
-        <div *ngIf="name.errors?.['required']">Name is required.</div>
-        <div *ngIf="name.errors?.['minlength']">
-          Name must be at least 4 characters long.
-        </div>
-        <div *ngIf="name.errors?.['forbiddenName']">
-          Name cannot be Bob.
-        </div>
-      </div>
-      </div>
-    </div> -->
 
     <br>
-
 
     <h1 class="modal-title h4 col-10" id="example-modal-sizes-title-lg">
         {{"SpecialRatesComponent.SpecialRateTittle" | translate }}
     </h1>
 
-  
-
     <hr style="border: 5px solid red; border-radius: 5px;">
 
     <br>
 
-    <div class="row">
-      <div class="col-lg-12">
-        <label style="font-weight: bold;" class="form-label">{{ "SpecialRatesComponent.FirstRateApply" | translate }}</label>
-        <input class="form-control" formControlName="tarifaBase" name="tarifaBase">
-      </div>
-    </div>
-
-    <br>
-
-    <div class="row">
-      <div class="col-lg-12">
-        <mat-checkbox #checkbox [checked]="tarifaVariante" (change)="tarifasVariantes($event.checked)" > <h3> {{ "SpecialRatesComponent.tarifaEspecialQuestion" | translate }} </h3>   </mat-checkbox>
-      </div>
-  </div>
-
-  <br>
-<ng-container *ngIf="tarifaVariante">
-  <div class="row">
-    <div class="col-lg-6">
-      <label class="form-label">{{"SpecialRatesComponent.RateOnePerson" | translate}}</label>
-      <input  type="number" class="form-control" formControlName="tarifa1persona" name="tarifa1persona">
-    </div>
-    <div class="col-lg-6">
-      <label class="form-label">{{"SpecialRatesComponent.RateTwoPerson"| translate}}</label>
-      <input  type="number" class="form-control" formControlName="tarifa2persona" name="tarifa2persona">
-    </div>
-  </div>
-  <br>
-  <div class="row">
-    <div class="col-lg-6">
-      <label class="form-label">{{"SpecialRatesComponent.RateThreePerson"| translate}}</label>
-      <input  type="number" class="form-control" formControlName="tarifa3persona" name="tarifa3persona">
-    </div>
-    <div class="col-lg-6">
-      <label class="form-label">{{"SpecialRatesComponent.RateKids"| translate}} </label>
-      <input  type="number" class="form-control" formControlName="tarifaNinos" name="tarifaNinos">
-    </div>
-  </div>
-  
-  <br>
-  <div class="row">
-    <div class="col-lg-12">
-      <label style="color:#00506a; font-weight: bold;" class="form-label">Aplica los dias: <small>Si no se selecciona ninguna la tarifa aplicara para todos los días</small></label>
-    </div>
-  </div>
-  <div class="row">
-    <div class="col-lg-12">
-      <section class="checkbox-section">
-        <ng-container *ngFor="let option of options(); let i = index">
-          <mat-checkbox 
-          class="checkbox-margin" value="{{option}}"
-          [checked]="option.checked"
-          (change)="getOption($event.checked,i)">
-          {{option.name}}
-          </mat-checkbox>
-        </ng-container>
-      </section>
-    </div>
-  </div>
-</ng-container>
-
-    <br>
-
-    <ng-container *ngIf="tarifaVariante">
-      <div class="row">
-        <div class="col-lg-12">
-          <mat-checkbox [checked]="firstRateCheckbox" (change)="onFirstRateCheckbox($event)"> <h3> {{ "SpecialRatesComponent.SpecialRateQuestion" | translate }} </h3>   </mat-checkbox>
+    <!-- First Group Form -->
+        <div class="row">
+          <div class="col-lg-6">
+            <label class="form-label">{{"SpecialRatesComponent.RateOnePerson" | translate}}</label>
+            <input  type="number" class="form-control" formControlName="tarifa_1" name="tarifa_1">
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label">{{"SpecialRatesComponent.RateTwoPerson"| translate}}</label>
+            <input  type="number" class="form-control" formControlName="tarifa_2" name="tarifa_2">
+          </div>
         </div>
-    </div>
-    <hr style="border: 5px solid red; border-radius: 5px;">
-    </ng-container>
+        <br>
+        <div class="row">
+          <div class="col-lg-6">
+            <label class="form-label">{{"SpecialRatesComponent.RateThreePerson"| translate}}</label>
+            <input  type="number" class="form-control" formControlName="tarifa_3" name="tarifa_3">
+          </div>
+          <div class="col-lg-6">
+            <label class="form-label">{{"SpecialRatesComponent.RateKids"| translate}} </label>
+            <input  type="number" class="form-control" formControlName="tarifa_n" name="tarifa_n">
+          </div>
+        </div>
+        
+        <br>
 
+        <div class="row">
+          <div class="col-lg-12">
+            <!-- <label style="color:#00506a; font-weight: bold;" class="form-label">Aplica los dias: <small>Si no se selecciona ninguna la tarifa aplicara para todos los días</small></label> -->
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-12">
+            <section class="checkbox-section">
+              <ng-container *ngFor="let option of options(); let i = index">
+                <mat-checkbox
+                class="checkbox-margin" value="{{option}}"
+                [checked]="option.checked"
+                (change)="getOption($event.checked,i)">
+                {{option.name}}
+                </mat-checkbox>
+              </ng-container>
+            </section>
+          </div>
+        </div>
+        <br>
+        <hr style="border: 5px solid red; border-radius: 5px;">
 
+    <br>
 
-  <ng-container *ngIf="firstRateCheckbox && tarifaVariante">
     <div class="row">
       <div class="col-lg-12">
-          <small style="color: red;"> {{ "SpecialRatesComponent.SpecialRatesExample" | translate }} </small>
+        <mat-checkbox #checkbox [checked]="editMode === true ? true : false"> <h3> {{ "SpecialRatesComponent.tarifaEspecialQuestion" | translate }} </h3>   </mat-checkbox>
       </div>
-  </div>
-  
-  <br>
-  
-  <!-- <div class="row">
-  <div class="col-lg-12">
-    <label style="font-weight: bold;" class="form-label">{{ "SpecialRatesComponent.SecondRateApply" | translate }}</label>
-    <input class="form-control" formControlName="tarifaBase2" name="tarifaBase2">
-  </div>
-  </div>
-  
-  <br> -->
-  
-  <div class="row">
-  <div class="col-lg-6">
-    <label class="form-label">{{"SpecialRatesComponent.ExtraOnePersonRate" | translate}}</label>
-    <input  type="number" class="form-control" formControlName="tarifa1persona2" name="tarifa1persona2">
-  </div>
-  <div class="col-lg-6">
-    <label class="form-label">{{"SpecialRatesComponent.ExtraTwoPersonRate"| translate}}</label>
-    <input  type="number" class="form-control" formControlName="tarifa2persona2" name="tarifa2persona2">
-  </div>
-  </div>
-  <br>
-  <div class="row">
-  <div class="col-lg-6">
-    <label class="form-label">{{"SpecialRatesComponent.ExtraThreePersonRate"| translate}}</label>
-    <input  type="number" class="form-control" formControlName="tarifa3persona2" name="tarifa3persona2">
-  </div>
-  <div class="col-lg-6">
-    <label class="form-label">{{"SpecialRatesComponent.ExtraKidsRate"| translate}} </label>
-    <input  type="number" class="form-control" formControlName="tarifaNinos2" name="tarifaNinos2">
-  </div>
-  </div>
-  
-  <br>
-  
-  <div class="row">
-  <div class="col-lg-12">
-    <label style="color:#00506a; font-weight: bold;" class="form-label">Aplica los dias: <small>Si no se selecciona ninguna la tarifa aplicara para todos los días</small></label>
-  </div>
-  </div>
-  <div class="row">
-  <div class="col-lg-12">
-    <section class="checkbox-section">
-      <ng-container *ngFor="let option of options2(); let i = index">
-        <mat-checkbox 
-        class="checkbox-margin" value="{{option}}"
-        [checked]="option.checked"
-        (change)="getOption2($event.checked, i)">
-        {{option.name}}
-        </mat-checkbox>
-      </ng-container>
-    </section>
-  </div>
-  </div>
-  
-  <br>
+    </div>
 
-  <hr style="border: 5px solid red; border-radius: 5px;">
+    <br>
+  
+    <div *ngIf="checkbox.checked" formArrayName="tarifasActivas">  
+        <div *ngFor="let tarifasActivas of tarifasActivasControls.controls; let i = index" [formGroupName]="i">
+    
+          <div class="row">
+            <div class="col-lg-6">
+              <label class="form-label">{{"SpecialRatesComponent.RateOnePerson" | translate}}</label>
+              <input  type="number" class="form-control" formControlName="Tarifa_1" name="tarifa_1">
+            </div>
+            <div class="col-lg-6">
+              <label class="form-label">{{"SpecialRatesComponent.RateTwoPerson"| translate}}</label>
+              <input  type="number" class="form-control" formControlName="Tarifa_2" name="tarifa_2">
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-lg-6">
+              <label class="form-label">{{"SpecialRatesComponent.RateThreePerson"| translate}}</label>
+              <input  type="number" class="form-control" formControlName="Tarifa_3" name="tarifa_3">
+            </div>
+            <div class="col-lg-6">
+              <label class="form-label">{{"SpecialRatesComponent.RateKids"| translate}} </label>
+              <input  type="number" class="form-control" formControlName="Tarifa_N" name="tarifa_n">
+            </div>
+          </div>
+          
+          <br>
+  
+          <div class="row">
+            <div class="col-lg-12">
+              <!-- <label style="color:#00506a; font-weight: bold;" class="form-label">Aplica los dias: <small>Si no se selecciona ninguna la tarifa aplicara para todos los días</small></label> -->
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <section class="checkbox-section">
+                <ng-container *ngFor="let option of options2(); let i = index">
+                  <mat-checkbox
+                  class="checkbox-margin" value="{{option}}"
+                  [checked]="option.checked"
+                  (change)="getOption2($event.checked,i)">
+                  {{option.name}}
+                  </mat-checkbox>
+                </ng-container>
+              </section>
+            </div>
+          </div>
+          <br>
+          <hr style="border: 5px solid red; border-radius: 5px;">
+        </div>
+        
+        <!---->
 
-  </ng-container>
+      </div> <!-- End of FormArray -->
+
+    <br>
   
   <h1 class="modal-title h4 col-10" id="example-modal-sizes-title-lg">
     {{"SpecialRatesComponent.RateApplyTemp" | translate }}

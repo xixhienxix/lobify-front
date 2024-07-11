@@ -73,8 +73,8 @@ export class SpecialRatesComponent implements OnInit{
   ninos:number=0
   dehabilitaButtons:boolean=false
   firstRateCheckbox:boolean=false
-  tarifaVariante:boolean=false;
   nameExist:boolean=false;
+  editMode:boolean=false;
 
   @Input() tarifa: Tarifas;
   @Input() roomsCodesIndexDB:Habitacion[]
@@ -84,24 +84,34 @@ export class SpecialRatesComponent implements OnInit{
   @Output() onNameAlreadyExist: EventEmitter<boolean> = new EventEmitter();
     /**CheckBoxes */
   readonly options =signal<Dias[]> ([
-      {name:'Lun', value:0, checked:false},
-      {name:'Mar', value:1, checked:false},
-      {name:'Mie', value:2, checked:false},
-      {name:'Jue', value:3, checked:false},
-      {name:'Vie', value:4, checked:false},
-      {name:'Sab', value:5, checked:false},
-      {name:'Dom', value:6, checked:false}
+      {rateIndex:0, name:'Lun', value:0, checked:false},
+      {rateIndex:0, name:'Mar', value:1, checked:false},
+      {rateIndex:0, name:'Mie', value:2, checked:false},
+      {rateIndex:0, name:'Jue', value:3, checked:false},
+      {rateIndex:0, name:'Vie', value:4, checked:false},
+      {rateIndex:0, name:'Sab', value:5, checked:false},
+      {rateIndex:0, name:'Dom', value:6, checked:false}
     ]);
-    
-  readonly options2 = signal<Dias[]>([
-      {name:'Lun', value:0, checked:false},
-      {name:'Mar', value:1, checked:false},
-      {name:'Mie', value:2, checked:false},
-      {name:'Jue', value:3, checked:false},
-      {name:'Vie', value:4, checked:false},
-      {name:'Sab', value:5, checked:false},
-      {name:'Dom', value:6, checked:false}
-    ]);
+
+  readonly options2 =signal<Dias[]> ([
+      {rateIndex:0, name:'Lun', value:0, checked:false},
+      {rateIndex:0, name:'Mar', value:1, checked:false},
+      {rateIndex:0, name:'Mie', value:2, checked:false},
+      {rateIndex:0, name:'Jue', value:3, checked:false},
+      {rateIndex:0, name:'Vie', value:4, checked:false},
+      {rateIndex:0, name:'Sab', value:5, checked:false},
+      {rateIndex:0, name:'Dom', value:6, checked:false}
+  ]);
+
+  readonly defaultvalues =signal<Dias[]> ([
+    {rateIndex:0, name:'Lun', value:0, checked:false},
+    {rateIndex:0, name:'Mar', value:1, checked:false},
+    {rateIndex:0, name:'Mie', value:2, checked:false},
+    {rateIndex:0, name:'Jue', value:3, checked:false},
+    {rateIndex:0, name:'Vie', value:4, checked:false},
+    {rateIndex:0, name:'Sab', value:5, checked:false},
+    {rateIndex:0, name:'Dom', value:6, checked:false}
+  ]);
 
   readonly visibility = signal<VisibilityRates>({
     name: 'Visibility Rates',
@@ -147,48 +157,30 @@ export class SpecialRatesComponent implements OnInit{
     return this.tarifaFormGroup.get('tipoCuarto') 
   }
 
-  // get selectedOptions() { // right now: ['1','3']
-  //   return this.options
-  //             .filter(opt => opt.checked)
-  //             .map(opt => opt.value)
-  // }
+  get tarifasActivasControls() {
+    return this.tarifaFormGroup.get('tarifasActivas') as FormArray;
+  }
 
   get tarifaControls (){
     return this.tarifaFormGroup.controls
   }
+
 
   
   ngOnInit(): void {
 
     // this.getTarifasRack();
     if(this.tarifa){
-      this.tarifaFormGroup = this.fb.group({
-        estado:[this.tarifa.Estado,Validators.required],
-        nombre:[this.tarifa.Tarifa,Validators.required], // <-- Here's how you pass in the custom validator.],
-        tarifaBase:[this.tarifa.TarifaRack,Validators.required],
-        tarifa1persona:[this.tarifa.Tarifa_Especial_1.Tarifa_1,Validators.required],
-        tarifa2persona:[this.tarifa.Tarifa_Especial_1.Tarifa_2,Validators.required],
-        tarifa3persona:[this.tarifa.Tarifa_Especial_1.Tarifa_3,Validators.required],
-        tarifaNinos:[this.tarifa.Tarifa_Especial_1.Tarifa_N,Validators.required],
-        tarifaBase2:[this.tarifa.TarifaRack,Validators.required],
-        tarifa1persona2:[this.tarifa.Tarifa_Especial_2.Tarifa_1,Validators.required],
-        tarifa2persona2:[this.tarifa.Tarifa_Especial_2.Tarifa_2,Validators.required],
-        tarifa3persona2:[this.tarifa.Tarifa_Especial_2.Tarifa_3,Validators.required],
-        tarifaNinos2:[this.tarifa.TarifaRack,Validators.required],
-        minima:[this.tarifa.EstanciaMinima,Validators.required],
-        maxima:[this.tarifa.EstanciaMaxima,Validators.required],
-      });
-
+      this.editMode=true;
       this.options.update(item=>{
-          item = this.tarifa.Tarifa_Especial_1.Dias
+          item = this.tarifa.TarifasActivas[0].Dias
         return item
       });
+
       this.options2.update(item=>{
-        item = this.tarifa.Tarifa_Especial_2.Dias
+        item = this.tarifa.TarifasActivas[1].Dias
       return item
     });
-
-    this.firstRateCheckbox = this.tarifa.Tarifa_Especial_2.Activa;
 
     this.range.controls["start"].patchValue(new Date(this.tarifa.Llegada));
     this.range.controls["end"].patchValue(new Date(this.tarifa.Salida));
@@ -205,33 +197,61 @@ export class SpecialRatesComponent implements OnInit{
     return item
     });
 
-    if(this.tarifa.Tarifa_Especial_1.Activa){
-      this.tarifasVariantes(true);
-      this.tarifaVariante=true;
-    }
+      this.tarifaFormGroup = this.fb.group({
+        estado:[this.tarifa.Estado,Validators.required],
+        nombre:[this.tarifa.Tarifa,Validators.required], // <-- Here's how you pass in the custom validator.],
+        minima:[this.tarifa.EstanciaMinima,Validators.required],
+        maxima:[this.tarifa.EstanciaMaxima,Validators.required],
+        tarifa_1:[this.tarifa.TarifasActivas[0].Tarifa_1,Validators.required],
+        tarifa_2:[this.tarifa.TarifasActivas[0].Tarifa_2,Validators.required],
+        tarifa_3:[this.tarifa.TarifasActivas[0].Tarifa_3,Validators.required],
+        tarifa_n:[this.tarifa.TarifasActivas[0].Tarifa_N,Validators.required],
+        tarifasActivas: this.fb.array([this.createTarifasActivasControls(true)]),
+      });
+
+      // this.patch();
 
     }else{
       this.tarifaFormGroup = this.fb.group({
         estado:[true,Validators.required],
         nombre:['',Validators.required],
-        tarifaBase:[0,Validators.required],
-        tarifa1persona:[0,Validators.required],
-        tarifa2persona:[0,Validators.required],
-        tarifa3persona:[0,Validators.required],
-        tarifaNinos:[0,Validators.required],
-        tarifaBase2:[0,Validators.required],
-        tarifa1persona2:[0,Validators.required],
-        tarifa2persona2:[0,Validators.required],
-        tarifa3persona2:[0,Validators.required],
-        tarifaNinos2:[0,Validators.required],
+        tarifa_1:[0,Validators.required],
+        tarifa_2:[0,Validators.required],
+        tarifa_3:[0,Validators.required],
+        tarifa_n:[0,Validators.required],
+        tarifasActivas: this.fb.array([this.createTarifasActivasControls(false)]),
         minima:[1,Validators.required],
         maxima:[0,Validators.required],
+
       });
     }
 
     this.getCodigosCuarto();
   }
 
+  private createTarifasActivasControls(editMode:boolean): FormGroup {
+    if(editMode){
+      return new FormGroup({
+        'Descripcion': new FormControl(this.tarifa.Tarifa),
+        'Activa': new FormControl(this.tarifa.Estado),
+        'Tarifa_1': new FormControl(this.tarifa.TarifasActivas[1].Tarifa_1, Validators.required),
+        'Tarifa_2': new FormControl(this.tarifa.TarifasActivas[1].Tarifa_2, Validators.required),
+        'Tarifa_3': new FormControl(this.tarifa.TarifasActivas[1].Tarifa_3, Validators.required),
+        'Tarifa_N': new FormControl(this.tarifa.TarifasActivas[1].Tarifa_N, Validators.required),
+        'Dias': new FormControl(this.tarifa.TarifasActivas[1].Dias),
+      });
+    }else{
+      return new FormGroup({
+        'Descripcion': new FormControl(''),
+        'Activa': new FormControl(false),
+        'Tarifa_1': new FormControl(0, Validators.required),
+        'Tarifa_2': new FormControl(0, Validators.required),
+        'Tarifa_3': new FormControl(0, Validators.required),
+        'Tarifa_N': new FormControl(0, Validators.required),
+        'Dias': new FormControl(this.options2()),
+      });
+    }
+  }
 
   preventCloseOnClickOut() {
     this.overlayContainer.getContainerElement().classList.add('disable-backdrop-click');
@@ -277,16 +297,6 @@ export class SpecialRatesComponent implements OnInit{
     this.firstRateCheckbox = checked.checked
   }
 
-  tarifasVariantes(checked:boolean){
-    if(!checked){
-      this.tarifaFormGroup.get('tarifaBase')?.enable();
-      this.tarifaVariante=false;
-    }else{
-      this.tarifaFormGroup.get('tarifaBase')?.disable();
-      this.tarifaVariante=true;
-    }
-  }
-
   camasValue(selected:any){
     this.resultLocationCamas = this.resultLocationCamas.filter((option) => {
       return option !== selected;
@@ -297,6 +307,7 @@ export class SpecialRatesComponent implements OnInit{
   getOption(checked:boolean, index:number){
     this.options.update(item=>{
       if(index !== undefined ){
+        item[index].rateIndex = 0
         item[index].checked= checked
       }
       return item
@@ -307,6 +318,7 @@ export class SpecialRatesComponent implements OnInit{
   getOption2(checked:boolean, index:number){
     this.options2.update(item=>{
       if(index !== undefined ){
+        item[index].rateIndex = 1
         item[index].checked= checked
       }
       return item
@@ -351,61 +363,41 @@ export class SpecialRatesComponent implements OnInit{
       return
     }
 
-      let tarifa :Tarifas= {
+    
+    this.tarifasActivasControls.controls.map((item)=>{
+      item.value.Descripcion = this.formControls['nombre'].value.trim();
+      item.value.Activa = this.formControls['estado'].value
+      item.value.Dias = this.options2()
+    });
+
+    const tarifasActivas = [{
+      Activa:this.formControls['estado'].value,
+      Descripcion:this.formControls['nombre'].value,
+      Tarifa_1:this.formControls['tarifa_1'].value,
+      Tarifa_2:this.formControls['tarifa_2'].value,
+      Tarifa_3:this.formControls['tarifa_3'].value,
+      Tarifa_N:this.formControls['tarifa_n'].value,
+      Dias:this.options()
+    }];
+
+    tarifasActivas.push(this.formControls['tarifasActivas'].value[0]);
+
+      let tarifa: Tarifas= {
         Tarifa:this.formControls["nombre"].value.trim(),
         Habitacion:this.resultLocationCamas,
         Llegada:this.range.controls["start"].value!,
         Salida:this.range.controls["end"].value!,
         Plan:'Ninguno',
         Adultos:1,
-        TarifaRack:this.formControls["tarifaBase"].value,
+        TarifaRack:0,
         Ninos:0,
+        Dias:this.defaultvalues(),
         Politicas: this.politicas(),
+        Descuento:0,
         EstanciaMinima:this.formControls['minima'].value,
         EstanciaMaxima:this.formControls['maxima'].value,
         Estado:this.formControls['estado'].value,
-        Tarifa_Especial_1: {
-          Activa:this.tarifaVariante,
-          Descripcion:'Solo Hospedaje',
-          Tarifa_1:this.formControls['tarifa1persona'].value,
-          Tarifa_2:this.formControls['tarifa2persona'].value,
-          Tarifa_3:this.formControls['tarifa3persona'].value,
-          Tarifa_N:this.formControls['tarifaNinos'].value,
-          Dias:this.options()
-        },
-        Tarifa_Especial_2: {
-          Activa:this.firstRateCheckbox,
-          Descripcion:'Solo Hospedaje',
-          Tarifa_1:this.formControls['tarifa1persona2'].value,
-          Tarifa_2:this.formControls['tarifa2persona2'].value,
-          Tarifa_3:this.formControls['tarifa3persona2'].value,
-          Tarifa_N:this.formControls['tarifaNinos2'].value,
-          Dias:this.options2()
-        },
-          Tarifa_Sin_Variantes: {
-            Activa:true,
-            Descripcion:'Solo Hospedaje',
-            Tarifa_1:0,
-            Tarifa_2:0,
-            Tarifa_3:0,
-            Tarifa_N:0
-        },
-        Tarifa_Extra_Sin: {
-            Activa:false,
-            Descripcion:'Desayunos Incluidos',
-            Tarifa_1:0,
-            Tarifa_2:0,
-            Tarifa_3:0,
-            Tarifa_N:0
-        },
-        Tarifa_Extra_Con: {
-            Activa:false,
-            Descripcion:'Todo Incluido',
-            Tarifa_1:0,
-            Tarifa_2:0,
-            Tarifa_3:0,
-            Tarifa_N:0
-        },
+        TarifasActivas:tarifasActivas,
         Visibilidad:this.visibility(),
         Cancelacion:this.politicas(),
       }

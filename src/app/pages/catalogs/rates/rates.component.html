@@ -47,21 +47,24 @@
                 <!-- Weight Column -->
                 <ng-container matColumnDef="Tarifas_Activa">
                   <th mat-header-cell *matHeaderCellDef> Tarifas Activa </th>
-                  <td mat-cell *matCellDef="let element">
-                    <div [innerHTML]="activeRates(element)"></div>
-                  </td>
-                </ng-container>
+                  <td mat-cell *matCellDef="let element"> 
+                    <div [innerHTML]="tarifasActivas(element)"></div>
+                </td>
+              </ng-container>
             
-                <!-- Symbol Column -->
                 <ng-container matColumnDef="Visible_en">
-                  <th mat-header-cell *matHeaderCellDef> Visible en </th>
-                  <td mat-cell *matCellDef="let element"> {{element.Visibilidad === 0 ? 'Recepción' : 'Recepción'}} </td>
+                  <th mat-header-cell *matHeaderCellDef> Visible en: </th>
+                  <td mat-cell *matCellDef="let element"> 
+                    <div [innerHTML]="visibleEn(element)"></div>
+                  </td>
                 </ng-container>
       
                 <!-- Estancia Column -->
                 <ng-container matColumnDef="Cancelacion">
                   <th mat-header-cell *matHeaderCellDef> Cancelacion </th>
-                  <td mat-cell *matCellDef="let element"> {{element.Cancelacion}}  </td>
+                  <td mat-cell *matCellDef="let element"> 
+                    <div [innerHTML]="politicasTable(element)"></div>
+                  </td>
                 </ng-container>
     
       
@@ -165,7 +168,7 @@
           <ng-container matColumnDef="Tarifas Activas">
             <th mat-header-cell *matHeaderCellDef> Tarifas Activas </th>
             <td mat-cell *matCellDef="let element"> 
-              <div [innerHTML]="tarifasActivas(element)"></div>
+                <div [innerHTML]="tarifasActivas(element)"></div>
             </td>
           </ng-container>
       
