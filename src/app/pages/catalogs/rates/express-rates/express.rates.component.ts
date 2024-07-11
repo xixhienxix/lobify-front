@@ -127,7 +127,7 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
       if(i===(this.tarifatoModify.TarifasActivas.length-1)){
         control.push(new FormGroup({
           'Descripcion': new FormControl(this.tarifatoModify.TarifasActivas[i].Descripcion),
-          'Activa': new FormControl(false),
+          'Activa': new FormControl(this.tarifatoModify.TarifasActivas[i].Activa),
           'Tarifa_1': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_1, Validators.required),
           'Tarifa_2': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_2, Validators.required),
           'Tarifa_3': new FormControl(this.tarifatoModify.TarifasActivas[i].Tarifa_3, Validators.required),
