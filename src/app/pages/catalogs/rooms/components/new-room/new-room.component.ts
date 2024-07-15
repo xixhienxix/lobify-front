@@ -1,4 +1,4 @@
-import { AfterContentChecked, AfterContentInit, AfterViewChecked, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation, signal } from '@angular/core';
+import { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation, signal } from '@angular/core';
 import { AngularFireStorage } from '@angular/fire/compat/storage';
 import { FormGroup, FormControl, FormBuilder, Validators, FormArray, FormGroupDirective, NgForm } from '@angular/forms';
 import { MatOption } from '@angular/material/core';
@@ -40,7 +40,7 @@ export class FileUpload {
   styleUrls: ['./new-room.component.scss'],
   encapsulation:ViewEncapsulation.None
 })
-export class NewRoomComponent implements OnInit, OnDestroy{
+export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
 
   @ViewChild('itemSelect') public itemSelect: MatSelect;
   @ViewChild('matOption') public matOption: MatOption;
@@ -148,9 +148,8 @@ export class NewRoomComponent implements OnInit, OnDestroy{
     public modal:NgbActiveModal,
     public _tarifasService:TarifasService,
     public _parametrosService:ParametrosService,
-    private af :AngularFireStorage
-
-
+    private af :AngularFireStorage,
+    private changeDetector: ChangeDetectorRef // Fixes Exeption of Expression already Changed
   ) {
 
   }
@@ -192,6 +191,10 @@ export class NewRoomComponent implements OnInit, OnDestroy{
       //this.formGroup.controls["nombreHabs"].patchValue(this.habitacion.Tipos_Camas)
     }
     this.inputs.push(this.inputForm);
+  }
+
+  ngAfterViewChecked() {
+    this.changeDetector.detectChanges();
   }
 
   checkEdicion(){
@@ -423,15 +426,7 @@ export class NewRoomComponent implements OnInit, OnDestroy{
     EstanciaMaxima:0,
     Estado:true,
     TarifaRack:this.formGroup.value.tarifaBase,
-    TarifasActivas:[{
-      Activa:true,
-      Descripcion:'Tarifa Base',
-      Tarifa_1:this.formGroup.value.tarifaBase,
-      Tarifa_2:this.formGroup.value.tarifaBase,
-      Tarifa_3:this.formGroup.value.tarifaBase,
-      Tarifa_N:0,
-      Dias:this.options()
-    }],
+    TarifasActivas:[],
     Visibilidad:this.visibility(),
     Cancelacion:this.politicas(),
 
@@ -439,7 +434,7 @@ export class NewRoomComponent implements OnInit, OnDestroy{
   }
     let promptFLag=false;
     const request1 = this.habitacionService.postHabitacion(habitacionNueva,this.editarHab,this.formGroup.value.image); 
-    const request3 = this._tarifasService.postTarifa(tarifa)
+    const request3 = this._tarifasService.postTarifa(tarifa);
     //concat(request1,request2,request3).pipe(
     concat(request1, request3).pipe(
       takeUntil(this.ngUnsubscribe))

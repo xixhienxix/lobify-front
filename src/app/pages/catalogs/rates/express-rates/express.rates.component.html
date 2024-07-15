@@ -51,7 +51,6 @@
 
   <br>
 
-
   <!--FORM ARAY BEGINS-->
         <div class="row">
           <div class="col-lg-12">
@@ -63,12 +62,12 @@
           <div *ngFor="let tarifasActivas of tarifasActivasControls.controls; let i = index" [formGroupName]="i">
             <hr style="border: 5px solid red; border-radius: 5px;">
             
-            <div class="row">
+            <!-- <div class="row">
               <div class="col-lg-12">
                 <label style="font-weight: bold;" class="form-label">{{"SpecialRatesComponent.RateName" | translate}}</label>
                 <input id="name" name="name"class="form-control" formControlName="Descripcion" name="nombre">
               </div>
-            </div>
+            </div> -->
 
             <br>
             <div class="row">
@@ -96,16 +95,15 @@
             <br>
             <hr style="border: 5px solid red; border-radius: 5px;">
 
-            <ng-container *ngIf="checkbox.checked">
+            <!-- <ng-container *ngIf="checkbox.checked">
               <div class="row">
                 <div class="col-lg-12">
                   <mat-checkbox formControlName="Activa"  #checkboxNew [value]="tarifasActivas.value.Activa" (change)="onNewRate(checkboxNew.checked, i)"> <h3 style="color: red;"> {{ "RatesComponent.newRatesQuestion" | translate }} </h3>   </mat-checkbox>
                 </div>
               </div>
-            </ng-container>
+            </ng-container> -->
 
           </div>
-
         </div><!--FORM ARRAY END-->
 
 
@@ -135,7 +133,7 @@
   <div class="row">
     <div class="col-lg-12">
     <ng-container *ngFor="let politicas of politicas(); let i = index">
-      <mat-radio-button [value]="politicas.value" (change)="setPoliticas($event.source.checked, i)">{{politicas.name}}</mat-radio-button>
+      <mat-radio-button [value]="politicas.name" [checked]="politicas.value" (change)="setPoliticas($event.source.checked, i)">{{politicas.name}}</mat-radio-button>
     </ng-container>
     </div>
   </div>
@@ -143,7 +141,6 @@
 </form>
 
 </div>
-
 
 <div class="card-footer" style="text-align: center;">
 <button type="submit" class="btn btn-success col-lg-12" [disabled]="preciosFormGroup.invalid" (click)="onSubmit()">Aceptar</button>

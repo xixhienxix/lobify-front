@@ -82,11 +82,19 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
   ngOnInit(){
     this.tarifatoModify =  JSON.parse(JSON.stringify(this.tarifa));
 
-
-    if(this.tarifatoModify.TarifasActivas.length>1){
+    if(this.tarifatoModify.TarifasActivas.length>0){
+      this.visibility.update(item=>{
+        item = this.tarifa.Visibilidad
+      return item
+      });
+  
+      this.politicas.update(item=>{
+          item = this.tarifa.Politicas!
+      return item
+      });
       this.preciosFormGroup = this.fb.group({
         estado:[this.tarifatoModify.Estado,Validators.required],
-        tarifaBase:[{value:this.tarifatoModify.TarifaRack, disabled:false},Validators.required],
+        tarifaBase:[{value:this.tarifatoModify.TarifaRack, disabled:true},Validators.required],
         tarifa_1:[0,Validators.required],
         tarifa_2:[0,Validators.required],
         tarifa_3:[0,Validators.required],
@@ -107,19 +115,24 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
         minima:[1,Validators.required],
         maxima:[0,Validators.required],
       });
-      this.addTarifaActiva();
-  
+      //this.addTarifaActiva();
     }
   }
   ngAfterViewInit() {
-    this.tarifasActivasInitialize();
-    this.firstCheckBox.checked=true;
+    if(this.tarifatoModify.TarifasActivas.length>0){
+      this.tarifasActivasInitialize();
+      this.firstCheckBox.checked=true;
+    }
     this.editMode=true;
     this.changeDetector.detectChanges();
-
   }
 
   tarifasActivasInitialize(){
+    this.politicas.update((item:any)=>{
+      console.log(item);
+      return item
+    });
+
     const control = <FormArray>this.preciosFormGroup.controls["tarifasActivas"];
 
     for(let i=0; i<this.tarifatoModify.TarifasActivas.length; i++){
@@ -162,7 +175,7 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
 
       return new FormGroup({
         'Descripcion': new FormControl(''),
-        'Activa': new FormControl(true),
+        'Activa': new FormControl(false),
         'Tarifa_1': new FormControl(0, Validators.required),
         'Tarifa_2': new FormControl(0, Validators.required),
         'Tarifa_3': new FormControl(0, Validators.required),
@@ -172,7 +185,13 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
   }
 
   onDisableBaseRate(checked:boolean){
-    
+    if(this.tarifatoModify.TarifasActivas.length === 0){
+      if(checked){
+        this.addTarifaActiva();
+      }
+    }else if(!checked){
+      this.removeTarifaActiva(0);
+    }
     if(!checked){
       this.preciosFormGroup.get('tarifaBase')?.enable();
     }else{
@@ -209,10 +228,13 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
   setPoliticas(checked:boolean, index:number){
     this.politicas.update(item=>{
         if(index!== undefined){
-          item.forEach(item=>{
-            item.value = false;
+          item.forEach((item,index2)=>{
+            if(index2 === index){
+              item.value = checked;
+            }else{
+              item.value = false;
+            }
           })
-          item[index].value = checked;
         }
       return item
     });
@@ -233,8 +255,17 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
       this.onAlertsEvent.emit({title:'Advertencia',message:'Faltan Datos por Capturar'})
     }
     else{
-      
+
+      this.preciosFormGroup.controls.tarifasActivas.value.map((item:any)=>{
+        item.Activa = true;
+        item.Descripcion = this.tarifatoModify.Tarifa;
+        item.Dias.forEach((item2:Dias)=>{
+          item2.checked = true
+        });
+      });
+
         let tarifa: Tarifas= {
+          _id:this.tarifa._id,
           Tarifa:this.tarifatoModify.Tarifa,
           Habitacion:this.tarifatoModify.Habitacion,
           Llegada:this.tarifatoModify.Llegada,
@@ -244,7 +275,7 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
           TarifaRack:this.tarifatoModify.TarifaRack,
           Ninos:this.tarifatoModify.Ninos,
           Dias:this.tarifatoModify.Dias,
-          Politicas: this.tarifatoModify.Politicas,
+          Politicas: this.politicas(),
           Descuento:0,
           EstanciaMinima:this.tarifatoModify.EstanciaMinima,
           EstanciaMaxima:this.tarifatoModify.EstanciaMaxima,

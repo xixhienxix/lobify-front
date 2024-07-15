@@ -99,20 +99,18 @@ export class TarifasService {
     const deleted = await this.deleteIndexDB("Rates");
     this.getAll();
     this.currentTarifasSubject.next(flag)
-
   }
-
 
   getAll() :Observable<Tarifas[]> {
     return this.http
      .get<any[]>(environment.apiUrl + '/tarifario/tarifas')
      .pipe(
        map(responseData=>{
-        responseData.forEach((item)=>{
-          if(item.hasOwnProperty('_id')){
-            delete item._id;   
-          }
-        })
+        // responseData.forEach((item)=>{
+        //   if(item.hasOwnProperty('_id')){
+        //     delete item._id;   
+        //   }
+        // })
         this.writeIndexDB("Rates",responseData);
         this.setCurrentTarifasValue = responseData 
         return responseData
@@ -132,10 +130,8 @@ export class TarifasService {
 
    }
 
-
-
-
   postTarifa(tarifa:Tarifas){
+    console.log("tarifaBAe Add New :", tarifa)
     return this.http.post(environment.apiUrl+'/tarifas/agregar',{tarifa}).pipe(
       map((data=>{
         this.sendNotification(true);
@@ -160,16 +156,10 @@ export class TarifasService {
     )))
   }
 
-  updateTarifaEspecial(tarifas:Tarifas){
-
-  }
-
   updateTarifasModifica(TarifasAnterior:any)
   {
-    const hotel = sessionStorage.getItem("HOTEL")
-
     return this.http
-    .post(environment.apiUrl+'/tarifario/actualiza/tarifas/modifica',{TarifasAnterior,hotel})
+    .post(environment.apiUrl+'/tarifario/actualiza/tarifas/modifica',{TarifasAnterior})
   }
 
   modificaTarifas(codigo:string, numero:string, llegada:string, salida:string)
@@ -178,16 +168,8 @@ export class TarifasService {
     .post(environment.apiUrl+'/tarifario/actualiza/tarifas',{codigo:codigo,numero:numero,llegada:llegada,salida:salida})
   }
 
-  // deleteTarifas(tarifa:Tarifas){
-  //   return this.http.post(environment.apiUrl+'/tarifas/rack/delete',{tarifa}).pipe(
-  //     map((data=>{
-  //       this.sendNotification(true);
-  //       }
-  //   )));
-  // }
-
-  deleteTarifaEspecial(tarifa:string){
-    return this.http.delete(environment.apiUrl+'/tarifas/especial/delete/'+tarifa,).pipe(
+  deleteTarifaEspecial(tarifa:Tarifas){
+    return this.http.delete(environment.apiUrl+'/tarifas/especial/delete/'+tarifa._id,).pipe(
       map((data=>{
         this.sendNotification(true);
         }

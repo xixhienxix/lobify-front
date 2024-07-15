@@ -1,0 +1,56 @@
+.mat-radio-button ~ .mat-radio-button {
+    margin-left: 16px;
+  }
+  .checkbox-section {
+    display: contents;
+    align-content: center;
+    align-items: center;
+    height: 60px;
+  }
+  .checkbox-margin {
+    margin: 0 10px;
+  }
+  .cdk-overlay-container, .cdk-overlay-pane {
+    z-index: 9999 !important;
+  }
+  .disable-backdrop-click .cdk-overlay-backdrop.cdk-overlay-transparent-backdrop.cdk-overlay-backdrop-showing {
+    pointer-events: none;
+  }
+  
+  .button1
+{
+background-color: white;
+  color: black;
+  margin-right: 10px;
+  border: 2px solid #4CAF50; /* Green */
+  position:relative;
+  margin-top:3%
+
+}
+.button2
+{
+background-color: white;
+  color: black;
+  margin-right: 10px;
+  position: relative;
+  border: 2px solid #af4c5c; /* Green */
+  margin-top:3%
+
+}
+.button3
+{
+background-color: white;
+color: black;
+margin-right: 10px;
+position: relative;
+border: 2px solid #564caf; /* Green */
+margin-top:3%
+
+}
+.lesser-size{
+  font-size: .5rem;
+  position:absolute;
+  top:-3px;
+  // left:-3px
+
+}

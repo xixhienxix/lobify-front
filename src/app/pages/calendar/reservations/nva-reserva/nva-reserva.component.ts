@@ -1,4 +1,4 @@
-import {  Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import {  AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
@@ -44,8 +44,9 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     private _disponibilidadService: DisponibilidadService,
     private _folioservice: FoliosService,
     private _estatusService:EstatusService,
-    private modalService:NgbModal){
-      
+    private modalService:NgbModal,
+  ){
+
   }
 
   formGroup:FormGroup
@@ -137,6 +138,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     this.checkFoliadorIndexDB();
     this.todaysDateComparer();
   }
+
 
   onSubmit(){
     /**Check only one tarifa is selected per Room */
@@ -306,8 +308,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     })
   }
   
-
-
   tarifaRadioButton(tarifas:Tarifas, event:any, codigo:string){
     const checkedStatus = event.source.checked
     const tarifa = tarifas
@@ -330,8 +330,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
      }     
   }
 
-
-
   preAsignar(numero:any,codigo:string,checked:boolean){
     if(this.preAsignadasArray.length >= 0){
       const index = this.preAsignadasArray.findIndex((item) => item.numero === numero)
@@ -346,7 +344,50 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 }
 
   ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cuarto){
-    if(tarifa.Tarifa === 'Tarifa Estandar'){
+    const adultos = this.formGroup.controls["adultos"].value
+    const ninos = this.formGroup.controls["ninos"].value
+
+    let tarifaTotal=0;
+
+    if(tarifa.Tarifa === 'Tarifa Base'){
+      // Cycle All Days
+      for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
+        const day = start.getDay();
+        tarifa.TarifasActivas.map((item)=>{
+
+          if(this.cuarto==="1"){
+            const tarifaEstandar  = this.standardRatesArray.filter(obj =>
+              obj.Habitacion.some(item => item === codigosCuarto)); 
+            tarifaTotal += tarifaEstandar[0].TarifaRack!  
+          }else{
+            const tarifaEstandar  = this.standardRatesArray.filter(obj =>
+              obj.Habitacion.some(item => item === this.cuarto)); 
+
+            tarifaTotal += tarifaEstandar[0].TarifaRack! 
+          }
+
+
+          if(item.Activa === true){
+            switch (adultos) {
+              case 1:
+                tarifaTotal += item.Tarifa_1
+                break;
+              case 2:
+                tarifaTotal += item.Tarifa_2
+                break;
+              case 3:
+                tarifaTotal += item.Tarifa_3
+                break;
+              default:
+                tarifaTotal += item.Tarifa_3
+            }
+              if(ninos!==0){
+                tarifaTotal += item.Tarifa_N
+              }
+          }
+        });
+      }
+
       return Math.trunc(tarifa.TarifaRack!*estanciaPorNoche)
     }else {
       let tarifaTotal=0
@@ -587,13 +628,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   }
 
   getRooms(){
-  //   <ng-container *ngFor="let habitacionesDisponibles of mySet">
-  //   <ng-container *ngFor="let tipocuarto of roomCodes">
-  //     <ng-container *ngIf="tipocuarto.Numero == habitacionesDisponibles">
-  //       <br><mat-checkbox  formControlName="checkbox"  #checked (change)="preAsignar(tipocuarto.Numero,tipocuarto.Codigo,checked.checked)"></mat-checkbox> &nbsp; <label style="margin-right: 7%">{{ tipocuarto.Numero }}</label>
-  //     </ng-container>
-  //   </ng-container>
-  // </ng-container>
     this.mySet.forEach((element)=>{
       this.roomCodes.forEach((roomsElemts)=>{
         if(roomsElemts.Numero === element){
@@ -699,7 +733,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 
     this.onSubmit();
   }
-
 
   /**
    * 

@@ -117,6 +117,28 @@
         "RateApplyTemp": "LA TARIFA APLICARA PARA LA TEMPORADA DE: ",
         "visibleOTAS": "CHANNEL MANAGER OTA's",
         "tarifaEspecialQuestion": "¿ QUISIERAS OFRECER UNA SEGUNDA TARIFA ?"
+    },
+    "TempRatesComponent":{
+        "TempSpecialRateTabTittle": "NUEVA TARFIA TEMPORADA",
+        "TempActiveRate":"TARIFA ACTIVA",
+        "TempInactiveRate":"TARIFA INACTIVA",
+        "TempRateName": "NOMBRE VISIBLE PARA LA NUEVA TARIFA" ,
+        "TempSpecialRateTittle": "TARIFA DE TEMPORADA", 
+        "TempFirstRateApply": "TARIFA 1 QUE SE APLICARA",
+        "TempSpecialRateQuestion": "¿ QUISIERAS OFRECER UNA SEGUNDA TARIFA ? ",
+        "TempRateOnePerson": "Precio para 1 Persona",
+        "TempRateTwoPerson": "Precio para 2 Persona",
+        "TempRateThreePerson": "Precio para 3 Persona",
+        "TempRateKids": "Precio para Niños y Niñas",
+        "TempSpecialRatesExample": "Ejemplo: Tarifa Fin de Semana",
+        "TempExtraOnePersonRate": "Precio para 1 Persona",
+        "TempExtraTwoPersonRate": "Precio para 2 Persona",
+        "TempExtraThreePersonRate": "Precio para 3 Persona",
+        "TempExtraKidsRate": "Precio para Niños y Niñas",
+        "TempSecondRateApply": "TARIFA 2 QUE SE APLICARA",
+        "TempRateApplyTemp": "LA TARIFA APLICARA PARA LA TEMPORADA DE: ",
+        "TempvisibleOTAS": "CHANNEL MANAGER OTA's",
+        "TemptarifaEspecialQuestion": "¿ QUISIERAS OFRECER UNA SEGUNDA TARIFA ?",
+        "TempAddNewRate":"AGREGAR NUEVA TARIFA DE TEMPORADA"
     }
-
 }

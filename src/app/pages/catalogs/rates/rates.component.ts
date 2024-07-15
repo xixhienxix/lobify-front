@@ -7,11 +7,12 @@ import { Subject, Subscription, firstValueFrom, takeUntil } from 'rxjs';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { TarifasService } from 'src/app/services/tarifas.service';
-import { ExpressRatesComponent } from './express-rates/express.rates.component';
 import { SpecialRatesComponent } from './special-rates/special-rates.component';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { Prompt } from 'src/app/models/prompt.model';
+import { TempRatesComponent } from './temp-rates/temp.rates.component';
+import { ExpressRatesComponent } from './express-rates/express.rates.component';
 
 
 @Component({
@@ -28,6 +29,8 @@ export class RatesComponent implements OnInit, AfterViewInit {
   //Table
   displayedColumns: string[] = ['Tarifa', 'Habitacion', 'Tarifas_Activa', 'Visible_en','Cancelacion','Acciones'];
   dataSource = new MatTableDataSource<any>();
+  displayedColumnsTemporada: string[] = ['Tarifa', 'Temporada', 'Tarifas Activas', 'Habitacion', 'Visibilidad', 'Cancelacion','Estado','Acciones'];
+  dataSourceTemporada = new MatTableDataSource<any>();
   displayedColumnsEspecial: string[] = ['Tarifa', 'Temporada', 'Tarifas Activas', 'Habitacion', 'Visibilidad', 'Cancelacion','Estado','Acciones'];
   dataSourceEspecial = new MatTableDataSource<any>();
 
@@ -54,6 +57,8 @@ export class RatesComponent implements OnInit, AfterViewInit {
   tarifaRackArr:any[]=[]
   tarifaRackCompleto:Tarifas[]=[]
   tarifaEspecialArray:Tarifas[]=[]
+  tarifaTemporadaArray:Tarifas[]=[]
+
 
   // ratesArray:Tarifas[]=[];
   // ratesArrayComplete:Tarifas[]=[];
@@ -71,10 +76,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
     public _habitacionService:HabitacionesService
   ) { 
     const sb =this._tarifasService.getNotification().subscribe(data=>{
-      if(data)
-      {
-        // this.dataSourceEspecial.data=[]
-        // this.dataSource.data=[]
+      if(data){
         this.getTarifas(false);
       }
     });
@@ -164,26 +166,31 @@ export class RatesComponent implements OnInit, AfterViewInit {
   }
 
   buildDataSource(data:Tarifas[]){
-    this.dataSourceEspecial.data=[]
-    this.dataSource.data=[]
-    this.tarifaEspecialArray=[]
-    this.tarifaRackArr=[]
-    this.isLoading=true
+    this.dataSourceEspecial.data=[];
+    this.dataSource.data=[];
+    this.dataSourceTemporada.data=[];
+    this.tarifaEspecialArray=[];
+    this.tarifaRackArr=[];
+    this.isLoading=true;
 
-    this.tarifaRackCompleto = data
+    this.tarifaRackCompleto = data;
 
-    this.tarifaEspecialArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa !== 'Tarifa Base' );
+    this.tarifaEspecialArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa !== 'Tarifa Base');
+    this.tarifaEspecialArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa !== 'Tarifa De Temporada');
+
     this.tarifaRackArr = this.tarifaRackCompleto.filter((val)=> val.Tarifa === 'Tarifa Base' );
+    this.tarifaTemporadaArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa === 'Tarifa De Temporada' );
+
 
             /*Borra Duplicados*/
     var borraDuplicados = this.tarifaEspecialArray.filter((value, index, self) =>
         index === self.findIndex((t) => (
           t.Tarifa === value.Tarifa
           )));
-      
 
     this.dataSource.data=this.tarifaRackArr     
-    this.dataSourceEspecial.data=borraDuplicados   
+    this.dataSourceEspecial.data=borraDuplicados 
+    this.dataSourceTemporada.data = this.tarifaTemporadaArray   
     this.isLoading = false
     this.reloading = false
   }
@@ -223,29 +230,6 @@ export class RatesComponent implements OnInit, AfterViewInit {
       return tableString.join('<br>')
     }
 
-
-
-    // const tarifasActivasArray = element.TarifasActivas.filter(item=>{
-    //   item.Activa == true;
-    // });
-
-    // const validTarifaDays = tarifasActivasArray.map(element => { return element.Descripcion }).join('-');
-
-    // const validDaysTarifa1 = element.Tarifa_Especial_1.Dias.filter(item=> item.checked === true).map(element=> {return element.name}).join('-');
-    // const validDaysTarifa2 = element.Tarifa_Especial_2.Dias.filter(item=> item.checked === true).map(element=> {return element.name}).join('-');
-
-    // if(element.Tarifa_Especial_1.Activa){
-    //   tarifasActivas += 'Tarifa 1: <br>' +  validDaysTarifa1 + '<br>'
-    // }
-    // if(element.Tarifa_Especial_2.Activa){
-    //   tarifasActivas += 'Tarifa 2: <br>' + validDaysTarifa2
-    // } 
-
-    // if(element.Tarifa_Especial_1.Activa === false && element.Tarifa_Especial_2.Activa === false){
-    //   return 'Tarifa 1: <br>' +  'Lun-Mar-Mie-Jue-Vie-Sab-Dom' + '<br>'
-    // }
-
-    // return tarifasActivas
   }
 
   async getHabitaciones(refreshTable:boolean){
@@ -300,23 +284,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
         modalRef.result.then((result) => {
           if(result=='Aceptar')        
           {
-            this.deleteTarifaRackEspecial(tarifa.Tarifa)
-            this.tarifaEspecialArray=[]
-          } 
-          this.closeResult = `Closed with: ${result}`;
-          }, (reason) => {
-              this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-          });
-  }
-
-  promtDeleteBaseRate(tarifa:Tarifas){
-    const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-        modalRef.componentInstance.alertHeader = 'Advertencia'
-        modalRef.componentInstance.mensaje='Estas seguro que deseas eliminar la tarifa para la habitación '+tarifa.Tarifa+''          
-        modalRef.result.then((result) => {
-          if(result=='Aceptar')        
-          {
-            this.deleteTarifaRackEspecial(tarifa.Tarifa)
+            this.deleteTarifaRackEspecial(tarifa)
             this.tarifaEspecialArray=[]
           } 
           this.closeResult = `Closed with: ${result}`;
@@ -332,8 +300,6 @@ export class RatesComponent implements OnInit, AfterViewInit {
     modalRef.result.then((result) => {
       if(result=='Aceptar')        
       {
-        // this.deleteTarifaRackEspecial(element)
-        // this.tarifaEspecialArray=[]
       } 
       this.closeResult = `Closed with: ${result}`;
       }, (reason) => {
@@ -345,8 +311,36 @@ export class RatesComponent implements OnInit, AfterViewInit {
       return
   }
 
+  editTarifaTemporada(row:any){
+    const modalref = this.modalService.open(TempRatesComponent,{size:'md',backdrop:'static'})
+    modalref.componentInstance.tarifa=row
+    modalref.componentInstance.cuartosArray = this.cuartosArray
+    modalref.componentInstance.onTarifaSubmit.subscribe({
+      next:(tarifa:Tarifas)=>{
+        this._tarifasService.updateTarifas(tarifa).subscribe({
+          next:(value)=>{
+            this.promptMessage('Exito','Tarifa(s) Generada(s) con éxito')
+            this._tarifasService.sendNotification(true);
+            this,modalref.close();        
+          },
+          error:(error)=>{
+            this.promptMessage('Error','No se pudo guardar la tarifa intente de nuevo mas tarde')
+          }
+        })
+      },
+      error:()=>{
 
-  deleteTarifaRackEspecial(element:string){
+      }
+    });
+    modalref.componentInstance.onAlertsEvent.subscribe({
+      next:(value:Prompt)=>{
+        this.promptMessage(value.title,value.message);
+      }
+    })
+  }
+
+
+  deleteTarifaRackEspecial(element:Tarifas){
 
       this._tarifasService.deleteTarifaEspecial(element).subscribe({
         next:(value)=>{
@@ -402,7 +396,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
     });
   }
 
-  nvaTarifaTemporada(){
+  nvaTarifaEspecial(){
     const modalRef = this.modalService.open(SpecialRatesComponent,{size:'md',backdrop:'static'});
     modalRef.componentInstance.cuartosArray = this.cuartosArray
     modalRef.componentInstance.onNameAlreadyExist.subscribe({
@@ -435,6 +429,60 @@ export class RatesComponent implements OnInit, AfterViewInit {
         this.promptMessage(value.title,value.message);
       }
     })
+  }
+
+
+  nvaTarifaTemporada(){
+    const modalRef = this.modalService.open(TempRatesComponent,{size:'md',backdrop:'static'});
+    modalRef.componentInstance.cuartosArray = this.cuartosArray
+    modalRef.componentInstance.onNameAlreadyExist.subscribe({
+      next:(value:boolean)=>{
+        if(value){
+          this.promptMessage('Error','El Nombre de la Tarifa ya existe, utilize otro')
+        }
+      }
+    })
+    modalRef.componentInstance.tarifasArray = this.tarifaRackCompleto
+    modalRef.componentInstance.onTarifaSubmit.subscribe({
+      next:(tarifa:Tarifas)=>{
+        this._tarifasService.postTarifaEspecial(tarifa).subscribe({
+          next:(value)=>{
+            this.promptMessage('Exito','Tarifa(s) Generada(s) con éxito')
+            this._tarifasService.sendNotification(true);
+            modalRef.close();        
+          },
+          error:(error)=>{
+            this.promptMessage('Error','No se pudo guardar la tarifa intente de nuevo mas tarde')
+          }
+        })
+      },
+      error:()=>{
+
+      }
+    });
+    modalRef.componentInstance.onAlertsEvent.subscribe({
+      next:(value:Prompt)=>{
+        this.promptMessage(value.title,value.message);
+      }
+    })
+  }
+
+  editTempRate(row:any){
+    const modalref = this.modalService.open(TempRatesComponent,{size:'md',backdrop:'static'})
+    modalref.componentInstance.tarifa=row
+    modalref.componentInstance.tarifasArray = this.tarifaRackCompleto
+    modalref.componentInstance.cuartosArray= this.cuartosArray;
+    modalref.componentInstance.onTarifaSubmit.subscribe({
+      next:(val:Tarifas)=>{
+        if(val){
+          this.updateTarifaBase(val);
+          modalref.close();        
+        }
+      },
+      error:(error:any)=>{
+        this.promptMessage('Error',error);
+      }
+    });
   }
 
   editBaseRate(row:any){

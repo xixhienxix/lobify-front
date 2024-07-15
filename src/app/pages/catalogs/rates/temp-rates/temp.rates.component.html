@@ -1,0 +1,176 @@
+<div class="modal-content">
+    <div style="background-color: var(--background-pink);" class="modal-header">
+        <h1 style="text-align: center; color: white;" class="text-center modal-title h4 col-10"
+          id="example-modal-sizes-title-lg">
+          {{"TempRatesComponent.TempSpecialRateTabTittle" | translate }}
+    </h1>
+        <button style="background-color:#fa6d7c; font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
+      </div>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="tarifaFormGroup">
+      <div class="row">
+        <mat-radio-group formControlName="estado" class="col-lg-12" aria-label="Select an option">
+          <mat-radio-button [checked]="activa" value="1">{{"TempRatesComponent.TempActiveRate" | translate}}</mat-radio-button>
+          <mat-radio-button value="2">{{"TempRatesComponent.TempInactiveRate" | translate}}</mat-radio-button>
+        </mat-radio-group>
+      </div>
+      <br>
+      <div class="row">
+        <div class="col-lg-12">
+          <label style="font-weight: bold;" class="form-label">{{"TempRatesComponent.TempRateName" | translate}}</label>
+          <input id="name" name="name"class="form-control" formControlName="nombre" name="nombre">
+        </div>
+      </div>
+  
+      <br>
+
+  
+      <hr style="border: 5px solid red; border-radius: 5px;">
+  
+      <br>
+  
+      <!-- First Group Form -->
+          <div class="row">
+            <div class="col-lg-6">
+              <label class="form-label">{{"TempRatesComponent.TempRateOnePerson" | translate}}</label>
+              <input  type="number" class="form-control" formControlName="tarifa_1" name="tarifa_1">
+            </div>
+            <div class="col-lg-6">
+              <label class="form-label">{{"TempRatesComponent.TempRateTwoPerson"| translate}}</label>
+              <input  type="number" class="form-control" formControlName="tarifa_2" name="tarifa_2">
+            </div>
+          </div>
+          <br>
+          <div class="row">
+            <div class="col-lg-6">
+              <label class="form-label">{{"TempRatesComponent.TempRateThreePerson"| translate}}</label>
+              <input  type="number" class="form-control" formControlName="tarifa_3" name="tarifa_3">
+            </div>
+            <div class="col-lg-6">
+              <label class="form-label">{{"TempRatesComponent.TempRateKids"| translate}} </label>
+              <input  type="number" class="form-control" formControlName="tarifa_n" name="tarifa_n">
+            </div>
+          </div>
+          
+          <br>
+  
+          <div class="row">
+            <div class="col-lg-12">
+              <!-- <label style="color:#00506a; font-weight: bold;" class="form-label">Aplica los dias: <small>Si no se selecciona ninguna la tarifa aplicara para todos los días</small></label> -->
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-12">
+              <section class="checkbox-section">
+                <ng-container *ngFor="let option of options(); let i = index">
+                  <mat-checkbox
+                  class="checkbox-margin" value="{{option}}"
+                  [checked]="option.checked"
+                  (change)="getOption($event.checked,i)">
+                  {{option.name}}
+                  </mat-checkbox>
+                </ng-container>
+              </section>
+            </div>
+          </div>
+          <br>
+          <hr style="border: 5px solid red; border-radius: 5px;">
+
+  
+      <br>
+    
+    <h1 class="modal-title h4 col-10" id="example-modal-sizes-title-lg">
+      {{"TempRatesComponent.TempRateApplyTemp" | translate }}
+  </h1>
+  
+  
+  <mat-form-field style="width:-webkit-fill-available">
+    <mat-label>Rango de Fechas</mat-label>
+    <mat-date-range-input [formGroup]="range" [rangePicker]="picker">
+      <input matStartDate formControlName="start" placeholder="Llegada">
+      <input matEndDate formControlName="end" placeholder="Salida">
+    </mat-date-range-input>
+    <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-date-range-picker #picker></mat-date-range-picker>
+  
+      <mat-error *ngIf="(range.controls.start.hasError('matStartDateInvalid'))">Fehca Inicial invalida</mat-error>
+      <mat-error *ngIf="(range.controls.end.hasError('matEndDateInvalid'))  ">Fecha Final invalida</mat-error>
+  </mat-form-field>
+  
+  <br>
+  
+  <div class="row" style="margin-top: 3%;">
+    <div class="col-lg-6">
+      <label style="color:#00506a; font-weight: bold;" class="form-label">Estancia minima de noches:
+        </label>
+      <input class="form-control" type="number" formControlName="minima" name="minima">
+    </div>
+    <div class="col-lg-6">
+      <label style="color:#00506a; font-weight: bold;" class="form-label">Estancia maxima de noches:
+        <span
+        class="fa fa-question-circle"
+        ngbTooltip="Si coloca un 0 la tarifa no tendra maximo de noches" 
+        >
+       </span>
+      </label>
+      <input class="form-control" formControlName="maxima" type="number" name="maxima">
+    </div>
+  </div>
+  <br>
+  
+  
+      <div class="row ">
+        <div class="col-lg-12">
+            <label style="font-weight: bold;" class="form-label">Tarifa Estandar Global de la Habitación(es)</label>
+        </div>
+    </div>
+        <div class="row">
+            <div class="col-lg-12">
+              <div class="input-group">
+                <mat-select 
+                (menuOpened)="preventCloseOnClickOut()" (menuClosed)="allowCloseOnClickOut()"
+                #camasSelect
+                multiple
+                class="form-control form-control-lg"
+                [formControl]="camasFC"                               
+                [(ngModel)]="resultLocationCamas">
+                <footer class="col-sm-12">
+                  <button style="color:white" (click)="camasSelect.close(); selectionChange();" mat-button class="col-sm-4 btn btn-primary">Confirmar</button>
+                </footer>
+                  <mat-select-trigger>                                
+                      <button *ngIf="camasFC.value?.length > 0" class="button1">{{camasFC.value[0]}}
+                          <span (click)="$event.stopPropagation(); camasValue(camasFC.value[0]); camasFC.value.splice(0,1); selectionChange();" class="lesser-size start-100 translate-middle badge rounded-pill bg-danger">   X    </span>
+                      </button> 
+                      <button *ngIf="camasFC.value?.length > 1" class="button2">{{camasFC.value[1]}}
+                          <span (click)="$event.stopPropagation(); camasValue(camasFC.value[1]); camasFC.value.splice(0,1); selectionChange();" class="lesser-size start-100 translate-middle badge rounded-pill bg-danger">   X    </span>
+                      </button>
+                      <button *ngIf="camasFC.value?.length > 2" class="button3">{{camasFC.value[2]}}
+                          <span (click)="$event.stopPropagation(); camasValue(camasFC.value[2]); camasFC.value.splice(0,1); selectionChange();" class="lesser-size start-100 translate-middle badge rounded-pill bg-danger">   X    </span>
+                      </button> 
+                    
+                      <span *ngIf="camasFC.value?.length > 3" class="additional-selection">
+                          (+{{camasFC.value.length - 3}} {{camasFC.value?.length === 4 ? 'mas' : 'mas'}})
+                      </span>
+                  </mat-select-trigger>
+      
+                  <div>
+                    <mat-option #matOption [value]="camas.value" *ngFor="let camas of disponiblesIndexadosCamas; let i = index" >{{camas.value}}</mat-option>
+                  </div>
+                </mat-select>
+              </div>
+              <div *ngIf="camaFCVacio===true">
+                <mat-error>Debe Seleccionar almenos un tipo de Cuarto</mat-error>
+              </div>
+              </div>
+        </div>   
+        <br>
+  
+    </form>
+  </div>
+  
+  
+  <div class="card-footer" style="text-align: center;">
+  <button  (click)="onSubmit()" class="btn btn-success col-lg-12">Aceptar</button>
+  </div>

@@ -24,7 +24,7 @@ interface TarifasDisponibles {
 //     Tarifa_N:number
 // }
 export interface Tarifas {
-
+    _id?:string;
     Tarifa:string;
     Habitacion:string[];
     Llegada:Date;
