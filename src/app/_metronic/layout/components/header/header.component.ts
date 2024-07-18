@@ -226,6 +226,27 @@ export class HeaderComponent implements OnInit, OnDestroy {
     modalRef.componentInstance.ratesArrayComplete = this.ratesArrayComplete
     modalRef.componentInstance.standardRatesArray = this.standardRatesArray
     modalRef.componentInstance.tempRatesArray = this.tempRatesArray
+    modalRef.componentInstance.onNvaReserva.subscribe({
+      next:async (value:Huesped[])=>{
+        this.submitLoading=true;
+        this._huespedService.addPost(value).subscribe({
+          next:async (data)=>{
+            this.allReservations = await firstValueFrom(this._huespedService.getAll());
+    
+            this.eventsSubject.next(value);
+            this.promptMessage('Exito','Reservacion Guardada con exito');
+            this.submitLoading=false
+    
+          },
+          error:()=>{
+            this.promptMessage('Error','La Reservacion no se pudo generar con exito intente nuevamente')
+          },
+          complete:()=>{
+            this.submitLoading=false
+          }
+        })
+      }
+    })
     
     modalRef.result.then((result) => {
         console.log(result)

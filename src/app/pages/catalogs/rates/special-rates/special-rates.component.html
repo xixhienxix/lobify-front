@@ -12,7 +12,7 @@
     <div class="row">
       <mat-radio-group formControlName="estado" class="col-lg-12" aria-label="Select an option">
         <mat-radio-button [checked]="activa" value="1">{{"SpecialRatesComponent.ActiveRate" | translate}}</mat-radio-button>
-        <mat-radio-button value="2">{{"SpecialRatesComponent.InactiveRate" | translate}}</mat-radio-button>
+        <mat-radio-button [checked]="activa2" value="2">{{"SpecialRatesComponent.InactiveRate" | translate}}</mat-radio-button>
       </mat-radio-group>
     </div>
     <br>

@@ -39,7 +39,7 @@ L10n.load({
 
 export class ContentComponent implements OnInit{
 
-
+  fareValue=900;
   closeResult:string
   public selectedDate: Date = new Date();
   todayDate = new Date();
@@ -164,7 +164,7 @@ export class ContentComponent implements OnInit{
             Folio: item.folio,
             Codigo: item.habitacion,
             Numero: item.numeroCuarto,
-            CategoryColor:item.origen === 'Walk-In' ? this.colorDict[0] : item.origen === 'Reserva' ? this.colorDict[3] : item.origen === 'Temporal' ? this.colorDict[1] : item.origen === 'Interno' ? this.colorDict[2] : this.colorDict[3]
+            CategoryColor:item.origen === 'Walk-In' ? this.colorDict[0] : item.origen === 'Reserva' ? this.colorDict[3] : item.origen === 'Reserva Temporal' ? this.colorDict[1] : item.origen === 'Uso Interno' ? this.colorDict[2] : this.colorDict[3]
           }
         this.datasourceArray.push(pushArray)
       })
@@ -296,11 +296,16 @@ onDataBound(){
         endDate.setDate(startDate.getDate() + 1); // add one day
         const events = this.scheduleObj.getEvents(startDate, endDate);
         events.forEach(event => {
-            if (event.ProjectId === 1) {
+            if (event.ProjectId) {
                 project1Events.push(event);
             } 
         });
         (cell as HTMLElement).innerText = project1Events.length.toString();
+        
+        const newElement = document.createElement('div');
+        newElement.innerText = this.fareValue.toString();
+        newElement.style.marginTop = '10px';
+        (cell as HTMLElement).appendChild(newElement);
         project1Events = [];
        
     });

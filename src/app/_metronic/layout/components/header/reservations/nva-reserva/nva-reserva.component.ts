@@ -1,5 +1,5 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
-import {  Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import {  AfterContentInit, AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
@@ -17,6 +17,13 @@ import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.componen
 import { Foliador } from 'src/app/pages/calendar/_models/foliador.model';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 
+export interface preAsig {
+  numero:string,
+  codigo:string,
+  checked:boolean,
+  disabled:boolean
+}
+
 @Component({
   selector: 'app-edit-customer-modal',
   templateUrl: './nva-reserva.component.html',
@@ -32,7 +39,7 @@ import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 })
 
 
-export class NvaReservaComponent implements  OnInit, OnDestroy
+export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 {
   constructor(
     private modal: NgbActiveModal,
@@ -41,6 +48,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     private _tarifasService: TarifasService,
     private modalService:NgbModal,
     private _disponibilidadService: DisponibilidadService,
+    private changeDetector: ChangeDetectorRef
   ){
 
   }
@@ -50,8 +58,9 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   isLoading:boolean=false;
   accordionDisplay="";
   bandera:boolean=false;
-  closeResult:string
-
+  closeResult:string;
+  mensajeAdultos:string=''
+  mensajeNinos:string=''
 
   /** Current Values */
   selectedRoom:any;
@@ -67,11 +76,11 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   ratesArrayComplete:Tarifas[]=[]
   infoRoomsAndCodes:any=[];
   availavilityCodeRooms:Habitacion[]=[]
-  availavilityRooms:Habitacion[]=[]
+  availavilityRooms:any[]=[]
   filterRatesAray:Tarifas[]=[]
   filterRatesbyRoomName:Tarifas[]=[]
   roomCodesComplete:Habitacion[]=[]
-  preAsignadasArray:any[]=[]
+  preAsignadasArray:preAsig[]=[]
   @Input() standardRatesArray:Tarifas[]=[]
   @Input() tempRatesArray:Tarifas[]=[]
   estatusArray:Estatus[]=[];
@@ -95,7 +104,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   maxPeopleFlag:boolean=false;
   /** Max Adultos y niños */
   quantityNin:number=0;
-  quantity:number=0;
+  quantity:number=1;
 
   /** Flags */
   dropDownHabValueIndex:any
@@ -128,6 +137,10 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 
     this.loadForm();
     this.todaysDateComparer();
+  }
+
+  ngAfterViewInit(): void {
+    this.changeDetector.detectChanges();
   }
 
 
@@ -233,7 +246,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
       adultos:[{value:1, disabled:true }, Validators.required],
       ninos:[{value:0,disabled:true}, Validators.required],
       habitacion:['', Validators.compose([Validators.required])],
-      checkbox:[false,Validators.required],
+      checkbox:[{value:false, disabled:true},Validators.required],
       nombre: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
       email: ['', Validators.compose([Validators.email,Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"),Validators.minLength(3),Validators.maxLength(50)])],
       telefono: ['', Validators.compose([Validators.nullValidator,Validators.pattern('[0-9]+'),Validators.minLength(10),Validators.maxLength(14)])],
@@ -242,11 +255,24 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     this.formGroup2 = this.fb.group({
       checkbox:[false,Validators.required],
     })
+
+
   }
-  
+
+
   tarifaRadioButton(tarifas:Tarifas, event:any, codigo:string){
     const checkedStatus = event.source.checked
     const tarifa = tarifas
+
+    //Uncheck all checkboxes that are not for the roomCode
+    this.preAsignadasArray.map((item)=>{
+      if(item.codigo !== codigo){
+        item.checked=false;
+        item.disabled=true;
+      }else{
+        item.disabled=false;
+      }
+    });
 
       if(this.tarifaSeleccionada.length > 0){
         const index  = this.tarifaSeleccionada.findIndex(obj =>
@@ -266,17 +292,19 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
      }     
   }
 
-  preAsignar(numero:any,codigo:string,checked:boolean){
+  preAsignar(numero:any,codigo:string,checked:boolean,disabled:boolean){
     if(this.preAsignadasArray.length >= 0){
       const index = this.preAsignadasArray.findIndex((item) => item.numero === numero)
       if(index != -1){
         this.preAsignadasArray[index].checked = checked
+        this.preAsignadasArray[index].disabled = disabled
       }else{
-        this.preAsignadasArray.push({numero,codigo,checked})
+        this.preAsignadasArray.push({numero,codigo,checked, disabled})
       }
     }else{
-      this.preAsignadasArray.push({numero,codigo,checked})
+      this.preAsignadasArray.push({numero,codigo,checked, disabled})
     }
+    this.formGroup.controls
 }
 
 ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cuarto, tarifaPromedio:boolean = false){
@@ -289,7 +317,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
         const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"];
 
         // Cycle All Days
-        for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
+        for (let start = new Date(this.intialDate); start.setHours(0,0,0,0) < this.endDate.setHours(0,0,0,0); start.setDate(start.getDate() + 1)) {
           tarifa.TarifasActivas.map((item)=>{
             const validDays = item.Dias!.filter((x)=> x.checked === true)    
             const day = start.getDay();
@@ -299,16 +327,16 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
               if(item.Activa === true){
                 switch (adultos) {
                   case 1:
-                    tarifaTotal += item.Tarifa_1
+                    tarifaTotal += item.Tarifa_1*(adultos)
                     break;
                   case 2:
-                    tarifaTotal += item.Tarifa_2
+                    tarifaTotal += item.Tarifa_2*(adultos)
                     break;
                   case 3:
-                    tarifaTotal += item.Tarifa_3
+                    tarifaTotal += item.Tarifa_3*(adultos)
                     break;
                   default:
-                    tarifaTotal += (item.Tarifa_3*(adultos-3))
+                    tarifaTotal += (item.Tarifa_3*(adultos))
                 }
                   if(ninos !==0 ){
                     tarifaTotal += (item.Tarifa_N*ninos)
@@ -350,18 +378,18 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
       tarifaBase?.TarifasActivas.map((item)=>{
         switch (adultos) {
           case 1:
-            tarifaTotal += item.Tarifa_1
+            tarifaTotal += item.Tarifa_1*(adultos)
           break;
           case 2:
-            tarifaTotal += item.Tarifa_2
+            tarifaTotal += item.Tarifa_2*(adultos)
           break;
           case 3:
-            tarifaTotal += item.Tarifa_3
+            tarifaTotal += item.Tarifa_3*(adultos)
           break;
           default:
-          tarifaTotal += (item.Tarifa_3*(adultos-3))
+          tarifaTotal += (item.Tarifa_3*(adultos))
           }
-  
+
           if(ninos !==0 ){
             tarifaTotal += (item.Tarifa_N*ninos)}
       });
@@ -379,30 +407,43 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
 
     tarifaTemporada.map(item=>{
         const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"];
-        const validDays = item.Dias!.filter((x)=> x.checked === true);
+        // let secondValidDates
+        let validDays = item?.TarifasActivas[0].Dias!.filter((x)=> x.checked === true);
+        //Check if Second Temp Rate Exist
+        // if(item?.TarifasActivas.length === 2 && validDays === undefined){
+        //   secondValidDates = item?.TarifasActivas[1].Dias!.filter((x)=> x.checked === true);
+        // }
+        // if(secondValidDates){
+        //   validDays = secondValidDates;
+        // }
+
         const day = fecha.getDay();
         const validDay = validDays.find((item) => item.name === dayNames[day])?.checked
 
         if(validDay){
-          item?.TarifasActivas.map((item)=>{
-            switch (adultos) {
-              case 1:
-                tarifaTotal += item.Tarifa_1
-              break;
-              case 2:
-                tarifaTotal += item.Tarifa_2
-              break;
-              case 3:
-                tarifaTotal += item.Tarifa_3
-              break;
-              default:
-              tarifaTotal += (item.Tarifa_3*(adultos-3))
-              }
-      
-              if(ninos !==0 ){
-                tarifaTotal += (item.Tarifa_N*ninos)}
-          });
-          return Math.ceil(tarifaTotal);
+          if(item.Estado === true) {
+            item?.TarifasActivas.map((item)=>{
+              switch (adultos) {
+                case 1:
+                  tarifaTotal += item.Tarifa_1*(adultos)
+                break;
+                case 2:
+                  tarifaTotal += item.Tarifa_2*(adultos)
+                break;
+                case 3:
+                  tarifaTotal += item.Tarifa_3*(adultos)
+                break;
+                default:
+                tarifaTotal += (item.Tarifa_3*(adultos))
+                }
+        
+                if(ninos !==0 ){
+                  tarifaTotal += (item.Tarifa_N*ninos)}
+            });
+            return Math.ceil(tarifaTotal);
+          }else{
+            tarifaTotal=0;
+          }
         }else{
           return tarifaTotal=0
         }
@@ -474,18 +515,84 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
                   }) 
                 }
               });
-            //}
+
+
+
+              this.availavilityRooms.forEach(item=>{
+                this.preAsignadasArray.push({
+                  numero:item.Numero,
+                  codigo:item.Codigo,
+                  checked:false,
+                  disabled:true
+                })
+              })
           },
           error:()=>{
           },
           complete:()=>{
             this.accordionDisplay=''
-            this.isLoading=false
+            this.isLoading=false;
+            this.changeDetector.detectChanges();
+
           }}
       )
     // this.onGetDisponibilidad.emit({intialDate:this.intialDate, endDate:this.endDate, habitacion:habitacion, stayNights:this.stayNights, folio:folio});
   }
 
+  revisaCapacidad(codigoCuarto:string){
+    const hab = this.roomCodesComplete.find(item=>
+      item.Codigo === codigoCuarto
+    );
+
+    if(hab){
+      if(hab.Adultos < this.quantity || hab?.Ninos<this.quantityNin){
+        if(hab.Adultos < this.quantity){
+          this.mensajeAdultos='El número de Adultos seleccionado exede la cantidad maxima de personas permitida para ste tipo de habitacion'+ '<br>';
+        }
+        if(hab?.Ninos<this.quantityNin){
+          this.mensajeNinos='El número de Niños seleccionado exede la cantidad maxima de personas permitida para ste tipo de habitacion'
+        }
+        return true;
+      }else{
+        this.mensajeAdultos='';
+        this.mensajeNinos=''
+        return false
+      }
+    }
+    return false
+  }
+
+  // roomRates(minihabs:string){
+  //   let availbleRates = this.ratesArrayComplete.filter((item) => item.Estado === true); 
+
+  //   availbleRates  = availbleRates.filter(obj =>
+  //     obj.Habitacion.some(item => item === minihabs));
+    
+  //   availbleRates = availbleRates.filter(item => item.Tarifa !== 'Tarifa De Temporada');
+
+  //   let newRatesArray = JSON.parse(JSON.stringify(availbleRates));
+
+  //   newRatesArray.map((item:Tarifas,index:number)=>{
+  //     if(item.TarifasActivas.length > 1){
+  //         const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"];
+  //         const validDays = item.TarifasActivas[1].Dias!.filter((x)=> x.checked === true)    
+  //         const day = this.intialDate.getDay();
+  //         const validDay = validDays.find((item) => item.name === dayNames[day])?.checked // Revisar si el dia es valido
+  //       if(validDay){
+  //         newRatesArray.push({
+  //           ...item, 
+  //           Tarifa: item.TarifasActivas[1].Descripcion + '- 2', 
+  //           Dias: item.TarifasActivas[1].Dias, 
+  //           TarifasActivas : [item.TarifasActivas[1]]
+  //         });
+  //         newRatesArray[index].TarifasActivas.splice(1,1);
+  //       }
+  //     }
+  //   })
+  //   newRatesArray = newRatesArray.sort((a:Tarifas,b:Tarifas) => (a.Tarifa > b.Tarifa) ? 1 : ((b.Tarifa > a.Tarifa) ? -1 : 0))
+    
+  //   return newRatesArray
+  // }
   roomRates(minihabs:string){
     let availbleRates = this.ratesArrayComplete.filter((item) => item.Estado === true); 
 
@@ -493,6 +600,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
       obj.Habitacion.some(item => item === minihabs));
     
     availbleRates = availbleRates.filter(item => item.Tarifa !== 'Tarifa De Temporada');
+    
     return availbleRates
   }
 
@@ -662,6 +770,8 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
     if(this.quantityNin<7){
       this.quantityNin++;
     }
+    this.resetDispo();
+
   }
   minusNin()
   {
@@ -670,6 +780,8 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
     }else{
     this.quantityNin
     }
+    this.resetDispo();
+
   }
   /** End Custom Plus Minus Button */
 
@@ -712,14 +824,18 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
 
     if(value===1){
       this.currentFolio=this.folios[2]
-      // this.estatusID=value
       this.origenReserva='Walk-In'
     }
     else if(value===2){
     this.currentFolio=this.folios[0]
-    // this.estatusID=value
     this.origenReserva='Reserva'}
-
+    else if(value === 5){
+      this.currentFolio=this.folios[1]
+      this.origenReserva='Uso Interno'
+    }else if(value === 7){
+      this.currentFolio=this.folios[3]
+      this.origenReserva='Reserva Temporal'
+    }
     this.onSubmit();
   }
 
@@ -791,3 +907,4 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
   }
 
 }
+

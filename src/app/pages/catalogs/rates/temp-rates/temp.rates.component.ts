@@ -64,6 +64,7 @@ export class TempRatesComponent implements OnInit{
   tarifaEspecialYVariantes:boolean=false
   descuentoTotalProCheckbox:boolean=false
   activa:boolean=true
+  activa2:boolean=false
   maximoDePersonas:number
   maximoDeNinos:number;
   descuentoNoAplicado=false
@@ -159,6 +160,13 @@ export class TempRatesComponent implements OnInit{
 
     // this.getTarifasRack();
     if(this.tarifa){
+      if(this.tarifa.Estado){
+        this.activa=true;
+        this.activa2=false;
+      }else{
+        this.activa=false;
+        this.activa2=true;
+      }
       this.editMode=true;
       this.options.update(item=>{
           item = this.tarifa.TarifasActivas[0].Dias
@@ -274,15 +282,19 @@ export class TempRatesComponent implements OnInit{
       this.camaFCVacio=true
       return
     }
+    let estado = true;
+    if(this.formControls['estado'].value === '2'){
+      estado = false;
+    }
 
     this.tarifasActivasControls.controls.map((item)=>{
       item.value.Descripcion = this.formControls["nombre"].value.trim();
-      item.value.Activa = this.formControls['estado'].value
+      item.value.Activa = estado
       item.value.Dias = this.options()
     });
   
       const tarifasActivas = [{
-        Activa:this.formControls['estado'].value,
+        Activa:estado,
         Descripcion:this.formControls['nombre'].value,
         Tarifa_1:this.formControls['tarifa_1'].value,
         Tarifa_2:this.formControls['tarifa_2'].value,
@@ -318,7 +330,7 @@ export class TempRatesComponent implements OnInit{
         Descuento:0,
         EstanciaMinima:this.formControls['minima'].value,
         EstanciaMaxima:this.formControls['maxima'].value,
-        Estado:this.formControls['estado'].value,
+        Estado:estado,
         TarifasActivas:tarifasActivas,
         Visibilidad:this.visibility(),
         Cancelacion:this.politicas(),

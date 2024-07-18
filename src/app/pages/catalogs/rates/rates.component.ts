@@ -175,8 +175,8 @@ export class RatesComponent implements OnInit, AfterViewInit {
 
     this.tarifaRackCompleto = data;
 
-    this.tarifaEspecialArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa !== 'Tarifa Base');
-    this.tarifaEspecialArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa !== 'Tarifa De Temporada');
+    this.tarifaEspecialArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa !== 'Tarifa Base' && val.Tarifa !== 'Tarifa De Temporada');
+    // this.tarifaEspecialArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa !== 'Tarifa De Temporada');
 
     this.tarifaRackArr = this.tarifaRackCompleto.filter((val)=> val.Tarifa === 'Tarifa Base' );
     this.tarifaTemporadaArray = this.tarifaRackCompleto.filter((val)=> val.Tarifa === 'Tarifa De Temporada' );
