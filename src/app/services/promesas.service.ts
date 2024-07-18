@@ -1,6 +1,6 @@
-import { HttpClient, HttpParams } from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable, Subject, map } from "rxjs";
+import { BehaviorSubject,  Subject, map } from "rxjs";
 import { environment } from "src/environments/environment";
 import { LocalForageCache } from "../tools/cache/indexdb-expire";
 import { Promesa } from "../pages/calendar/_models/promesas.model";
@@ -51,7 +51,6 @@ private currentPromesaSubject =new Subject<any>();
     }
 
     async sendCustomFormNotification(flag:boolean){
-      const deleted = await this.deleteIndexDB("Promesas");
     //   this.getPromesas();
       this.currentPromesaSubject.next(flag)
     };

@@ -121,13 +121,6 @@ class ThemeMode {
     }
   }
 
-  private getActiveMenuItem = (): HTMLElement | null => {
-    return (
-      this.menu?.querySelector(
-        '[data-kt-element="mode"][data-kt-value="' + this.getMenuMode() + '"]'
-      ) || null
-    )
-  }
 
   private setActiveMenuItem = (item: HTMLElement): void => {
     const menuModeParam = this.getParamName('menu')

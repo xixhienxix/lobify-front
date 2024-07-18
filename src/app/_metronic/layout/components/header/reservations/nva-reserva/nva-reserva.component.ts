@@ -1,23 +1,21 @@
-import {  AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
+/* eslint-disable @angular-eslint/no-output-on-prefix */
+import {  Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
-import { ModalDismissReasons, NgbActiveModal, NgbDateAdapter, NgbDateParserFormatter, NgbDateStruct, NgbModal, } from '@ng-bootstrap/ng-bootstrap';
+import { ModalDismissReasons, NgbActiveModal, NgbDateAdapter, NgbDateParserFormatter, NgbModal, } from '@ng-bootstrap/ng-bootstrap';
 import { DateTime } from 'luxon';
-import { Observable, Subject, filter, first, firstValueFrom, map, takeUntil } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { Tarifas, TarifasRadioButton } from 'src/app/models/tarifas';
 import { DisponibilidadService } from 'src/app/services/disponibilidad.service';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { TarifasService } from 'src/app/services/tarifas.service';
 import { CustomAdapter, CustomDateParserFormatter } from 'src/app/tools/date-picker.utils';
-import { Estatus } from '../../_models/estatus.model';
-import { Foliador } from '../../_models/foliador.model';
-import { EstatusService } from '../../_services/estatus.service';
-import { FoliosService } from '../../_services/folios.service';
 import { Huesped } from 'src/app/models/huesped.model';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
-import { MatCheckboxChange } from '@angular/material/checkbox';
+import { Foliador } from 'src/app/pages/calendar/_models/foliador.model';
+import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 
 @Component({
   selector: 'app-edit-customer-modal',
@@ -41,10 +39,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     private fb: FormBuilder,
     private _habitacionService: HabitacionesService,
     private _tarifasService: TarifasService,
-    private _disponibilidadService: DisponibilidadService,
-    private _folioservice: FoliosService,
-    private _estatusService:EstatusService,
     private modalService:NgbModal,
+    private _disponibilidadService: DisponibilidadService,
   ){
 
   }
@@ -67,7 +63,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   /** Models */
   roomCodes:Habitacion[]=[];
   mySet = new Set();
-  ratesArray:Tarifas[]=[];
+  @Input() ratesArray:Tarifas[]=[];
   ratesArrayComplete:Tarifas[]=[]
   infoRoomsAndCodes:any=[];
   availavilityCodeRooms:Habitacion[]=[]
@@ -76,7 +72,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   filterRatesbyRoomName:Tarifas[]=[]
   roomCodesComplete:Habitacion[]=[]
   preAsignadasArray:any[]=[]
-  standardRatesArray:Tarifas[]=[]
+  @Input() standardRatesArray:Tarifas[]=[]
+  @Input() tempRatesArray:Tarifas[]=[]
   estatusArray:Estatus[]=[];
   folios:Foliador[]=[];
   huespedInformation:Huesped[]=[];
@@ -120,22 +117,16 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
   todayDate:Date = new Date();
   // closeResult: string;
 
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   @Output() onNvaReserva: EventEmitter<Huesped[]> = new EventEmitter();
-
+  @Output() onGetDisponibilidad: EventEmitter<any> = new EventEmitter();
   get inputs() {
     return this.formGroup.controls["nombreHabs"] as FormArray;
   }
   /** Subscription */
-  private ngUnsubscribe = new Subject<void>();
 
   async ngOnInit() {
 
     this.loadForm();
-    this.checkRoomCodesIndexDB();
-    this.checkRatesIndexDB();
-    this.checkEstatusIndexDB();
-    this.checkFoliadorIndexDB();
     this.todaysDateComparer();
   }
 
@@ -224,6 +215,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
         return false
       }
     }
+    
   }
 
   todaysDateComparer(){
@@ -236,66 +228,10 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
         }
   }
 
-  async checkRatesIndexDB(){
-    const ratesIndexDB:Tarifas[] = await this._habitacionService.readIndexDB("Rates");
-
-    /** Checks if RatesArray is on IndexDb */
-    if(ratesIndexDB){
-      this.ratesArray = ratesIndexDB
-      this.ratesArrayComplete = ratesIndexDB
-    }else {
-      this.ratesArray = await firstValueFrom(this._tarifasService.getAll());
-      this.ratesArrayComplete = await firstValueFrom(this._tarifasService.getAll());
-      this.standardRatesArray = this.ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa Estandar');
-    }
-  }
-
-  async checkRoomCodesIndexDB(){
-    const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("Rooms");
-
-        /** Check if RoomsCode are on IndexDb */
-        if(roomsCodesIndexDB){
-          this.roomCodesComplete = roomsCodesIndexDB;
-          this.roomCodes = Object.values(
-            roomsCodesIndexDB.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
-        ); 
-      }else{
-          this.roomCodes = await firstValueFrom(this._habitacionService.getAll());
-          this.roomCodesComplete = this.roomCodes
-          this.roomCodes = Object.values(
-            this.roomCodes.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
-        );         
-      }
-  }
-
-  async checkEstatusIndexDB(){
-    const estatusCodesIndexDB:Estatus[] = await this._estatusService.readIndexDB("Rooms");
-        /** Check if EstatusCodes are on IndexDb */
-      if(estatusCodesIndexDB){
-          this.estatusArray = estatusCodesIndexDB;
-          console.log(this.estatusArray)
-
-      }else{
-          this.estatusArray = await firstValueFrom(this._estatusService.getAll());      
-          console.log(this.estatusArray)
-
-      }
-  }
-
-  async checkFoliadorIndexDB(){
-    const foliosIndexDB:Foliador[] = await this._folioservice.readIndexDB("Foliosr");
-        /** Check if EstatusCodes are on IndexDb */
-      if(foliosIndexDB){
-          this.folios = foliosIndexDB;
-      }else{
-          this.folios = await firstValueFrom(this._folioservice.getAll());      
-      }
-  }
-
   loadForm(){
     this.formGroup = this.fb.group({
-      adultos:[1, Validators.required],
-      ninos:[0, Validators.required],
+      adultos:[{value:1, disabled:true }, Validators.required],
+      ninos:[{value:0,disabled:true}, Validators.required],
       habitacion:['', Validators.compose([Validators.required])],
       checkbox:[false,Validators.required],
       nombre: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
@@ -343,78 +279,135 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     }
 }
 
-  ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cuarto){
-    const adultos = this.formGroup.controls["adultos"].value
-    const ninos = this.formGroup.controls["ninos"].value
+ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cuarto, tarifaPromedio:boolean = false){
+    const adultos = this.quantity
+    const ninos = this.quantityNin
+    let tarifaTotal = 0;
 
-    let tarifaTotal=0;
+    if(tarifa.Tarifa !== 'Tarifa Base'){
+      if(tarifa.Estado === true){
+        const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"];
 
-    if(tarifa.Tarifa === 'Tarifa Base'){
-      // Cycle All Days
+        // Cycle All Days
+        for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
+          tarifa.TarifasActivas.map((item)=>{
+            const validDays = item.Dias!.filter((x)=> x.checked === true)    
+            const day = start.getDay();
+            const validDay = validDays.find((item) => item.name === dayNames[day])?.checked // Revisar si el dia es valido
+
+            if(validDay){
+              if(item.Activa === true){
+                switch (adultos) {
+                  case 1:
+                    tarifaTotal += item.Tarifa_1
+                    break;
+                  case 2:
+                    tarifaTotal += item.Tarifa_2
+                    break;
+                  case 3:
+                    tarifaTotal += item.Tarifa_3
+                    break;
+                  default:
+                    tarifaTotal += (item.Tarifa_3*(adultos-3))
+                }
+                  if(ninos !==0 ){
+                    tarifaTotal += (item.Tarifa_N*ninos)
+                  }
+              } 
+            }else { // La Tarifa Especial No Es Valida para este dia entonses se tomara el precio de la base
+              tarifaTotal += this.retriveBaseRatePrice(codigosCuarto,start);
+            }
+          });
+        }
+      }
+      // return Math.trunc(tarifa.TarifaRack!*estanciaPorNoche);
+
+    }else if(tarifa.Tarifa === 'Tarifa Base'){
       for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
-        const day = start.getDay();
-        tarifa.TarifasActivas.map((item)=>{
+        tarifaTotal += this.retriveBaseRatePrice(codigosCuarto,start);
+      }
+    }
+    if(tarifaPromedio){
+      return Math.ceil(tarifaTotal/this.stayNights);
+    }else{
+      return (tarifaTotal);
+    }
+  }
 
-          if(this.cuarto==="1"){
-            const tarifaEstandar  = this.standardRatesArray.filter(obj =>
-              obj.Habitacion.some(item => item === codigosCuarto)); 
-            tarifaTotal += tarifaEstandar[0].TarifaRack!  
-          }else{
-            const tarifaEstandar  = this.standardRatesArray.filter(obj =>
-              obj.Habitacion.some(item => item === this.cuarto)); 
+  retriveBaseRatePrice(codigosCuarto:string, checkDay:Date){
+    let tarifaTotal = 0;
+    const adultos = this.quantity
+    const ninos = this.quantityNin
 
-            tarifaTotal += tarifaEstandar[0].TarifaRack! 
+    const tarifaBase = this.standardRatesArray.find(obj =>
+      obj.Habitacion.some(item => item === codigosCuarto)); 
+
+    const tarifaTemporada = this.checkIfTempRateAvaible(codigosCuarto,checkDay);
+
+    if(tarifaTemporada !== 0){
+      return Math.ceil(tarifaTemporada)
+    }else{
+      tarifaBase?.TarifasActivas.map((item)=>{
+        switch (adultos) {
+          case 1:
+            tarifaTotal += item.Tarifa_1
+          break;
+          case 2:
+            tarifaTotal += item.Tarifa_2
+          break;
+          case 3:
+            tarifaTotal += item.Tarifa_3
+          break;
+          default:
+          tarifaTotal += (item.Tarifa_3*(adultos-3))
           }
+  
+          if(ninos !==0 ){
+            tarifaTotal += (item.Tarifa_N*ninos)}
+      });
+      return Math.ceil(tarifaTotal);
+    }
+  }
 
+  checkIfTempRateAvaible(codigoCuarto:string, fecha:Date){
+    let tarifaTotal = 0;
+    const adultos = this.quantity
+    const ninos = this.quantityNin
 
-          if(item.Activa === true){
+    const tarifaTemporada = this.tempRatesArray.filter(obj =>
+      obj.Habitacion.some(item => item === codigoCuarto)); 
+
+    tarifaTemporada.map(item=>{
+        const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"];
+        const validDays = item.Dias!.filter((x)=> x.checked === true);
+        const day = fecha.getDay();
+        const validDay = validDays.find((item) => item.name === dayNames[day])?.checked
+
+        if(validDay){
+          item?.TarifasActivas.map((item)=>{
             switch (adultos) {
               case 1:
                 tarifaTotal += item.Tarifa_1
-                break;
+              break;
               case 2:
                 tarifaTotal += item.Tarifa_2
-                break;
+              break;
               case 3:
                 tarifaTotal += item.Tarifa_3
-                break;
+              break;
               default:
-                tarifaTotal += item.Tarifa_3
-            }
-              if(ninos!==0){
-                tarifaTotal += item.Tarifa_N
+              tarifaTotal += (item.Tarifa_3*(adultos-3))
               }
-          }
-        });
-      }
-
-      return Math.trunc(tarifa.TarifaRack!*estanciaPorNoche)
-    }else {
-      let tarifaTotal=0
-      const validDays = tarifa.Dias!.filter((x)=> x.checked === true)    
-      const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"]
-
-      for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
-        const day = start.getDay();
-        const validDay = validDays.find((item) => item.name === dayNames[day])?.checked
-        
-        if(validDay){
-          tarifaTotal += tarifa.TarifaRack!
+      
+              if(ninos !==0 ){
+                tarifaTotal += (item.Tarifa_N*ninos)}
+          });
+          return Math.ceil(tarifaTotal);
         }else{
-          if(this.cuarto==="1"){
-            const tarifaEstandar  = this.standardRatesArray.filter(obj =>
-              obj.Habitacion.some(item => item === codigosCuarto)); 
-            tarifaTotal += tarifaEstandar[0].TarifaRack!  
-          }else{
-            const tarifaEstandar  = this.standardRatesArray.filter(obj =>
-              obj.Habitacion.some(item => item === this.cuarto)); 
-
-            tarifaTotal += tarifaEstandar[0].TarifaRack! 
-          }
+          return tarifaTotal=0
         }
-      }
-      return Math.trunc(tarifaTotal)
-    }
+    })
+    return tarifaTotal
   }
 
   buscaDispo(habitacion:any){
@@ -436,7 +429,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
       this.cuarto=habitacion.Codigo
     }
 
-
     this.filterRates();
 
     console.log("tarifas: ",this.filterRatesAray)
@@ -451,20 +443,20 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
       this.dropDownHabValueIndex=''
     }
 
-    this._disponibilidadService.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio)
+      this._disponibilidadService.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio)
       .subscribe(
         {      
           next:(response)=>{
             // if(response.length!=0){
             //   console.log("cuartos ocupados")
             // }else{
-              if(!this.roomCodesComplete){
-                this.checkRoomCodesIndexDB();
-              }else{
+              // if(!this.roomCodesComplete){
+              //   this.checkRoomCodesIndexDB();
+              // }else{
                 this.roomCodesComplete.forEach((val)=>{ this.mySet.add(val.Numero) })
                 //ELimina habitaciones no disponibles del Set
                 response.forEach((val)=>{this.mySet.delete(val)})   
-              }
+              //}
   
               this.mySet.forEach((value)=> {
                 const results = this.roomCodesComplete.find((item) => item.Numero === value )  
@@ -491,6 +483,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
             this.isLoading=false
           }}
       )
+    // this.onGetDisponibilidad.emit({intialDate:this.intialDate, endDate:this.endDate, habitacion:habitacion, stayNights:this.stayNights, folio:folio});
   }
 
   roomRates(minihabs:string){
@@ -498,15 +491,12 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
 
     availbleRates  = availbleRates.filter(obj =>
       obj.Habitacion.some(item => item === minihabs));
+    
+    availbleRates = availbleRates.filter(item => item.Tarifa !== 'Tarifa De Temporada');
     return availbleRates
   }
 
   filterRates(){
-                /**Comparador de Fechas Tarifas */
-                // this.ratesArray=this.ratesArrayComplete.filter(d => {
-                //     return (this.intialDate.getTime() >= new Date(d.Llegada).getTime() );
-                // });
-
                 if(this.ratesArray){
                        this.filterRatesAray = this.ratesArray.filter((val) => 
                          new Date(val.Llegada).getTime() <= this.intialDate.getTime() && new Date(val.Salida).getTime() >= this.endDate.getTime() )
@@ -537,7 +527,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
                                                             day: new Date(this.filterRatesAray[i].Llegada).getDate()
                                                           })
                     
-                for(let y=fromDate;fromDate>=timeLlegada;timeLlegada=timeLlegada.plus({ days: 1 })){
+                for(;fromDate>=timeLlegada;timeLlegada=timeLlegada.plus({ days: 1 })){
                       if(fromDate.hasSame(timeLlegada, 'day') && fromDate.hasSame(timeLlegada, 'year') && fromDate.hasSame(timeLlegada, 'month')){
     
                         var diaDeLlegada = fromDate.setLocale("es").weekdayShort
@@ -556,7 +546,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
                   this.filterRatesAray
                   /** */
                }   
-               console.log(this.filterRatesAray) 
   }
 
   maxPeopleCheck(habitacion:any){
@@ -756,7 +745,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy
     }
   }
 
-  promptMessage(header:string,message:string, obj?:any){
+  promptMessage(header:string,message:string){
     const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
     modalRef.componentInstance.alertHeader = header
     modalRef.componentInstance.mensaje= message    

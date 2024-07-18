@@ -1,7 +1,7 @@
-import { Component, Inject, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, ViewChild, ViewEncapsulation } from '@angular/core';
 import { extend, Internationalization, createElement, closest, remove, addClass, removeClass } from '@syncfusion/ej2-base';
 import { ChangeEventArgs } from '@syncfusion/ej2-angular-dropdowns';
-import { ScheduleComponent, Schedule, ActionEventArgs, PopupOpenEventArgs, EventFieldsMapping, MonthService, EventSettingsModel, CallbackFunction, ScheduleModule } from '@syncfusion/ej2-angular-schedule';
+import { ScheduleComponent, Schedule, PopupOpenEventArgs, EventFieldsMapping, MonthService, EventSettingsModel, CallbackFunction } from '@syncfusion/ej2-angular-schedule';
 
 (window as TemplateFunction).getAirwaysName = (value: number) => {
   return (value === 1) ? 'Airways 1' : (value === 2) ? 'Airways 2' : 'Airways 3';
@@ -102,7 +102,7 @@ export class FareCalendarComponent {
     }
   }
 
-  public onChange(args: ChangeEventArgs): void {
+  public onChange(_args: ChangeEventArgs): void {
     const tdElement: HTMLElement = this.scheduleObj.element.querySelector('.best-price:not(.e-work-cells)')!;
     if (tdElement) {
       removeClass([closest(tdElement, 'td')], 'best-price');
@@ -178,14 +178,14 @@ export class FareCalendarComponent {
       }
     ];
     const start: Date = new Date(2021, 3, 1);
-    const dateCollections: Date[] = Array.apply(null, [{ length: 30 }]).map( (value: unknown, index: number) =>
+    const dateCollections: Date[] = Array.apply(null, [{ length: 30 }]).map( (_value: unknown, index: number) =>
       { 
             return new Date(start.getTime() + (1000 * 60 * 60 * 24 * index));
         }
     );
     let id = 1;
     let day = 0;
-    for (const date of dateCollections) {
+    for (const _date of dateCollections) {
       let resource = 1;
       for (const data of dataCollections) {
         const strDate: Date = new Date((data.StartTime as Date).getTime());

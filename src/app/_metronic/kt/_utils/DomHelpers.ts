@@ -66,7 +66,7 @@ function getElementActualHeight(el: HTMLElement) {
   return getElementActualCss(el, 'height', false)
 }
 
-function getElementActualWidth(el: HTMLElement, cache?: boolean) {
+function getElementActualWidth(el: HTMLElement) {
   return getElementActualCss(el, 'width', false)
 }
 

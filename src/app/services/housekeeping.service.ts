@@ -51,7 +51,6 @@ private currentHouseKeepingSubject =new Subject<any>();
     }
 
     async sendCustomFormNotification(flag:boolean){
-      const deleted = await this.deleteIndexDB("HouseKeeping");
       this.getAll();
       this.currentHouseKeepingSubject.next(flag)
     };

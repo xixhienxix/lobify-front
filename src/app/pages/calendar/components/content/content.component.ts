@@ -1,6 +1,6 @@
 
-import { AfterViewInit, Component, EventEmitter, Inject, Input, OnChanges, OnDestroy, OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
-import { extend,Internationalization } from '@syncfusion/ej2-base';
+import { Component, EventEmitter,Input,  OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Internationalization } from '@syncfusion/ej2-base';
 import { ChangeEventArgs } from '@syncfusion/ej2-buttons';
 import {
   ScheduleComponent, DragAndDropService, TimelineViewsService, GroupModel, EventSettingsModel, ResizeService, View, TimelineMonthService, WorkHoursModel, RenderCellEventArgs, TimeScaleModel, ActionEventArgs,
@@ -14,8 +14,7 @@ import { environment } from 'src/environments/environment';
 import { ActivatedRoute } from '@angular/router';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { L10n } from '@syncfusion/ej2-base';
-import { HuespedService } from 'src/app/services/huesped.service';
-import { Observable, Subject, Subscription, firstValueFrom } from 'rxjs';
+import { Subject, firstValueFrom } from 'rxjs';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Huesped } from 'src/app/models/huesped.model';
@@ -40,7 +39,6 @@ L10n.load({
 
 export class ContentComponent implements OnInit{
 
-  private eventsSubscription: Subscription;
 
   closeResult:string
   public selectedDate: Date = new Date();
@@ -111,7 +109,6 @@ export class ContentComponent implements OnInit{
   @Input() roomCodesComplete:Habitacion[];
   @Input() roomCodes:Habitacion[];
   @Input() datasourceArray :Record<string, any>[]=[]
-  @Input() onSavedReservation: Observable<Huesped[]>;
 
   // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   @Output() onResizeReserva: EventEmitter<Record<string, any>> = new EventEmitter();
@@ -145,7 +142,6 @@ export class ContentComponent implements OnInit{
             this.roomCodes.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
         );         
       }
-      console.log("RoomCodeCOmplete d mmain container: ", this.roomCodesComplete)
   }
 
   async ngOnInit(){
@@ -183,7 +179,6 @@ export class ContentComponent implements OnInit{
   }
 
   checkGroupId(codigo:string){
-    let codigosSet = new Set();
     const habitacionesPorTipo = this.roomCodesComplete.find(item=>item.Codigo === codigo);
     const foundGroupID = this.tipoHabGroupDataSource.find(item=>item.text === habitacionesPorTipo?.Tipo);
     return foundGroupID?.id
@@ -212,7 +207,7 @@ export class ContentComponent implements OnInit{
     const tipoCuarto = [...new Set(responseData.map(item => item.Tipo))];
     // const codigoCuarto = [...new Set(responseData.map(item => item.Numero))];
 
-    tipoCuarto.forEach((item,index)=>{
+    tipoCuarto.forEach((_item,index)=>{
       tipoArray.push({ text: tipoCuarto[index], id:index+1, color:'#' + Math.floor(Math.random()*16777215).toString(16) });
     }) 
     // HERE THE GROUPS ARE CREATED
@@ -259,27 +254,22 @@ export class ContentComponent implements OnInit{
    */
   onDragStart(args: DragEventArgs): void {
     args.interval = 30;
-    console.log("Drag Start : ", args)
   }
 
   onDragStop(args: DragEventArgs): void {
     //this.onResizeReserva.emit(args.data) // <-- This data is from where the event start  and i need the data to which is moved to
-    console.log(args.data);
     const scheduleObj = (document.querySelector('.e-schedule') as any).ej2_instances[0];
     const targetElement:any = args.target;
-    const cellIndex = targetElement!.cellIndex;
     const rowIndex = targetElement!.parentNode!.rowIndex;
     const resourceDetails = scheduleObj.getResourcesByIndex(rowIndex);
     const Codigo = this.roomCodesComplete.find((item)=> item.Numero === resourceDetails.resourceData.text)?.Codigo
     args.data.Codigo = Codigo
     args.data.Numero = resourceDetails.resourceData.text
     this.onResizeReserva.emit(args.data)
-    console.log('Dropped resource data:', args.data);
   }
   
 
   onRenderCell(args: RenderCellEventArgs): void {
-    console.log("")
     let filteredData: any;
     if (args.elementType == 'resourceGroupCells' ) {
       
@@ -289,7 +279,6 @@ export class ContentComponent implements OnInit{
             const argsDate = new Date(args.date!);
             dataDate.setHours(0, 0, 0, 0);
             argsDate.setHours(0, 0, 0, 0);
-            let groupIndex = this.scheduleObj.getResourcesByIndex(data.ProjectId);
             let argsGroupIndex = this.scheduleObj.getResourcesByIndex(args.groupIndex!);
              return data.ProjectId === argsGroupIndex.groupData!.ProjectId && dataDate.getTime() == argsDate.getTime(); 
         });
@@ -297,10 +286,9 @@ export class ContentComponent implements OnInit{
   }
 }
 
-onDataBound(event:any){
-    const numberOfDaystoDisplay = 7;
+onDataBound(){
     const workCells = document.querySelectorAll(".e-work-cells.e-resource-group-cells");
-    workCells.forEach((cell, index) => {
+    workCells.forEach((cell) => {
         let project1Events = [];    
         const timestamp = Number(cell.getAttribute('data-date'));
         const startDate = new Date(timestamp);
@@ -373,7 +361,7 @@ onResizeStop(args: ResizeEventArgs){
     this.onResizeReserva.emit(args.data)
 }
 
-promptMessage(header:string,message:string, obj?:any){
+promptMessage(header:string,message:string){
   const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
   modalRef.componentInstance.alertHeader = header
   modalRef.componentInstance.mensaje= message    

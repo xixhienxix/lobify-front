@@ -4,7 +4,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { OverlayContainer } from '@angular/cdk/overlay';
-import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { Tarifas } from 'src/app/models/tarifas';
 import { VisibilityRates } from 'src/app/models/visibility.model';
 import { Politicas } from 'src/app/models/politicas.model';
@@ -136,7 +136,6 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
     const control = <FormArray>this.preciosFormGroup.controls["tarifasActivas"];
 
     for(let i=0; i<this.tarifatoModify.TarifasActivas.length; i++){
-      const lastQuest = false;
       if(i===(this.tarifatoModify.TarifasActivas.length-1)){
         control.push(new FormGroup({
           'Descripcion': new FormControl(this.tarifatoModify.TarifasActivas[i].Descripcion),

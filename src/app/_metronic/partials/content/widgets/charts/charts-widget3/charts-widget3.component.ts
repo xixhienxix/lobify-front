@@ -15,7 +15,7 @@ export class ChartsWidget3Component implements OnInit {
   }
 }
 
-function getChartOptions(height: number) {
+function getChartOptions(_height: number) {
   const labelColor = getCSSVariableValue('--bs-gray-500');
   const borderColor = getCSSVariableValue('--bs-gray-200');
   const baseColor = getCSSVariableValue('--bs-info');

@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Subject, Subscription, firstValueFrom, takeUntil } from 'rxjs';
+import { Subject, Subscription, takeUntil } from 'rxjs';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { TarifasService } from 'src/app/services/tarifas.service';
@@ -99,7 +99,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
       this._tarifasService.getAll()
       .pipe(
         takeUntil(this.ngUnsubscribe)).subscribe({
-          next: (val:Tarifas[])=>{
+          next: ()=>{
             dataSourceBS = this._tarifasService.getCurrentTarifasValue.getValue()
             this.tarifaRackCompleto=dataSourceBS
             this.buildDataSource(dataSourceBS);
@@ -129,7 +129,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
         this._tarifasService.getAll()
         .pipe(
           takeUntil(this.ngUnsubscribe)).subscribe({
-            next: (val:Tarifas[])=>{
+            next: ()=>{
               dataSourceBS = this._tarifasService.getCurrentTarifasValue.getValue()
               this.tarifaRackCompleto=dataSourceBS
               this.buildDataSource(dataSourceBS);
@@ -145,10 +145,10 @@ export class RatesComponent implements OnInit, AfterViewInit {
       }
     } else 
     {
-      const sb  =  this._tarifasService.getAll()
+      this._tarifasService.getAll()
       .pipe(
         takeUntil(this.ngUnsubscribe)).subscribe({
-          next: (val:Tarifas[])=>{
+          next: ()=>{
             dataSourceBS = this._tarifasService.getCurrentTarifasValue.getValue()
             this.tarifaRackCompleto=dataSourceBS
             this.buildDataSource(dataSourceBS);
@@ -212,17 +212,17 @@ export class RatesComponent implements OnInit, AfterViewInit {
         }
       }); 
     }else{
-      const tableString = element.TarifasActivas.map((item,index)=>{
+      const tableString = element.TarifasActivas.map((item)=>{
         if(item.Activa===true){
           let nameTarifa = item.Descripcion
           const dias_validos:any=[]
-          let diasValidos = item.Dias.map((item2)=>{
-              if(item2.checked === true){
-                dias_validos.push(item2.name);
-                return item2.name
-              }
+          // let diasValidos = item.Dias.map((item2)=>{
+          //     if(item2.checked === true){
+          //       dias_validos.push(item2.name);
+          //       return item2.name
+          //     }
             
-          })
+          // })
           const joiningDias = dias_validos.join('-');
           return nameTarifa + '<br>' +  joiningDias
         }
@@ -237,7 +237,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
     if(refreshTable){
       this._habitacionService.getAll().pipe(
         takeUntil(this.ngUnsubscribe)).subscribe({
-          next:(val:Habitacion[])=>{
+          next:()=>{
             this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
         }
       });
@@ -251,7 +251,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
       }else{
         this._habitacionService.getAll().pipe(
           takeUntil(this.ngUnsubscribe)).subscribe(
-          (val:Habitacion[])=>{
+          ()=>{
             this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
         })
       }
@@ -259,7 +259,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
     {
        this._habitacionService.getAll().pipe(
         takeUntil(this.ngUnsubscribe)).subscribe(
-        (val:Habitacion[])=>{
+        ()=>{
           this.cuartosArray = this._habitacionService.getcurrentHabitacionValue.getValue()
       });
     }
@@ -293,7 +293,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
           });
   }
 
-  promptMessage(header:string,message:string, obj?:any){
+  promptMessage(header:string,message:string){
     const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
     modalRef.componentInstance.alertHeader = header
     modalRef.componentInstance.mensaje= message    
@@ -318,12 +318,12 @@ export class RatesComponent implements OnInit, AfterViewInit {
     modalref.componentInstance.onTarifaSubmit.subscribe({
       next:(tarifa:Tarifas)=>{
         this._tarifasService.updateTarifas(tarifa).subscribe({
-          next:(value)=>{
+          next:()=>{
             this.promptMessage('Exito','Tarifa(s) Generada(s) con éxito')
             this._tarifasService.sendNotification(true);
             this,modalref.close();        
           },
-          error:(error)=>{
+          error:()=>{
             this.promptMessage('Error','No se pudo guardar la tarifa intente de nuevo mas tarde')
           }
         })
@@ -343,7 +343,7 @@ export class RatesComponent implements OnInit, AfterViewInit {
   deleteTarifaRackEspecial(element:Tarifas){
 
       this._tarifasService.deleteTarifaEspecial(element).subscribe({
-        next:(value)=>{
+        next:()=>{
           this.promptMessage('Exito','Tarifa Eliminada con éxito' )
           // this._tarifasService.sendNotification(true);
           this.getTarifas(false);
@@ -363,12 +363,12 @@ export class RatesComponent implements OnInit, AfterViewInit {
     modalref.componentInstance.onTarifaSubmit.subscribe({
       next:(tarifa:Tarifas)=>{
         this._tarifasService.updateTarifas(tarifa).subscribe({
-          next:(value)=>{
+          next:()=>{
             this.promptMessage('Exito','Tarifa(s) Generada(s) con éxito')
             this._tarifasService.sendNotification(true);
             this,modalref.close();        
           },
-          error:(error)=>{
+          error:()=>{
             this.promptMessage('Error','No se pudo guardar la tarifa intente de nuevo mas tarde')
           }
         })
@@ -386,11 +386,11 @@ export class RatesComponent implements OnInit, AfterViewInit {
 
   updateTarifaBase(tarifa:Tarifas){
     this._tarifasService.updateTarifas(tarifa).subscribe({
-      next:(val)=>{
+      next:()=>{
         this.getTarifas(true);
         this.promptMessage('Exito', 'Tarifa Actualizada con Exito');
       },
-      error:(error)=>{
+      error:()=>{
         this.promptMessage('Error','No se pudo guardar el cambio en la tarifa, intente de nuevo');
       }
     });
@@ -410,12 +410,12 @@ export class RatesComponent implements OnInit, AfterViewInit {
     modalRef.componentInstance.onTarifaSubmit.subscribe({
       next:(tarifa:Tarifas)=>{
         this._tarifasService.postTarifaEspecial(tarifa).subscribe({
-          next:(value)=>{
+          next:()=>{
             this.promptMessage('Exito','Tarifa(s) Generada(s) con éxito')
             this._tarifasService.sendNotification(true);
             modalRef.close();        
           },
-          error:(error)=>{
+          error:()=>{
             this.promptMessage('Error','No se pudo guardar la tarifa intente de nuevo mas tarde')
           }
         })
@@ -446,12 +446,12 @@ export class RatesComponent implements OnInit, AfterViewInit {
     modalRef.componentInstance.onTarifaSubmit.subscribe({
       next:(tarifa:Tarifas)=>{
         this._tarifasService.postTarifaEspecial(tarifa).subscribe({
-          next:(value)=>{
+          next:()=>{
             this.promptMessage('Exito','Tarifa(s) Generada(s) con éxito')
             this._tarifasService.sendNotification(true);
             modalRef.close();        
           },
-          error:(error)=>{
+          error:()=>{
             this.promptMessage('Error','No se pudo guardar la tarifa intente de nuevo mas tarde')
           }
         })

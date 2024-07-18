@@ -1,14 +1,13 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, BehaviorSubject, of, Subscription } from 'rxjs';
-import { map, catchError, switchMap, finalize } from 'rxjs/operators';
+import { map, catchError, finalize } from 'rxjs/operators';
 import { UserModel } from '../models/user.model';
 import { AuthModel } from '../models/auth.model';
 import { environment } from 'src/environments/environment';
 import { Router } from '@angular/router';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 
 export type UserType = UserModel | undefined;
-const API_USERS_URL = `${environment.apiUrl}/auth`;
 export const DEFAULT_AUTH = {
   authToken: '',
   refreshToken: '',
@@ -89,10 +88,9 @@ export class AuthService implements OnDestroy {
     const hotel = sessionStorage.getItem("HOTEL") as string;
     let queryParams = new HttpParams();
     queryParams = queryParams.append("hotel",hotel);
-
+    let mensaje=''
     return this.http.post<any>(environment.apiUrl+"/createdb",{params:queryParams,hotels,fullname,email,username,password,terminos})
     .pipe(map(res=>{
-      let mensaje=null
       if(res.mensaje == "Usuario agregado con exito"){
 
         return res
@@ -107,7 +105,7 @@ export class AuthService implements OnDestroy {
     }))
   }
 
-  getUserByTokenBackend(token: string): Observable<UserModel> {
+  getUserByTokenBackend(_token: string): Observable<UserModel> {
     // const httpHeaders = new HttpHeaders({
     //   Authorization: `${token}`,
     // });
@@ -170,7 +168,6 @@ export class AuthService implements OnDestroy {
   }
 
   private tokenExpired(token: string) {
-    const expiry = (JSON.parse(atob(token.split('.')[1]))).exp;
     // return (Math.floor((new Date).getTime() / 1000)) >= expiry;
     return (JSON.parse(atob(token.split('.')[1]))).exp;
   }

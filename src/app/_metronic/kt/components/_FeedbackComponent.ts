@@ -131,20 +131,20 @@ class FeedbackComponent {
   }
 
   // Create Instances
-  public static createInstances(selector: string) {
+  public static createInstances() {
     throw new Error('not implemented')
   }
 
   // Static methods
-  public static hasInstace(element: HTMLElement) {
+  public static hasInstace() {
     throw new Error('not implemented')
   }
 
-  public static getInstance(element: HTMLElement) {
+  public static getInstance() {
     throw new Error('not implemented')
   }
 
-  public static bootstrap(attr: string = '[data-Feedback]') {
+  public static bootstrap(_attr: string = '[data-Feedback]') {
     throw new Error('not implemented')
   }
 }

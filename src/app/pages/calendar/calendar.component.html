@@ -1,6 +1,6 @@
     <div class="card card-custom">
-        <app-header (onNvaReserva)="onNvaReserva($event)"
-        ></app-header>
+        <!-- <app-header 
+        ></app-header> -->
     </div>
     <div class="card card-custom" style="overflow-y: auto; padding: 10px;">
         <app-content #calendar 
@@ -8,12 +8,9 @@
         [roomCodes]="roomCodes"
         [roomCodesComplete]="roomCodesComplete"
         [changing]="changingValue"
-        (honEditRsv)="onEditRsv($event)" 
-        [onSavedReservation]="eventsSubject.asObservable()" 
         (onResizeReserva)="onResizeReservation($event)" 
         (onChangedRate)="onChangedRate($event)" 
-        (onOpenEnviarReservacion)="openEnviarReservacion()"
-        (onOpenModifica)="onOpenModifica($event)">
+        (onOpenEnviarReservacion)="openEnviarReservacion()">
     </app-content>
     </div>
     <div class="card card-custom">

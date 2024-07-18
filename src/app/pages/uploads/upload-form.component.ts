@@ -1,5 +1,4 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output } from '@angular/core';
-import { Observable } from 'rxjs';
 import { FileUpload } from 'src/app/models/file.upload.model';
 import { FileUploadService } from 'src/app/services/file.upload.service';
 

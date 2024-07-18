@@ -353,10 +353,6 @@ class MenuComponent {
     return getElementParents(item, '.menu-item.show').length > 0
   }
 
-  // Test of it is item sub element
-  private _isItemSubElement = (item: HTMLElement) => {
-    return item.classList.contains('menu-sub')
-  }
 
   // Test if item has sub
   private _hasItemSub = (item: HTMLElement) => {
@@ -604,8 +600,6 @@ class MenuComponent {
     } // updated
   }
 
-  // TODO: not done
-  private _destroy = () => {}
 
   // Update all item state classes if item sub type changed
   private _update = () => {
@@ -665,7 +659,7 @@ class MenuComponent {
   }
 
   // Mouseout handle
-  private _mouseout = (element: HTMLElement, e: MouseEvent) => {
+  private _mouseout = (element: HTMLElement, p0?: MouseEvent) => {
     const item = this._getItemElement(element)
     if (!item) {
       return
@@ -686,7 +680,7 @@ class MenuComponent {
   }
 
   // Mouseover handle
-  private _mouseover = (element: HTMLElement, e: MouseEvent) => {
+  private _mouseover = (element: HTMLElement, p0?: MouseEvent) => {
     const item = this._getItemElement(element)
     if (!item) {
       return
@@ -709,7 +703,7 @@ class MenuComponent {
   }
 
   // Dismiss handler
-  private _dismiss = (element: HTMLElement, e: Event) => {
+  private _dismiss = (element: HTMLElement, e?: Event) => {
     const item = this._getItemElement(element)
     if (!item) {
       return
@@ -733,7 +727,7 @@ class MenuComponent {
   }
 
   // Link handler
-  private _link = (element: HTMLElement, e: Event) => {
+  private _link = (element: HTMLElement, e?: Event) => {
     if (EventHandlerUtil.trigger(this.element, 'kt.menu.link.click') === false) {
       return
     }
@@ -960,7 +954,6 @@ class MenuComponent {
           const menuObj = MenuComponent.getInstance(item) as MenuComponent
           if (menuObj && menuObj.getItemSubType(item) === 'dropdown') {
 
-            const menu = menuObj.getElement()
             const sub = menuObj.getItemSubElement(item) as HTMLElement
             if (item === e.target || item.contains(e.target as HTMLElement)) {
               continue

@@ -135,7 +135,7 @@ class SwapperComponent {
   // Static methods
   public static getInstance = (
     el: HTMLElement,
-    componentName: string = defaultSwapperQueires.componentName
+    _componentName: string = defaultSwapperQueires.componentName
   ): SwapperComponent | null => {
     const place = SwapperStore.get(el.id)
     if (place) {

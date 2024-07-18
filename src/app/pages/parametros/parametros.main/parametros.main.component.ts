@@ -91,7 +91,7 @@ getTimeZones()
       else 
       {this.zonaHoraria.push(DEFAULT_TIMEZONE)}
     },
-   error: (error)=>{
+   error: ()=>{
       const modalRef=this.modal.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
       modalRef.componentInstance.alertsHeader = 'Error'
       modalRef.componentInstance.mensaje='No se pudo cargar la lista de zonas horarias intente actualizando la pagina'
@@ -108,7 +108,7 @@ getDivisas(){
       else 
       {this.divisas.push(DEFAULT_DIVISA)}
     },
-  error: (error)=>{
+  error: ()=>{
       const modalRef=this.modal.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
       modalRef.componentInstance.alertsHeader = 'Error'
       modalRef.componentInstance.mensaje='No se pudo cargar la lista de zonas horarias intente actualizando la pagina'
@@ -175,7 +175,7 @@ submitParametros(){
   }
 
   const sb = this._parametrosService.postParametros(parametros).subscribe(
-    (value)=>{
+    ()=>{
       this.isLoading=false
 
      const modalRef = this.modal.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
@@ -183,7 +183,7 @@ submitParametros(){
      modalRef.componentInstance.mensaje='Parametros Actualizados con exito'
       this.setFormGroup()
     },
-    (error)=>{
+    ()=>{
       this.isLoading=false
 
       const modalRef = this.modal.open(AlertsComponent,{ size: 'sm', backdrop:'static' })

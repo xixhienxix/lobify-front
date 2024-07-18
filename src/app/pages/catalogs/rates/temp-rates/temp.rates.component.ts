@@ -1,22 +1,19 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 import { Component, EventEmitter, Input, OnInit, Output, signal, ViewEncapsulation } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, FormGroupDirective, NgForm, Validators } from '@angular/forms';
-import { ModalDismissReasons, NgbActiveModal, NgbDate, NgbDateStruct, NgbDatepickerI18n, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { NgbActiveModal, NgbDate,  NgbDatepickerI18n, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { TarifasService } from 'src/app/services/tarifas.service';
 import { OverlayContainer } from '@angular/cdk/overlay';
-import { Subject, Subscription, map, takeUntil } from 'rxjs';
+import { Subscription,  } from 'rxjs';
 import { DateTime } from 'luxon';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { Tarifas } from 'src/app/models/tarifas';
-import { MatCheckbox, MatCheckboxChange } from '@angular/material/checkbox';
-import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
-import { MatRadioChange } from '@angular/material/radio';
+import {  MatCheckboxChange } from '@angular/material/checkbox';
 import { VisibilityRates } from 'src/app/models/visibility.model';
 import { Politicas } from 'src/app/models/politicas.model';
 import { Dias } from 'src/app/models/days.model';
 import { Prompt } from 'src/app/models/prompt.model';
-import { nameAlreadyExist } from 'src/app/_metronic/shared/customValidators/name-already-exist.directive';
 var ObjectId = require('bson').ObjectId;
 
 type listaCamas = {key:number;value:string;}
@@ -235,10 +232,8 @@ export class TempRatesComponent implements OnInit{
   }
 
   selectionChange(){
-    let tarifaRack
 
     if(this.resultLocationCamas.length === 1){
-      tarifaRack = this.tarifaRackArr.filter(filtro=>filtro.Habitacion==this.resultLocationCamas[0])
     }
   }
 
@@ -360,20 +355,11 @@ export class TempRatesComponent implements OnInit{
     return control.dirty || control.touched;
   }
 
-  isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+  isErrorState(control: FormControl | null): boolean {
       const invalidCtrl = !!(control?.invalid && control?.parent?.dirty);
       const invalidParent = !!(control?.parent?.invalid && control?.parent?.dirty);
   
       return invalidCtrl || invalidParent;
   }
 
-  private getDismissReason(reason: any): string {
-    if (reason === ModalDismissReasons.ESC) {
-        return 'by pressing ESC';
-    } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
-        return 'by clicking on a backdrop';
-    } else {
-        return  `with: ${reason}`;
-    }
-  }
 }

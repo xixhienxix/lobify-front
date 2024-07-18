@@ -1,7 +1,7 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Subject, Subscription, distinctUntilChanged, distinctUntilKeyChanged, map, takeUntil } from 'rxjs';
+import { Subject, Subscription, map, takeUntil } from 'rxjs';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { GroupingState } from 'src/app/_metronic/shared/models/grouping.model';
 import { PaginatorState } from 'src/app/_metronic/shared/models/paginator.model';
@@ -59,7 +59,7 @@ export class RoomsComponent implements OnInit{
     public uploadService : FileUploadService,
     ){
       this._habitacionService.getcustomFormNotification().subscribe({
-        next: async (val)=>{
+        next: async ()=>{
           // if(val){
           //   this.promptMessage('Exito','Habitación(es) Generadas con éxito')
           // }
@@ -68,7 +68,7 @@ export class RoomsComponent implements OnInit{
           // }
           this.getHabitaciones(false)
         },
-        error: (error)=>{
+        error: ()=>{
 
         }
       });
@@ -114,7 +114,7 @@ export class RoomsComponent implements OnInit{
 
     this._habitacionService.getAll().pipe(
       takeUntil(this.ngUnsubscribe)).subscribe({
-        next:(val:Habitacion[])=>{
+        next:()=>{
           dataSourceBS = this._habitacionService.getcurrentHabitacionValue.getValue()
           this.buildDataSource(dataSourceBS);
       }
@@ -122,11 +122,9 @@ export class RoomsComponent implements OnInit{
   }
 
   buildDataSource(data:Habitacion[]){
-    let codigosCuarto
     let arrayUniqueByKey
     let newArray
 
-    codigosCuarto = [...new Set(data.map(item => item.Codigo))];
 
         arrayUniqueByKey = [...new Map(data.map(item  =>
           [item['Codigo'], item])).values()];
@@ -157,7 +155,7 @@ export class RoomsComponent implements OnInit{
 
   
 
-  delete(habitacion:any,index:number){
+  delete(habitacion:any){
     this.isLoading=true
     this._habitacionService.deleteHabitacion(habitacion.Codigo).subscribe({
       next:async (data)=>{
@@ -170,7 +168,7 @@ export class RoomsComponent implements OnInit{
           this.promptMessage('Exito','Habitacion eliminada con exito' )
         }
       },
-      error:(error)=>{
+      error:()=>{
         this.isLoading=false
         this.promptMessage('Error','No se pudo eliminar la habitacion intente de nuevo')
 
@@ -204,7 +202,7 @@ export class RoomsComponent implements OnInit{
 
   }
 
-  promptMessage(header:string,message:string, obj?:any){
+  promptMessage(header:string,message:string){
     const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
     modalRef.componentInstance.alertHeader = header
     modalRef.componentInstance.mensaje= message    

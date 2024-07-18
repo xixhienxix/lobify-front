@@ -1,7 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Divisas } from '../_models/divisas';
 const DEFAULT_DIVISA ={
@@ -33,7 +32,7 @@ set setcurrentDivisa(divisa:Divisas){
     return this.http.get(environment.apiUrl+'/parametros/divisas')
   }
 
-  getDivisasByParametro(divisa:string, hotel:string){
+  getDivisasByParametro(divisa:string){
      this.http.get<Divisas>(environment.apiUrl+'/parametros/divisas/'+divisa)
     .subscribe(
       (value:any)=>{

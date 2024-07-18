@@ -1,7 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, Subject, map } from "rxjs";
-import { Huesped } from "../models/huesped.model";
 import { environment } from "src/environments/environment";
 import { Codigos } from "../models/codigos.model";
 import { LocalForageCache } from "../tools/cache/indexdb-expire";
@@ -52,7 +51,6 @@ private currentCodigosSubject =new Subject<any>();
     }
 
     async sendCustomFormNotification(flag:boolean){
-      const deleted = await this.deleteIndexDB("Codes");
       this.getAll();
       this.currentCodigosSubject.next(flag)
     };

@@ -261,7 +261,7 @@ class ScrollComponent {
     })
   }
 
-  public static destroyAll(attr: string = '[data-kt-scroll="true"]') {}
+  public static destroyAll(_attr: string = '[data-kt-scroll="true"]') {}
 
   public static bootstrap(attr: string = '[data-kt-scroll="true"]') {
     ScrollComponent.createInstances(attr)

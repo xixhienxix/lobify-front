@@ -1,9 +1,13 @@
-import { Component, Input, OnInit } from '@angular/core';
+/* eslint-disable @angular-eslint/no-output-on-prefix */
+import { Component, Input, OnInit, Output } from '@angular/core';
 import { Router } from '@angular/router';
 import { LayoutType } from '../../../core/configs/config';
 import { LayoutInitService } from '../../../core/layout-init.service';
 import { LayoutService } from '../../../core/layout.service';
 import { TranslateService } from '@ngx-translate/core';
+import { Huesped } from 'src/app/models/huesped.model';
+import { EventEmitter } from '@angular/core';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-header-menu',
@@ -11,11 +15,25 @@ import { TranslateService } from '@ngx-translate/core';
   styleUrls: ['./header-menu.component.scss'],
 })
 export class HeaderMenuComponent implements OnInit {
+
+  @Output() onOpenNuevaReserva: EventEmitter<boolean> = new EventEmitter();
+  @Input() onSavedReservation: Observable<Huesped[]>;
+
   constructor(private router: Router, private layout: LayoutService, private layoutInit: LayoutInitService, private translateService:TranslateService) {
     this.translateService.use('es')
   }
 
   ngOnInit(): void {}
+
+  // onNvaReserva(huesped:any){  
+  //   this.onAddPost.emit(huesped);
+  // }
+
+  openNvaReserva(){
+    this.onOpenNuevaReserva.emit(true);
+  }
+
+  //HEADER FUNCTIONS
 
   calculateMenuItemCssClass(url: string): string {
     return checkIsActive(this.router.url, url) ? 'active' : '';
@@ -32,6 +50,7 @@ export class HeaderMenuComponent implements OnInit {
       this.layout.saveBaseConfig(currentConfig)
     }
   }
+
 }
 
 const getCurrentUrl = (pathname: string): string => {
@@ -54,3 +73,4 @@ const checkIsActive = (pathname: string, url: string) => {
 
   return false;
 };
+

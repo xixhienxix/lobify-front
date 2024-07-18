@@ -61,7 +61,9 @@
         data-kt-swapper-mode="{default: 'append', lg: 'prepend'}"
         data-kt-swapper-parent="{default: '#kt_app_body', lg: '#kt_app_header_wrapper'}">
         <!--begin::Menu-->
-        <app-header-menu class="
+        <app-header-menu 
+        (onOpenNuevaReserva)="openNvaReserva()"
+        class="
         menu
         menu-rounded
         menu-column
@@ -85,3 +87,6 @@
   <!--end::Header wrapper-->
 </div>
 <!--end::Header container-->
+<ng-container *ngIf="submitLoading">
+  <app-loader-spinner></app-loader-spinner>
+</ng-container>

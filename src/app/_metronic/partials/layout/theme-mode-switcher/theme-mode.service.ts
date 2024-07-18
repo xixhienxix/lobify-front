@@ -4,14 +4,6 @@ import { ThemeModeComponent } from '../../../kt/layout';
 
 export type ThemeModeType = 'dark' | 'light' | 'system';
 const systemMode = ThemeModeComponent.getSystemMode() as 'light' | 'dark';
-const themeModeSwitchHelper = (_mode: ThemeModeType) => {
-  // change background image url
-  const mode = _mode !== 'system' ? _mode : systemMode;
-  const imageUrl =
-    './assets/media/patterns/header-bg' +
-    (mode === 'light' ? '.jpg' : '-dark.png');
-  document.body.style.backgroundImage = `url("${imageUrl}")`;
-};
 
 const themeModeLSKey = 'kt_theme_mode_value';
 const themeMenuModeLSKey = 'kt_theme_mode_menu';

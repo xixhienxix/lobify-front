@@ -39,6 +39,7 @@ import { ExtendedComponent } from './components/toolbar/extended/extended.compon
 import { ReportsComponent } from './components/toolbar/reports/reports.component';
 import { SaasComponent } from './components/toolbar/saas/saas.component';
 import {SharedModule} from "../shared/shared.module";
+import { NvaReservaComponent } from './components/header/reservations/nva-reserva/nva-reserva.component';
 
 const routes: Routes = [
   {
@@ -52,6 +53,7 @@ const routes: Routes = [
   declarations: [
     LayoutComponent,
     HeaderComponent,
+    NvaReservaComponent,
     ContentComponent,
     FooterComponent,
     ScriptsInitComponent,

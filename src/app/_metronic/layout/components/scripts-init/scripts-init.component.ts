@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ResolveEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { LayoutService } from '../../core/layout.service';
 import {
   ToggleComponent,
@@ -12,7 +12,6 @@ import {
   ScrollComponent,
 } from '../../../kt/components';
 import { PageInfoService } from '../../core/page-info.service';
-import { ILayout } from '../../core/configs/config';
 
 @Component({
   selector: 'app-scripts-init',

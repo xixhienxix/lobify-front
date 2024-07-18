@@ -240,7 +240,7 @@ export class NgPagination implements OnChanges {
 
   selectPage(pageNumber: number): void { this._updatePages(pageNumber); }
 
-  ngOnChanges(changes: SimpleChanges): void { this._updatePages(this.page); }
+  ngOnChanges(_changes: SimpleChanges): void { this._updatePages(this.page); }
 
   isEllipsis(pageNumber:any): boolean { return pageNumber === -1; }
 

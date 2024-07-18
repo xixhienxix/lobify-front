@@ -235,18 +235,7 @@ class DrawerComponent {
     }
   }
 
-  private _getDirection = () => {
-    return String(this._getOption('direction')) === 'left' ? 'left' : 'right'
-  }
 
-  private _getWidth = () => {
-    let width = this._getOption('width')
-    if (width && width === 'auto') {
-      width = getCSS(this.element, 'width')
-    }
-
-    return width
-  }
 
   ///////////////////////
   // ** Public API  ** //

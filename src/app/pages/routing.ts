@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { HabitacionesService, roomsTypeResolver } from '../services/habitaciones.service';
+import { HabitacionesService } from '../services/habitaciones.service';
 import { inject } from '@angular/core';
 
 const Routing: Routes = [

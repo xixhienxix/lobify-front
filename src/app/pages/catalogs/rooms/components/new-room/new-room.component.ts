@@ -1,11 +1,10 @@
-import { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation, signal } from '@angular/core';
-import { AngularFireStorage } from '@angular/fire/compat/storage';
-import { FormGroup, FormControl, FormBuilder, Validators, FormArray, FormGroupDirective, NgForm } from '@angular/forms';
+import {  AfterViewChecked, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation, signal } from '@angular/core';
+import { FormGroup, FormControl, FormBuilder, Validators, FormArray} from '@angular/forms';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { Router } from '@angular/router';
 import { NgbModal, NgbActiveModal, ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
-import { Subject, Subscription, concat, concatMap, filter, map, takeUntil } from 'rxjs';
+import { Subject, Subscription, concat, filter, map, takeUntil } from 'rxjs';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Adicional } from 'src/app/models/adicional.model';
 import { Disponibilidad } from 'src/app/models/disponibilidad.model';
@@ -148,14 +147,13 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
     public modal:NgbActiveModal,
     public _tarifasService:TarifasService,
     public _parametrosService:ParametrosService,
-    private af :AngularFireStorage,
     private changeDetector: ChangeDetectorRef // Fixes Exeption of Expression already Changed
   ) {
 
   }
 
   ngOnInit(): void {
-  this.getCodigos(false);
+  this.getCodigos();
   // this.checkEdicion();
 
     this.formGroup = this.fb.group({
@@ -212,7 +210,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
   }
 
 
-  async getCodigos(flag:boolean){
+  async getCodigos(){
 
     const roomsCodesIndexDB:Codigos[] = await this._codigosService.readIndexDB("Codes");
 
@@ -433,13 +431,13 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
     Dias:this.options()
   }
     let promptFLag=false;
-    const request1 = this.habitacionService.postHabitacion(habitacionNueva,this.editarHab,this.formGroup.value.image); 
+    const request1 = this.habitacionService.postHabitacion(habitacionNueva,this.editarHab); 
     const request3 = this._tarifasService.postTarifa(tarifa);
     //concat(request1,request2,request3).pipe(
     concat(request1, request3).pipe(
       takeUntil(this.ngUnsubscribe))
       .subscribe({
-        next: (val)=>{
+        next: ()=>{
           if(!promptFLag){
             this.promptMessage('Exito','Habitación(es) Generadas con éxito')
             promptFLag=true;
@@ -449,7 +447,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
                 this.habitacionService.sendCustomFormNotification(true)
                 this.sendUpload=true
         },
-        error: (error) =>{
+        error: () =>{
             this.isLoading=false
             if(!promptFLag){
               this.promptMessage('Error','No se pudo guardar la habitación intente de nuevo mas tarde');
@@ -501,7 +499,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       return control.dirty || control.touched;
     }
 
-    isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+    isErrorState(control: FormControl | null): boolean {
         const invalidCtrl = !!(control?.invalid && control?.parent?.dirty);
         const invalidParent = !!(control?.parent?.invalid && control?.parent?.dirty);
 
@@ -559,7 +557,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       }
     }
 
-    promptMessage(header:string,message:string, obj?:any){
+    promptMessage(header:string,message:string){
       const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
       modalRef.componentInstance.alertHeader = header
       modalRef.componentInstance.mensaje= message    

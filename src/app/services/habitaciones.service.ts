@@ -3,19 +3,10 @@ import { Inject, Injectable, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, catchError, map } from 'rxjs';
 import { Habitacion } from '../models/habitaciones.model';
 import { environment } from 'src/environments/environment';
-import { ITableState } from '../_metronic/shared/models/table.model';
 import { TableService } from '../_metronic/shared/services/table.service';
-import { codigosCuarto } from '../models/codigosCuarto.model';
 import { LocalForageCache } from '../tools/cache/indexdb-expire';
-import { ParametrosService } from '../pages/parametros/_services/parametros.service';
 import { ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot } from '@angular/router';
 
-const DEFAUL_CODIGOS = {
-  nombreHabitacion:'',
-  codigo:'',
-  tipo:'',
-  capacidad:''
-}
 @Injectable({
   providedIn: 'root'
 })
@@ -77,9 +68,8 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
     this.currentCodigosCuartoSubject.next(habitacion);
   }
 
-  async sendCustomFormNotification(nuevoDatoAgregado:boolean){
-    if(nuevoDatoAgregado=true){
-      const deleted = await this.deleteIndexDB("Rooms");
+  async sendCustomFormNotification(_nuevoDatoAgregado:boolean){
+    if(_nuevoDatoAgregado=true){
       this.currentHabitacionSubject.next(true)
     }
   };
@@ -118,7 +108,7 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
    }
 
 
-   postHabitacion(habitacion:Habitacion,editar:boolean,filename:File){
+   postHabitacion(habitacion:Habitacion,editar:boolean){
     const body = {
       habitacion,editar
     }
@@ -145,7 +135,7 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
       map(result => {
           return (result);  
        }),
-      catchError((err, caught) => {
+      catchError((err) => {
         return err;
       })
     ).toPromise();
@@ -157,8 +147,8 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
 }
 
 export const roomsTypeResolver: ResolveFn<Habitacion[]> = (
-  route: ActivatedRouteSnapshot,
-  state: RouterStateSnapshot,
+  _route: ActivatedRouteSnapshot,
+  _state: RouterStateSnapshot,
 ) => {
   return inject(HabitacionesService).getAll();
 };
