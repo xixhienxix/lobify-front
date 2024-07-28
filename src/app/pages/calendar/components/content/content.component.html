@@ -37,6 +37,13 @@
         <div class="date-text"></div>
         <div [innerHTML]="getDateHeaderText(data.date)"></div>
       </ng-template>
+      <ng-template #resourceHeaderTemplate let-data>
+        <div>
+          <!-- <img [src]="getIconClass(data.resourceData)" alt="image"> -->
+          <i [ngClass]="getIconClass(data.resourceData.id)"></i>
+          {{data.resourceData.text}}
+        </div>
+      </ng-template>
 
         <e-resources>
           <e-resource 

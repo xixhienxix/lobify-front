@@ -47,6 +47,7 @@ export class CalendarComponent implements OnInit{
   //Models
   estatusArray:Estatus[]=[]
   @Input() allReservations:Huesped[]=[]
+  ratesArrayComplete:Tarifas[]=[];
   
   promesasDisplay:boolean=false;
   onSuccessResponse: Subject<boolean> = new Subject();
@@ -54,7 +55,6 @@ export class CalendarComponent implements OnInit{
   roomCodesComplete:Habitacion[];
   roomCodes:Habitacion[];
   houseKeepingCodes:HouseKeeping[]=[]
-
 
 
   changingValue: Subject<any> = new Subject();
@@ -78,11 +78,19 @@ export class CalendarComponent implements OnInit{
   }
 
   async ngOnInit(){
+    this._huespedService.updateReservations$.subscribe({
+      next:(value)=>{
+        if(value){
+          this.getReservations();
+        }
+      }
+    })
     await this.checkRoomCodesIndexDB();
     await this.getReservations();
     await this.checkEstatusIndexDB();
-    // await this.checkReservationsIndexDB();
     await this.checkAmaCodesIndexDB();
+    await this.checkRatesIndexDB();
+
   }
 
   async getReservations(){
@@ -241,7 +249,7 @@ export class CalendarComponent implements OnInit{
     console.log("MAIN CONTAINER:",event);
 
     const dataSource = await this.roomRates(event.Codigo);
-    const tarifaEstandarArray = dataSource.filter((item)=>item.Tarifa === 'Tarifa Estandar');
+    const tarifaEstandarArray = dataSource.filter((item:any)=>item.Tarifa === 'Tarifa Estandar');
 
     let Difference_In_Time = event.EndTime.getTime() - event.StartTime.getTime();
     this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
@@ -284,7 +292,7 @@ export class CalendarComponent implements OnInit{
   }
 
   async roomRates(minihabs:string){
-    const tarifasDisponibles = await this.checkRatesIndexDB();
+    const tarifasDisponibles = [...this.ratesArrayComplete]
 
     let availbleRates = tarifasDisponibles.filter((item) => item.Estado === true); 
 
@@ -298,9 +306,9 @@ export class CalendarComponent implements OnInit{
 
     /** Checks if RatesArray is on IndexDb */
     if(ratesIndexDB){
-      return ratesIndexDB
+      this.ratesArrayComplete = [...ratesIndexDB]
     }else {
-      return  await firstValueFrom(this._tarifasService.getAll());
+      this.ratesArrayComplete = await firstValueFrom(this._tarifasService.getAll());
     }
   }
 

@@ -180,7 +180,7 @@
                         <ng-container matColumnDef="Acciones">
                           <th mat-header-cell *matHeaderCellDef> Acciones </th>
                           <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element; let i = index "> 
-                            <mat-radio-group>
+                            <mat-radio-group [name]="cuarto">
                               <mat-radio-button [disabled]="revisaCapacidad(cuarto)" [value]="element[i]" (change)="tarifaRadioButton(element,$event, cuarto)"></mat-radio-button>   
                             </mat-radio-group>
                           </td>

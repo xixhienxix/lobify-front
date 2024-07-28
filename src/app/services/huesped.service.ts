@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { Observable, map } from "rxjs";
+import { BehaviorSubject, Observable, Subject, map } from "rxjs";
 import { Huesped } from "../models/huesped.model";
 import { environment } from "src/environments/environment";
 import { LocalForageCache } from "../tools/cache/indexdb-expire";
@@ -15,6 +15,9 @@ export class HuespedService {
     storeName: 'Reservations',
     defaultExpiration: 10800
   });
+
+  updateReservations$ = new BehaviorSubject<boolean>(false)
+
     constructor(private http:HttpClient){
 
     }
@@ -37,13 +40,15 @@ export class HuespedService {
         }
     }
 
-    getAll() :Observable<Huesped[]> {
+    getAll(newReservarion:boolean=false) :Observable<Huesped[]> {
         return this.http
          .get<Huesped[]>(environment.apiUrl + '/huesped/getAll')
          .pipe(
            map(responseData=>{
             this.writeIndexDB("Reservations",responseData);
-
+            if(newReservarion){
+              this.updateReservations$.next(true);
+            }
            return responseData
          })
          )

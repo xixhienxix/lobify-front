@@ -231,7 +231,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.submitLoading=true;
         this._huespedService.addPost(value).subscribe({
           next:async (data)=>{
-            this.allReservations = await firstValueFrom(this._huespedService.getAll());
+            this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
     
             this.eventsSubject.next(value);
             this.promptMessage('Exito','Reservacion Guardada con exito');

@@ -44,8 +44,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   constructor(
     private modal: NgbActiveModal,
     private fb: FormBuilder,
-    private _habitacionService: HabitacionesService,
-    private _tarifasService: TarifasService,
     private modalService:NgbModal,
     private _disponibilidadService: DisponibilidadService,
     private changeDetector: ChangeDetectorRef
@@ -308,6 +306,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 }
 
 ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cuarto, tarifaPromedio:boolean = false){
+
     const adultos = this.quantity
     const ninos = this.quantityNin
     let tarifaTotal = 0;
@@ -472,7 +471,6 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
 
     this.filterRates();
 
-    console.log("tarifas: ",this.filterRatesAray)
 
     this.maxPeopleCheck(habitacion);
 
@@ -488,6 +486,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
       .subscribe(
         {      
           next:(response)=>{
+
             // if(response.length!=0){
             //   console.log("cuartos ocupados")
             // }else{
@@ -526,6 +525,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
                   disabled:true
                 })
               })
+
           },
           error:()=>{
           },

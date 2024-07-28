@@ -18,6 +18,7 @@ import { Subject, firstValueFrom } from 'rxjs';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Huesped } from 'src/app/models/huesped.model';
+import { Tarifas } from 'src/app/models/tarifas';
 
 L10n.load({
   'en-US': {
@@ -108,6 +109,7 @@ export class ContentComponent implements OnInit{
   @Input() changing: Subject<Record<string, any>[]>;
   @Input() roomCodesComplete:Habitacion[];
   @Input() roomCodes:Habitacion[];
+  @Input() ratesArrayComplete:Tarifas[];
   @Input() datasourceArray :Record<string, any>[]=[]
 
   // eslint-disable-next-line @angular-eslint/no-output-on-prefix
@@ -267,7 +269,6 @@ export class ContentComponent implements OnInit{
     args.data.Numero = resourceDetails.resourceData.text
     this.onResizeReserva.emit(args.data)
   }
-  
 
   onRenderCell(args: RenderCellEventArgs): void {
     let filteredData: any;
@@ -295,21 +296,48 @@ onDataBound(){
         const endDate = new Date(startDate);
         endDate.setDate(startDate.getDate() + 1); // add one day
         const events = this.scheduleObj.getEvents(startDate, endDate);
+
         events.forEach(event => {
-            if (event.ProjectId) {
                 project1Events.push(event);
-            } 
         });
         (cell as HTMLElement).innerText = project1Events.length.toString();
         
-        const newElement = document.createElement('div');
-        newElement.innerText = this.fareValue.toString();
-        newElement.style.marginTop = '10px';
-        (cell as HTMLElement).appendChild(newElement);
+        //Code Block for Rates on grouping column
+        // this.ratesArrayComplete.map((item) => {
+        //   if(item.Tarifa === 'Tarifa De Temporada'){
+        //     return item.ta
+        //   }
+        // });
+        // const newElement = document.createElement('div');
+        // newElement.innerText = this.fareValue.toString();
+        // newElement.style.marginTop = '10px';
+        // (cell as HTMLElement).appendChild(newElement);
         project1Events = [];
        
     });
   }
+
+  getIconClass(text: number): string {
+    if (text === 1) {
+      return 'e-icons e-people';
+    } else if (text === 2) {
+      return 'e-icons e-emoji';
+    }
+    else if (text === 3) {
+      return 'e-icons e-people';
+    }
+    else if (text === 4) {
+      return 'e-icons e-emoji';
+    }
+    else if (text === 5) {
+      return 'e-icons e-people';
+    }
+    else if (text === 6) {
+      return 'e-icons e-emoji';
+    }
+    return '';
+  }
+
 
  onActionComplete(args: ActionEventArgs): void {
   if (args.requestType === 'dateNavigate') {
