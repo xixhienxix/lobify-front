@@ -1,3 +1,4 @@
+/* eslint-disable @angular-eslint/no-output-on-prefix */
 import { Component, OnInit, Output, ViewChild, EventEmitter, Input } from '@angular/core';
 import { Form, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatPaginator } from '@angular/material/paginator';
@@ -11,7 +12,8 @@ import { Adicional } from 'src/app/models/adicional.model';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { Promesa } from 'src/app/pages/calendar/_models/promesas.model';
 import { AlertsMessageInterface } from 'src/app/models/message.model';
-import { edoCuenta } from 'src/app/pages/calendar/_models/estado_de_cuenta.model';
+import { PromesaService } from 'src/app/services/promesas.service';
+import { edoCuenta } from 'src/app/models/edoCuenta.model';
 
 @Component({
   selector: 'app-reservas-component',
@@ -37,7 +39,7 @@ export class ReservasComponent implements OnInit {
   @Output() onAlertMessage: EventEmitter<AlertsMessageInterface> = new EventEmitter();
   @Output() onGuardarPromesa: EventEmitter<any> = new EventEmitter();
   @Output() onAgregarPago: EventEmitter<edoCuenta> = new EventEmitter();
-
+  @Output() honEstatusAplicado: EventEmitter<Huesped> = new EventEmitter();
   /**INDEX */
   idPromesa:''
 
@@ -60,7 +62,7 @@ export class ReservasComponent implements OnInit {
   noches:number;
   closeResult:string;
   minDate:NgbDateStruct;
-  today:DateTime
+  today:DateTime=DateTime.now();
 
   /*Models*/
 
@@ -76,7 +78,6 @@ export class ReservasComponent implements OnInit {
   subscription:Subscription[]=[]
 
   /*TABLE*/
-  displayedColumns: string[] = ['select','_id','Fecha', 'Cantidad', 'Estatus','Accion','Color','ColorAplicado'];
   dataSource: MatTableDataSource<any>;
 
   /*Diseño Dinamico*/
@@ -93,6 +94,7 @@ export class ReservasComponent implements OnInit {
     public i18n: NgbDatepickerI18n,
     public fb : FormBuilder,
     public modalService: NgbModal,
+    private _promesasService: PromesaService
   ) {  
   }
 
@@ -107,14 +109,15 @@ export class ReservasComponent implements OnInit {
                 this.dataSource = new MatTableDataSource(newDataSource);   
                 this.dataSource.sort = this.sort;
             }
-        })
+        });
+
     this.onSuccessResponse.subscribe({
         next:(val)=>{
             if(val){
             this.promesasDisplay=true
             this.formGroupPromesa.reset();
             this.promesasPagoList=[]
-            this.getPromesa();
+            this.onGetPromesas.emit(this.currentHuesped.folio);
             }
         }
     })
@@ -132,7 +135,7 @@ export class ReservasComponent implements OnInit {
         }
     })
 
-    this.getPromesa();
+    // this.getPromesa();
     this.loadForm();
 
   }
@@ -142,10 +145,9 @@ export class ReservasComponent implements OnInit {
       this.onDeletePromesas.emit(_id);
     }
 
-    getPromesa()
-    {
-        this.onGetPromesas.emit(this.currentHuesped.folio);
-    }
+    // getPromesa(){
+    //   this.onGetPromesas.emit(this.currentHuesped.folio);
+    // }
     
     
     formatDate(fecha:any){
@@ -212,58 +214,25 @@ export class ReservasComponent implements OnInit {
 
       return
     }
-    this.isLoading=true
     let estatus='Vigente'
     this.onGuardarPromesa.emit({folio:this.currentHuesped.folio,fechaPromesaPago:this.promesa.fechaPromesaPago.value,promesaPago:this.promesa.promesaPago.value,estatus});
-    // const sb =  this.promesaService.guardarPromesa(this.currentHuesped.folio,this.promesa.fechaPromesaPago.value,this.promesa.promesaPago.value,estatus).subscribe(
-    //     (value)=>{
-    //         this.isLoading=false
-
-    //         const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop:'static' });
-    //         modalRef.componentInstance.alertHeader='Exito'
-    //         modalRef.componentInstance.mensaje = 'Promesa de Pago Generada con Exito'
-    //         modalRef.result.then((result) => {
-    //         this.closeResult = `Closed with: ${result}`;
-    //         }, (reason) => {
-    //             this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    //         });
-    //         setTimeout(() => {
-    //             modalRef.close('Close click');
-    //         },4000)      
-    //         this.promesasDisplay=true
-    //         this.formGroupPromesa.reset();
-    //         this.promesasPagoList=[]
-    //         this.getPromesa();
-    //         },
-    //     (err)=>{
-    //         this.isLoading=false
-
-    //         if(err){
-    //         const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop:'static' });
-    //         modalRef.componentInstance.alertHeader='Error'
-    //         modalRef.componentInstance.mensaje = 'Error al Guardar Promesa de Pago'
-    //         modalRef.result.then((result) => {
-    //         this.closeResult = `Closed with: ${result}`;
-    //         }, (reason) => {
-    //             this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-    //         });
-    //         setTimeout(() => {
-    //             modalRef.close('Close click');
-    //         },4000)      
-    //         this.promesasDisplay=false
-    //         }
-    //     },
-    //     ()=>{}
-    //     )
-    //     this.subscription.push(sb)
+    this._promesasService.getPromesas(this.currentHuesped.folio).subscribe({
+      next:()=>{
+        this.promesasDisplay=false;
+      },
+      error:()=>{
+        this.onAlertMessage.emit({tittle:'Error', message:'No se pudieron actualizar las refrescas, cierre la pantalla y vuelva a intentar'});
+      }
+    });
   }
 
-  togglePromesas(){
+  togglePromesas(folio:string){
     if(this.promesasDisplay==false)
     {this.promesasDisplay=true}
     else if(this.promesasDisplay==true){
       this.promesasDisplay=false
     }
+    this.onGetPromesas.emit(folio);
   }
 
   getAdicionales(): void {
@@ -284,43 +253,36 @@ export class ReservasComponent implements OnInit {
   }
 
   estatusAplicado(row:any){
-    if (row.Aplicado==true){
-//EVENT EMITTER
-    }
-    else return
-  }
+    if(row.Aplicado===false){
+      row.Aplicado=true;
+      const modalRef = this.modalService.open(this.preguntaPrevia,{ size: 'sm', backdrop:'static' })
+      modalRef.result.then( (value) =>{
+        this._promesasService.updatePromesaEstatus(row._id,row.Estatus).subscribe({
+          next:(item)=>{
+            if(this.currentHuesped.estatus=='Reserva Sin Pago'||this.currentHuesped.estatus=='Esperando Deposito')
+              {
+                this.currentHuesped.estatus='Deposito Realizado'
+              }
+              this.honEstatusAplicado.emit(this.currentHuesped);
+          }
+        })
 
-  preguntasPrevias(row:any){
-
-      if(row.Aplicado==false){
-        const modalRef = this.modalService.open(this.preguntaPrevia,{ size: 'sm', backdrop:'static' })
-        modalRef.result.then( (value) =>
-        {
-
-          let  pago = {
-            
-              _id : row._id,
-              Fecha:row.Fecha,
-              Cantidad:this.getThirdForm.pagoManualInput.value,
-              Estatus:'Pago Hecho',
-              Aplicado : true,
-              Forma_De_Pago : this.getforthForm.pago.value
-                  }
-          this.idPromesa=row._id
-            this.aplicarPromesa(pago)
-
+        let  pago = {
+            _id : row._id,
+            Fecha:row.Fecha,
+            Cantidad:this.getThirdForm.pagoManualInput.value,
+            Estatus:'Pago Hecho',
+            Aplicado : true,
+            Forma_De_Pago : this.getforthForm.pago.value
         }
-      );
-      }else if (row.Aplicado==true)
-      {
-        this.onAlertMessage.emit({tittle:'Error', message:'Este pago ya fue Aplicado'})    
+        this.idPromesa=row._id
+        this.aplicarPromesa(pago)
       }
-
-    
-    
+    );
+    }else if (row.Aplicado==true){
+      this.onAlertMessage.emit({tittle:'Error', message:'Este pago ya fue Aplicado'})    
+    }
   }
-
-
 
   aplicarPromesa(row:any){
     let pago : edoCuenta

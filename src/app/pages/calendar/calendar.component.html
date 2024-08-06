@@ -3,21 +3,25 @@
         ></app-header> -->
     </div>
     <div class="card card-custom" style="overflow-y: auto; padding: 10px;">
-        <app-content #calendar 
-        [datasourceArray]="datasourceArray"
-        [roomCodes]="roomCodes"
-        [roomCodesComplete]="roomCodesComplete"
-        [ratesArrayComplete]="ratesArrayComplete"
-        [changing]="changingValue"
-        (onResizeReserva)="onResizeReservation($event)" 
-        (onChangedRate)="onChangedRate($event)" 
-        (onOpenEnviarReservacion)="openEnviarReservacion()">
-    </app-content>
+        <app-content
+            #calendar 
+            [roomCodes]="roomCodes"
+            [roomCodesComplete]="roomCodesComplete"
+            [ratesArrayComplete]="ratesArrayComplete"
+            [allReservations]="allReservations"
+            [changing]="changingValue"
+            [estatusArray]="houseKeepingCodes"
+            (honEditRsv)="onEditRsv($event)"
+            (onResizeReserva)="onResizeReservation($event)" 
+            (onChangedRate)="onChangedRate($event)" 
+            (onChangeEstatus)="onChangeEstatus($event)"
+            (onOpenEnviarReservacion)="openEnviarReservacion()"
+            (onRefreshingFinished)="onRefreshingFinished($event)">
+        </app-content>
     </div>
-    <div class="card card-custom">
+    <div *ngIf="_isRefreshing | async" class="card card-custom">
         <app-footer></app-footer>
     </div>
-
-<ng-container *ngIf="submitLoading">
+<ng-container *ngIf="_isLoading | async">
     <app-loader-spinner></app-loader-spinner>
 </ng-container>

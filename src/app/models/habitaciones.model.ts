@@ -18,5 +18,5 @@ export interface Habitacion
   URL?: string;
   hotel?:string;
   Color?:string;
-
+  Estatus:string;
 }

@@ -1,7 +1,7 @@
 export interface edoCuenta {
     _id?:string,
     Folio:string,
-    Referencia:string,
+    Referencia?:string,
     Forma_de_Pago:string,
     Fecha:Date,
     Fecha_Cancelado?:string,

@@ -57,7 +57,6 @@ private currentPromesaSubject =new Subject<any>();
 
 
     getPromesas(folio:string){
-        
         return this.http.get<Promesa[]>(environment.apiUrl+'/promesas/'+folio)
         .pipe(
             map((datosCuenta)=>{
@@ -65,6 +64,7 @@ private currentPromesaSubject =new Subject<any>();
               for(let i=0;i<datosCuenta.length;i++){
                 promesa.push(datosCuenta[i])
               }
+              this.setcurrentPromesaValue = promesa;
               return promesa    
           }))
     }

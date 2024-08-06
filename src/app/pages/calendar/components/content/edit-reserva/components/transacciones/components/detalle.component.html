@@ -1,0 +1,169 @@
+<div style="background-color: #319dd7; text-align: center;" class="modal-header">
+    <button
+    style="
+      position: absolute;
+      top: 2%;
+      right: 1%;
+      background-color: #fa6d7c;
+      font-weight: bold;
+      color: white;
+    "
+    class="btn"
+    (click)="modal.close()"
+  >
+    X
+  </button>
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    >
+      MOVIMIENTO
+    </label>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <br />
+        <label class="control-label">Usuari@:</label>
+        <br />
+        &nbsp;
+        <label>{{ folio }} </label>
+      </div>
+      <div class="col-md-6">
+        <br />
+        <label class="control-label">Autorizo:</label>
+        <br />
+        &nbsp;
+        <label>{{row.Autorizo}}</label>
+      </div>
+    </div>
+
+    <div class="row">
+        <ng-container *ngIf="fechaCancelado===''">
+            <div class="col-md-6">
+                <br />
+                <label class="control-label">Fecha:</label>
+                <br />
+                &nbsp;
+                <label>{{row.Fecha.split('T')[0].split('-')[2] + ' de ' +i18n.getMonthFullName(row.Fecha.split('T')[0].split('-')[1]) +' del ' + row.Fecha.split('T')[0].split('-')[0]}}</label>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="fechaCancelado!==''">
+            <div class="col-md-6">
+                <br />
+                <label class="control-label">Fecha de Cancelacion:</label>
+                <br />
+                &nbsp;
+                <label>{{fechaCancelado}}</label>
+            </div>
+        </ng-container>
+
+      <div class="col-md-6">
+        <br />
+        <label class="control-label">ID de Movimiento Interno:</label>
+        <br />
+        &nbsp;
+        <label>{{row._id}}</label>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-6">
+        <br />
+        <label class="control-label">Concepto:</label>
+        <br />
+        &nbsp;
+        <ng-container *ngIf="row.Forma_de_Pago==='Descuento' && row.Descripcion.indexOf('%') > -1">
+          <label>Descuento {{row.Descripcion.split("(")[1]}} (D)</label>
+        </ng-container>
+        <ng-container *ngIf="row.Forma_de_Pago==='Descuento' && row.Descripcion.indexOf('%') === -1">
+          <label> Descuento (D)</label>
+        </ng-container>
+        <ng-container *ngIf="row.Referencia==='Anticipo' && row.Estatus!=='Cancelado'">
+          Anticipo (A)
+         </ng-container>
+         <ng-container *ngIf="row.Referencia==='Anticipo' && row.Estatus==='Cancelado'">
+          Anticipo (X)
+         </ng-container>
+        <label *ngIf="row.Forma_de_Pago !== 'Descuento' && row.Referencia !== 'Anticipo' "> {{row.Descripcion}}</label>
+      </div>
+      <div class="col-md-6">
+        <br />
+        <label class="control-label">Tipo de Movimiento:</label>
+        <br />
+        &nbsp;
+        <ng-container *ngIf="row.Estatus==='Cancelado'">
+            <label>Cancelación</label>
+        </ng-container>
+        <ng-container *ngIf="row.Estatus==='Activo'">
+           <ng-container *ngIf="row.Cargo===0">
+            <label>Abono</label>
+           </ng-container>
+           <ng-container *ngIf="row.Abono===0">
+            <label>Cargo</label>
+           </ng-container>
+        </ng-container>
+        <ng-container *ngIf="row.Estatus==='Devolucion'">
+            <label>Devolución</label>
+        </ng-container>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <br />
+        <label class="control-label">Forma de Pago:</label>
+        <br />
+        &nbsp;
+        <label>{{row.Forma_de_Pago}} </label>
+      </div>
+      <div class="col-md-6">
+        <label class="control-label">
+          <br />
+          ID de Movimiento Externo:
+        </label>
+        <br />
+        &nbsp;
+       <label></label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-md-6">
+        <br />
+        <label class="font-weight-bold control-label"
+          >Cantidad (Unidades):</label
+        >
+        <br />
+        &nbsp;
+        <label>{{row.Cantidad}}</label>
+      </div>
+      <div class="col-md-6">
+        <br />
+        <label class="font-weight-bold control-label"
+          >Cantidad:</label
+        >
+        <br />
+        &nbsp;
+        <ng-container *ngIf="row.Abono===0">
+            <label [ngStyle]="{'color': row.Cargo === 0 ? 'red' : 'black'}">$ {{row.Cargo.toLocaleString("es-MX",{ minimumFractionDigits: 2 })}}</label> 
+           </ng-container>  
+           <ng-container *ngIf="row.Cargo===0">
+           <label [ngStyle]="{'color': row.Cargo === 0 ? 'red' : 'black'}">$ -{{row.Abono.toLocaleString("es-MX",{ minimumFractionDigits: 2 })}}</label> 
+           </ng-container> 
+      </div>
+    </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <br />
+          <label class="font-weight-bold control-label"
+            >Notas:</label
+          >
+          <br />
+          &nbsp;
+
+          <label>{{row.Descripcion}}</label>
+        </div>
+       
+      </div>
+  </div>

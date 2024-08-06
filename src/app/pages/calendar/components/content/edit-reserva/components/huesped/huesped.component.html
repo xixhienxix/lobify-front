@@ -1,0 +1,575 @@
+<form
+[formGroup]="formGroup"
+class="form form-label-right"
+>
+<div
+  
+  class="cursor-default modal-content"
+>
+<div class="row container">
+
+  <div style="margin-top: 5px" class="col-sm-12">
+    &nbsp;&nbsp;&nbsp;&nbsp;
+    <label style="font-weight: bold;font-size: medium; "> &nbsp; ID Socio : </label>
+    &nbsp;&nbsp;<label style="font-size: medium; font-weight: bold;" >&nbsp;{{huesped.ID_Socio}}</label>
+
+    
+  </div>
+</div>
+<br>
+  <div class="row container">
+    <div style="margin-top: 5px" class="col-sm-4">
+      <mat-radio-button (change)="vipChecked()" [checked]="checkedVIP" class="example-margin">VIP</mat-radio-button >
+    </div>
+    <div style="margin-top: 5px" class="col-sm-4">
+      <mat-radio-button (change)="regularChecked()" [checked]="checkedRegular" class="example-margin">REGULAR</mat-radio-button >
+    </div>
+    <div style="margin-top: 5px" class="col-sm-4">
+      <mat-radio-button (change)="listaNegraChecked()" [checked]="checkedListaNegra" class="example-margin">LISTA NEGRA</mat-radio-button >
+    </div>
+  </div>
+<br>
+  <div class="row container">
+    <div class="col-lg-12">
+      <label class="form-label">Nombre Completo</label>
+      <input
+      [attr.disabled]="inputDisabled"
+      type="text"
+        class="form-control form-control-lg form-control-solid"
+        name="nombre"
+        autocomplete="off"
+        [class.is-invalid]="isControlInvalid('nombre')"
+        [class.is-valid]="isControlValid('nombre')"
+        formControlName="nombre"
+        value="{{ huesped.nombre }}"
+      />
+      <div class="valid-feedback" *ngIf="isControlValid('nombre')">
+        Nombre Escrito Correctamente
+      </div>
+      <div
+        class="invalid-feedback"
+        *ngIf="controlHasError('required', 'nombre')"
+      >
+        Campo Requerido*
+      </div>
+      <div
+        class="invalid-feedback"
+        *ngIf="controlHasError('minlength', 'nombre')"
+      >
+        Minimo 3 letras
+      </div>
+      <div
+        class="invalid-feedback"
+        *ngIf="controlHasError('maxlength', 'nombre')"
+      >
+        Maximo 100 letras
+      </div>
+    </div>
+  </div>
+  <br>
+  <div class="row container">
+    <div class="col-lg-6">
+      <label class="form-label">Email</label>
+      <input
+        [attr.disabled]="inputDisabled"
+        type="email"
+        class="form-control form-control-lg form-control-solid"
+        name="email"
+        autocomplete="off"
+        [class.is-invalid]="isControlInvalid('email')"
+        [class.is-valid]="isControlValid('email')"
+        formControlName="email"
+        value="{{ huesped.email }}"
+      />
+      <div
+        class="invalid-feedback"
+        *ngIf="controlHasError('minlength', 'email')"
+      >
+        Minimo 3 letras
+      </div>
+      <div
+        class="invalid-feedback"
+        *ngIf="controlHasError('maxlength', 'email')"
+      >
+        Maximo 100 letras
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <label class="form-label">Teléfono</label>
+      <input
+        [attr.disabled]="inputDisabled"
+        type="tel"
+        class="form-control form-control-lg form-control-solid"
+        name="telefono"
+        autocomplete="off"
+        [class.is-invalid]="isControlInvalid('telefono')"
+        [class.is-valid]="isControlValid('telefono')"
+        formControlName="telefono"
+        value="{{ huesped.telefono }}"
+      />
+      <br />
+      <div
+        class="invalid-feedback"
+        *ngIf="controlHasError('minlength', 'telefono')"
+      >
+        Minimo 10 numeros
+      </div>
+      <div
+        class="invalid-feedback"
+        *ngIf="controlHasError('maxlength', 'telefono')"
+      >
+        Maximo 20 numeros
+      </div>
+    </div>
+  </div>
+</div>
+  <div style="background-color: #319dd7" class="modal-content">
+
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    >  Datos de Facturación </label>
+  </div>
+
+<div class="row container">
+  <div class="col-lg-6">
+    <br />
+      <div class="form-group">
+            <label style="color:#00506a; font-weight: bold;" class="form-label">Fecha de Nacimiento</label>
+            <div class="input-group">
+              <input 
+              style="width: 100%;"
+              [attr.disabled]="inputDisabled"
+                     class="form-control form-control-lg form-control-solid" 
+                     name="dp" 
+                     ngbDatepicker 
+                     autocomplete="off"
+                     [minDate]="today"
+                     placeholder="Click para seleccionar Fecha"
+                     [footerTemplate]="footerTemplate" 
+                     #d="ngbDatepicker"
+                     (click)="d.toggle()"
+                     (dateSelect)="formatDate($event)" 
+                     >
+              <div class="input-group-append">
+                <button [attr.disabled]="currentHuesped.estatus==='Reserva Cancelada'||currentHuesped.estatus==='No Show'" class="btn btn-outline-secondary " (click)="d.toggle()" type="button">
+                </button>
+              </div>
+            </div>
+      </div>
+    <ng-template #footerTemplate>
+      <hr class="my-0">
+      <button class="btn btn-secondary btn-sm m-2 float-right" (click)="d.close()">Close</button>
+    </ng-template>
+
+  </div>
+  <div class="col-lg-6">
+    <br />
+    <label class="form-label">Trabaja En:</label>
+    <input
+      [attr.disabled]="inputDisabled"
+      class="form-control form-control-lg form-control-solid"
+      name="trabajaEn"
+      autocomplete="off"
+      [class.is-invalid]="isControlInvalid('trabajaEn')"
+      [class.is-valid]="isControlValid('trabajaEn')"
+      formControlName="trabajaEn"
+      value="{{ huesped.trabajaEn }}"
+      [attr.disabled]="inputDisabled"
+    />
+    <br />
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('minlength', 'trabajaEn')"
+    >
+      Minimo 3 letras
+    </div>
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('maxlength', 'trabajaEn')"
+    >
+      Maximo 200 letras
+    </div>
+  </div>
+</div>
+<div class="row container">
+  <div class="col-lg-6">
+    <br />
+    <label class="form-label">Tipo de ID</label>
+    <input
+      [attr.disabled]="inputDisabled"
+      class="form-control form-control-lg form-control-solid"
+      name="tipoDeID"
+      autocomplete="off"
+      [class.is-invalid]="isControlInvalid('tipoDeID')"
+      [class.is-valid]="isControlValid('tipoDeID')"
+      formControlName="tipoDeID"
+      value="{{ huesped.tipoDeID }}"
+      [attr.disabled]="inputDisabled"
+    />
+    <br />
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('minlength', 'tipoDeID')"
+    >
+      Minimo 3 numeros
+    </div>
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('maxlength', 'tipoDeID')"
+    >
+      Maximo 100 numeros
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <br />
+    <label class="form-label">Numero de ID</label>
+    <input
+      [attr.disabled]="inputDisabled"
+      class="form-control form-control-lg form-control-solid"
+      name="numeroDeID"
+      autocomplete="off"
+      [class.is-invalid]="isControlInvalid('numeroDeID')"
+      [class.is-valid]="isControlValid('numeroDeID')"
+      formControlName="numeroDeID"
+      value="{{ huesped.numeroDeID }}"
+      [attr.disabled]="inputDisabled"
+    />
+    <br />
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('minlength', 'numeroDeID')"
+    >
+      Minimo 3 caracteres
+    </div>
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('maxlength', 'numeroDeID')"
+    >
+      Maximo 100 caracteres
+    </div>
+  </div>
+</div>
+<div class="row container">
+  <div class="col-lg-12">
+    <label class="form-label">Dirección</label>
+    <input
+      [attr.disabled]="inputDisabled"
+      type="text"
+      class="form-control form-control-lg form-control-solid"
+      name="direccion"
+      autocomplete="off"
+      [class.is-invalid]="isControlInvalid('direccion')"
+      [class.is-valid]="isControlValid('direccion')"
+      formControlName="direccion"
+      value="{{ huesped.direccion }}"
+      [attr.disabled]="inputDisabled"
+    />
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('minlength', 'direccion')"
+    >
+      Minimo 3 letras
+    </div>
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('maxlength', 'direccion')"
+    >
+      Maximo 100 letras
+    </div>
+  </div>
+</div>
+<div class="row container">
+  <div class="col-lg-6">
+    <br />
+    <label class="form-label">País</label>
+    <input
+      [attr.disabled]="inputDisabled"
+      class="form-control form-control-lg form-control-solid"
+      name="pais"
+      autocomplete="off"
+      [class.is-invalid]="isControlInvalid('pais')"
+      [class.is-valid]="isControlValid('pais')"
+      formControlName="pais"
+      value="{{ huesped.pais }}"
+      [attr.disabled]="inputDisabled"
+    />
+    <br />
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('minlength', 'pais')"
+    >
+      Minimo 3 letras
+    </div>
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('maxlength', 'pais')"
+    >
+      Maximo 100 letras
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <br />
+    <label class="form-label">Ciudad</label>
+    <input
+      [attr.disabled]="inputDisabled"
+      class="form-control form-control-lg form-control-solid"
+      name="ciudad"
+      autocomplete="off"
+      [class.is-invalid]="isControlInvalid('ciudad')"
+      [class.is-valid]="isControlValid('ciudad')"
+      formControlName="ciudad"
+      value="{{ huesped.ciudad }}"
+      [attr.disabled]="inputDisabled"
+    />
+    <br />
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('minlength', 'ciudad')"
+    >
+      Minimo 3 caracteres
+    </div>
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('maxlength', 'ciudad')"
+    >
+      Maximo 100 caracteres
+    </div>
+  </div>
+</div>
+<div class="row container">
+  <div class="col-lg-6">
+    <br />
+    <label class="form-label">Codigo Postal</label>
+    <input
+      [attr.disabled]="inputDisabled"
+      class="form-control form-control-lg form-control-solid"
+      name="codigoPostal"
+      autocomplete="off"
+      [class.is-invalid]="isControlInvalid('codigoPostal')"
+      [class.is-valid]="isControlValid('codigoPostal')"
+      formControlName="codigoPostal"
+      value="{{ huesped.codigoPostal }}"
+      [attr.disabled]="inputDisabled"
+    />
+    <br />
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('minlength', 'codigoPostal')"
+    >
+      Minimo 3 caracteres
+    </div>
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('maxlength', 'codigoPostal')"
+    >
+      Maximo 20 caracteres
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <br />
+    <label class="form-label">Lenguaje</label>
+    <input
+      [attr.disabled]="inputDisabled"
+      class="form-control form-control-lg form-control-solid"
+      name="lenguaje"
+      autocomplete="off"
+      [class.is-invalid]="isControlInvalid('lenguaje')"
+      [class.is-valid]="isControlValid('lenguaje')"
+      formControlName="lenguaje"
+      value="{{ huesped.lenguaje }}"
+      [attr.disabled]="inputDisabled"
+    />
+    <br />
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('minlength', 'lenguaje')"
+    >
+      Minimo 3 caracteres
+    </div>
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasError('maxlength', 'lenguaje')"
+    >
+      Maximo 100 caracteres
+    </div>
+  </div>
+</div>
+
+<div style="background-color: #319dd7" class="modal-content">
+
+  <label
+    class="h4"
+    style="color: aliceblue; text-align: center; padding-top: 5px"
+  >  Otros Detalles </label>
+</div>
+
+<form [formGroup]="facturacionFormGroup">
+  <br>
+  <div class="row container">
+    <div class="col-lg-12">
+      <label class="form-label">Nombre / Razon Social</label>
+      <input
+      [attr.disabled]="inputDisabled"
+        type="text"
+        class="form-control form-control-lg form-control-solid"
+        name="razonsocial"
+        autocomplete="off"
+        [class.is-invalid]="isControlInvalidFactura('razonsocial')"
+        [class.is-valid]="isControlValidFactura('razonsocial')"
+        formControlName="razonsocial"
+      />
+      <div
+        class="invalid-feedback"
+        *ngIf="controlHasErrorFactura('required', 'razonsocial')"
+      >
+        Campo Requerido*
+      </div>
+    </div>
+    <br>
+    <div class="col-lg-12">
+      <label class="form-label">RFC</label>
+      <input
+      [attr.disabled]="inputDisabled"
+        type="text"
+        class="form-control form-control-lg form-control-solid"
+        name="rfc"
+        autocomplete="off"
+        [class.is-invalid]="isControlInvalidFactura('rfc')"
+        [class.is-valid]="isControlValidFactura('rfc')"
+        formControlName="rfc"
+      />
+      <div
+        class="invalid-feedback"
+        *ngIf="controlHasErrorFactura('required', 'rfc')"
+      >
+        Campo Requerido*
+      </div>
+    </div>
+  </div>
+  <br>
+  <div class="row container">
+    <div class="col-lg-6">
+      <label class="form-label">EMAIL</label>
+      <input
+      [attr.disabled]="inputDisabled"
+        type="text"
+        class="form-control form-control-lg form-control-solid"
+        name="email"
+        autocomplete="off"
+        [class.is-invalid]="isControlInvalidFactura('email')"
+        [class.is-valid]="isControlValidFactura('email')"
+        formControlName="email"
+      />
+      <div
+        class="invalid-feedback"
+        *ngIf="controlHasErrorFactura('required', 'email')"
+      >
+        Campo Requerido*
+      </div>
+    </div>
+  <div class="col-lg-6">
+    <label class="form-label">USO DE CFDI</label>
+    <mat-form-field appearance="fill">
+      <mat-label></mat-label>
+      <mat-select [attr.disabled]="inputDisabled"
+      formControlName="cfdi" >
+        <mat-option *ngFor="let cfdi of cfdiList" [value]="cfdi">{{cfdi}}</mat-option>
+      </mat-select>
+    </mat-form-field>
+    <div
+      class="invalid-feedback"
+      *ngIf="controlHasErrorFactura('required', 'cfdi')"
+    >
+      Campo Requerido*
+    </div>
+  </div>
+  </div>
+ 
+  <div class="col-md-12">
+    <button 
+    [attr.disabled]="inputDisabled"
+    class="btn btn-primary btn-block">
+      Actualizar Datos de Facturación
+    </button>
+  </div>
+</form>
+
+<br>
+
+
+
+<div style="background-color: #319dd7" class="modal-content">
+
+  <label
+    class="h4"
+    style="color: aliceblue; text-align: center; padding-top: 5px"
+  > Notas Internas del cliente </label>
+</div>
+<br>
+  <div class="row">
+    <div style="text-align: center;" class="col-md-12">
+      <textarea             [attr.disabled]="inputDisabled"
+      formControlName="notas" style="border: 2px solid rgb(177, 177, 177)" class="form-control">           - NOTAS EXTRAS DEL CLIENTE</textarea>
+    </div>
+  </div>
+  <br>
+  
+<div class="row">
+  <div
+    style="
+      display: flex;
+      justify-content: space-evenly;
+      flex-direction: row;
+    "
+    class="col-md-6"
+  >
+    <button class="btn btn-secondary btn-block"
+    (click)="formReset()">Cancelar</button>
+  </div>
+  <div class="col-md-6">
+    <button
+    [attr.disabled]="inputDisabled" 
+    (click)="save()"
+    class="btn btn-success btn-block">
+      Actualizar y Guardar
+    </button>
+  </div>
+</div>
+<br>
+  <div style="background-color: #319dd7" class="modal-content">
+
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    > Historial de Visitas </label>
+  </div>
+  <br>
+
+
+
+<!-- <mat-accordion>
+<mat-expansion-panel>
+<mat-expansion-panel-header>
+<mat-panel-title>
+  Day of the trip
+</mat-panel-title>
+<mat-panel-description>
+  Inform the date you wish to travel
+  <mat-icon>date_range</mat-icon>
+</mat-panel-description>
+</mat-expansion-panel-header>
+
+<mat-form-field>
+<mat-label>Date</mat-label>
+<input matInput [matDatepicker]="picker" (focus)="picker.open()" readonly>
+</mat-form-field>
+<mat-datepicker #picker></mat-datepicker>
+</mat-expansion-panel>
+</mat-accordion> -->
+</form>
+
+<ng-container *ngIf="isLoading">
+  <app-loader-spinner></app-loader-spinner>
+</ng-container>

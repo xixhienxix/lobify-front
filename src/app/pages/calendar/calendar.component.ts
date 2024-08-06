@@ -1,8 +1,8 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit, ViewChild } from '@angular/core';
 
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
-import { Subject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
 import { WarningComponent } from './_helpers/warning.prompt.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
@@ -19,6 +19,10 @@ import { Promesa } from './_models/promesas.model';
 import { PromesaService } from 'src/app/services/promesas.service';
 import { AdicionalService } from 'src/app/services/adicionales.service';
 import { DateTime } from 'luxon';
+import { AlertsMessageInterface } from 'src/app/models/message.model';
+import { MatTableDataSource } from '@angular/material/table';
+import { EditReservaComponent } from './components/content/edit-reserva/edit-reserva.component';
+import { Edo_Cuenta_Service } from 'src/app/services/edoCuenta.service';
 
 
 @Component({
@@ -33,7 +37,6 @@ export class CalendarComponent implements OnInit{
   currentFolio=''
   stayNights:number=1
   // eventsSubject: Subject<Huesped[]> = new Subject<Huesped[]>();
-  datasourceArray :Record<string, any>[]=[]
   colorDict={
     0:'#99d284',
     1:'#fab3db',
@@ -55,11 +58,13 @@ export class CalendarComponent implements OnInit{
   roomCodesComplete:Habitacion[];
   roomCodes:Habitacion[];
   houseKeepingCodes:HouseKeeping[]=[]
-
+  indexDbLoaded:boolean=false
 
   changingValue: Subject<any> = new Subject();
-  changingPromesasValue: Subject<any> = new Subject();
+  // changingPromesasValue: Subject<any> = new Subject();
   changingAdicionalesValue: Subject<Adicional[]> = new Subject();
+  _isLoading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  _isRefreshing: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
 
   @ViewChild('email') emailModal: null;
 
@@ -72,7 +77,8 @@ export class CalendarComponent implements OnInit{
     private _housekeepingService:HouseKeepingService,
     private _roomService: HabitacionesService,
     private _promesasService: PromesaService,
-    private _adicionalService: AdicionalService
+    private _adicionalService: AdicionalService,
+    private _edoCuentaService: Edo_Cuenta_Service
   ){
     
   }
@@ -90,19 +96,22 @@ export class CalendarComponent implements OnInit{
     await this.checkEstatusIndexDB();
     await this.checkAmaCodesIndexDB();
     await this.checkRatesIndexDB();
-
+    await this.checkReservationsIndexDB();
+    this.indexDbLoaded=true;
   }
 
   async getReservations(){
     this._huespedService.getAll().subscribe({
       next:(value)=>{
+        this.allReservations = [];
         this.changingValue.next(value);
+        this.allReservations = [...value]
       }
 
     })  
   }
 
-  async checkRoomCodesIndexDB(){
+  async checkRoomCodesIndexDB(refresh:boolean=false){
     const roomsCodesIndexDB:Habitacion[] = await this._roomService.readIndexDB("Rooms");
         /** Check if RoomsCode are on IndexDb */
       if(roomsCodesIndexDB){
@@ -117,6 +126,19 @@ export class CalendarComponent implements OnInit{
             this.roomCodes.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
         );         
       }
+
+      if(refresh){
+        this.roomCodes = await firstValueFrom(this._roomService.getAll());
+          this.roomCodesComplete = [...this.roomCodes]
+          this.roomCodes = Object.values(
+            this.roomCodes.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
+        );  
+      }
+  }
+  onRefreshingFinished(flag:boolean){
+    if(flag){
+      this._isRefreshing.next(false);
+    }
   }
 
   async checkEstatusIndexDB(){
@@ -129,15 +151,15 @@ export class CalendarComponent implements OnInit{
     }
   }
 
-  // async checkReservationsIndexDB(){
-  //   const reservationsIndexDB:Huesped[] = await this._huespedService.readIndexDB("Reservations");
-  //   /** Check if RoomsCode are on IndexDb */
-  //   if(reservationsIndexDB){
-  //     this.allReservations = reservationsIndexDB
-  //   }else{
-  //      this.allReservations = await firstValueFrom(this._huespedService.getAll());
-  //   }
-  // }
+  async checkReservationsIndexDB(){
+    const reservationsIndexDB:Huesped[] = await this._huespedService.readIndexDB("Reservations");
+    /** Check if RoomsCode are on IndexDb */
+    if(reservationsIndexDB){
+      this.allReservations = reservationsIndexDB
+    }else{
+       this.allReservations = await firstValueFrom(this._huespedService.getAll());
+    }
+  }
 
   async checkAmaCodesIndexDB(){
     const amaIndexDB:HouseKeeping[] = await this._housekeepingService.readIndexDB("houseKeeperCodes");
@@ -159,117 +181,174 @@ export class CalendarComponent implements OnInit{
     }
   }
 
-  // onEditRsv(data:any){
-  //   if(data.data.hasOwnProperty("Id")){
+  onEditRsv(data:any){
+    if(data.data.hasOwnProperty("Id")){
 
-  //     const currentHuesped = this.allReservations.find(item=>item.folio === data.data.Folio)!;
-  //     this.currentFolio = data.data.Folio;
-  //     const colorAma = this.houseKeepingCodes.find(item=>
-  //       item.Descripcion == currentHuesped.estatus_Ama_De_Llaves!.toUpperCase()
-  //     )?.Color!
+      const currentHuesped = this.allReservations.find(item=>item.folio === data.data.Folio)!;
+      this.currentFolio = data.data.Folio;
+      let colorAma = this.houseKeepingCodes.find(item=>
+        item.Descripcion == currentHuesped.estatus_Ama_De_Llaves!.toUpperCase()
+      )?.Color!
 
-  //     const modalRef = this.modalService.open(EditReservaComponent,{ size: 'md', backdrop:'static' })
-  //     modalRef.componentInstance.data = data.data
-  //     modalRef.componentInstance.promesasDisplay = this.promesasDisplay
-  //     modalRef.componentInstance.estatusArray = this.estatusArray
-  //     modalRef.componentInstance.currentHuesped = currentHuesped
-  //     modalRef.componentInstance.colorAma = colorAma
-  //     modalRef.componentInstance.onGuardarPromesa.subscribe({
-  //       next:(promesa:any)=>{
-  //         this.submitLoading=true;
-  //         this._promesasService.guardarPromesa(promesa.folio,promesa.fechaPromesaPago,promesa.promesaPago.value,promesa.estatus).subscribe({
-  //           next:(val)=>{
-  //             this.promesasDisplay=true
-  //             this.onSuccessResponse.next(true);
-  //           },
-  //           error:(error)=>{
-              
-  //           },
-  //           complete:()=>{
-  //             this.submitLoading=false;
-  //           }
-  //         })
-  //       }
-  //     })
-  //     modalRef.componentInstance.onAlertMessage.subscribe({
-  //       next:(message:AlertsMessageInterface)=>{
-  //         this.promptMessage(message.tittle,message.message);
-  //       }
-  //     })
-  //     modalRef.componentInstance.onGetAdicionales.subscribe({
-  //       next:async (flag:boolean)=>{
-  //         const adicionales = await this.checkAdicionalesIndexDB();
-  //         this.changingAdicionalesValue.next(adicionales)
-  //       }
-  //     })
-  //     modalRef.componentInstance.onGetPromesas.subscribe({
-  //       next:async (folio:string)=>{
-  //         this._promesasService.getPromesas(folio).subscribe({
-  //           next:(value:Promesa[])=>{
-  //             this.processPromesasResponse(value);
-  //           }
-  //         })
-  //       }
-  //     })
-  //     modalRef.componentInstance.onAgregarPago.subscribe({
-  //       next:(val:edoCuenta)=>{
-  //       }
-  //     })
-  //     modalRef.componentInstance.onUpdateEstatusHuesped.subscribe({
-  //       next:(huesped:Huesped)=>{
-  //         this.submitLoading=true;
-  //         this._huespedService.updateEstatusHuesped(huesped).subscribe(
-  //           {
-  //             next:(val)=>{
-  //               this.promptMessage('Exito','Datos del huesped Actualizados');
-  //             },
-  //             error:(error)=>{
-  //               this.promptMessage('Error','Error al Guardar Promesa de Pago');
-  //               this.promesasDisplay=false
-  //             },
-  //             complete:()=>{
-  //               this.submitLoading=false;
-  //             }
-  //           })
-  //       }
-  //     })
-  //     modalRef.componentInstance.houseKeepingCodes = this.houseKeepingCodes
-  //     modalRef.result.then((result) => {
-  //       if(result) {
-  //         console.log(result);
-  //       }else
-  //       this.closeResult = `Closed with: ${result}`;
-  //       }, (reason) => {
-  //           this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-  //       });
-  //   }
-  // }
+      const habitacion = this.roomCodesComplete.find((item)=>item.Numero === data.data.Numero);
+
+      const modalRef = this.modalService.open(EditReservaComponent,{ size: 'md', backdrop:'static' });
+      modalRef.componentInstance.huesped = currentHuesped
+      modalRef.componentInstance.data = data.data
+      modalRef.componentInstance.currentRoom = habitacion
+      modalRef.componentInstance.promesasDisplay = this.promesasDisplay
+      modalRef.componentInstance.estatusArray = this.estatusArray
+      modalRef.componentInstance.currentHuesped = currentHuesped
+      modalRef.componentInstance.colorAmaLlaves = colorAma
+      //DataSource Promesas
+      modalRef.componentInstance.onEstatusChange.subscribe({
+        next:(value:any)=>{
+          this.onEstatusChange(value);
+        }
+      })
+      modalRef.componentInstance.onChangeAmaStatus.subscribe({
+        next:(value:any)=>{
+          this.onChangeEstatus(value);
+        }
+      })
+      modalRef.componentInstance.onGuardarPromesa.subscribe({
+        next:(promesa:any)=>{
+          const fechaPromesa = new Date(promesa.fechaPromesaPago.year,promesa.fechaPromesaPago.month-1,promesa.fechaPromesaPago.day)
+          this._isLoading.next(true);
+          promesa.estatus='Vigente'
+          this._promesasService.guardarPromesa(promesa.folio,fechaPromesa,promesa.promesaPago,promesa.estatus).subscribe({
+            next:(val)=>{
+              this.promesasDisplay=true
+              // this.onSuccessResponse.next(true);
+              this.promptMessage('Exito','Promesa guardada con exito');
+              // this._isLoading.next(false);
+            },
+            complete:()=>{
+              this._isLoading.next(false);
+            }
+          })
+        }
+      });
+
+      modalRef.componentInstance.onEstatusAplicado.subscribe({
+        next:(value:any)=>{
+          this.promptMessage('Exito','Movimiento agregado al Estado de cuenta del cliente');
+
+          this._huespedService.updateEstatusHuesped(value).subscribe({
+            next:(value)=>{
+              this.getReservations();
+            },
+            error:(error)=>{
+              this.promptMessage('Error','No se pudo actualizar el estatus de la Promesa');
+            }}
+          )
+        }
+      })
+
+      modalRef.componentInstance.onAlertMessage.subscribe({
+        next:(message:AlertsMessageInterface)=>{
+          this.promptMessage(message.tittle,message.message);
+        }
+      })
+      modalRef.componentInstance.onGetAdicionales.subscribe({
+        next:async (flag:boolean)=>{
+          const adicionales = await this.checkAdicionalesIndexDB();
+          this.changingAdicionalesValue.next(adicionales)
+        }
+      })
+      
+      //GET PROMESAS
+      modalRef.componentInstance.onGetPromesas.subscribe({
+        next:async (folio:string)=>{
+          this._promesasService.getPromesas(folio).subscribe({
+            next: (value) => {
+            },
+            error: (err) => {
+              this.promptMessage('Error', 'No se pudieron cargar las promesas de pago, refresque el navegador e intente nuevamente');
+            }
+          });
+        }
+      });
+
+      modalRef.componentInstance.onFetchReservations.subscribe({
+        next:()=>{
+          this.getReservations();
+        },
+        error:()=>{
+          this.promptMessage('Error','No se pudo realizar el checkout intente de nuevo mas tarde');
+        }
+      })
+
+      modalRef.componentInstance.onActualizarCuenta.subscribe({
+        next:()=>{
+          this.getReservations();
+        },
+        error:()=>{
+          this.promptMessage('Error', 'No se pudo actualizar el estado de cuenta del cliente');
+        }
+      })
+
+      modalRef.componentInstance.onAgregarPago.subscribe({
+        /// POR IMPLEMENTAR
+      //   next:(val:edoCuenta)=>{
+      //   }
+      // })
+      // modalRef.componentInstance.onUpdateEstatusHuesped.subscribe({
+      //   next:(huesped:Huesped)=>{
+      //     this.submitLoading=true;
+      //     this._huespedService.updateEstatusHuesped(huesped).subscribe(
+      //       {
+      //         next:(val)=>{
+      //           this.promptMessage('Exito','Datos del huesped Actualizados');
+      //         },
+      //         error:(error)=>{
+      //           this.promptMessage('Error','Error al Guardar Promesa de Pago');
+      //           this.promesasDisplay=false
+      //         },
+      //         complete:()=>{
+      //           this.submitLoading=false;
+      //         }
+      //       })
+      //   }
+     });
+
+    }
+  }
 
   async onResizeReservation(event:Record<string, any>){
-    console.log("MAIN CONTAINER:",event);
 
     const dataSource = await this.roomRates(event.Codigo);
-    const tarifaEstandarArray = dataSource.filter((item:any)=>item.Tarifa === 'Tarifa Estandar');
+    const tarifaEstandarArray = dataSource.filter((item:any)=>item.Tarifa === 'Tarifa Base');
+    const tempRatesArray = dataSource.filter((item:any)=>item.Tarifa === 'Tarifa De Temporada');
+    const huesped = this.allReservations.find(item=> item.folio === event.Folio);
 
     let Difference_In_Time = event.EndTime.getTime() - event.StartTime.getTime();
-    this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+    const stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
 
     const modalRef = this.modalService.open(WarningComponent,{ size: 'md', backdrop:'static' })
-    modalRef.componentInstance.dataSource = dataSource
-    modalRef.componentInstance.stayNights = this.stayNights
+    modalRef.componentInstance.ratesArrayComplete = dataSource
+    modalRef.componentInstance.stayNights = stayNights
     modalRef.componentInstance.StartTime = event.StartTime
     modalRef.componentInstance.EndTime = event.EndTime
+
+    modalRef.componentInstance.Adultos = huesped?.adultos
+    modalRef.componentInstance.Ninos = huesped?.ninos
+
     modalRef.componentInstance.tarifaEstandarArray = tarifaEstandarArray
+    modalRef.componentInstance.tempRatesArray = tempRatesArray
     modalRef.componentInstance.cuarto = event.Codigo
     modalRef.componentInstance.folio = event.Folio    
+    modalRef.componentInstance.roomCodesComplete=this.roomCodesComplete
     modalRef.componentInstance.numeroCuarto = event.Numero
     modalRef.componentInstance.alertHeader = "Advertencia"
-    modalRef.componentInstance.mensaje= "Al cambiarse la fecha de la reservacion es nesesario confirmar la tarifa que se utilizara para la misma"  
-    modalRef.result.then((result) => {
+    modalRef.componentInstance.mensaje= "Al cambiarse la fecha de la reservacion es nesesario confirmar la tarifa que se utilizara para la misma. "  
+    modalRef.result.then(async (result) => {
       if(result) {
         this.onChangedRate(result);
-      }else
-      this.closeResult = `Closed with: ${result}`;
+      }else{
+        this.closeResult = `Closed with: ${result}`;
+      }
+      await this.getReservations();
       }, (reason) => {
           this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
       });
@@ -278,8 +357,8 @@ export class CalendarComponent implements OnInit{
   onChangedRate(data:any){
     
     this._huespedService.updateReserva(data).subscribe({
-      next:(data)=>{
-        console.log(data);
+      next:async (data)=>{
+        await this.getReservations();
         this.promptMessage('Exito','Reservacion actualizada con exito');
       },
       error:()=>{
@@ -320,77 +399,29 @@ export class CalendarComponent implements OnInit{
           this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
       });
   }
+  
+  onChangeEstatus(data:any){
+    // this.submitLoading = true;
+    this._housekeepingService.updateEstatus(data.cuarto,data.estatus).subscribe({
+      next:async ()=>{
+        this.checkRoomCodesIndexDB(true);
+        this.getReservations();
+        //MEthod to update the locks columns
+      }
+    });
+  }
 
-  processPromesasResponse(result:Promesa[]){
-    let today = DateTime.now()
-                for(let i =0;i<result.length;i++){
-                  
-                  let color =''
-                  let colorAplicado='' //amarillo
-                  let expirado 
-              
-                  let todayMillis = today.toMillis()
-
-                  const dateParts50:string = result[i].Fecha.toString().split("T")[0];
-                  const dateObject = DateTime.fromISO(dateParts50); 
-                  const promesasPagoList=[]
-
-                  console.log(dateObject)
-
-                  if(result[i].Aplicado==false)
-                  {
-
-                    colorAplicado='#f7347a'//rosa
-                    color='#68B29A'
-                    if(dateObject.millisecond<todayMillis)
-                    {
-                      let status = 'Expirado'
-                      expirado='Expirado'
-                      color='#D47070'//rosa
-                      const _id= result[i]._id!
-                      this._promesasService.updatePromesaEstatus(_id,status).subscribe()
-                    }
-
-                    if(dateObject.millisecond>todayMillis)
-                    {
-                      expirado='Vigente'
-                      color='#68B29A'//verde
-                    }
-
-                    promesasPagoList[i] = {
-                      _id:result[i]._id,
-                      Fecha:result[i].Fecha.toString().split('T')[0],
-                      Cantidad:result[i].Cantidad,
-                      Expirado:expirado,
-                      Aplicado:result[i].Aplicado,
-                      Color:color,
-                      ColorAplicado:colorAplicado,
-                      Estatus:result[i].Estatus
-                    }
-
-                  }else if(result[i].Aplicado==true)
-                  
-                  {
-                    expirado=result[i].Estatus
-
-                      color='#0A506A'//Azul 
-                      colorAplicado='#0A506A'//Azul 
-
-                  
-                      promesasPagoList[i] = {
-                      _id:result[i]._id,
-                      Fecha:result[i].Fecha.toString().split('T')[0],
-                      Cantidad:result[i].Cantidad,
-                      Expirado:expirado,
-                      Aplicado:result[i].Aplicado,
-                      Color:color,
-                      ColorAplicado:colorAplicado,
-                      Estatus:result[i].Estatus
-                    }
-                  }
-                  this.changingPromesasValue.next(promesasPagoList);
-                }
-}
+  onEstatusChange(data:any){
+    data.huesped.estatus=data.estatus;
+    this._huespedService.updateEstatusHuesped(data.huesped).subscribe({
+      next:()=>{
+        this.getReservations();
+        if(data.checkout===true){
+          this.promptMessage('Exito','Checkout Realizado con exito')
+        }
+      }
+    })
+  }
 
   promptMessage(header:string,message:string){
     const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })

@@ -1,3 +1,4 @@
+/* eslint-disable @angular-eslint/no-output-on-prefix */
 
 import { Component, EventEmitter,Input,  OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Internationalization } from '@syncfusion/ej2-base';
@@ -13,23 +14,19 @@ import { DataManager, UrlAdaptor } from '@syncfusion/ej2-data';
 import { environment } from 'src/environments/environment';
 import { ActivatedRoute } from '@angular/router';
 import { Habitacion } from 'src/app/models/habitaciones.model';
-import { L10n } from '@syncfusion/ej2-base';
+import { loadCldr,L10n } from '@syncfusion/ej2-base';
 import { Subject, firstValueFrom } from 'rxjs';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Huesped } from 'src/app/models/huesped.model';
 import { Tarifas } from 'src/app/models/tarifas';
+import { HouseKeeping } from '../../_models/housekeeping.model';
 
-L10n.load({
-  'en-US': {
-      'schedule': {
-          'saveButton': 'Save',
-          'cancelButton': 'Close',
-          'deleteButton': 'Remove',
-          'newEvent': 'New Reservation',
-      },
-  }
-});
+import * as numberingSystems from '../../../../../assets/i18/culture-files/numberingSystems.json'
+import * as gregorian from '../../../../../assets/i18/culture-files/ca-gregorian.json';
+import * as numbers from '../../../../../assets/i18/culture-files/numberingSystems.json';
+import * as timeZoneNames from '../../../../../assets/i18/culture-files/timeZoneNames.json';
+
 @Component({
     selector      : 'app-content',
     templateUrl   : './content.component.html',
@@ -39,8 +36,11 @@ L10n.load({
 })
 
 export class ContentComponent implements OnInit{
-
   fareValue=900;
+  datasourceArray :Record<string, any>[]=[]
+  reservationsArray:Huesped[];
+  @Input() allReservations:Huesped[];
+
   closeResult:string
   public selectedDate: Date = new Date();
   todayDate = new Date();
@@ -62,7 +62,7 @@ export class ContentComponent implements OnInit{
   };
 
   public datas: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-  public scheduleinterval = 5;
+  public scheduleinterval = 7;
 
 
   public rowAutoHeight = true;
@@ -106,15 +106,17 @@ export class ContentComponent implements OnInit{
   }
   @Input() tipoHabGroupDataSource: Record<string, any>[]
   @Input() habitacionPorTipoDataSource: Record<string, any>[]
-  @Input() changing: Subject<Record<string, any>[]>;
-  @Input() roomCodesComplete:Habitacion[];
+  @Input() changing: Subject<Huesped[]>;
+  @Input() roomCodesComplete:any[];
   @Input() roomCodes:Habitacion[];
   @Input() ratesArrayComplete:Tarifas[];
-  @Input() datasourceArray :Record<string, any>[]=[]
+  @Input() estatusArray:HouseKeeping[];
 
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   @Output() onResizeReserva: EventEmitter<Record<string, any>> = new EventEmitter();
-  @Output() honEditRsv: EventEmitter<Huesped[]> = new EventEmitter();
+  @Output() honEditRsv: EventEmitter<Huesped> = new EventEmitter();
+  @Output() onChangeEstatus: EventEmitter<any> = new EventEmitter();
+  @Output() onRefreshingFinished: EventEmitter<boolean> = new EventEmitter();
+
   @ViewChild("scheduleObj") public scheduleObj: ScheduleComponent;
 
   
@@ -147,10 +149,17 @@ export class ContentComponent implements OnInit{
   }
 
   async ngOnInit(){
+    // this.scheduleObj.locale = 'es';
+
     await this.checkRoomCodesIndexDB();
 
     this.changing.subscribe(dataSource => { 
+      this.datasourceArray=[]
+      this.reservationsArray=[]
       dataSource.forEach((item, index)=>{
+        this.reservationsArray.push(item);
+        const hours = parseInt(item.llegada.split('T')[1].split(':')[0]);
+        const minutes = parseInt(item.llegada.split('T')[1].split(':')[1]);
         const llegada = new Date(item.llegada);
         const salida = new Date(item.salida);
 
@@ -158,8 +167,8 @@ export class ContentComponent implements OnInit{
           {
             Id: index+1,   
             Subject: item.nombre,
-            StartTime: new Date(llegada.getFullYear(), llegada.getMonth(), llegada.getDate(), llegada.getHours(), llegada.getMinutes()),
-            EndTime: new Date(salida.getFullYear(), salida.getMonth(), salida.getDate(), salida.getHours(), salida.getMinutes()),
+            StartTime: new Date(llegada.setHours(hours)),
+            EndTime: new Date(salida.setHours(hours)),
             IsAllDay: false,
             ProjectId: this.checkGroupId(item.habitacion),
             TaskId: this.checkTaskID(item.numeroCuarto),
@@ -178,6 +187,8 @@ export class ContentComponent implements OnInit{
 
   refreshCalendar(datasource:Record<string, any>[]){
     this.scheduleObj.eventSettings.dataSource = [...datasource]
+    this.scheduleObj.refresh();
+    this.onRefreshingFinished.emit(true);
   }
 
   checkGroupId(codigo:string){
@@ -190,17 +201,6 @@ export class ContentComponent implements OnInit{
     const foundTaskID = this.habitacionPorTipoDataSource.find(item=>item.text === numero);
     return foundTaskID?.id
   }
-
-
-  // async checkReservationsIndexDB(){
-  //   const reservationsIndexDB:Huesped[] = await this._huespedService.readIndexDB("Reservations");
-  //   /** Check if RoomsCode are on IndexDb */
-  //   if(reservationsIndexDB){
-  //     this.reservationsArrayComplete = reservationsIndexDB;
-  //   }else{
-  //       this.reservationsArrayComplete = await firstValueFrom(this._huespedService.getAll());     
-  //   }
-  // }
 
   createRack(responseData:Habitacion[]){
     const tipoArray:Record<string, any>[] = []
@@ -245,7 +245,12 @@ export class ContentComponent implements OnInit{
   onPopupOpen = (args:any) => {
    if (args.type === 'Editor' || args.type === 'QuickInfo')  {
     args.cancel = true;
-    this.honEditRsv.emit(args);
+    // const huesped = this.reservacionesArray.find((item)=>
+    //   item.folio === args.data.Folio    
+    // )
+    //if(huesped !== undefined){
+      this.honEditRsv.emit(args);
+    //}
     }
   }
   /**
@@ -287,21 +292,28 @@ export class ContentComponent implements OnInit{
   }
 }
 
-onDataBound(){
-    const workCells = document.querySelectorAll(".e-work-cells.e-resource-group-cells");
-    workCells.forEach((cell) => {
-        let project1Events = [];    
-        const timestamp = Number(cell.getAttribute('data-date'));
-        const startDate = new Date(timestamp);
-        const endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 1); // add one day
-        const events = this.scheduleObj.getEvents(startDate, endDate);
+isChildNode(data: any): boolean {
+  return data.resourceData.ClassName !== "e-parent-node";
+}
 
-        events.forEach(event => {
-                project1Events.push(event);
-        });
-        (cell as HTMLElement).innerText = project1Events.length.toString();
-        
+onDataBound(){
+
+  const workCells = document.querySelectorAll(".e-work-cells.e-resource-group-cells");
+  workCells.forEach((cell, index) => {
+      let projectEvents = [];    
+      const timestamp = Number(cell.getAttribute('data-date'));
+      const startDate = new Date(timestamp);
+      const endDate = new Date(startDate);
+      endDate.setDate(startDate.getDate() + 1); // add one day
+      const events = this.scheduleObj.getEvents(startDate, endDate);
+      const cellProjectId = this.scheduleObj.getResourcesByIndex(Number(cell.getAttribute("data-group-index"))).groupData!.ProjectId;        
+      events.forEach(event => {
+          if (event.ProjectId === cellProjectId) {
+              projectEvents.push(event);
+          } 
+      });
+      (cell as HTMLElement).innerText = projectEvents.length.toString();
+  });
         //Code Block for Rates on grouping column
         // this.ratesArrayComplete.map((item) => {
         //   if(item.Tarifa === 'Tarifa De Temporada'){
@@ -312,30 +324,32 @@ onDataBound(){
         // newElement.innerText = this.fareValue.toString();
         // newElement.style.marginTop = '10px';
         // (cell as HTMLElement).appendChild(newElement);
-        project1Events = [];
-       
-    });
   }
 
-  getIconClass(text: number): string {
-    if (text === 1) {
-      return 'e-icons e-people';
-    } else if (text === 2) {
-      return 'e-icons e-emoji';
+  getIconClass(text: string) {
+    let huesped
+
+    if(this.roomCodesComplete){
+      huesped = this.roomCodesComplete.find(item=>
+        item.Numero === text
+      );
     }
-    else if (text === 3) {
-      return 'e-icons e-people';
+
+    if(huesped !== undefined){
+      // return '../../../../../assets/media/locks/green_Lock.png'
+      if(huesped.Estatus === 'LIMPIA'){
+        return '../../../../../assets/media/locks/blue_Lock.png'
+      }else if(huesped.Estatus === 'REVISAR'){
+        return '../../../../../assets/media/locks/yellow_Lock.png'
+      }else if(huesped.Estatus === 'SUCIA'){
+        return '../../../../../assets/media/locks/red_Lock.png'
+      }else if(huesped.Estatus === 'RETOCAR'){
+        return '../../../../../assets/media/locks/green_Lock.png'
+      }
+      else {
+        return '../../../../../assets/media/locks/green_Lock.png'
+      }
     }
-    else if (text === 4) {
-      return 'e-icons e-emoji';
-    }
-    else if (text === 5) {
-      return 'e-icons e-people';
-    }
-    else if (text === 6) {
-      return 'e-icons e-emoji';
-    }
-    return '';
   }
 
 
@@ -382,6 +396,11 @@ onEventRendered(args: EventRenderedArgs): void {
   } else {
     args.element.style.backgroundColor = categoryColor;
   }
+}
+
+
+onStatusChange(cuarto:string, estatus:string){
+  this.onChangeEstatus.emit({cuarto,estatus})
 }
 
 

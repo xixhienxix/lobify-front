@@ -7,4 +7,7 @@ export interface Promesa
     Aplicado:boolean;
     Estatus:string;
     hotel?:string;
+    Expirado?:string;
+    Color?:string;
+    ColorAplicado?:string;
 }

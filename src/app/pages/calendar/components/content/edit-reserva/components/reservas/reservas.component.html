@@ -90,16 +90,16 @@
   </div>
 
   <br />
-  <div style="background-color: #319dd7" class="modal-content sub-menu">
+  <!-- <div style="background-color: #319dd7" class="modal-content sub-menu">
     <label
       class="h4"
       style="color: aliceblue; text-align: center; padding-top: 5px"
     >
       Estancia
     </label>
-  </div>
+  </div> -->
 
-  <div class="row container" style="margin:auto">
+  <!-- <div class="row container" style="margin:auto">
     <div class="col-sm-6">
       <br />
       <label class="control-label">A Pagar por Noche:</label>
@@ -126,11 +126,11 @@
         type="text"
 
       />
-      <!--         value="$ {{
+               value="$ {{
           (currentHuesped.tarifa * currentHuesped.noches).toLocaleString()
-        }}    MXN" -->
+        }}    MXN" 
     </div>
-  </div>
+  </div> -->
 
   <br />
   <div style="background-color: #319dd7" class="modal-content">
@@ -216,7 +216,7 @@
 "
 class="col-md-6">
     <button 
-    (click)="togglePromesas()"
+    (click)="togglePromesas(currentHuesped.folio)"
     class="btn btn-danger btn-block">
     Ver Promesas
     </button>
@@ -227,110 +227,18 @@ class="col-md-6">
 <br>
 
 <ng-container *ngIf="promesasDisplay">
-  
-  <div class="mat-elevation-z8">
-    <table mat-table [dataSource]="dataSource" matSort>
-
-      <!-- Checkbox Column -->
-      <ng-container matColumnDef="select">
-        <th class="header-align-right" mat-header-cell *matHeaderCellDef>
-          <td class="header-align-right" mat-cell *matCellDef="let row">
-          <button 
-          [disabled]="row.Aplicado"
-          (click)="eliminarPromesa(row._id)"
-          class="btn btn-danger">
-              x
-          </button>
-        </td>
-      </ng-container>
-
-      <!-- Fecha Column -->
-      <ng-container matColumnDef="_id">
-        <th mat-header-cell hidden *matHeaderCellDef mat-sort-header> _id </th>
-        <td mat-cell hidden *matCellDef="let row"> {{row._id}} </td>
-      </ng-container>
-
-      <!-- Color Column -->
-      <ng-container matColumnDef="Color">
-        <th mat-header-cell hidden *matHeaderCellDef mat-sort-header> Color </th>
-        <td mat-cell hidden *matCellDef="let row"> {{row.Color}} </td>
-      </ng-container>
-
-      <!-- ColorAplicado Column -->
-      <ng-container matColumnDef="ColorAplicado">
-        <th mat-header-cell hidden *matHeaderCellDef mat-sort-header> ColorAplicado </th>
-        <td mat-cell hidden *matCellDef="let row"> {{row.ColorAplicado}} </td>
-      </ng-container> 
-
-      <!-- Fecha Column -->
-      <ng-container matColumnDef="Fecha">
-        <th mat-header-cell  *matHeaderCellDef mat-sort-header> Fecha </th>
-        <td  mat-cell *matCellDef="let row"> {{row.Fecha}} </td>
-      </ng-container>
-
-      <!-- Cantidad Column -->
-      <ng-container matColumnDef="Cantidad">
-        <th mat-header-cell  *matHeaderCellDef mat-sort-header> Cantidad </th>
-        <td mat-cell *matCellDef="let row">$ {{row.Cantidad.toLocaleString("es-MX")}}.00 </td>
-      </ng-container>
-
-      <ng-container hidden matColumnDef="Estatus">
-        <th mat-header-cell  *matHeaderCellDef mat-sort-header> Estatus </th>
-        <td style="color: white; font-weight: bold;" 
-        [style.background]="row.Color"
-        at-cell *matCellDef="let row"> {{row.Expirado}} </td>
-      </ng-container>
-      <!-- [ngStyle]="{'background-color': row.Expirado ? '#f7347a' : '#00c688' }"  -->
-
-      <!-- Aplicar PAgo Column -->
-      <ng-container hidden matColumnDef="Accion">
-        <th mat-header-cell  *matHeaderCellDef mat-sort-header> Accion </th>
-        <td mat-cell  *matCellDef="let row"> 
-          <ng-container *ngIf="row.Aplicado===false">
-            <button 
-              (click)="preguntasPrevias(row);estatusAplicado(row)" 
-              style="background-color: #FBCF67;"
-              class="btn btn-info">
-                <i  class="fa fa-check" aria-hidden="false"></i>
-            </button>
-            </ng-container>
-            <ng-container *ngIf="row.Aplicado">
-              <button 
-              (click)="preguntasPrevias(row);estatusAplicado(row)" 
-              style="background-color: #319DD7;"
-              class="btn btn-info">
-                <i class="fa fa-eye" aria-hidden="true"></i>
-            </button>
-          </ng-container>          
-         </td>
-      </ng-container>
-
-  
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row (click)="clickedRow.add(row);" *matRowDef="let row; columns: displayedColumns;"></tr>
-  
-      <!-- Row shown when there is no matching data. -->
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="4">No se encontraron datos</td>
-      </tr>
-
-    </table>
-  
-    <!-- <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Pagina"></mat-paginator> -->
+  <div class="container">
+    <app-promesas
+    [folio]="currentHuesped.folio"
+    (honEliminarPromesa)="eliminarPromesa($event)"
+    (honEstatusAplicado)="estatusAplicado($event)"
+    >
+  </app-promesas>
   </div>
 </ng-container>
 
 <br>
-  <div style="background-color: #319dd7" class="modal-content sub-menu">
-    <label
-      class="h4"
-      style="color: aliceblue; text-align: center; padding-top: 5px"
-    >
-      SERVICIOS ADICIONALES
-    </label>
-  </div>
 
-<br>
 <form [formGroup]="serviciosAdicionaledForm">
 
 
@@ -348,7 +256,6 @@ class="col-md-6">
       <br>
     </div>
   </div> -->
-<br>
   <div style="background-color: #319dd7" class="modal-content sub-menu">
     <label
       class="h4"
@@ -381,7 +288,8 @@ class="col-md-6">
     <div class="col-md-12">
       <button 
       (click)="guardarAdicionales()"
-      class="btn btn-success btn-block">
+      class="btn btn-success btn-block"
+      style="display: flex; justify-content: center;">
         Actualizar y Guardar
       </button>
     </div>

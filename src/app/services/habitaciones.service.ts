@@ -6,6 +6,7 @@ import { environment } from 'src/environments/environment';
 import { TableService } from '../_metronic/shared/services/table.service';
 import { LocalForageCache } from '../tools/cache/indexdb-expire';
 import { ActivatedRouteSnapshot, ResolveFn, RouterStateSnapshot } from '@angular/router';
+import { HouseKeeping } from '../pages/calendar/_models/housekeeping.model';
 
 @Injectable({
   providedIn: 'root'
@@ -119,6 +120,8 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
       })
     )
    }
+
+
 
    searchRoom(habitacion:Habitacion){
     return this.http.post<Habitacion[]>(environment.apiUrl+'/habitacion/buscar',{habitacion})

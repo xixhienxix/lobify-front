@@ -371,7 +371,8 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       Tipos_Camas:this.camasFC.value,
       Amenidades:this.amenidadesFC.value,
       Orden:this.formGroup.value.orden,
-      Tarifa:this.formGroup.value.tarifaBase
+      Tarifa:this.formGroup.value.tarifaBase,
+      Estatus:'LIMPIA'
     }
   }else {
     if(nombreHabs.length!=0){
@@ -389,7 +390,8 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
         Tipos_Camas:this.camasFC.value,
         Amenidades:this.amenidadesFC.value,
         Orden:this.formGroup.value.orden,
-        Tarifa:this.formGroup.value.tarifaBase
+        Tarifa:this.formGroup.value.tarifaBase,
+        Estatus:'LIMPIA'
       }
     }else{
       habitacionNueva = {
@@ -406,7 +408,8 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
         Tipos_Camas:this.camasFC.value,
         Amenidades:this.amenidadesFC.value,
         Orden:this.formGroup.value.orden,
-        Tarifa:this.formGroup.value.tarifaBase
+        Tarifa:this.formGroup.value.tarifaBase,
+        Estatus:'LIMPIA'
       }
     }
   }

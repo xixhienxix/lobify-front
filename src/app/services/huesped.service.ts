@@ -4,7 +4,39 @@ import { BehaviorSubject, Observable, Subject, map } from "rxjs";
 import { Huesped } from "../models/huesped.model";
 import { environment } from "src/environments/environment";
 import { LocalForageCache } from "../tools/cache/indexdb-expire";
-
+const EMPTY_CUSTOMER: Huesped = {
+  folio:'',
+  adultos:1,
+  ninos:1,
+  nombre: '',
+  estatus:'',
+  // llegada: date.getDay().toString()+'/'+date.getMonth()+'/'+date.getFullYear(),
+  // salida: (date.getDay()+1).toString()+'/'+date.getMonth()+'/'+date.getFullYear(),
+  llegada:'',
+  salida:'',
+  noches: 1,
+  tarifa:'',
+  porPagar: 500,
+  pendiente:500,
+  origen: 'Online',
+  habitacion: "",
+  telefono:"",
+  email:"",
+  motivo:"",
+  //OTROS DATOs
+  fechaNacimiento:'',
+  trabajaEn:'',
+  tipoDeID:'',
+  numeroDeID:'',
+  direccion:'',
+  pais:'',
+  ciudad:'',
+  codigoPostal:'',
+  lenguaje:'Español',
+  numeroCuarto:'0',
+  creada: new Date().toString(),
+  tipoHuesped:"Regular"
+};
 
 @Injectable({
     providedIn: 'root',
@@ -17,9 +49,22 @@ export class HuespedService {
   });
 
   updateReservations$ = new BehaviorSubject<boolean>(false)
+  updatedReservations$ = new BehaviorSubject<Huesped[]>([])
+  
+  huespedUpdate$: Observable<Huesped>;
+  private currentHuesped$=new BehaviorSubject<Huesped>(EMPTY_CUSTOMER);
+
+
+  get getCurrentHuespedValue(): Huesped {
+    return this.currentHuesped$.value;
+  }
+
+  set setCurrentHuespedValue(huesped: Huesped) {
+    this.currentHuesped$.next(huesped);
+  }
 
     constructor(private http:HttpClient){
-
+      this.huespedUpdate$=this.currentHuesped$.asObservable();
     }
 
     async writeIndexDB(propertyName: string, propertyValue: any): Promise<void> {
@@ -46,6 +91,7 @@ export class HuespedService {
          .pipe(
            map(responseData=>{
             this.writeIndexDB("Reservations",responseData);
+            this.updatedReservations$.next(responseData);
             if(newReservarion){
               this.updateReservations$.next(true);
             }
@@ -87,7 +133,11 @@ export class HuespedService {
       )
     }
 
-    updateEstatusHuesped(huesped:Huesped){
+    updateEstatusHuesped(huesped:Huesped,){
       return this.http.post(environment.apiUrl+'/actualiza/estatus/huesped',{huesped})
+    }
+
+    updateHuesped(huesped:Huesped){
+      return this.http.post(environment.apiUrl+'/reportes/actualiza/huesped',{huesped})
     }
 }

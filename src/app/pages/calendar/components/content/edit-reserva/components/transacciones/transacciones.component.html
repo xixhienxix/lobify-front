@@ -1,0 +1,148 @@
+
+
+<div style="background-color: #319dd7" class="modal-content sub-menu">
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    >
+      MOVIMIENTOS
+    </label>
+  </div>
+  
+  <br>
+  <div class="row col-md-12" style="justify-content: center;">
+    
+    <div style="margin-top: 4px" class="col-sm-4">
+      <mat-radio-button 
+      (change)="selectedTable($event)"
+      [checked]="todosChecked"
+      id="todos"
+      class="example-margin">Todos</mat-radio-button>
+    </div>
+    <div style="margin-top: 4px" class="col-sm-4">
+      <mat-radio-button 
+      class="example-margin" 
+      [checked]="abonosChecked"
+      id="abonosRadio"
+      (change)="selectedTable($event)">Abonos</mat-radio-button>
+    </div>
+    <div style="margin-top: 4px" class="col-sm-4">
+      <mat-radio-button 
+      class="example-margin" 
+      [checked]="cargosChecked"
+      id="cargosRadio"
+      (change)="selectedTable($event)">Cargos</mat-radio-button>
+    </div>
+  
+  </div>
+  <div class="row col-md-12" style="justify-content: center;">
+    <div style="margin-top: 5px" class="col-sm-5">
+      <mat-radio-button 
+      (change)="selectedTable($event)"
+      [checked]="descuentosChecked"
+      id="descuentosRadio"
+      class="example-margin">Descuentos</mat-radio-button>
+    </div>
+    <div style="margin-top: 5px" class="col-sm-7">
+      <mat-radio-button 
+      class="example-margin" 
+      [checked]="canceladosChecked"
+      id="cancelados"
+      (change)="selectedTable($event)">Cancelaciones y Devoluciones</mat-radio-button>
+    </div>
+  </div>
+  
+  
+  <div class="row col-md-12" style="justify-content: center;">
+      <table mat-table [dataSource]="dataSource" matSort class="table overflow-hidden table-head-custom table-vertical-center">
+    
+  
+     
+       <!-- Fecha Column -->
+       <ng-container matColumnDef="Fecha">
+         <th class="fecha-columna"  mat-header-cell *matHeaderCellDef mat-sort-header> Fecha </th>
+         <td class="fecha-columna" mat-cell *matCellDef="let row"> {{row.Fecha.split('T')[0].split('-')[2]+'-'+row.Fecha.split('T')[0].split('-')[1]+'-'+row.Fecha.split('T')[0].split('-')[0]}} </td>
+         <td mat-footer-cell *matFooterCellDef>  </td>
+     
+       </ng-container>
+     
+       <!-- Concepto Column -->
+       <ng-container matColumnDef="Concepto">
+         <th class="concepto-columna" mat-header-cell  *matHeaderCellDef mat-sort-header> Concepto </th>
+         <td class="concepto-columna"  mat-cell *matCellDef="let row">
+           <ng-container *ngIf="row.Referencia!=='Anticipo'">
+            <ng-container *ngIf="row.Forma_de_Pago!=='Descuento'"> {{row.Descripcion}} </ng-container>
+            <ng-container *ngIf="row.Cargo!==0 && row.Forma_de_Pago!=='Descuento' && row.Estatus==='Activo' && row.Cantidad >1 && !row.Descripcion.includes('Alojamiento')" >($ {{(row.Cargo / row.Cantidad).toLocaleString()}} x {{row.Cantidad}}) (C)</ng-container>  
+            <ng-container *ngIf="row.Cargo!==0 && row.Forma_de_Pago!=='Descuento' && row.Estatus==='Activo' && row.Cantidad ===1">(C)</ng-container>  
+            <ng-container *ngIf="row.Abono!==0 && row.Forma_de_Pago!=='Descuento' && row.Estatus==='Activo'">(A)</ng-container>  
+              <ng-container *ngIf="row.Estatus==='Cancelado' && row.Forma_De_Pago!=='Descuento'">{{row.Descripcion}} (X)</ng-container>  
+              <ng-container *ngIf="row.Estatus==='Devolucion'">(R)</ng-container>  
+              <ng-container *ngIf="row.Forma_de_Pago==='Descuento' && row.Estatus!=='Cancelado' && row.Descripcion.indexOf('%') > -1 && row.Estatus==='Activo'">Descuento ({{row.Descripcion.split("(")[1]}} (D)</ng-container>  <!--REGEX ?<=( ?<= : Means Preceded by, then '')'' is the real split caracter-->
+              <ng-container *ngIf="row.Forma_de_Pago==='Descuento' && row.Estatus!=='Cancelado' && row.Descripcion.indexOf('%') === -1 && row.Estatus==='Activo'">Descuento (D)</ng-container> 
+              <ng-container *ngIf="row.Forma_de_Pago==='Descuento' && row.Estatus!=='Cancelado' && row.Descripcion.indexOf('%') > -1 && row.Estatus!=='Activo'">Descuento ({{row.Descripcion.split("(")[1]}} (X)</ng-container>  <!--REGEX ?<=( ?<= : Means Preceded by, then '')'' is the real split caracter-->
+              <ng-container *ngIf="row.Forma_de_Pago==='Descuento' && row.Estatus!=='Cancelado' && row.Descripcion.indexOf('%') === -1 && row.Estatus!=='Activo'">Descuento (X)</ng-container> 
+           </ng-container>
+           <ng-container *ngIf="row.Referencia==='Anticipo' && row.Estatus!=='Cancelado'">
+            Anticipo (A)
+           </ng-container>
+           <ng-container *ngIf="row.Referencia==='Anticipo' && row.Estatus==='Cancelado'">
+            Anticipo (X)
+           </ng-container>
+          </td>
+        
+         <td mat-footer-cell *matFooterCellDef> Total: </td>
+     
+       </ng-container>
+     
+  
+            <!-- _id. Column -->
+       <ng-container matColumnDef="_id">
+         <th hidden mat-header-cell  *matHeaderCellDef mat-sort-header> _id </th>
+         <td hidden  mat-cell *matCellDef="let row">  {{row._id}}</td>
+         <td hidden  mat-footer-cell *matFooterCellDef> _id </td>
+       </ng-container>
+  
+       <!-- F.P. Column -->
+       <ng-container matColumnDef="F.P.">
+         <th  hidden mat-header-cell  *matHeaderCellDef mat-sort-header> F.P. </th>
+         <td hidden  mat-cell *matCellDef="let row">  {{row.Forma_de_Pago}}</td>
+         <td hidden  mat-footer-cell *matFooterCellDef> Total </td>
+       </ng-container>
+  
+            <!-- Cantidad Column -->
+            <ng-container matColumnDef="Cantidad">
+              <th hidden mat-header-cell  *matHeaderCellDef mat-sort-header> Cantidad </th>
+              <td hidden  mat-cell *matCellDef="let row">  {{row.Cantidad}}</td>
+              <td hidden  mat-footer-cell *matFooterCellDef> Total </td>
+            </ng-container>
+     
+       
+       <!-- Valor PAgo Column -->
+       <ng-container hidden matColumnDef="Valor">
+         <th class="valor-columna" mat-header-cell  *matHeaderCellDef mat-sort-header> Valor </th>
+         <td class="valor-columna"  mat-cell *matCellDef="let row" [ngStyle]="{'color': row.Cargo===0 ? 'green' : 'black'}" >
+           <ng-container *ngIf="row.Abono===0">
+            $ {{row.Cargo.toLocaleString("es-MX",{ minimumFractionDigits: 2 })}} 
+           </ng-container>  
+           <ng-container *ngIf="row.Cargo===0">
+            $ - {{row.Abono.toLocaleString("es-MX",{ minimumFractionDigits: 2 })}}
+           </ng-container> 
+         </td>
+         <td mat-footer-cell *matFooterCellDef> ${{totalCalculado.toLocaleString("es-MX",{ minimumFractionDigits: 2 })}}  </td>
+       </ng-container>
+     
+          <!-- Fecha Column -->
+          <ng-container matColumnDef="Fecha_Cancelado">
+            <th hidden  mat-header-cell *matHeaderCellDef mat-sort-header> Fecha_Cancelado </th>
+            <td hidden mat-cell *matCellDef="let row"> {{row.Fecha_Cancelado.split('T')[0]}} </td>
+            <td hidden mat-footer-cell *matFooterCellDef>  </td>
+        
+          </ng-container>
+  
+       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+       <tr mat-row     
+       *matRowDef="let row; columns: displayedColumns;"
+       (click)="abrirDetalle(row)"></tr>
+       <tr mat-footer-row *matFooterRowDef="displayedColumns"></tr>
+     </table>
+  

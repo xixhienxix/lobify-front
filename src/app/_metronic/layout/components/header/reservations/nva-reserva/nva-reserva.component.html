@@ -6,7 +6,7 @@
         <!-- <label>
           {{huesped.folio}}</label> -->
       </div>
-      <button style=" background-color:#fa6d7c; font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
+      <button style=" background-color:var(--header-background); font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
     </div>
 </div>
 
@@ -133,7 +133,7 @@
               <mat-accordion [style]="accordionDisplay" class="example-headers-align" multi>
                 <mat-expansion-panel  [expanded]="step === 1"  hideToggle>
                   <!-- HEADER DEL ACCORDION DE DISPONIBILIDAD -->
-                  <mat-expansion-panel-header *ngIf="!checkAvaibility(cuarto)" style="background-color: #99d284;">
+                  <mat-expansion-panel-header *ngIf="!checkAvaibility(cuarto)" [ngStyle]="{'background-color': revisaCapacidad(cuarto) ? '#fa6d7c' : '#99d284' }">
                     <mat-panel-title>
                       DISPONIBILIDAD
                     </mat-panel-title>
@@ -142,7 +142,7 @@
                     </mat-panel-description> 
                   </mat-expansion-panel-header>
                   <!-- [FIN] HEADER DEL ACCORDION DE DISPONIBILIDAD -->
-                  <mat-expansion-panel-header *ngIf="checkAvaibility(cuarto)" style="background-color:#fa6d7c;">
+                  <mat-expansion-panel-header *ngIf="checkAvaibility(cuarto)" [ngStyle]="{'background-color': revisaCapacidad(cuarto) ? '#fa6d7c' : '#99d284' }">
                     <mat-panel-title>
                       SIN DISPONIBILIDAD
                     </mat-panel-title>

@@ -73,5 +73,9 @@ private currentHouseKeepingSubject =new Subject<any>();
              return responseData
         })
         )
-       }
+  }
+
+  updateEstatus(cuarto:string,estatus:string){
+    return this.http.post<HouseKeeping[]>(environment.apiUrl + '/codigos/update/housekeeping',{cuarto,estatus});
+  }
 }

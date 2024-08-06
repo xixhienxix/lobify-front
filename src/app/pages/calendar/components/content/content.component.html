@@ -1,6 +1,6 @@
 <div class="control-section">
   <div class="col-lg-12 content-wrapper">
-    <mat-select
+    <!-- <mat-select
       class="form-control form-control-lg "
       placeholder="-- Choose DayInterval to display -- "
       [(value)]='scheduleinterval'
@@ -8,21 +8,20 @@
       >
     <mat-option value="0">-- Choose DayInterval to display --</mat-option>
         <mat-option *ngFor="let tipoCuarto of datas" [value]="tipoCuarto">{{tipoCuarto}} </mat-option>
-    </mat-select>
-    <ejs-dropdownlist  id="scheduleview" [dataSource]='datas' [(value)]='scheduleinterval'(change)="onChange($event)" >
-    </ejs-dropdownlist>
+    </mat-select> -->
+    <!-- <ejs-dropdownlist  id="scheduleview" [dataSource]='datas' [(value)]='scheduleinterval'(change)="onChange($event)" >
+    </ejs-dropdownlist> Changes the number of days displayed on View-->
     <!-- enableAdaptiveUI='true' use this on ejs-schedule for mobile resize -->
     <ejs-schedule 
     #scheduleObj 
     width='100%' 
     cssClass='timeline-resource-grouping' 
-    height='500px'
+    height='auto'
       [selectedDate]="selectedDate" 
       [group]="group" 
       [workDays]="workDays" 
       [eventSettings]="eventSettings" 
       [timeScale]="timeScale" 
-      [rowAutoHeight]="rowAutoHeight" 
       [currentView]="currentView" 
       (actionComplete)="onActionComplete($event)" 
       (renderCell)="onRenderCell($event)"
@@ -37,10 +36,20 @@
         <div class="date-text"></div>
         <div [innerHTML]="getDateHeaderText(data.date)"></div>
       </ng-template>
-      <ng-template #resourceHeaderTemplate let-data>
-        <div>
-          <!-- <img [src]="getIconClass(data.resourceData)" alt="image"> -->
-          <i [ngClass]="getIconClass(data.resourceData.id)"></i>
+      <ng-template #resourceHeaderTemplate let-data let-index>
+        <div style="height: 100%; display: flex; align-items: center; justify-content: start;">
+          <div [matMenuTriggerFor]="menu" class="btn btn-icon btn-custom btn-icon-muted">
+            <img class="thumbnail" *ngIf="isChildNode(data)" [src]="getIconClass(data.resourceData.text)" alt="{{data.resourceData.ImageName}}" style="height: 57px; width: 30px;" />
+          </div>
+
+    <mat-menu #menu="matMenu">
+      <ng-container *ngFor="let estatus of estatusArray">
+        <button (click)="onStatusChange(data.resourceData.text, estatus.Descripcion)" mat-menu-item>
+          <span>{{estatus.Descripcion}}</span>
+        </button>
+      </ng-container>
+    </mat-menu>
+
           {{data.resourceData.text}}
         </div>
       </ng-template>

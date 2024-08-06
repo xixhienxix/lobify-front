@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
@@ -42,6 +42,8 @@ divisas : Divisas[]=[]
 checkOutList : string[]=['00:00','00:30','01:00','01:30','02:00','02:30','03:00','03:30','04:00','04:30','05:00','05:30','06:00','06:30','07:00','07:30','08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','12:00',
 '12:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30','17:00','17:30','18:00','18:30','19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30','23:00','23:30']
 cancelacionList:string[]=['No Reembolsable']
+currentUtc:string = ''
+parametrosModel:Parametros
 
 constructor(
   public fb : FormBuilder,
@@ -56,38 +58,38 @@ constructor(
 }
 
 
-ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
   this.initForm();
-
+  await this.checkParametrosIndexDB();
   this.setFormGroup();
   this.getTimeZones();
   this.getDivisas();
 }
 
-ngOnDestroy():void
-{
+ngOnDestroy():void{
   this.susbcription.forEach(sb=>sb.unsubscribe())
 }
 
 setFormGroup(){
-
-      this.formGroup.controls['timeZone'].setValue(this._parametrosService.getCurrentParametrosValue.codigoZona);
-      this.formGroup.controls['divisa'].setValue(this._parametrosService.getCurrentParametrosValue.divisa);
-      this.formGroup.controls['iva'].setValue(this._parametrosService.getCurrentParametrosValue.iva);
-      this.formGroup.controls['ish'].setValue(this._parametrosService.getCurrentParametrosValue.ish);
-      this.formGroup.controls['checkOut'].setValue(this._parametrosService.getCurrentParametrosValue.checkOut);
-      this.formGroup.controls['checkIn'].setValue(this._parametrosService.getCurrentParametrosValue.checkIn);
-      this.formGroup.controls['noShow'].setValue(this._parametrosService.getCurrentParametrosValue.noShow);
-      this.formGroup.controls['tarifasCancelacion'].setValue(this._parametrosService.getCurrentParametrosValue.tarifasCancelacion);
-      this.formGroup.controls['auditoria'].setValue(this._parametrosService.getCurrentParametrosValue.auditoria);
+      this.formGroup.controls['timeZone'].setValue(this.parametrosModel.codigoZona);
+      this.formGroup.controls['divisa'].setValue(this.parametrosModel.divisa);
+      this.formGroup.controls['iva'].setValue(this.parametrosModel.iva);
+      this.formGroup.controls['ish'].setValue(this.parametrosModel.ish);
+      this.formGroup.controls['checkOut'].setValue(this.parametrosModel.checkOut);
+      this.formGroup.controls['checkIn'].setValue(this.parametrosModel.checkIn);
+      this.formGroup.controls['noShow'].setValue(this.parametrosModel.noShow);
+      this.formGroup.controls['tarifasCancelacion'].setValue(this.parametrosModel.tarifasCancelacion);
 }
 
-getTimeZones()
-{
+getTimeZones(){
   const sb = this.timezonesService.getTimeZones().subscribe({
    next: (value:any)=>{
-      if(value)
-      {this.zonaHoraria=value}
+      if(value){
+        const currentUtc = value.find((item:any)=> item.Nombre === 'America/Mexico_City')
+        this.currentUtc = currentUtc.UTC+' '+currentUtc.Nombre
+        this.formGroup.controls["timeZone"].patchValue(this.currentUtc);
+        this.zonaHoraria=value
+      }
       else 
       {this.zonaHoraria.push(DEFAULT_TIMEZONE)}
     },
@@ -133,25 +135,47 @@ initForm(){
     checkOut:['',Validators.required],
     checkIn:['',Validators.required],
     noShow:['',Validators.required],
-    auditoria:['',Validators.required],
     tarifasCancelacion:['',Validators.required]
   })
 
 }
 
-
-
-onSelectTimeZone(zona:string){
-  this.timezone=zona
+async checkParametrosIndexDB(){
+  const parametrosIndexDB:Parametros = await this._parametrosService.readIndexDB("Parametros");
+  /** Check if Parametros are on IndexDb */
+  if(parametrosIndexDB){
+      this.parametrosModel = parametrosIndexDB
+  }else{
+    this.parametrosModel = await firstValueFrom(this._parametrosService.getParametros());
+  }
 }
 
+onSelectTimeZone(zona:string){
+  this.timezone=zona;
+}
 
+    //CheckEstatus Controls
+   findInvalidControlsRecursive(formToInvestigate:FormGroup):string[] {
+      var invalidControls:string[] = [];
+      let recursiveFunc = (form:FormGroup) => {
+        Object.keys(form.controls).forEach(field => {
+          const control = form.get(field);
+          if (control?.invalid) invalidControls.push(field);
+          if (control instanceof FormGroup) {
+            recursiveFunc(control);
+          }
+        });
+      }
+      recursiveFunc(formToInvestigate);
+      return invalidControls;
+    }
 
 submitParametros(){
 
   // this.isLoading=true
 
   if(this.formGroup.invalid){
+    const invalidControls = this.findInvalidControlsRecursive(this.formGroup);
     this.isLoading=false
     return
   }
@@ -170,12 +194,11 @@ submitParametros(){
     noShow:this.getFormGroupValues.noShow.value,
     checkOut:this.getFormGroupValues.checkOut.value,
     checkIn:this.getFormGroupValues.checkIn.value,
-    auditoria:this.getFormGroupValues.auditoria.value,
     tarifasCancelacion:this.getFormGroupValues.tarifasCancelacion.value
   }
 
-  const sb = this._parametrosService.postParametros(parametros).subscribe(
-    ()=>{
+  const sb = this._parametrosService.postParametros(parametros).subscribe({
+    next:()=>{
       this.isLoading=false
 
      const modalRef = this.modal.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
@@ -183,14 +206,14 @@ submitParametros(){
      modalRef.componentInstance.mensaje='Parametros Actualizados con exito'
       this.setFormGroup()
     },
-    ()=>{
+    error:()=>{
       this.isLoading=false
 
       const modalRef = this.modal.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
       modalRef.componentInstance.alertHeader='Error'
       modalRef.componentInstance.mensaje='Hubo un error al guardar los parametros intente de nuevo mas tarde'
     },
-    )
+  });
 this.susbcription.push(sb)
 }
 

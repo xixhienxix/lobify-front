@@ -7,9 +7,8 @@ export interface Parametros {
     noShow:string,
     checkOut:string,
     checkIn:string,
-    auditoria:string,
     codigoZona:string,
     id?:string,
     hotel?:string;
-    tarifasCancelacion:string;
+    tarifasCancelacion?:string;
 }

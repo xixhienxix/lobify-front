@@ -1,6 +1,6 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NavigationCancel, NavigationEnd, Router } from '@angular/router';
-import { firstValueFrom, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, concat, concatMap, firstValueFrom, Subject, Subscription, takeUntil } from 'rxjs';
 import { LayoutService } from '../../core/layout.service';
 import { MenuComponent } from '../../../kt/components';
 import { ILayout, LayoutType } from '../../core/configs/config';
@@ -17,6 +17,10 @@ import { Habitacion } from 'src/app/models/habitaciones.model';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { Tarifas } from 'src/app/models/tarifas';
 import { TarifasService } from 'src/app/services/tarifas.service';
+import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
+import { Parametros } from 'src/app/pages/parametros/_models/parametros';
+import { Edo_Cuenta_Service } from 'src/app/services/edoCuenta.service';
+import { edoCuenta } from 'src/app/models/edoCuenta.model';
 
 @Component({
   selector: 'app-header',
@@ -25,6 +29,8 @@ import { TarifasService } from 'src/app/services/tarifas.service';
 })
 export class HeaderComponent implements OnInit, OnDestroy {
   private unsubscribe: Subscription[] = [];
+  private ngUnsubscribe = new Subject<void>();
+
   // Public props
   currentLayoutType: LayoutType | null;
 
@@ -67,9 +73,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
   accordionDisplay="";
   isLoading:boolean=false;
 
+  salidas:number;
+  llegadas:number;
+  allReservations:Huesped[]
+
   eventsSubject: Subject<Huesped[]> = new Subject<Huesped[]>();
-  
-  @Input() allReservations:Huesped[]=[]
+  sendReservations: BehaviorSubject<Huesped[]> = new BehaviorSubject<Huesped[]>([]);
 
   constructor(
     private layout: LayoutService, 
@@ -79,7 +88,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private _folioservice: FoliosService,
     private _estatusService:EstatusService,
     private _habitacionService:HabitacionesService,
-    private _tarifasService:TarifasService
+    private _tarifasService:TarifasService,
+    private _parametrosService:ParametrosService,
+    private _estadoDeCuenta: Edo_Cuenta_Service
   ) {
     this.routingChanges();
   }
@@ -157,8 +168,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Secondary header
   }
 
-   ngOnInit() {
-    this.checkReservationsIndexDB();
+  ngOnInit() {
     this.checkFoliadorIndexDB();
     this.checkEstatusIndexDB();
     this.checkRoomCodesIndexDB();
@@ -170,12 +180,20 @@ export class HeaderComponent implements OnInit, OnDestroy {
         this.updateProps(config);
       });
     this.unsubscribe.push(subscr);
+
     const layoutSubscr = this.layout.currentLayoutTypeSubject
       .asObservable()
       .subscribe((layout) => {
         this.currentLayoutType = layout;
       });
     this.unsubscribe.push(layoutSubscr);
+
+    const reservasSubs = this._huespedService.updatedReservations$
+      .asObservable()
+      .subscribe((reservas)=>{
+        this.sendReservations.next(reservas);
+      })
+    this.unsubscribe.push(reservasSubs);
   }
 
   async checkEstatusIndexDB(){
@@ -217,34 +235,97 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  openNvaReserva(){
+  async checkParametrosIndexDB(){
+    const parametrosIndexDB:Parametros = await this._parametrosService.readIndexDB("Parametros");
+    if(parametrosIndexDB){
+      this._parametrosService.setCurrentParametrosValue = parametrosIndexDB;
+      this.openNvaReserva();
+    }else {
+      this._parametrosService.getParametros().subscribe({
+        next:(item)=>{
+          this.openNvaReserva();
+        }
+      });
+    }
+  }
+
+  async checkParameters(){
+    await this.checkParametrosIndexDB();
+  }
+
+  async openNvaReserva(){
     const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' })  
     modalRef.componentInstance.folios = this.folios;
     modalRef.componentInstance.estatusArray = this.estatusArray
+    modalRef.componentInstance.checkIn = this._parametrosService.getCurrentParametrosValue.checkIn
+    modalRef.componentInstance.checkOut=this._parametrosService.getCurrentParametrosValue.checkOut
+    modalRef.componentInstance.zona=this._parametrosService.getCurrentParametrosValue.zona
     modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
     modalRef.componentInstance.roomCodes=this.roomCodes
     modalRef.componentInstance.ratesArrayComplete = this.ratesArrayComplete
     modalRef.componentInstance.standardRatesArray = this.standardRatesArray
     modalRef.componentInstance.tempRatesArray = this.tempRatesArray
     modalRef.componentInstance.onNvaReserva.subscribe({
-      next:async (value:Huesped[])=>{
+      next:async (huespedArray:Huesped[])=>{
         this.submitLoading=true;
-        this._huespedService.addPost(value).subscribe({
-          next:async (data)=>{
+        let pago:edoCuenta[]=[]; 
+        
+        huespedArray.map((item)=>{
+          pago.push({
+            Folio:item.folio,
+            Forma_de_Pago:'',
+            Fecha:new Date(),
+                  Descripcion:'HOSPEDAJE',
+                  Cantidad:1,
+                  Cargo:item.pendiente,
+                  Abono:0,
+                  Total:item.pendiente,
+                  Estatus:'Activo',
+          })
+        });
+        let promptFLag=false;
+
+        const request1 = this._huespedService.addPost(huespedArray); 
+        const request2 = this._estadoDeCuenta.agregarHospedaje(pago)
+        //concat(request1,request2,request3).pipe(
+        concat(request1, request2).pipe(
+          takeUntil(this.ngUnsubscribe))
+          .subscribe({
+            next: async (value)=>{
             this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
-    
             this.eventsSubject.next(value);
             this.promptMessage('Exito','Reservacion Guardada con exito');
             this.submitLoading=false
-    
-          },
-          error:()=>{
-            this.promptMessage('Error','La Reservacion no se pudo generar con exito intente nuevamente')
-          },
-          complete:()=>{
-            this.submitLoading=false
+            error: () =>{
+                this.isLoading=false
+                if(!promptFLag){
+                  this.promptMessage('Error','No se pudo guardar la habitación intente de nuevo mas tarde');
+                  promptFLag=true;
+                }
+                          
+            }
           }
-        })
+        }); 
+
+
+
+
+        // this._huespedService.addPost(value).subscribe({
+        //   next:async (data)=>{
+        //     this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
+    
+        //     this.eventsSubject.next(value);
+        //     this.promptMessage('Exito','Reservacion Guardada con exito');
+        //     this.submitLoading=false
+    
+        //   },
+        //   error:()=>{
+        //     this.promptMessage('Error','La Reservacion no se pudo generar con exito intente nuevamente')
+        //   },
+        //   complete:()=>{
+        //     this.submitLoading=false
+        //   }
+        // })
       }
     })
     
@@ -257,21 +338,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   
       return
   }
-
-  submitReserva(huesped:Huesped[]){
-    console.log(huesped);
-  }
-
-  async checkReservationsIndexDB(){
-    const reservationsIndexDB:Huesped[] = await this._huespedService.readIndexDB("Reservations");
-    /** Check if RoomsCode are on IndexDb */
-    if(reservationsIndexDB){
-      this.allReservations = reservationsIndexDB
-    }else{
-       this.allReservations = await firstValueFrom(this._huespedService.getAll());
-    }
-  }
-
 
   async checkRoomCodesIndexDB(){
     const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("Rooms");

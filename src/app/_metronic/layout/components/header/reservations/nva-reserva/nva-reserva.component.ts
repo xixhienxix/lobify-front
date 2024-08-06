@@ -4,7 +4,6 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
 import { ModalDismissReasons, NgbActiveModal, NgbDateAdapter, NgbDateParserFormatter, NgbModal, } from '@ng-bootstrap/ng-bootstrap';
-import { DateTime } from 'luxon';
 import { firstValueFrom } from 'rxjs';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { Tarifas, TarifasRadioButton } from 'src/app/models/tarifas';
@@ -16,7 +15,7 @@ import { Huesped } from 'src/app/models/huesped.model';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Foliador } from 'src/app/pages/calendar/_models/foliador.model';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
-
+import { DateTime } from 'luxon'; 
 export interface preAsig {
   numero:string,
   codigo:string,
@@ -59,6 +58,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   closeResult:string;
   mensajeAdultos:string=''
   mensajeNinos:string=''
+  totalPorCuenta:number=0;
 
   /** Current Values */
   selectedRoom:any;
@@ -81,6 +81,9 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   preAsignadasArray:preAsig[]=[]
   @Input() standardRatesArray:Tarifas[]=[]
   @Input() tempRatesArray:Tarifas[]=[]
+  @Input() checkOut:string
+  @Input() checkIn:string
+  @Input() zona:string='America/Mexico_City'
   estatusArray:Estatus[]=[];
   folios:Foliador[]=[];
   huespedInformation:Huesped[]=[];
@@ -156,24 +159,40 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   save(){
     const formData = this.formGroup.value;
-
+    
       for(let i=0; i<this.preAsignadasArray.length; i++){
         if(this.preAsignadasArray[i].checked === true){
           const tarifa  = this.tarifaSeleccionada.find(obj =>
             obj.Habitacion.some(item => item === this.preAsignadasArray[i].codigo));
 
+            let initialDate = DateTime.local().setZone(this.zona).set({
+                day:this.intialDate.getDate(),
+                month:this.intialDate.getMonth()+1,
+                year:this.intialDate.getFullYear(), 
+                hour:parseInt(this.checkOut.split(":")[0]),
+                minute:parseInt(this.checkOut.split(":")[1])
+              }).toISO()
+              let endDate = DateTime.local().setZone(this.zona).set({
+                day:this.endDate.getDate(),
+                month:this.endDate.getMonth()+1,
+                year:this.endDate.getFullYear(), 
+                hour:parseInt(this.checkIn.split(":")[0]),
+                minute:parseInt(this.checkIn.split(":")[1])
+              }).toISO()
+
+
           const huesped = {
             folio:this.currentFolio.Letra + this.currentFolio.Folio,
-            adultos:formData.adultos,
-            ninos:formData.ninos,
+            adultos:this.quantity,
+            ninos:this.quantityNin,
             nombre:formData.nombre,
             estatus: this.currentStatus,
-            llegada:this.intialDate.toISOString(),
-            salida:this.endDate.toISOString(),
+            llegada:initialDate ?? this.intialDate.toISOString(),
+            salida:endDate ?? this.endDate.toISOString(),
             noches:this.stayNights,
             tarifa:tarifa === undefined ? '' : tarifa.Tarifa,
-            porPagar:tarifa === undefined ? 0 : tarifa.TarifaRack,
-            pendiente:tarifa === undefined ? 0 : tarifa.TarifaRack,
+            porPagar:this.totalPorCuenta,
+            pendiente:this.totalPorCuenta,
             origen:this.origenReserva,
             habitacion:this.preAsignadasArray[i].codigo,
             telefono:formData.telefono,
@@ -259,6 +278,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
 
   tarifaRadioButton(tarifas:Tarifas, event:any, codigo:string){
+    this.totalPorCuenta = this.ratesTotalCalc(tarifas,this.stayNights)
     const checkedStatus = event.source.checked
     const tarifa = tarifas
 
@@ -546,10 +566,10 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
 
     if(hab){
       if(hab.Adultos < this.quantity || hab?.Ninos<this.quantityNin){
-        if(hab.Adultos < this.quantity){
+        if(this.quantity > hab.Adultos ){
           this.mensajeAdultos='El número de Adultos seleccionado exede la cantidad maxima de personas permitida para ste tipo de habitacion'+ '<br>';
         }
-        if(hab?.Ninos<this.quantityNin){
+        if(this.quantityNin > hab?.Ninos){
           this.mensajeNinos='El número de Niños seleccionado exede la cantidad maxima de personas permitida para ste tipo de habitacion'
         }
         return true;

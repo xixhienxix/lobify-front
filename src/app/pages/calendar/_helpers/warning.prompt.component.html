@@ -7,7 +7,36 @@
   <div class="modal-body">
     <p>{{mensaje}}</p>
 
-    <table mat-table [dataSource]="dataSource">
+      <table mat-table [dataSource]="roomRates(cuarto)">
+        <ng-container matColumnDef="Tarifa">
+          <th mat-header-cell *matHeaderCellDef> Tarifa </th>
+          <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="$ Promedio x Noche">
+          <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
+          <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights)/stayNights | currency : 'MXN' : 'symbol' : '1.0-0'}} </td>
+        </ng-container>
+    
+        <ng-container matColumnDef="Total">
+          <th mat-header-cell *matHeaderCellDef> Total </th>
+          <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td>
+        </ng-container>
+
+        <ng-container matColumnDef="Acciones">
+          <th mat-header-cell *matHeaderCellDef> Acciones </th>
+          <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element; let i = index "> 
+            <mat-radio-group [name]="cuarto">
+              <mat-radio-button [value]="element[i]" (change)="tarifaRadioButton(element,$event, cuarto)"></mat-radio-button>   
+            </mat-radio-group>
+          </td>
+        </ng-container>
+
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    <!-- <table mat-table [dataSource]="dataSource">
         <ng-container matColumnDef="Tarifa">
           <th mat-header-cell *matHeaderCellDef> Tarifa </th>
           <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
@@ -33,11 +62,11 @@
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
+      </table> -->
   </div>
 
 
 <div class="modal-footer">
     <button type="button" class="btn btn-light" (click)="modal.close({tarifaSeleccionada,stayNights,StartTime,EndTime, folio, totalSeleccionado, cuarto , numeroCuarto})">Aceptar</button>
-    <button type="button" class="btn btn-light" (click)="modal.close()">Cerrar</button>
+    <button type="button" class="btn btn-light" (click)="modal.close()">Cancelar Cambio</button>
   </div>

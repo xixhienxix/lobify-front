@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable, map } from "rxjs";
 import { environment } from "src/environments/environment";
 import { Estatus } from "../_models/estatus.model";
 import { LocalForageCache } from "src/app/tools/cache/indexdb-expire";
+import { Huesped } from "src/app/models/huesped.model";
 
 
 @Injectable({
@@ -68,4 +69,10 @@ export class EstatusService {
           })
           )
     }
+
+    actualizaEstatus(estatus:string,folio:string,huesped:Huesped){  
+      return this.http.post(environment.apiUrl+"/actualiza/estatus",{estatus:estatus,folio:folio,huesped:huesped})
+    }
+
+    
 }

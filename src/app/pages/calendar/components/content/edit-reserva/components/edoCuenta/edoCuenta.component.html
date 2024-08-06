@@ -1,0 +1,478 @@
+<div style="background-color: #dde0e2" class="modal-content sub-menu">
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px; color: red;"
+    >
+      Estado de Cuenta
+    </label>
+  </div>
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-6">
+            <label style="color: black;" class="control-label">Tarifa / Plan:</label>
+        </div>
+      
+        <div class="col-sm-6">
+            <label class="control-label">{{_huespedService.getCurrentHuespedValue.habitacion}}</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <label style="color: black;" class="control-label">Adultos:</label>           
+          </div>
+      
+          <div class="col-sm-6">
+            <label class="control-label">{{_huespedService.getCurrentHuespedValue.adultos}}</label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <label style="color: black;" class="control-label">Niños:</label>
+           
+          </div>
+      
+          <div class="col-sm-6">
+            <label class="control-label">{{_huespedService.getCurrentHuespedValue.ninos}}</label>
+          </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <label style="color: black;" class="control-label">Noches:</label>
+          </div>
+    
+          <div class="col-sm-6">
+            <label class="control-label">{{_huespedService.getCurrentHuespedValue.noches}}</label>
+        </div>
+    </div>
+</div>
+    
+   <br>
+
+<div style="background-color: #319dd7" class="modal-content sub-menu">
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    >
+      Alojamiento
+    </label>
+</div>
+<div style="background-color: #dde0e2" class="modal-content sub-menu">
+        <div class="row container">
+            <div  class="col-sm-6">
+                <label
+                style="text-align: center;"
+                  class="control-label"
+                >
+                Fechas:
+                </label>
+            </div>
+            <div style="text-align: right;" class="col-sm-6">
+                <label
+                style="text-align: right;"
+                class="control-label" 
+                >Cantidad a Pagar:
+            </label>
+            </div>
+        </div>
+</div> 
+<br>
+
+<div class="container">
+    <ng-container *ngFor="let edoAlojamiento of edoCuentaAlojamientosActivos">
+            <div class="row ">
+                <div style="text-align: left;" class="col-sm-10">
+                    <label style="color: black;" class="control-label"> {{edoAlojamiento.Fecha}}
+                    </label>
+                </div>
+
+                <div style="text-align: center;" class="col-sm-2">
+                    <label class="control-label">$ {{edoAlojamiento.Cargo.toLocaleString('es-MX')}}
+                    </label>
+                </div>
+            </div>
+    </ng-container>
+</div>
+<hr>
+<div class="container">
+            <div class="row ">
+                <div style="text-align: left;" class="col-sm-10">
+                    <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Alojamiento
+                    </label>
+                </div>
+
+                <div style="text-align: center;" class="col-sm-2">
+                    <label class="control-label">$ {{subTotalAlojamiento}}
+                    </label>
+                </div>
+            </div>
+</div>
+<br>
+<div style="background-color: #319dd7" class="modal-content sub-menu">
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    >
+      Servicios Extra
+    </label>
+</div>
+<div style="background-color: #dde0e2" class="modal-content sub-menu">
+        <div class="row container">
+            <div  class="col-sm-6">
+                <label
+                style="text-align: center;"
+                  class="control-label"
+                >
+                Servicios - (Cantidad):
+                </label>
+            </div>
+            <!-- <div  class="col-sm-5">
+                <label
+                style="text-align: center;"
+                  class="control-label"
+                >
+                Detalles:
+                </label>
+            </div> -->
+            <div style="text-align: right;" class="col-sm-6">
+                <label
+                style="text-align: right;"
+                class="control-label" 
+                >Cantidad a Pagar:
+            </label>
+            </div>
+        </div>
+</div> 
+<br>
+
+<div class="container">
+    <ng-container *ngFor="let edoServiciosExtra of edoCuentaServiciosExtra">
+            <div class="row ">
+                <div style="text-align: left;" class="col-sm-10">
+                    <label style="color: black;" class="control-label"> {{edoServiciosExtra.Descripcion}} - ({{edoServiciosExtra.Cantidad}})
+                    </label>
+                </div>
+                <!-- <div style="text-align: left;" class="col-sm-5">
+                    <label style="color: black;" class="control-label"> {{edoServiciosExtra.Descripcion}} ({{edoServiciosExtra.Cantidad}})
+                    </label>
+                </div> -->
+
+                <div style="text-align: center;" class="col-sm-2">
+                    <label class="control-label">$ {{edoServiciosExtra.Cargo.toLocaleString('es-MX')}}
+                    </label>
+                </div>
+            </div>
+    </ng-container>
+</div>
+<hr>
+<div class="container">
+            <div class="row ">
+                <div style="text-align: left;" class="col-sm-10">
+                    <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Servicios Extra
+                    </label>
+                </div>
+
+                <div style="text-align: center;" class="col-sm-2">
+                    <label class="control-label">$ {{subTotalServiciosExtra}}
+                    </label>
+                </div>
+            </div>
+</div>
+<br>
+<div style="background-color: #319dd7" class="modal-content sub-menu">
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    >
+      Impuestos
+    </label>
+</div>
+<br>
+
+<div class="container">
+        <div class="row ">
+            <div style="text-align: left;" class="col-sm-10">
+                <label style="color: black;" class="control-label"> Impuesto sobre Hospedaje: 
+                </label>
+            </div>
+            <div style="text-align: center;" class="col-sm-2">
+                <label class="control-label">$ {{impuestoSobreHospedaje}}
+                </label>
+            </div>
+        </div>
+        <div class="row ">
+            <div style="text-align: left;" class="col-sm-10">
+                <label style="color: black;" class="control-label"> IVA: 
+                </label>
+            </div>
+            <div style="text-align: center;" class="col-sm-2">
+                <label class="control-label">$ {{iva}}
+                </label>
+            </div>
+        </div>
+</div>
+<hr>
+<div class="container">
+        <div class="row ">
+            <div style="text-align: left;" class="col-sm-6">
+                <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Impuestos
+                </label>
+            </div>
+
+            <div style="text-align: center;" class="col-sm-6">
+                <label class="control-label">$ {{totalimpuestos}}
+                </label>
+            </div>
+        </div>
+</div>
+<br>
+<div style="background-color: #319dd7" class="modal-content sub-menu">
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    >
+      Descuentos Y Cupones
+    </label>
+</div>
+<br>
+<div class="container">
+<ng-container *ngFor="let edoDescuentos of edoCuentaDescuentosLista">
+        <div class="row ">
+            <div style="text-align: left;" class="col-sm-10">
+                <label style="color: black;" class="control-label"> {{edoDescuentos.Descripcion}}
+                </label>
+            </div>
+            <div style="text-align: center;" class="col-sm-2">
+                <label style="color: green;" class="control-label">$ {{edoDescuentos.Abono.toLocaleString('es-MX')}}
+                </label>
+            </div>
+        </div>
+</ng-container>
+</div>
+<hr>
+<div class="container">
+        <div class="row ">
+            <div style="text-align: left;" class="col-sm-10">
+                <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Descuentos
+                </label>
+            </div>
+
+            <div style="text-align: center;" class="col-sm-2">
+                <label style="color: green;" class="control-label">$ {{totalDescuentos}}
+                </label>
+            </div>
+        </div>
+</div>
+<br>
+<div style="background-color: #319dd7" class="modal-content sub-menu">
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    >
+      Pagos / Depositos
+    </label>
+</div>
+<br>
+<div class="container">
+<ng-container *ngFor="let edoAbonos of edoCuentaAbonosLista">
+        <div class="row ">
+            <div style="text-align: left;" class="col-sm-10">
+                <label style="color: black;" class="control-label"> {{edoAbonos.Descripcion}}
+                </label>
+            </div>
+            <div style="text-align: center;" class="col-sm-2">
+                <label style="color:  #da8f27" class="control-label">$ {{edoAbonos.Abono.toLocaleString('es-MX')}}
+                </label>
+            </div>
+        </div>
+</ng-container>
+</div>
+<hr>
+<div class="container">
+        <div class="row ">
+            <div style="text-align: left;" class="col-sm-10">
+                <label style="font-weight:bold; color: black;" class="control-label"> Total de Pagos
+                </label>
+            </div>
+
+            <div style="text-align: center;" class="col-sm-2">
+                <label style="color:#da8f27" class="control-label">$ {{totalAbonos}}
+                </label>
+            </div>
+        </div>
+</div>
+<br>
+<div style="background-color: #319dd7" class="modal-content sub-menu">
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    >
+      Cargos Totales
+    </label>
+</div>
+<br>
+<div class="container">
+    <div class="row ">
+        <div style="text-align: left;" class="col-sm-10">
+            <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Alojamiento
+            </label>
+        </div>
+
+        <div style="text-align: center;" class="col-sm-2">
+            <label  class="control-label">$ {{subTotalAlojamiento}}
+            </label>
+        </div>
+    </div>
+    <div class="row ">
+        <div style="text-align: left;" class="col-sm-10">
+            <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Servicios Extra
+            </label>
+        </div>
+
+        <div style="text-align: center;" class="col-sm-2">
+            <label  class="control-label">$ {{subTotalServiciosExtra}}
+            </label>
+        </div>
+    </div>
+    <div class="row ">
+        <div style="text-align: left;" class="col-sm-10">
+            <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Descuentos
+            </label>
+        </div>
+
+        <div style="text-align: center;" class="col-sm-2">
+            <label style="color: green;" class="control-label">$ -{{totalDescuentos}}
+            </label>
+        </div>
+    </div>
+    <div class="row ">
+        <div style="text-align: left;" class="col-sm-10">
+            <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Impuestos
+            </label>
+        </div>
+
+        <div style="text-align: center;" class="col-sm-2">
+            <label  class="control-label">$ {{totalimpuestos}}
+            </label>
+        </div>
+    </div>
+</div>
+<br>
+<div style="background-color: #0083b2" class="modal-content sub-menu">
+    <div class="container">
+        <div class="row">
+            <div style="text-align: left;" class="col-sm-8">
+                <label
+                class="h4"
+                style="color: aliceblue; text-align: center; padding-top: 5px"
+              >
+                Su Cuenta con Impuestos
+              </label>
+            </div>
+              <div style="text-align: right;" class="col-sm-4">
+                <label
+                class="h4"
+                style="color: aliceblue; text-align: center; padding-top: 5px"
+              >
+              {{this.divisasService.getcurrentDivisa.Simbolo}} {{totalCargos.toLocaleString('es-MX')}}
+              </label>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<!-- <div style="background-color: #44d731de" class="modal-content sub-menu">
+    <div class="container">
+        <div class="row">
+            <div style="text-align: left;" class="col-sm-8">
+                <label
+                class="h4"
+                style="color: aliceblue; text-align: center; padding-top: 5px"
+              >
+                Descuentos
+              </label>
+            </div>
+              <div style="text-align: right;" class="col-sm-4">
+                <label
+                class="h4"
+                style="color: aliceblue; text-align: center; padding-top: 5px"
+              >
+              {{this.divisasService.getcurrentDivisa.Simbolo}} -{{totalDescuentos.toLocaleString('es-MX')}}
+              </label>
+            </div>
+        </div>
+    </div>
+</div> -->
+<div style="background-color: #da8f27" class="modal-content sub-menu">
+    <div class="container">
+        <div class="row">
+            <div style="text-align: left;" class="col-sm-8">
+                <label
+                class="h4"
+                style="color: aliceblue; text-align: center; padding-top: 5px"
+              >
+                Pagos y Descuentos
+              </label>
+            </div>
+              <div style="text-align: right;" class="col-sm-4">
+                <label
+                class="h4"
+                style="color: aliceblue; text-align: center; padding-top: 5px"
+              >
+              {{this.divisasService.getcurrentDivisa.Simbolo}} -{{(_huespedService.getCurrentHuespedValue.porPagar!-_huespedService.getCurrentHuespedValue.pendiente!).toLocaleString('es-MX')}}
+              </label>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<div style="background-color:#e43748" class="modal-content sub-menu">
+    <div class="container">
+        <div class="row">
+            <div style="text-align: left;" class="col-sm-8">
+                <label
+                class="h4"
+                style="color: aliceblue; text-align: center; padding-top: 5px"
+              >
+                Saldo Total
+              </label>
+            </div>
+              <div style="text-align: right;" class="col-sm-4">
+                <label
+                class="h4"
+                style="color: aliceblue; text-align: center; padding-top: 5px"
+              >
+              {{this.divisasService.getcurrentDivisa.Simbolo}} {{(_huespedService.getCurrentHuespedValue.pendiente!).toLocaleString('es-MX')}}
+              </label>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+      <div class="container">
+        <div style=" padding-top: 1%;" class="row">
+            <div class="col-lg-6">
+              <button disabled
+                class="btn btn-primary btn-block"
+                type="submit"
+                name="estatus"
+              >
+                Imprimir
+              </button>
+              <br>
+            </div>
+            
+      
+            <div class="col-lg-6">
+              <button
+              disabled 
+              class="btn btn-danger btn-block" 
+              type="submit"
+              >
+                Enviar / Compartir
+              </button>
+            </div>
+          </div>
+        </div>
+     

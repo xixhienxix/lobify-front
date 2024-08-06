@@ -1,4 +1,4 @@
-import { Component, OnInit,Input, ViewChild } from '@angular/core';
+import { Component, OnInit,Input, ViewChild, OnDestroy } from '@angular/core';
 import { NgbActiveModal,NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
@@ -10,7 +10,7 @@ import { HuespedService } from 'src/app/services/huesped.service';
   templateUrl: './confirmation-modal.component.html',
   styleUrls: ['./confirmation-modal.component.scss']
 })
-export class ConfirmationModalComponent implements OnInit {
+export class ConfirmationModalComponent implements OnInit, OnDestroy {
 
   @Input() huesped:any;
   @Input() estatus:any;
