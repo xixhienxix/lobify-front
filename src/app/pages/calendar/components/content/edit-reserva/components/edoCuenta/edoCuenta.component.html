@@ -420,7 +420,7 @@
                 class="h4"
                 style="color: aliceblue; text-align: center; padding-top: 5px"
               >
-              {{this.divisasService.getcurrentDivisa.Simbolo}} -{{(_huespedService.getCurrentHuespedValue.porPagar!-_huespedService.getCurrentHuespedValue.pendiente!).toLocaleString('es-MX')}}
+              $ {{(currentHuesped.porPagar!-currentHuesped.pendiente!).toLocaleString('es-MX')}}
               </label>
             </div>
         </div>

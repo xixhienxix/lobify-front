@@ -1,16 +1,28 @@
 
 <!-- begin::Row -->
 <div class="row gy-5 g-xl-8">
-  <div class="col-xl-4">
-    <!--class="card card-xl-stretch mb-xl-8"-->
-    <app-arrivals></app-arrivals>
-  </div>
-  <div class="col-xl-4">
-    <app-departures></app-departures>
-  </div>
-  <div class="col-xl-4">
-    <app-in-house></app-in-house>
-  </div>
+    <div class="col-xl-4">
+      <!--class="card card-xl-stretch mb-xl-8"-->
+      <ng-container>
+        <app-arrivals 
+        [changing]="changingValue"
+        [allReservations]="allReservations"
+        ></app-arrivals>
+      </ng-container>
+    </div>
+    <div class="col-xl-4">
+      <app-departures
+      [changing]="changingValue"
+      [allReservations]="allReservations"
+      ></app-departures>
+    </div>
+    <div class="col-xl-4">
+      <app-in-house
+      [changing]="changingValue"
+      [changingValueRooms]="changingValueRooms"
+      [allReservations]="allReservations"
+      ></app-in-house>
+    </div>
 </div>
 <!-- end::Row -->
 
@@ -18,13 +30,19 @@
 <div class="row gx-5 gx-xl-10">
   <!--begin::Col-->
   <div class="col-xxl-6 mb-5 mb-xl-10">
-    <app-clean-status-widget></app-clean-status-widget>
+    <app-clean-status-widget
+    [changingValueRooms]="changingValueRooms"
+    ></app-clean-status-widget>
   </div>
   <!--end::Col-->
 
   <!--begin::Col-->
   <div class="col-xxl-6 mb-5 mb-xl-10">
-    <app-occupacy-and-income-widget></app-occupacy-and-income-widget>
+    <app-occupacy-and-income-widget
+      [allReservations]="allReservations"
+      [changingValueRooms]="changingValueRooms"
+      [changing]="changingValue"
+    ></app-occupacy-and-income-widget>
   </div>
   <!--end::Col-->
 </div>
@@ -32,19 +50,31 @@
 <!-- begin::Row -->
 <div class="row g-5 g-xl-8">
   <div class="col-xl-3">
-    <app-future-reservations></app-future-reservations>
+    <app-future-reservations
+      [allReservations]="allReservations"
+      [changing]="changingValue"
+    ></app-future-reservations>
   </div>
 
   <div class="col-xl-3">
-    <app-canceled-reservations></app-canceled-reservations>
+    <app-canceled-reservations
+      [allReservations]="allReservations"
+      [changing]="changingValue"
+    ></app-canceled-reservations>
   </div>
 
   <div class="col-xl-3">
-    <app-temporal-reservations-widget></app-temporal-reservations-widget>
+    <app-temporal-reservations-widget
+      [allReservations]="allReservations"
+      [changing]="changingValue"
+    ></app-temporal-reservations-widget>
   </div>
 
   <div class="col-xl-3">
-    <app-abandon-reservations-widget></app-abandon-reservations-widget>
+    <app-abandon-reservations-widget
+      [allReservations]="allReservations"
+      [changing]="changingValue"
+    ></app-abandon-reservations-widget>
   </div>
 </div>
 <!-- end::Row -->

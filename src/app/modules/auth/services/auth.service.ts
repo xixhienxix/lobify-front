@@ -1,6 +1,6 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, BehaviorSubject, of, Subscription } from 'rxjs';
-import { map, catchError, finalize } from 'rxjs/operators';
+import { map, catchError, finalize, timeout } from 'rxjs/operators';
 import { UserModel } from '../models/user.model';
 import { AuthModel } from '../models/auth.model';
 import { environment } from 'src/environments/environment';
@@ -138,8 +138,12 @@ export class AuthService implements OnDestroy {
 
   // private methods
   private setAuthFromLocalStorage(auth: UserModel): boolean {
-    localStorage.setItem('USER',JSON.stringify(auth))
-    localStorage.setItem('HOTEL',auth.hotel)
+    const authInfo = {
+      username:auth.username,
+      name:auth.firstname
+    }
+    localStorage.setItem('USER',JSON.stringify(authInfo))
+    localStorage.setItem('HOTEL',auth.hotel.replace(/\s+$/, ''))
     // store auth authToken/refreshToken/epiresIn in local storage to keep user logged in between page refreshes
     if (auth && auth.accessToken) {
       localStorage.setItem('ACCESS_TOKEN',auth.accessToken);
@@ -186,6 +190,26 @@ export class AuthService implements OnDestroy {
   //     finalize(() => this.isLoadingSubject.next(false))
   //   );
   // }
+  autoriza(username:string,password:string){
+    return this.http.post<UserModel|string>(environment.apiUrl+"/auth/autoriza",{username,password})
+    .pipe(
+      map((datosUsuario:any)=>{
+        if(!datosUsuario){
+          return { id: 1, message: 'Usuario invalido' }
+        }else{
+          if(datosUsuario.perfil === 1 ){
+            return { id: 3, message: 'Usuario Autorizado' }
+          }else{
+            return { id: 4, message: 'Usuario No Autorizado' }
+          }
+        }
+      }),
+      catchError((err) => {
+        console.error('err', err);
+        return of(undefined);
+      }),
+      finalize(() => this.isLoadingSubject.next(false))
+    );   }
 
   ngOnDestroy() {
     this.unsubscribe.forEach((sb) => sb.unsubscribe());

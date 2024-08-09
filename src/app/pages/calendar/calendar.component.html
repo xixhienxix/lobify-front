@@ -19,8 +19,13 @@
             (onRefreshingFinished)="onRefreshingFinished($event)">
         </app-content>
     </div>
-    <div *ngIf="_isRefreshing | async" class="card card-custom">
-        <app-footer></app-footer>
+    <div class="card card-custom">
+        <ng-container *ngIf="allReservations && roomCodesComplete">
+            <app-footer
+              [allReservations]="allReservations"
+              [houseKeepingCodes]="roomCodesComplete"
+            ></app-footer>
+          </ng-container>
     </div>
 <ng-container *ngIf="_isLoading | async">
     <app-loader-spinner></app-loader-spinner>

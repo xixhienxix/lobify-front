@@ -1,6 +1,6 @@
 <!-- begin::Body -->
 <!-- begin::Item -->
-<div class="d-flex align-items-center p-5" style="background-color: var(--light-blue-title);">
+<div class="d-flex align-items-center p-5" style="background-color: var(--header-background);">
   <!-- begin::Label -->
   <div class="flex-grow-1 me-2">
       <a href="#" class="fw-bolder text-hover-primary fs-2" style="color: white;">
@@ -12,7 +12,7 @@
   <div class="d-flex fw-bolder rounded-2 py-1" style="background-color:var(--light-green-background); padding: 10%;">
       <div class="d-flex flex-column me-2">
           <span class="fw-bold text-gray-800;" style="font-size: 2rem;">
-              15
+              {{huespedEnCasa.length}}
           </span>
       </div>
   </div>
@@ -22,7 +22,7 @@
 
 
 <!-- begin::Item -->
-<div class="d-flex align-items-center p-5 mb-7" style="background-color: var(--dark-blue-background);">
+<div class="d-flex align-items-center p-5 mb-7" style="background-color: var(--deep-red-background);">
   <!-- begin::Label -->
   <div class="flex-grow-1 me-2">
       <a href="#" class="fw-bolder text-hover-primary fs-2" style="color: white;">
@@ -34,7 +34,7 @@
   <div class="flex-grow-1 fw-bolder rounded-2 py-1">
       <div class="d-flex flex-column me-2">
           <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: #2ea9eb; margin: inherit;">
-              20
+            {{inventario.length}}
           </span>
       </div>
   </div>
@@ -50,7 +50,7 @@
   <div class=" flex-grow-1 fw-bolder rounded-2 py-1">
       <div class="d-flex flex-column me-2">
           <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: var(--light-green-font); margin: inherit;">
-              5
+              {{avaibleRooms}}
           </span>
       </div>
   </div>
@@ -58,5 +58,5 @@
 </div>
 <!-- end::Body -->
 <!--begin::Button-->
-<button type="button" class="align-items-center p-5 mb-7 w-100 fw-bolder fs-2" style="background-color: var(--dark-blue-background); color: white; text-align: center;" >{{"ArrivalsComponent.go-to-reports" | translate}}</button>
+<button type="button" class="align-items-center p-5 mb-7 w-100 fw-bolder fs-2" style="background-color: var(--deep-red-background); color: white; text-align: center;" >{{"ArrivalsComponent.go-to-reports" | translate}}</button>
 <!-- end::Button-->

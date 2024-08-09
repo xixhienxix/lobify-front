@@ -147,8 +147,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   onSubmit(){
     /**Check only one tarifa is selected per Room */
-
-
     if(this.formGroup.valid){
       this.save();
     }else if(this.formGroup.invalid)
@@ -277,8 +275,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   }
 
 
-  tarifaRadioButton(tarifas:Tarifas, event:any, codigo:string){
-    this.totalPorCuenta = this.ratesTotalCalc(tarifas,this.stayNights)
+  tarifaRadioButton(totalTarifa:number,tarifas:Tarifas, event:any, codigo:string){
+    this.totalPorCuenta = totalTarifa
     const checkedStatus = event.source.checked
     const tarifa = tarifas
 
@@ -582,37 +580,6 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
     return false
   }
 
-  // roomRates(minihabs:string){
-  //   let availbleRates = this.ratesArrayComplete.filter((item) => item.Estado === true); 
-
-  //   availbleRates  = availbleRates.filter(obj =>
-  //     obj.Habitacion.some(item => item === minihabs));
-    
-  //   availbleRates = availbleRates.filter(item => item.Tarifa !== 'Tarifa De Temporada');
-
-  //   let newRatesArray = JSON.parse(JSON.stringify(availbleRates));
-
-  //   newRatesArray.map((item:Tarifas,index:number)=>{
-  //     if(item.TarifasActivas.length > 1){
-  //         const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"];
-  //         const validDays = item.TarifasActivas[1].Dias!.filter((x)=> x.checked === true)    
-  //         const day = this.intialDate.getDay();
-  //         const validDay = validDays.find((item) => item.name === dayNames[day])?.checked // Revisar si el dia es valido
-  //       if(validDay){
-  //         newRatesArray.push({
-  //           ...item, 
-  //           Tarifa: item.TarifasActivas[1].Descripcion + '- 2', 
-  //           Dias: item.TarifasActivas[1].Dias, 
-  //           TarifasActivas : [item.TarifasActivas[1]]
-  //         });
-  //         newRatesArray[index].TarifasActivas.splice(1,1);
-  //       }
-  //     }
-  //   })
-  //   newRatesArray = newRatesArray.sort((a:Tarifas,b:Tarifas) => (a.Tarifa > b.Tarifa) ? 1 : ((b.Tarifa > a.Tarifa) ? -1 : 0))
-    
-  //   return newRatesArray
-  // }
   roomRates(minihabs:string){
     let availbleRates = this.ratesArrayComplete.filter((item) => item.Estado === true); 
 

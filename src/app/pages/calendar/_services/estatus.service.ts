@@ -71,8 +71,6 @@ export class EstatusService {
     }
 
     actualizaEstatus(estatus:string,folio:string,huesped:Huesped){  
-      return this.http.post(environment.apiUrl+"/actualiza/estatus",{estatus:estatus,folio:folio,huesped:huesped})
+      return this.http.post(environment.apiUrl+"/actualiza/estatus/reserva",{estatus:estatus,folio:folio,huesped:huesped})
     }
-
-    
 }

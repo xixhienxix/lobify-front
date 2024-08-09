@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, Subject, map } from "rxjs";
-import { Huesped } from "../models/huesped.model";
+import { DEFAULT_HUESPED, Huesped } from "../models/huesped.model";
 import { environment } from "src/environments/environment";
 import { LocalForageCache } from "../tools/cache/indexdb-expire";
 const EMPTY_CUSTOMER: Huesped = {
@@ -52,7 +52,7 @@ export class HuespedService {
   updatedReservations$ = new BehaviorSubject<Huesped[]>([])
   
   huespedUpdate$: Observable<Huesped>;
-  private currentHuesped$=new BehaviorSubject<Huesped>(EMPTY_CUSTOMER);
+  currentHuesped$=new BehaviorSubject<Huesped>(EMPTY_CUSTOMER);
 
 
   get getCurrentHuespedValue(): Huesped {
@@ -105,13 +105,13 @@ export class HuespedService {
         return this.http.post<any>(environment.apiUrl+"/huesped/save", {huespedInfo})
         .pipe(
             map(responseData=>{
+              
              const postArray = []
-              for(const key in responseData)
-              {
+              for(const key in responseData){
                 if(responseData.hasOwnProperty(key))
                 postArray.push(responseData[key]);
                }
-     
+               this.updateReservations$.next(true);
                return responseData
           })
           )

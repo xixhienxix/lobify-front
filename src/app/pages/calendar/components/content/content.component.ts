@@ -113,7 +113,7 @@ export class ContentComponent implements OnInit{
   @Input() estatusArray:HouseKeeping[];
 
   @Output() onResizeReserva: EventEmitter<Record<string, any>> = new EventEmitter();
-  @Output() honEditRsv: EventEmitter<Huesped> = new EventEmitter();
+  @Output() honEditRsv: EventEmitter<any> = new EventEmitter();
   @Output() onChangeEstatus: EventEmitter<any> = new EventEmitter();
   @Output() onRefreshingFinished: EventEmitter<boolean> = new EventEmitter();
 
@@ -249,8 +249,9 @@ export class ContentComponent implements OnInit{
     //   item.folio === args.data.Folio    
     // )
     //if(huesped !== undefined){
-      this.honEditRsv.emit(args);
-    //}
+    if(args.data.hasOwnProperty("Folio")){
+      this.honEditRsv.emit({row:args,folio:args.data.Folio});
+    }    //}
     }
   }
   /**

@@ -9,6 +9,8 @@ import { LogoutComponent } from './components/logout/logout.component';
 import { AuthComponent } from './auth.component';
 import { TranslationModule } from '../i18n/translation.module';
 import { AuthInterceptor } from './services/auth.interceptor';
+import { SuperUserComponent } from './components/super-user/super.user.component';
+import { SharedModule } from 'primeng/api';
 
 @NgModule({
   declarations: [
@@ -16,6 +18,7 @@ import { AuthInterceptor } from './services/auth.interceptor';
     RegistrationComponent,
     LogoutComponent,
     AuthComponent,
+    SuperUserComponent,
   ],
   imports: [
     CommonModule,
@@ -24,6 +27,7 @@ import { AuthInterceptor } from './services/auth.interceptor';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
+    SharedModule
   ],
   providers:[
     {    

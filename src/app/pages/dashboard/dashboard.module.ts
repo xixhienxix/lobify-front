@@ -12,9 +12,14 @@ import { FutureReservationsComponent } from './widgets/future-reservations/futur
 import { CanceledReservationsComponent } from './widgets/canceled-reservations/canceled-reservations.component';
 import { TemporalReservationsWidgetComponent } from './widgets/temporal-reservations-widget/temporal-reservations-widget.component';
 import { AbandonReservationsWidgetComponent } from './widgets/abandon-reservations-widget/abandon-reservations-widget.component';
+import { InHouseComponent } from '../reports/widgets/in-house/in-house.component';
+import { ArrivalsComponent } from '../reports/widgets/arrivals/arrivals.component';
+import { DeparturesComponent } from '../reports/widgets/departures/departures.component';
 
 @NgModule({
-  declarations: [DashboardComponent, CleanStatusWidgetComponent, OccupacyAndIncomeWidgetComponent, BadgeWidgetComponent, FutureReservationsComponent, CanceledReservationsComponent, TemporalReservationsWidgetComponent, AbandonReservationsWidgetComponent],
+  declarations: [DashboardComponent, CleanStatusWidgetComponent, OccupacyAndIncomeWidgetComponent, BadgeWidgetComponent, FutureReservationsComponent, CanceledReservationsComponent, TemporalReservationsWidgetComponent, AbandonReservationsWidgetComponent,
+    ArrivalsComponent, DeparturesComponent, InHouseComponent
+  ],
   imports: [
     TranslateModule,
     CommonModule,
@@ -26,7 +31,6 @@ import { AbandonReservationsWidgetComponent } from './widgets/abandon-reservatio
     ]),
     WidgetsModule,
     ModalsModule,
-    ReportsModule
   ],
 })
 export class DashboardModule {}

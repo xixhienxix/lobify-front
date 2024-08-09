@@ -21,10 +21,9 @@ const EMPTY_EDO = {
 export class Edo_Cuenta_Service {
 
     public edoCuentaSubject = new BehaviorSubject<edoCuenta[]>([])
-    private subject =new Subject<any>();
+    public subject =new Subject<any>();
 
-sendNotification(value:any)
-{
+sendNotification(value:any){
     this.subject.next({text:value});
 }
 
@@ -44,8 +43,8 @@ getNotification(){
 
     constructor(private http: HttpClient, private _parametrosService:ParametrosService) { }
 
-    agregarPago(pago:edoCuenta){
-       return this.http.post<edoCuenta>(environment.apiUrl+'/edo_cuenta/pagos',{pago}).pipe(
+    agregarPago(edoCuenta:edoCuenta){
+       return this.http.post<edoCuenta>(environment.apiUrl+'/edo_cuenta/pagos',{edoCuenta}).pipe(
         map((data=>{
           this.sendNotification(true);
           }
@@ -69,12 +68,8 @@ getNotification(){
       )));;
     }
 
-
     getCuentas(folio:string ){
-      let params = new HttpParams();
-      params = params.append('folio', folio);
-
-        return this.http.get<edoCuenta[]>(environment.apiUrl+'/edo_cuenta/cuenta',{ params })
+        return this.http.get<edoCuenta[]>(environment.apiUrl+'/edo_cuenta/'+folio)
         .pipe(
             map((datosCuenta)=>{
             let estadoDeCuenta:edoCuenta[]=[];

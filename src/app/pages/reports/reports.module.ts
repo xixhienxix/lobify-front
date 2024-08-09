@@ -9,7 +9,7 @@ import { TagModule } from 'primeng/tag'
 import { TranslateModule } from '@ngx-translate/core';
 
 @NgModule({
-  declarations: [ArrivalsComponent, DeparturesComponent, InHouseComponent],
+  declarations: [],
   imports: [
     TranslateModule,
     CommonModule,
@@ -17,8 +17,5 @@ import { TranslateModule } from '@ngx-translate/core';
     ButtonModule,
     TagModule
   ],
-  exports: [
-    ArrivalsComponent,DeparturesComponent, InHouseComponent
-  ]
 })
 export class ReportsModule { }

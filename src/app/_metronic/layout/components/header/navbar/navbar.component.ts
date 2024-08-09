@@ -36,10 +36,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
     const todayDate = new Date();
     const llegadas = reservations.filter((item)=>{
-    const llegada = new Date(item.llegada);
 
-      if(llegada.setHours(0,0,0,0) === todayDate.setHours(0,0,0,0)){
-        return item
+      if(item.origen === 'Reserva'){
+        const llegada = new Date(item.llegada);
+
+        if(llegada.setHours(0,0,0,0) === todayDate.setHours(0,0,0,0)){
+          return item
+        }
       }
     });
     this.llegadas = llegadas.length;

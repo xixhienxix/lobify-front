@@ -1,0 +1,199 @@
+
+<div style="background-color: #319dd7" class="modal-content sub-menu">
+    <label
+      class="h4"
+      style="color: aliceblue; text-align: center; padding-top: 5px"
+    >
+      Movimientos
+    </label>
+    <button
+    style="
+      position: absolute;
+      top: 2%;
+      right: 1%;
+      background-color: #fa6d7c;
+      font-weight: bold;
+      color: white;
+    "
+    class="btn"
+    (click)="closeModal()"
+  >
+    X
+  </button>
+  </div>
+  
+   <mat-form-field appearance="outline">
+          <mat-label>Busca Movimiento</mat-label>
+          <input matInput (keyup)="applyFilter($event)" placeholder="Buscar Movimiento" #input>
+   </mat-form-field>
+        
+  <div class="contenedor-tabla">
+    <mat-table class="lessons-table mat-elevation-z8" [dataSource]="dataSource">
+  
+      <ng-container matColumnDef="Fecha">
+          <mat-header-cell *matHeaderCellDef>Fecha</mat-header-cell>
+          <mat-cell *matCellDef="let lesson">{{lesson.Fecha.split('T')[0]}}</mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+    
+      <ng-container matColumnDef="Descripcion">
+          <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
+          <mat-cell class="description-cell" *matCellDef="let lesson">{{lesson.Descripcion}}</mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+    
+      <ng-container matColumnDef="Forma_De_Pago">
+          <mat-header-cell *matHeaderCellDef>Forma De Pago</mat-header-cell>
+          <mat-cell class="duration-cell" *matCellDef="let lesson">{{lesson.Forma_De_Pago}}</mat-cell>
+          <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+      </ng-container>
+    
+      <ng-container matColumnDef="Cantidad">
+        <mat-header-cell *matHeaderCellDef>Cantidad</mat-header-cell>
+        <mat-cell style="text-align: center;" class="duration-cell" *matCellDef="let lesson">{{lesson.Cantidad}}</mat-cell>
+        <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+    
+    </ng-container>
+    
+    <ng-container matColumnDef="Cargo">
+      <mat-header-cell *matHeaderCellDef>Cargo</mat-header-cell>
+      <mat-cell class="duration-cell" *matCellDef="let lesson">$ {{lesson.Cargo.toLocaleString("es-MX")}}.00</mat-cell>
+      <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+    </ng-container>
+    
+    <ng-container matColumnDef="Abono">
+      <mat-header-cell *matHeaderCellDef>Abono</mat-header-cell>
+      <mat-cell class="duration-cell" *matCellDef="let lesson">$ {{lesson.Abono.toLocaleString("es-MX")}}.00</mat-cell>
+      <mat-footer-cell *matFooterCellDef> Total: {{divisasService.getcurrentDivisa.Simbolo}} {{getTotal()}}.00</mat-footer-cell>
+    </ng-container>
+    
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns" 
+      (click)="clickedRows.add(row);llenarAjustesTable(row);getTotalAjustes()"
+      [class.demo-row-is-clicked]="clickedRows.has(row)">
+    </mat-row>
+      <!-- <td mat-footer-cell *matFooterCellDef> {{getTotal() | currency}} </td> -->
+      <mat-footer-row class="sticky-footer" *matFooterRowDef="displayedColumns"></mat-footer-row>
+    
+    
+    </mat-table>
+  </div>
+  
+  
+          <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" aria-label="Select page of users"></mat-paginator>
+  
+  
+          <div style="background-color: #319dd7" class="modal-content sub-menu">
+            <label
+              class="h4"
+              style="color: aliceblue; text-align: center; padding-top: 5px"
+            >
+              Movimiento al cual aplicar ajuste
+            </label>
+          </div>
+          
+          <mat-table class="lessons-table mat-elevation-z8" [dataSource]="ajustesDataSource">
+  
+            <ng-container matColumnDef="Fecha">
+                <mat-header-cell *matHeaderCellDef>Fecha</mat-header-cell>
+                <mat-cell *matCellDef="let lesson">{{lesson.Fecha.split('T')[0]}}</mat-cell>
+                <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+            </ng-container>
+          
+            <ng-container matColumnDef="Descripcion">
+                <mat-header-cell *matHeaderCellDef>Description</mat-header-cell>
+                <mat-cell class="description-cell" *matCellDef="let lesson">{{lesson.Descripcion}}</mat-cell>
+                <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+            </ng-container>
+          
+            <ng-container matColumnDef="Forma_De_Pago">
+                <mat-header-cell *matHeaderCellDef>Forma De Pago</mat-header-cell>
+                <mat-cell class="duration-cell" *matCellDef="let lesson">{{lesson.Forma_De_Pago}}</mat-cell>
+                <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+            </ng-container>
+          
+            <ng-container matColumnDef="Cantidad">
+              <mat-header-cell *matHeaderCellDef>Cantidad</mat-header-cell>
+              <mat-cell style="text-align: center;" class="duration-cell" *matCellDef="let lesson">{{lesson.Cantidad}}</mat-cell>
+              <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          
+          </ng-container>
+          <ng-container matColumnDef="Cargo">
+            <mat-header-cell *matHeaderCellDef>Cargo</mat-header-cell>
+            <mat-cell class="duration-cell" *matCellDef="let lesson">$ {{lesson.Cargo.toLocaleString("es-MX")}}.00</mat-cell>
+            <mat-footer-cell *matFooterCellDef></mat-footer-cell>
+          </ng-container>
+          
+          <ng-container matColumnDef="Abono">
+            <mat-header-cell *matHeaderCellDef>Abono</mat-header-cell>
+            <mat-cell class="duration-cell" *matCellDef="let lesson">$ {{lesson.Abono.toLocaleString("es-MX")}}.00</mat-cell>
+            <mat-footer-cell *matFooterCellDef> Total: {{divisasService.getcurrentDivisa.Simbolo}} {{getTotalAjustes()}}.00</mat-footer-cell>
+          </ng-container>
+          
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns">
+          </mat-row>
+            <!-- <td mat-footer-cell *matFooterCellDef> {{getTotal() | currency}} </td> -->
+            <mat-footer-row class="sticky-footer" *matFooterRowDef="displayedColumns"></mat-footer-row>
+          
+          </mat-table>
+  <br>
+  <form [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+            <div class="row col-md-12">
+                <mat-form-field class="col-sm-3" appearance="fill">
+                    <mat-label>Ajuste / Devolucion</mat-label>
+                    <mat-select formControlName="tipo">
+                      <mat-option value="Ajuste">Ajuste</mat-option>
+                      <mat-option value="Devolucion">Devolucion</mat-option>
+                    </mat-select>
+                </mat-form-field>
+              <div class="col-sm-3" >
+                <input
+                type="text"
+                class="form-control form-control-lg form-control-solid"
+                name="descripcion"
+                placeholder="Descripcion"
+                autocomplete="off"
+                formControlName="descripcion"
+                [class.is-invalid]="isControlInvalid('descripcion')"
+                [class.is-valid]="isControlValid('descripcion')"                
+                value=''
+              />
+              </div>
+              <div class="col-sm-3" >
+                      <input
+                      type="number"
+                      class="form-control form-control-lg form-control-solid"
+                      name="monto"
+                      placeholder="Monto"
+                      autocomplete="off"
+                      formControlName="monto"
+                      [class.is-invalid]="isControlInvalid('monto')"
+                      [class.is-valid]="isControlValid('monto')"                
+                      value=''
+                    />
+              </div>
+                <mat-form-field class="col-sm-3" appearance="fill">
+                    <mat-label>Forma de Pago</mat-label>
+                    <mat-select formControlName="pago">
+                        <mat-option *ngFor="let pago of formasDePago" value={{pago}}>{{pago}}</mat-option>
+                    </mat-select>
+                </mat-form-field>
+    
+          </div>
+          <div class="col-lg-12">
+            <button
+              [disabled]="isLoading"
+              class="btn btn-primary btn-block"
+              type="submit"
+              name="estatus"
+            >
+              Agregar Ajuste
+            </button>
+            <br>
+          </div>
+  </form>
+  <div style="text-align: center;" class="row col-md-12" *ngIf="isLoading">
+    <app-loader-spinner></app-loader-spinner>
+  </div>
+  

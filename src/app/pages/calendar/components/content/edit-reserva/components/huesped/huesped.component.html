@@ -11,7 +11,7 @@ class="form form-label-right"
   <div style="margin-top: 5px" class="col-sm-12">
     &nbsp;&nbsp;&nbsp;&nbsp;
     <label style="font-weight: bold;font-size: medium; "> &nbsp; ID Socio : </label>
-    &nbsp;&nbsp;<label style="font-size: medium; font-weight: bold;" >&nbsp;{{huesped.ID_Socio}}</label>
+    &nbsp;&nbsp;<label style="font-size: medium; font-weight: bold;" >&nbsp;{{currentHuesped.ID_Socio}}</label>
 
     
   </div>
@@ -41,7 +41,7 @@ class="form form-label-right"
         [class.is-invalid]="isControlInvalid('nombre')"
         [class.is-valid]="isControlValid('nombre')"
         formControlName="nombre"
-        value="{{ huesped.nombre }}"
+        value="{{ currentHuesped.nombre }}"
       />
       <div class="valid-feedback" *ngIf="isControlValid('nombre')">
         Nombre Escrito Correctamente
@@ -79,7 +79,7 @@ class="form form-label-right"
         [class.is-invalid]="isControlInvalid('email')"
         [class.is-valid]="isControlValid('email')"
         formControlName="email"
-        value="{{ huesped.email }}"
+        value="{{ currentHuesped.email }}"
       />
       <div
         class="invalid-feedback"
@@ -106,7 +106,7 @@ class="form form-label-right"
         [class.is-invalid]="isControlInvalid('telefono')"
         [class.is-valid]="isControlValid('telefono')"
         formControlName="telefono"
-        value="{{ huesped.telefono }}"
+        value="{{ currentHuesped.telefono }}"
       />
       <br />
       <div
@@ -175,7 +175,7 @@ class="form form-label-right"
       [class.is-invalid]="isControlInvalid('trabajaEn')"
       [class.is-valid]="isControlValid('trabajaEn')"
       formControlName="trabajaEn"
-      value="{{ huesped.trabajaEn }}"
+      value="{{ currentHuesped.trabajaEn }}"
       [attr.disabled]="inputDisabled"
     />
     <br />
@@ -205,7 +205,7 @@ class="form form-label-right"
       [class.is-invalid]="isControlInvalid('tipoDeID')"
       [class.is-valid]="isControlValid('tipoDeID')"
       formControlName="tipoDeID"
-      value="{{ huesped.tipoDeID }}"
+      value="{{ currentHuesped.tipoDeID }}"
       [attr.disabled]="inputDisabled"
     />
     <br />
@@ -233,7 +233,7 @@ class="form form-label-right"
       [class.is-invalid]="isControlInvalid('numeroDeID')"
       [class.is-valid]="isControlValid('numeroDeID')"
       formControlName="numeroDeID"
-      value="{{ huesped.numeroDeID }}"
+      value="{{ currentHuesped.numeroDeID }}"
       [attr.disabled]="inputDisabled"
     />
     <br />
@@ -263,7 +263,7 @@ class="form form-label-right"
       [class.is-invalid]="isControlInvalid('direccion')"
       [class.is-valid]="isControlValid('direccion')"
       formControlName="direccion"
-      value="{{ huesped.direccion }}"
+      value="{{ currentHuesped.direccion }}"
       [attr.disabled]="inputDisabled"
     />
     <div
@@ -292,7 +292,7 @@ class="form form-label-right"
       [class.is-invalid]="isControlInvalid('pais')"
       [class.is-valid]="isControlValid('pais')"
       formControlName="pais"
-      value="{{ huesped.pais }}"
+      value="{{ currentHuesped.pais }}"
       [attr.disabled]="inputDisabled"
     />
     <br />
@@ -320,7 +320,7 @@ class="form form-label-right"
       [class.is-invalid]="isControlInvalid('ciudad')"
       [class.is-valid]="isControlValid('ciudad')"
       formControlName="ciudad"
-      value="{{ huesped.ciudad }}"
+      value="{{ currentHuesped.ciudad }}"
       [attr.disabled]="inputDisabled"
     />
     <br />
@@ -350,7 +350,7 @@ class="form form-label-right"
       [class.is-invalid]="isControlInvalid('codigoPostal')"
       [class.is-valid]="isControlValid('codigoPostal')"
       formControlName="codigoPostal"
-      value="{{ huesped.codigoPostal }}"
+      value="{{ currentHuesped.codigoPostal }}"
       [attr.disabled]="inputDisabled"
     />
     <br />
@@ -378,7 +378,7 @@ class="form form-label-right"
       [class.is-invalid]="isControlInvalid('lenguaje')"
       [class.is-valid]="isControlValid('lenguaje')"
       formControlName="lenguaje"
-      value="{{ huesped.lenguaje }}"
+      value="{{ currentHuesped.lenguaje }}"
       [attr.disabled]="inputDisabled"
     />
     <br />

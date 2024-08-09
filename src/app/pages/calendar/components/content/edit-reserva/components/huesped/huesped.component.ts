@@ -87,8 +87,7 @@ export class HuespedComponent implements OnInit {
 
     this.fromDate = DateTime.now().setZone(this._parametrosService.getCurrentParametrosValue.zona) 
     this.toDate = DateTime.now().setZone(this._parametrosService.getCurrentParametrosValue.zona).plus({ days: 1 }) 
-    console.log("Huesped fromDate",this.fromDate)
-    console.log("Huesped To DAte", this.toDate)
+
     this.fechaFinalBloqueo=this.toDate.day+" de "+this.i18n.getMonthFullName(this.toDate.month)+" del "+this.toDate.year 
   }
 
@@ -97,9 +96,7 @@ export class HuespedComponent implements OnInit {
     if(this.currentHuesped.estatus=='Reserva Cancelada'||this.currentHuesped.estatus=='No Show'||this.currentHuesped.estatus=='Check-Out')
     {this.inputDisabled=true}
 
-    const sb = this.customerService.huespedUpdate$.subscribe((value)=>{
-      this.huesped=value
-       const sb =this.detallesService.getDetailsById(this.huesped.ID_Socio!).subscribe(
+       const sb =this.detallesService.getDetailsById(this.currentHuesped.ID_Socio!).subscribe(
         (response)=>{
           this.detailsList=response
           if(response){
@@ -128,7 +125,7 @@ export class HuespedComponent implements OnInit {
         }
         )
         this.subscription.push(sb)
-    })
+    
     this.subscription.push(sb)
     this.loadForm();
 
@@ -136,15 +133,15 @@ export class HuespedComponent implements OnInit {
 
   loadForm() {
 
-    if(this.huesped.tipoHuesped=="Regular"){this.checkedRegular=true}
-    if(this.huesped.tipoHuesped=="VIP"){this.checkedVIP=true}
-    if(this.huesped.tipoHuesped=="Lista Negra"){this.checkedListaNegra=true}
+    if(this.currentHuesped.tipoHuesped=="Regular"){this.checkedRegular=true}
+    if(this.currentHuesped.tipoHuesped=="VIP"){this.checkedVIP=true}
+    if(this.currentHuesped.tipoHuesped=="Lista Negra"){this.checkedListaNegra=true}
 
 
     this.formGroup = this.fb.group({
-      nombre: [this.huesped.nombre, Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
-      email: [this.huesped.email, Validators.compose([Validators.email,Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"),Validators.minLength(3),Validators.maxLength(50)])],
-      telefono: [this.huesped.telefono, Validators.compose([Validators.nullValidator,Validators.minLength(10),Validators.maxLength(14)])],
+      nombre: [this.currentHuesped.nombre, Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
+      email: [this.currentHuesped.email, Validators.compose([Validators.email,Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"),Validators.minLength(3),Validators.maxLength(50)])],
+      telefono: [this.currentHuesped.telefono, Validators.compose([Validators.nullValidator,Validators.minLength(10),Validators.maxLength(14)])],
       trabajaEn: ['', Validators.compose([Validators.nullValidator,Validators.minLength(3),Validators.maxLength(100)])],
       fechaNacimiento: ['', Validators.compose([Validators.nullValidator,Validators.minLength(3),Validators.maxLength(100)])],
       tipoDeID: ['', Validators.compose([Validators.nullValidator,Validators.minLength(3),Validators.maxLength(100)])],
@@ -197,16 +194,16 @@ export class HuespedComponent implements OnInit {
 
   private prepareHuesped() {
 
-    if(this.checkedRegular){this.huesped.tipoHuesped="Regular"}
-    if(this.checkedVIP){this.huesped.tipoHuesped="VIP"}
-    if(this.checkedListaNegra){this.huesped.tipoHuesped="Lista Negra"}
+    if(this.checkedRegular){this.currentHuesped.tipoHuesped="Regular"}
+    if(this.checkedVIP){this.currentHuesped.tipoHuesped="VIP"}
+    if(this.checkedListaNegra){this.currentHuesped.tipoHuesped="Lista Negra"}
     const formData = this.formGroup.value;
-    this.huesped.nombre = formData.nombre
-    this.huesped.email = formData.email
-    this.huesped.telefono = formData.telefono
-    this.huesped.folio=this.huesped.folio
-    this.huesped.notas=formData.notas
-    this.huesped.ID_Socio=this.id_Socio
+    this.currentHuesped.nombre = formData.nombre
+    this.currentHuesped.email = formData.email
+    this.currentHuesped.telefono = formData.telefono
+    this.currentHuesped.folio=this.currentHuesped.folio
+    this.currentHuesped.notas=formData.notas
+    this.currentHuesped.ID_Socio=this.id_Socio
 
     this.detailsList = {
       ID_Socio:this.id_Socio,
@@ -226,7 +223,7 @@ export class HuespedComponent implements OnInit {
       notas:formData.notas,
     }
     this.isLoading=true;
-    const sb = this.customerService.updateHuesped(this.huesped).subscribe(
+    const sb = this.customerService.updateHuesped(this.currentHuesped).subscribe(
       (value)=>{
 
         const sb = this.detallesService.updateDetails(this.detailsList).subscribe(
@@ -297,15 +294,15 @@ export class HuespedComponent implements OnInit {
   // }
 
 //   create() {
-//     const sbCreate = this.customerService.addPost(this.huesped).pipe(
+//     const sbCreate = this.customerService.addPost(this.currentHuesped).pipe(
 //       tap(() => {
 //         this.modal.close();
 //       }),
 //       catchError((errorMessage) => {
 //         this.modal.dismiss(errorMessage);
-//         return of(this.huesped);
+//         return of(this.currentHuesped);
 //       }),
-//     ).subscribe((res: Huesped) => this.huesped = res);
+//     ).subscribe((res: Huesped) => this.currentHuesped = res);
 //     this.subscription.push(sbCreate);
 //   }
 

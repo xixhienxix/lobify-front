@@ -30,6 +30,7 @@ import { TransaccionesComponent } from './components/content/edit-reserva/compon
 import { EdoCuentaComponent } from './components/content/edit-reserva/components/edoCuenta/edoCuenta.component';
 import { SaldoCuentaComponent } from './components/content/edit-reserva/components/edoCuenta/components/saldar.cuenta.component';
 import { MatSelect, MatSelectModule } from '@angular/material/select';
+import { AjustesComponent } from './components/content/edit-reserva/components/transacciones/components/ajustes/ajustes.component';
 
 
 @NgModule({
@@ -46,7 +47,8 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
     DetalleComponent,
     TransaccionesComponent,
     EdoCuentaComponent,
-    SaldoCuentaComponent
+    SaldoCuentaComponent,
+    AjustesComponent
   ],
   imports: [
     TranslateModule,

@@ -1,7 +1,7 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewEncapsulation } from '@angular/core';
 import { ModalDismissReasons, NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Huesped } from 'src/app/models/huesped.model';
+import { DEFAULT_HUESPED, Huesped } from 'src/app/models/huesped.model';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { HuespedService } from 'src/app/services/huesped.service';
 import { Subject, Subscription, firstValueFrom } from 'rxjs';
@@ -17,6 +17,8 @@ import { DateTime } from 'luxon';
 import { Edo_Cuenta_Service } from 'src/app/services/edoCuenta.service';
 import { SaldoCuentaComponent } from './components/edoCuenta/components/saldar.cuenta.component';
 import { edoCuenta } from 'src/app/models/edoCuenta.model';
+import { EstatusService } from '../../../_services/estatus.service';
+import { Codigos } from 'src/app/models/codigos.model';
 
 @Component({
   selector: 'app-edit-reserva',
@@ -52,6 +54,12 @@ export class EditReservaComponent implements OnInit, OnDestroy{
 
   private subscriptions: Subscription[] = [];
 
+  //Model
+  currentHuesped:Huesped
+  porPagar:number=0;
+  pendiente:number=0;
+  
+
 
   @Input() promesasDisplay:boolean=false;
   @Input() houseKeepingCodes:HouseKeeping[]=[]
@@ -59,7 +67,8 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   @Input() data:any;
   @Input() llegahoy:boolean=false;
   @Input() currentRoom:Habitacion;
-  @Input() currentHuesped:Huesped
+  @Input() codigosCargo:Codigos[]
+  @Input() folio:string
 
   @Output() onAgregarPago: EventEmitter<edoCuenta> = new EventEmitter();
   @Output() onEditRsv: EventEmitter<Huesped[]> = new EventEmitter();
@@ -81,30 +90,51 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     private modalService: NgbModal,
     public fb:FormBuilder,
     private _edoCuentaService: Edo_Cuenta_Service,
-    private _huespedService: HuespedService
-
+    private _huespedService: HuespedService,
+    private _estatusService: EstatusService,
+    private cdRef: ChangeDetectorRef,
   ){
-
+    this._huespedService.currentHuesped$.subscribe({
+      next:(reserva:Huesped)=>{
+        this.currentHuesped = reserva
+        this.porPagar = reserva.porPagar!
+        this.pendiente = reserva.pendiente!
+        this.cdRef.detectChanges(); // Manually trigger change detection
+      }
+    })
   }
   async ngOnInit(){
-    
-    this.changingPromesasValue.subscribe({
-      next:(value)=>{
-        this.changingPromesasValue.next(value);
-      }
-    })
 
-    this.onSuccessResponse.subscribe({
-      next:(val)=>{
-        if(val){
-          this.onSuccessResponse.next(val)
-        }
-      }
-    })
+  
+    this.formGroup = this.fb.group({
+      estatus : [this.currentHuesped.estatus],
+      ama:[this.currentRoom.Estatus]
+    });
+
+    // this.changingPromesasValue.subscribe({
+    //   next:(value)=>{
+    //     this.changingPromesasValue.next(value);
+    //   }
+    // })
+
+    // this.onSuccessResponse.subscribe({
+    //   next:(val)=>{
+    //     if(val){
+    //       this.onSuccessResponse.next(val)
+    //     }
+    //   }
+    // })
 
     this.adicionalSubject.subscribe({
       next:(value:Adicional[])=>{
         this.adicionalSubject.next(value);
+      }
+    });
+
+    this._edoCuentaService.subject.subscribe({
+      next:(val)=>{
+        console.log("val");
+        this.getCuentas();
       }
     })
 
@@ -112,27 +142,38 @@ export class EditReservaComponent implements OnInit, OnDestroy{
 
     let fechaDeLlegada = new Date(parseInt(this.currentHuesped.llegada.split('/')[2]),parseInt(this.currentHuesped.llegada.split('/')[1])-1,parseInt(this.currentHuesped.llegada.split('/')[0])) 
     this.intialDate = fechaDeLlegada
-
+    console.log(this.houseKeepingCodes);
     this.colorAma = this.houseKeepingCodes.find((item)=> item.Descripcion === this.currentRoom.Estatus)!?.Color
 
-    this.formGroup = this.fb.group({
-      estatus : [this.currentHuesped.estatus],
-      ama:[this.currentRoom.Estatus]
-    });
-
-    this.formGroup.controls["ama"].patchValue(this.currentRoom.Estatus);
+    // this.formGroup.controls["ama"].patchValue(this.currentRoom.Estatus);
+    this.cdRef.detectChanges();
 
   }
 
   async getCuentas(){
       this._edoCuentaService.getCuentas(this.currentHuesped.folio).subscribe({
         next:(value)=>{
-          this.currentEdoCuenta = value    
+          this.currentEdoCuenta = value  
+          this.cdRef.detectChanges();  
         },
         error:()=>{
 
         }
     })
+  }
+
+  isCurrentStatus(statuses: string[]): boolean {
+    return statuses.includes(this.currentHuesped.estatus);
+  }
+
+  filteredEstatusArray(ids: number[]): any[] {
+    return this.estatusArray.filter(estatus => ids.includes(estatus.id));
+  }
+
+  async onRefreshEdoCuenta(flag:boolean){
+    if(flag){
+      await this.getCuentas();
+    }
   }
 
   setStep(index:number){
@@ -227,6 +268,10 @@ export class EditReservaComponent implements OnInit, OnDestroy{
 
     honAgregarPago(pago:edoCuenta){
       this.onAgregarPago.emit(pago)
+    }
+
+    honFetchReservations(huesped:Huesped){
+      this.onFetchReservations.emit(huesped);
     }
 
     honCheckOut(estatus:number, folio:number){  
@@ -374,6 +419,87 @@ export class EditReservaComponent implements OnInit, OnDestroy{
         }
       });
       this.subscriptions.push(sb)
+    }
+
+    confirmaReserva(estatus:number,folio:string){
+      this.isLoading=true
+      let edoFiltrado : any
+      let totalCargos
+      let totalAbonos
+
+      if( estatus === 12 || estatus === 11 || estatus ===4 ){
+        edoFiltrado = this.currentEdoCuenta.filter((result)=> result.Abono! > 1)
+        
+        console.log(edoFiltrado) 
+
+        if(edoFiltrado.length<0){ 
+          for(let i=0; i<edoFiltrado.length; i++){
+            totalCargos = totalCargos + edoFiltrado[i].Cargo
+            totalAbonos = totalAbonos + edoFiltrado[i].Abono
+          }
+          if(totalAbonos<totalCargos){
+            this.onAlertMessage.emit({tittle: 'Advertencia', message:'El huesped tiene saldo a Favor, aplique una devolucion antes de darle Check-Out'});
+            return
+          }
+        }
+        this.isLoading=false
+      }
+          const sb = this._estatusService.actualizaEstatus(estatus.toString(),folio,this.currentHuesped)
+          .subscribe({
+            next:()=>{
+              this.isLoading=false
+              let mensaje_exito=''
+              switch (estatus) {
+                case 3:
+                  mensaje_exito = "Reservación confirmada";
+                  break;
+                case 2:
+                  mensaje_exito = "Reservación realizada con éxito";
+                  break;
+                case 1:
+                  mensaje_exito = "Check-in realizado con éxito";
+                  break;
+                case 4:
+                  mensaje_exito = "Check-out realizado con éxito";
+                  break;
+                case 11:
+                  mensaje_exito = "No-show, para reactivar la reservación haga clic en el botón en la parte inferior";
+                  break;
+                case 12:
+                  mensaje_exito = "Reservación cancelada con éxito";
+                  break;
+              }
+
+              this.onAlertMessage.emit({tittle: 'EXITO', message: mensaje_exito});
+              this.onFetchReservations.emit();
+
+                this.closeModal()
+
+            },
+            error:(err)=>{
+              if(err){
+
+                this.isLoading=false
+
+                const modalRef=this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+                modalRef.componentInstance.alertHeader='ERROR'
+                modalRef.componentInstance.mensaje='Ocurrio un Error al actualizar el estatus, vuelve a intentarlo'
+                modalRef.result.then((result) => {
+                  this.closeResult = `Closed with: ${result}`;
+                  }, (reason) => {
+                      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+                  });
+                  setTimeout(() => {
+                    modalRef.close('Close click');
+                  },4000)
+                    }
+            },
+            complete:()=>{
+      
+            
+            }
+          })
+        this.subscriptions.push(sb)
     }
     
     getDismissReason(reason: any): string {

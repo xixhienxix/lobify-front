@@ -26,6 +26,7 @@ export class UserModel extends AuthModel {
   accessToken:string;
   hotel:string;
   rol:number;
+  perfil?:number;
   
 
   setUser(_user: unknown) {

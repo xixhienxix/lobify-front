@@ -181,7 +181,7 @@
                           <th mat-header-cell *matHeaderCellDef> Acciones </th>
                           <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element; let i = index "> 
                             <mat-radio-group [name]="cuarto">
-                              <mat-radio-button [disabled]="revisaCapacidad(cuarto)" [value]="element[i]" (change)="tarifaRadioButton(element,$event, cuarto)"></mat-radio-button>   
+                              <mat-radio-button [disabled]="revisaCapacidad(cuarto)" [value]="element[i]" (change)="tarifaRadioButton(ratesTotalCalc(element,stayNights),element,$event, cuarto)"></mat-radio-button>   
                             </mat-radio-group>
                           </td>
                         </ng-container>
@@ -241,7 +241,7 @@
                                   <th mat-header-cell *matHeaderCellDef> Acciones </th>
                                   <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element; let i = index"> 
                                       <mat-radio-group [name]="cuarto" >
-                                        <mat-radio-button [disabled]="revisaCapacidad(codigosCuarto.Codigo)" [value]="element" [name]="i" (change)="tarifaRadioButton(element, $event, codigosCuarto.Codigo)"></mat-radio-button>
+                                        <mat-radio-button [disabled]="revisaCapacidad(codigosCuarto.Codigo)" [value]="element" [name]="i" (change)="tarifaRadioButton(ratesTotalCalc(element,stayNights,codigosCuarto.Codigo),element, $event, codigosCuarto.Codigo)"></mat-radio-button>
                                     </mat-radio-group>                                  
                                   </td>
                                 </ng-container>
