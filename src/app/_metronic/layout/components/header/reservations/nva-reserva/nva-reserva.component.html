@@ -214,7 +214,7 @@
                     <!-- CUANDO SE CONSULTAN TODOS LOS TIPOS DE CUARTO -->
                     <ng-container *ngIf="cuarto === '1'">
                       <!--CUANDO SE SELECCIONARON TODOS LOS CUARTOS-->
-                      <ng-container *ngFor="let codigosCuarto of availavilityCodeRooms; ">
+                      <ng-container *ngFor="let codigosCuarto of availavilityRooms; ">
                         <div style="color: black" [ngStyle]="{'background-color': revisaCapacidad(codigosCuarto.Codigo) ? '#fa6d7c' : '' }" class=" modal-header"><h2 style="font-weight: bold; color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2>                           
                           <small style="margin-left: 5%; margin-right: 5%; font-weight: bold; font: bold;" *ngIf="revisaCapacidad(codigosCuarto.Codigo)">
                             <div [innerHTML]="mensajeAdultos+mensajeNinos"></div>

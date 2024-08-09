@@ -28,6 +28,10 @@ import { Codigos } from 'src/app/models/codigos.model';
 })
 export class EditReservaComponent implements OnInit, OnDestroy{
 
+  /**LOADING SUBJECT */
+  loadingSubject: Subject<boolean> = new Subject<boolean>();
+
+
   formGroup:FormGroup
   isLoading:boolean=false;
   selectedIndex:number
@@ -99,31 +103,15 @@ export class EditReservaComponent implements OnInit, OnDestroy{
         this.currentHuesped = reserva
         this.porPagar = reserva.porPagar!
         this.pendiente = reserva.pendiente!
-        this.cdRef.detectChanges(); // Manually trigger change detection
       }
     })
   }
   async ngOnInit(){
 
-  
     this.formGroup = this.fb.group({
       estatus : [this.currentHuesped.estatus],
       ama:[this.currentRoom.Estatus]
     });
-
-    // this.changingPromesasValue.subscribe({
-    //   next:(value)=>{
-    //     this.changingPromesasValue.next(value);
-    //   }
-    // })
-
-    // this.onSuccessResponse.subscribe({
-    //   next:(val)=>{
-    //     if(val){
-    //       this.onSuccessResponse.next(val)
-    //     }
-    //   }
-    // })
 
     this.adicionalSubject.subscribe({
       next:(value:Adicional[])=>{
@@ -149,6 +137,127 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     this.cdRef.detectChanges();
 
   }
+
+  //OPTIMIZED FUNCTIONS
+  honCheckOut(estatus:number, folio:number){  
+    const todayDate = new Date();
+    const currentHuesped = this.currentHuesped;
+
+    const getTimeDifference = (date1: Date, date2: Date) => Math.ceil((date1.getTime() - date2.getTime()) / (1000 * 3600 * 24));
+
+    const nochesAlojadas = getTimeDifference(todayDate, new Date(currentHuesped.llegada));
+    const nochesReservadas = getTimeDifference(new Date(currentHuesped.salida), new Date(currentHuesped.llegada));
+
+    this.nochesReales = nochesAlojadas === 0 ? 1 : nochesAlojadas;
+    this.totalAlojamientoNuevo = 0; // this.huesped.tarifa * this.nochesReales
+
+    const cargosSinAlojamiento = this._edoCuentaService.currentCuentaValue.filter(cargo => cargo.Cargo! > 0 && cargo.Descripcion !== 'Alojamiento');
+    const abonos = this._edoCuentaService.currentCuentaValue.filter(abono => abono.Abono! > 0);
+    const alojamientoAnterior = this._edoCuentaService.currentCuentaValue.find(alojamiento => alojamiento.Descripcion === 'Alojamiento');
+
+    if (alojamientoAnterior) {
+      this.alojamiento_id = alojamientoAnterior._id!;
+    }
+
+    const totalAbonos = abonos.reduce((total, abono) => total + abono.Abono!, 0);
+    const totalCargosSinAlojamiento = cargosSinAlojamiento.reduce((total, cargo) => total + cargo.Cargo!, 0);
+
+    this.saldoPendiente = totalCargosSinAlojamiento + this.totalAlojamientoNuevo - totalAbonos;
+
+    const fechaSalida = DateTime.fromISO(currentHuesped.salida.split("T")[0]);
+    const fechaLlegada = DateTime.fromISO(currentHuesped.llegada.split("T")[0]);
+    const luxonTodayDate = DateTime.fromJSDate(todayDate);
+
+    if (fechaSalida.startOf("day") >= luxonTodayDate.startOf("day")) {
+      const modalRef = this.modalService.open(AlertsComponent, { size: 'sm' });
+      modalRef.componentInstance.alertHeader = 'Advertencia';
+      modalRef.componentInstance.mensaje = 'La fecha de salida del huésped es posterior al día de hoy, ¿desea realizar un Check-Out anticipado?';
+      modalRef.result.then((result) => {
+        if (result === 'Aceptar') {
+          if (this.saldoPendiente === 0) {   
+            this.checkOutfunction();
+          } else {
+            this.promptToLiquidateAccount();
+          }
+        }
+        this.isLoading = false;
+        this.closeResult = `Closed with: ${result}`;
+      }, (reason) => {
+        this.isLoading = false;
+        this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      });
+    } else {
+      if (currentHuesped.pendiente === 0) {
+        this.onEstatusChange.emit({ huesped: currentHuesped, estatus, checkout: true });
+      } else {
+        this.promptToLiquidateAccount();
+      }
+    }
+  }
+
+  handleLoading(isLoading: boolean) {
+    this.loadingSubject.next(isLoading);
+  }
+
+  promptToLiquidateAccount() {
+    const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+    modalRef.componentInstance.alertHeader = 'Advertencia';
+    modalRef.componentInstance.mensaje = 'Aun queda Saldo pendiente en la cuenta, ¿desea liquidar la cuenta?';
+    
+    modalRef.result.then((result) => {
+      if (result === 'Aceptar') {
+        this.saldarCuenta();
+      }
+      this.closeResult = `Closed with: ${result}`;
+    }, (reason) => {
+      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+    });
+  }  
+
+  onEstatusUpdate(estatus:number){
+    const sb = this._estatusService.actualizaEstatus(estatus.toString(), this.folio, this.currentHuesped).subscribe({
+      next: () => {
+        this.isLoading = false;
+    
+        const statusMessages: { [key: number]: string } = {
+          3: "Reservación confirmada",
+          2: "Reservación realizada con éxito",
+          1: "Check-in realizado con éxito",
+          4: "Check-out realizado con éxito",
+          11: "No-show, para reactivar la reservación haga clic en el botón en la parte inferior",
+          12: "Reservación cancelada con éxito"
+        };
+    
+        this.onAlertMessage.emit({ tittle: 'ÉXITO', message: statusMessages[estatus] || '' });
+        this.onFetchReservations.emit();
+        this.closeModal();
+      },
+      error: (err) => {
+        if (err) {
+          this.isLoading = false;
+    
+          const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+          modalRef.componentInstance.alertHeader = 'ERROR';
+          modalRef.componentInstance.mensaje = 'Ocurrió un error al actualizar el estatus, vuelve a intentarlo';
+          modalRef.result.then(
+            result => {
+              this.closeResult = `Closed with: ${result}`;
+            },
+            reason => {
+              this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+            }
+          );
+    
+          setTimeout(() => {
+            modalRef.close('Close click');
+          }, 4000);
+        }
+      },
+      complete: () => {}
+    });
+  }
+
+  ///// NOT OPTIMIZED 
 
   async getCuentas(){
       this._edoCuentaService.getCuentas(this.currentHuesped.folio).subscribe({
@@ -274,96 +383,6 @@ export class EditReservaComponent implements OnInit, OnDestroy{
       this.onFetchReservations.emit(huesped);
     }
 
-    honCheckOut(estatus:number, folio:number){  
-      const todayDate = new Date();
-      let Difference_In_TimeFrom_Today = new Date(todayDate).getTime() - new Date(this.currentHuesped.llegada).getTime()
-      let Difference_In_TimeFrom_EndDate = new Date(this.currentHuesped.salida).getTime() - new Date(this.currentHuesped.llegada).getTime()
-
-      const nochesAlojadas = Math.ceil(Difference_In_TimeFrom_Today / (1000 * 3600 * 24));
-      const nochesReservadas = Math.ceil(Difference_In_TimeFrom_EndDate / (1000 * 3600 * 24));
-
-            if(nochesAlojadas===0){
-              this.nochesReales=1;
-            }
-
-            this.totalAlojamientoNuevo = 0//this.huesped.tarifa*this.nochesReales
-
-            const cargosSinAlojamiento:edoCuenta[] = this._edoCuentaService.currentCuentaValue.filter(cargos => cargos.Cargo! > 0 && cargos.Descripcion !='Alojamiento');
-            const abonos:edoCuenta[] = this._edoCuentaService.currentCuentaValue.filter(abonos=> abonos.Abono!>0)
-            const alojamientoAnterior = this._edoCuentaService.currentCuentaValue.filter(alojamiento => alojamiento.Descripcion =='Alojamiento' );
-            this.alojamiento_id = alojamientoAnterior[0]._id!
-
-            const totalAbonos = abonos.reduce((previous,current)=>previous+current.Abono!,0)
-            const totalCargosSinAlojamiento = cargosSinAlojamiento.reduce((previous,current)=>previous+current.Cargo!,0)
-
-            this.saldoPendiente = (totalCargosSinAlojamiento+this.totalAlojamientoNuevo)-totalAbonos
-
-            const fechaSalida = DateTime.fromISO(this.currentHuesped.salida.split("T")[0]);
-            const fechaLlegada = DateTime.fromISO(this.currentHuesped.llegada.split("T")[0]);
-            const luxonTodayDate = DateTime.fromJSDate(todayDate);
-
-            if(fechaSalida.startOf("day") >= luxonTodayDate.startOf("day") ){
-              const modalRef = this.modalService.open(AlertsComponent,{size:'sm'})
-              modalRef.componentInstance.alertHeader='Advertencia'
-              modalRef.componentInstance.mensaje = 'La fecha de salida del húesped es posterior al dia de hoy, desea realizar un Check-Out anticipado?'
-              modalRef.result.then((result) => {
-              if(result=='Aceptar'){
-                  if(this.saldoPendiente==0){   
-                    this.checkOutfunction()
-                  }else{
-                    this.isLoading=false
-                    const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-                    modalRef.componentInstance.alertHeader='Advertencia'
-                    modalRef.componentInstance.mensaje = 'Aun queda Saldo pendiente en la cuenta desea liquidar la cuenta?'
-                    modalRef.result.then((result) => {
-                      if(result=='Aceptar'){
-                        this.saldarCuenta();
-                      }
-                      else{
-                        this.closeResult = `Closed with: ${result}`;
-                      }
-                      }, (reason) => {
-                          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-                      });
-            
-                    }
-                  }
-                  if(result=='Close click')
-                  {
-                    this.isLoading=false
-                  }
-                  this.closeResult = `Closed with: ${result}`;
-                  }, (reason) => {
-                    console.log((reason));
-                    this.isLoading=false
-                    this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-                  });
-      }else {
-          if (this.currentHuesped.pendiente==0){
-            this.onEstatusChange.emit({huesped: this.currentHuesped,estatus:estatus, checkout:true});
-          }else{
-            this.isLoading=false
-
-            const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-            modalRef.componentInstance.alertHeader='Advertencia'
-            modalRef.componentInstance.mensaje = 'Aun queda Saldo pendiente en la cuenta desea liquidar la cuenta?'
-            
-            modalRef.result.then((result) => {
-              if(result=='Aceptar'){
-                this.saldarCuenta();
-                modalRef.close();
-              }
-              else{
-                this.closeResult = `Closed with: ${result}`;
-              }
-              }, (reason) => {
-                  this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-              });
-    
-          }
-        }
-    }
-
     saldarCuenta(){
     
       const modalRef = this.modalService.open(SaldoCuentaComponent,{size:'sm' , backdrop:'static'})
@@ -419,87 +438,6 @@ export class EditReservaComponent implements OnInit, OnDestroy{
         }
       });
       this.subscriptions.push(sb)
-    }
-
-    confirmaReserva(estatus:number,folio:string){
-      this.isLoading=true
-      let edoFiltrado : any
-      let totalCargos
-      let totalAbonos
-
-      if( estatus === 12 || estatus === 11 || estatus ===4 ){
-        edoFiltrado = this.currentEdoCuenta.filter((result)=> result.Abono! > 1)
-        
-        console.log(edoFiltrado) 
-
-        if(edoFiltrado.length<0){ 
-          for(let i=0; i<edoFiltrado.length; i++){
-            totalCargos = totalCargos + edoFiltrado[i].Cargo
-            totalAbonos = totalAbonos + edoFiltrado[i].Abono
-          }
-          if(totalAbonos<totalCargos){
-            this.onAlertMessage.emit({tittle: 'Advertencia', message:'El huesped tiene saldo a Favor, aplique una devolucion antes de darle Check-Out'});
-            return
-          }
-        }
-        this.isLoading=false
-      }
-          const sb = this._estatusService.actualizaEstatus(estatus.toString(),folio,this.currentHuesped)
-          .subscribe({
-            next:()=>{
-              this.isLoading=false
-              let mensaje_exito=''
-              switch (estatus) {
-                case 3:
-                  mensaje_exito = "Reservación confirmada";
-                  break;
-                case 2:
-                  mensaje_exito = "Reservación realizada con éxito";
-                  break;
-                case 1:
-                  mensaje_exito = "Check-in realizado con éxito";
-                  break;
-                case 4:
-                  mensaje_exito = "Check-out realizado con éxito";
-                  break;
-                case 11:
-                  mensaje_exito = "No-show, para reactivar la reservación haga clic en el botón en la parte inferior";
-                  break;
-                case 12:
-                  mensaje_exito = "Reservación cancelada con éxito";
-                  break;
-              }
-
-              this.onAlertMessage.emit({tittle: 'EXITO', message: mensaje_exito});
-              this.onFetchReservations.emit();
-
-                this.closeModal()
-
-            },
-            error:(err)=>{
-              if(err){
-
-                this.isLoading=false
-
-                const modalRef=this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-                modalRef.componentInstance.alertHeader='ERROR'
-                modalRef.componentInstance.mensaje='Ocurrio un Error al actualizar el estatus, vuelve a intentarlo'
-                modalRef.result.then((result) => {
-                  this.closeResult = `Closed with: ${result}`;
-                  }, (reason) => {
-                      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-                  });
-                  setTimeout(() => {
-                    modalRef.close('Close click');
-                  },4000)
-                    }
-            },
-            complete:()=>{
-      
-            
-            }
-          })
-        this.subscriptions.push(sb)
     }
     
     getDismissReason(reason: any): string {

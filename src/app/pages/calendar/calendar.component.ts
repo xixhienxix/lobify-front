@@ -177,7 +177,7 @@ export class CalendarComponent implements OnInit {
   }
 
   async checkAmaCodesIndexDB() {
-    const amaIndexDB: HouseKeeping[] = await this._housekeepingService.readIndexDB("houseKeeperCodes");
+    const amaIndexDB: HouseKeeping[] = await this._housekeepingService.readIndexDB("houseKeepingCodes");
     /** Check if RoomsCode are on IndexDb */
     if (amaIndexDB) {
       this.houseKeepingCodes = amaIndexDB
