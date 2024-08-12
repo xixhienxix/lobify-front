@@ -59,6 +59,7 @@ import { AlertsMessageInterface } from 'src/app/models/message.model';
             class="btn btn-danger btn-block"
             type="submit"
             style="width: 100%;"
+            (click)="confirmaReserva(11,currentHuesped.folio);"
           >
             No se presento
           </button>
@@ -116,7 +117,9 @@ export class ReservationActionsComponent {
 
   @Output() loadingEvent = new EventEmitter<boolean>();
   @Output() honAlertMessage: EventEmitter<AlertsMessageInterface> = new EventEmitter();
+  @Output() honSetStep: EventEmitter<number> = new EventEmitter();
   @Output() honEstatusUpdate: EventEmitter<number> = new EventEmitter();
+  @Output() honModificaReserva: EventEmitter<any> = new EventEmitter();
 
   get isReservable() {
     return ['Reserva Confirmada', 'Reserva Sin Pago', 'Reserva Temporal', 'Esperando Deposito', 'Deposito Realizado', 'Totalmente Pagada'].includes(this.estatus);
@@ -164,7 +167,7 @@ export class ReservationActionsComponent {
   }
 
   setStep(step: number) {
-    // Implement this method
+    this.honSetStep.emit(step);
   }
 
   openEnviarConfirmacion() {
@@ -172,7 +175,7 @@ export class ReservationActionsComponent {
   }
 
   openModifica() {
-    // Implement this method
+    this.honModificaReserva.emit();
   }
 
   todaysDateComparer() {

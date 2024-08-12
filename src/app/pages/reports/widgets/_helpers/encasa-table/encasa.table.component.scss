@@ -1,0 +1,42 @@
+.reservations-table {
+    width: 100%;
+    overflow-x: auto;
+  
+    .content-div {
+      padding: 16px;
+    }
+  
+    mat-tab-group {
+      width: 100%;
+    }
+  
+    table {
+      width: 100%;
+    }
+    .title-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+      }
+      .arrow-icon {
+        order: -1; /* Move the arrow icon to the left */
+        margin-right: 10px; /* Adjust the space between the arrow and the text */
+        font-size: 24px; /* Adjust the size of the arrow */
+      }
+      .title {
+        margin-right: 20px; /* Adjust as needed */
+      }
+      .description-container {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        width: 100%;
+      }
+      .description-container span {
+        margin-right: 10px; /* Adjust as needed */
+      }
+      .description-container button {
+        margin-left: auto;
+      }
+      
+  }

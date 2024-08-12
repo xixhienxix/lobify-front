@@ -223,6 +223,8 @@ export class CalendarComponent implements OnInit {
       modalRef.componentInstance.promesasDisplay = this.promesasDisplay
       modalRef.componentInstance.estatusArray = this.estatusArray
       modalRef.componentInstance.colorAmaLlaves = colorAma
+      modalRef.componentInstance.ratesArrayComplete = this.ratesArrayComplete
+      modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
       //DataSource Promesas
       modalRef.componentInstance.onEstatusChange.subscribe({
         next: (value: any) => {
@@ -323,6 +325,11 @@ export class CalendarComponent implements OnInit {
           });
         }
       })
+      modalRef.componentInstance.honUpdateHuesped.subscribe({
+        next:(value:any)=>{
+          console.log(value)
+        }
+      });
       // modalRef.componentInstance.onUpdateEstatusHuesped.subscribe({
       //   next: (huesped: Huesped) => {
       //     this.submitLoading = true;

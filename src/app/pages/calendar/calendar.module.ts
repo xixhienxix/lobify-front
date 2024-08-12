@@ -32,6 +32,7 @@ import { SaldoCuentaComponent } from './components/content/edit-reserva/componen
 import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { AjustesComponent } from './components/content/edit-reserva/components/transacciones/components/ajustes/ajustes.component';
 import { ReservationActionsComponent } from './components/content/edit-reserva/_helpers/action-buttons.component';
+import { ModificaReservaComponent } from './components/content/edit-reserva/components/modifica/modifica.reserva.component';
 
 
 @NgModule({
@@ -50,7 +51,8 @@ import { ReservationActionsComponent } from './components/content/edit-reserva/_
     EdoCuentaComponent,
     SaldoCuentaComponent,
     AjustesComponent,
-    ReservationActionsComponent
+    ReservationActionsComponent,
+    ModificaReservaComponent
   ],
   imports: [
     TranslateModule,

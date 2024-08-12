@@ -1,0 +1,97 @@
+<div class="reservations-table">
+    <mat-accordion displayMode="flat" class="example-headers-align" multi>
+            <mat-expansion-panel *ngFor="let reservation of dataSource" style="background-color: var(--deep-red-background); color: white;">
+                <mat-expansion-panel-header style="background-color: var(--header-background);">
+                  <mat-panel-title style="color: white;">
+                    {{reservation.folio}} 
+                  </mat-panel-title>
+                  <mat-panel-description>
+                    <div class="description-container" style="color: white;">
+                        <span>{{reservation.nombre}}</span>
+                        <button (click)="onButtonClick($event)" mat-button class="btn btn-danger" style="background-color: var(--deep-red-background); color: white;">Folio</button>
+                      </div>                  
+                    </mat-panel-description>
+                </mat-expansion-panel-header>
+                <div class="expansion-content">
+                    <div class="container">
+                      <div class="row">
+                        <!-- Group 1 -->
+                        <div class="col-6">
+                          <div class="row">
+                            <div class="col-6 text-left" style="font-size: 70%; font-weight: bold;">
+                              Habitacion
+                            </div>
+                            <div class="col-6 text-right" style="font-size: 70%;">
+                              {{reservation.numeroCuarto}}
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-6 text-left" style="font-size: 70%; font-weight: bold;">
+                              Origen
+                            </div>
+                            <div class="col-6 text-right" style="font-size: 70%;">
+                              {{reservation.origen}}
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-6 text-left" style="font-size: 70%; font-weight: bold;">
+                              Llegada
+                            </div>
+                            <div class="col-6 text-right" style="font-size: 70%;">
+                              {{formatISODateToCustom(reservation.llegada)}}
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-6 text-left" style="font-size: 70%; font-weight: bold;">
+                              Noches
+                            </div>
+                            <div class="col-6 text-right" style="font-size: 70%;">
+                              {{reservation.noches}}
+                            </div>
+                          </div>
+                        </div>
+                  
+                        <!-- Group 2 -->
+                        <div class="col-6">
+                          <div class="row">
+                            <div class="col-6 text-left" style="font-size: 70%; font-weight: bold;">
+                              Salida
+                            </div>
+                            <div class="col-6 text-right" style="font-size: 70%;">
+                              {{formatISODateToCustom(reservation.salida)}}
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-6 text-left" style="font-size: 70%; font-weight: bold;">
+                              Por Pagar
+                            </div>
+                            <div class="col-6 text-right" style="font-size: 70%;">
+                              ${{reservation.porPagar?.toLocaleString('es-MX')}}
+                            </div>
+                          </div>
+                          <div class="row">
+                            <div class="col-6 text-left" style="font-size: 70%; font-weight: bold;">
+                              Pendiente
+                            </div>
+                            <div class="col-6 text-right" style="font-size: 70%;">
+                              - ${{reservation.pendiente?.toLocaleString('es-MX')}}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+              </mat-expansion-panel>
+              <mat-expansion-panel *ngIf="dataSource.length === 0">
+                <mat-expansion-panel-header style="background-color: var(--header-background);">
+                    <mat-panel-title style="color: white;">
+                      Sin Llegadas 
+                    </mat-panel-title>
+                    <mat-panel-description>
+                                    
+                      </mat-panel-description>
+                  </mat-expansion-panel-header>
+              </mat-expansion-panel>
+      </mat-accordion>
+</div>

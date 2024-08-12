@@ -35,6 +35,10 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit{
     })
   }
 
+  occupancyPercentage(){
+    return Math.ceil((this.porcentajeOcupaccion.length / this.inventario.length) * 100)
+  }
+
   processReservations() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);

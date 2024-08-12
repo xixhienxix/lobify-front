@@ -41,7 +41,7 @@ import {MatCardModule} from '@angular/material/card';
     SortIconComponent,
     AlertsComponent,
     NgPagination,
-    InlineSpinnerComponent
+    InlineSpinnerComponent,
   ],
   imports: [
     CommonModule,
@@ -71,7 +71,7 @@ import {MatCardModule} from '@angular/material/card';
     ScheduleModule,
     RecurrenceEditorModule,
     MatCardModule,
-    MatButtonModule
+    MatButtonModule,
   ],
   exports: [
     KeeniconComponent,

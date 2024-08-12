@@ -174,7 +174,9 @@
     [currentEdoCuenta]="currentEdoCuenta"
     (loadingEvent)="handleLoading($event)" 
     (honAlertMessage)="honAlertMessage($event)"
-    (honEstatusUpdate)="onEstatusUpdate($event)"   
+    (honSetStep)="setStep($event)"
+    (honEstatusUpdate)="onEstatusUpdate($event)"  
+    (honModificaReserva)="openModifica()"
     >
   </app-reservation-actions>
 

@@ -49,7 +49,7 @@ export class DeparturesComponent implements OnInit{
 
         if (item.estatus === 'Check-Out') {
           this.yaSeFueron.push(item);
-        }if (item.origen === 'Check-In') {
+        }if (item.estatus === 'Huesped en Casa') {
           this.porSalir.push(item);
         }
       }

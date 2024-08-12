@@ -21,6 +21,8 @@ import { ParametrosService } from 'src/app/pages/parametros/_services/parametros
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 import { Edo_Cuenta_Service } from 'src/app/services/edoCuenta.service';
 import { edoCuenta } from 'src/app/models/edoCuenta.model';
+import { LogService } from 'src/app/services/activity-logs.service';
+import { AuthService } from 'src/app/modules/auth';
 
 @Component({
   selector: 'app-header',
@@ -76,6 +78,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   salidas:number;
   llegadas:number;
   allReservations:Huesped[]
+  currentUser:string;
 
   eventsSubject: Subject<Huesped[]> = new Subject<Huesped[]>();
   sendReservations: BehaviorSubject<Huesped[]> = new BehaviorSubject<Huesped[]>([]);
@@ -90,8 +93,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private _habitacionService:HabitacionesService,
     private _tarifasService:TarifasService,
     private _parametrosService:ParametrosService,
-    private _estadoDeCuenta: Edo_Cuenta_Service
+    private _estadoDeCuenta: Edo_Cuenta_Service,
+    private _logService: LogService,
+    private _authService: AuthService
   ) {
+    this.currentUser = this._authService.getUserInfo().username
     this.routingChanges();
   }
 
@@ -168,7 +174,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     // Secondary header
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.checkFoliadorIndexDB();
     this.checkEstatusIndexDB();
     this.checkRoomCodesIndexDB();
@@ -271,6 +277,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
         let pago:edoCuenta[]=[]; 
         
         huespedArray.map((item)=>{
+          this._logService.logNvaReserva('Created Nueva Reserva',this.currentUser, item.folio);
+
           pago.push({
             Folio:item.folio,
             Forma_de_Pago:'',
@@ -306,26 +314,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
             }
           }
         }); 
-
-
-
-
-        // this._huespedService.addPost(value).subscribe({
-        //   next:async (data)=>{
-        //     this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
-    
-        //     this.eventsSubject.next(value);
-        //     this.promptMessage('Exito','Reservacion Guardada con exito');
-        //     this.submitLoading=false
-    
-        //   },
-        //   error:()=>{
-        //     this.promptMessage('Error','La Reservacion no se pudo generar con exito intente nuevamente')
-        //   },
-        //   complete:()=>{
-        //     this.submitLoading=false
-        //   }
-        // })
       }
     })
     

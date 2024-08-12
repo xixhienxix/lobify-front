@@ -1,8 +1,14 @@
 <div class="modal-content">
     <div style="background-color: var(--deep-red-background);" class="modal-header">
-      <div style="text-align: center; color: white;" class="text-center modal-title h4 col-10"
+        <div style="text-align: left; color: white;" class="modal-title h4 col-4"
         id="example-modal-sizes-title-lg">
-        NUEVA RESERVA
+        FOLIO : {{currentHuesped.folio}}
+        <!-- <label>
+          {{huesped.folio}}</label> -->
+      </div>
+      <div style="text-align: center; color: white;" class="text-center modal-title h4 col-8"
+        id="example-modal-sizes-title-lg">
+        Modifica Reserva
         <!-- <label>
           {{huesped.folio}}</label> -->
       </div>
@@ -13,22 +19,39 @@
 <div  class="cursor-default overlay overlay-block modal-body" style="background-color: #e6e9ed;">
     <form [formGroup]="formGroup" class="form form-label-right" style="background-color: #e6e9ed">
 
-        <!--DatePicker-->
-          <mat-form-field style="margin-right: 12px;">
-            <mat-label>Seleccion de Fechas</mat-label>
-            <mat-date-range-input [rangePicker]="picker">
-              <input [formControl]="intialDateFC" matStartDate (dateChange)="addEventIntialDate('change', $event)" placeholder="Fecha de Llegada">
-              <input [formControl]="endDateFC"  matEndDate (dateChange)="addEventEndDate('change', $event)" placeholder="Fecha de Salida">
-            </mat-date-range-input>
-            <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-date-range-picker #picker></mat-date-range-picker>
-          </mat-form-field>
+        <div class="row" style="margin-bottom: 16px;">
+            <!-- Date Picker -->
+            <div class="col-4">
+              <mat-form-field style="width: 100%;">
+                <mat-label>Seleccion de Fechas</mat-label>
+                <mat-date-range-input [rangePicker]="picker">
+                  <input [formControl]="intialDateFC" matStartDate (dateChange)="addEventIntialDate('change', $event)" placeholder="Fecha de Llegada">
+                  <input [formControl]="endDateFC" matEndDate (dateChange)="addEventEndDate('change', $event)" placeholder="Fecha de Salida">
+                </mat-date-range-input>
+                <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <mat-date-range-picker #picker></mat-date-range-picker>
+              </mat-form-field>
+            </div>
+          
+            <!-- Noches -->
+            <div class="col-4 d-flex flex-column align-items-center">
+              <div class="label-text">Noches:</div>
+              <div class="value-text">
+                {{ stayNights }}
+              </div>
+            </div>
+          
+            <!-- Habitacion -->
+            <div class="col-4 d-flex flex-column align-items-center">
+              <div class="label-text">Habitacion Actual:</div>
+              <div class="value-text">
+                {{ currentHuesped.habitacion + '-' + currentHuesped.numeroCuarto }}
+              </div>
+            </div>
+          </div>
 
-          <label class="h1" style="padding-left: 5%;">Noches: </label>
-            <label style="padding-left: 5%; padding-top: 2%; color:#00506a; font-weight: bold;" class="h1">
-              {{ stayNights }}
-            </label>
+
 
             <div style="margin-top: 10px;" class="row">
               <div class="form-group col-lg-6">
@@ -48,12 +71,12 @@
                     name="adultos"
                     [value]="quantity"
                     formControlName="adultos"
-                    [class.is-invalid]="isControlInvalid('adultos')"
-                    [class.is-valid]="isControlValid('adultos')"
+                    [class.is-invalid]="isControlInvalidFirst('adultos')"
+                    [class.is-valid]="isControlValidFirst('adultos')"
                     >
                     <div
                     class="invalid-feedback"
-                    *ngIf="controlHasError('max', 'adultos')"
+                    *ngIf="controlHasErrorFirst('max', 'adultos')"
                     >
                     Maximo {{maxPeople}} Adultos
                     </div>
@@ -82,12 +105,12 @@
                     name="ninos"
                     [value]="quantityNin"
                     formControlName="ninos"
-                    [class.is-invalid]="isControlInvalid('ninos')"
-                    [class.is-valid]="isControlValid('ninos')"
+                    [class.is-invalid]="isControlInvalidFirst('ninos')"
+                    [class.is-valid]="isControlValidFirst('ninos')"
                     >
                   <div class="input-group-append"
                     class="invalid-feedback"
-                    *ngIf="controlHasError('maxlength', 'ninos')"
+                    *ngIf="controlHasErrorFirst('maxlength', 'ninos')"
                   >
                     Maximo {{ maxChildren }} Niños
                   </div>
@@ -103,17 +126,18 @@
 
             <div class="row" style="margin-top: 5px;">
               <label style="color:#00506a; font-weight: bold;" class="form-group col-lg-6" >Habitación </label>
+
               <div class="col-lg-12" style="margin-top:10px">
                 <mat-select #tipodeCuartoDropDown
                 class="form-control form-control-lg "
                 name="habitacion"
                 formControlName="habitacion"
-                placeholder="-- Seleccione Tipo de Habitación -- "
+                placeholder="-- Seleccione Tipo de Habitacion para cambio -- "
                 required
                 (selectionChange)="buscaDispo($event.value)"
                 >
                     <mat-option value="0">-- Selecciona Habitación --</mat-option>
-                    <mat-option value="1">Todos los Tipos de Cuartos</mat-option>
+                    <!-- <mat-option value="1">Todos los Tipos de Cuartos</mat-option> -->
                     <mat-option *ngFor="let tipoCuarto of roomCodes" [value]="tipoCuarto">{{tipoCuarto.Codigo.replace("_"," ")}} </mat-option>
                 </mat-select>
 
@@ -142,7 +166,7 @@
                     </mat-panel-description> 
                   </mat-expansion-panel-header>
                   <!-- [FIN] HEADER DEL ACCORDION DE DISPONIBILIDAD -->
-                  <mat-expansion-panel-header *ngIf="checkAvaibility(cuarto)" [ngStyle]="{'background-color': revisaCapacidad(cuarto) ? '#fa6d7c' : '#99d284' }">
+                  <mat-expansion-panel-header *ngIf="checkAvaibility(cuarto)" [ngStyle]="{'background-color': revisaCapacidad(cuarto) ? '#fa6d7c' : '#fa6d7c' }">
                     <mat-panel-title>
                       SIN DISPONIBILIDAD
                     </mat-panel-title>
@@ -156,7 +180,7 @@
                   <div  class="table-responsive angular-bootstrap-table">
 
                     <!-- CUANDO ES UN SOLO TIPO DE CUARTO EN CONSULTA -->
-                    <ng-container *ngIf="cuarto !== '1' || checkAvaibility(cuarto)" >
+                    <ng-container *ngIf="cuarto !== '1' || checkAvaibility(cuarto)">
                       <ng-container *ngFor="let codigosCuarto of availavilityCodeRooms; ">
                         <div *ngIf="codigosCuarto.Codigo===cuarto" style="font-weight:bold; color: rgba(128, 128, 128, 0.623);" class=" modal-header"><h2 style="color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2> (Cap. Max.: {{codigosCuarto.Adultos}})</div>
                       </ng-container>
@@ -212,8 +236,7 @@
                     <!-- [FIN] CUANDO ES UN SOLO TIPO DE CUARTO EN CONSULTA -->
 
                     <!-- CUANDO SE CONSULTAN TODOS LOS TIPOS DE CUARTO -->
-                    <ng-container *ngIf="cuarto === '1'">
-                      <!--CUANDO SE SELECCIONARON TODOS LOS CUARTOS-->
+                    <!-- <ng-container *ngIf="cuarto === '1'">
                       <ng-container *ngFor="let codigosCuarto of availavilityRooms; ">
                         <div style="color: black" [ngStyle]="{'background-color': revisaCapacidad(codigosCuarto.Codigo) ? '#fa6d7c' : '' }" class=" modal-header"><h2 style="font-weight: bold; color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2>                           
                           <small style="margin-left: 5%; margin-right: 5%; font-weight: bold; font: bold;" *ngIf="revisaCapacidad(codigosCuarto.Codigo)">
@@ -229,12 +252,12 @@
                             
                                 <ng-container matColumnDef="$ Promedio x Noche">
                                   <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-                                  <td mat-cell *matCellDef="let element">{{ratesTotalCalc(element,stayNights,codigosCuarto.Codigo,true) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td><!--{{ratesTotalCalc(element,stayNights)/stayNights}}-->
+                                  <td mat-cell *matCellDef="let element">{{ratesTotalCalc(element,stayNights,codigosCuarto.Codigo,true) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td>
                                 </ng-container>
                             
                                 <ng-container matColumnDef="Total">
                                   <th mat-header-cell *matHeaderCellDef> Total </th>
-                                  <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights,codigosCuarto.Codigo) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td><!--{{ratesTotalCalc(element,stayNights)}}-->
+                                  <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights,codigosCuarto.Codigo) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td>
                                 </ng-container>
                       
                                 <ng-container matColumnDef="Acciones">
@@ -246,7 +269,6 @@
                                   </td>
                                 </ng-container>
         
-                              <!--Habitacion List Column-->
                               <ng-container matColumnDef="disclaimer">
                                 <td mat-footer-cell *matFooterCellDef colspan="2">
                                   <section style="display: contents;
@@ -268,9 +290,7 @@
                             </table>
 
                     </ng-container>
-                    <!-- FIN DE SELECCION DE TODOS LOS CUARTOS -->
-                    </ng-container>
-                    <!-- [FIN] CUANDO SE CONSULTAN TODOS LOS TIPOS DE CUARTO -->
+                    </ng-container> -->
                   </div>
                 </mat-expansion-panel>
               </mat-accordion>
@@ -278,194 +298,113 @@
 <!--FIN DE DISPONIBILIDAD-->
 
 <br>
-
+<form [formGroup]="currentDataFormGroup">
     <div style="background-color:var(--deep-red-background);" class="modal-tittle">
-      <div style="color: white; padding-top: 1%; padding-bottom: 1%;" class="text-center modal-title h5 col-12">
-        Agrega Húesped
-      </div>
-     </div>
-
-    <div class="cursor-default  modal-body" style="background-color: #dadcdf">
-        <div class="row">
-          <div class="col-lg-12">
-            <label class="form-label">Nombre Completo</label>
-            <input
-              type="text"
-              class="form-control form-control-lg form-control-solid"
-              name="nombre"
-              placeholder="Nombre completo"
-              autocomplete="off"
-              [class.is-invalid]="isControlInvalid('nombre')"
-              formControlName="nombre"
-            /><!--[class.is-valid]="isControlValid('nombre')"-->
-            <div class="valid-feedback" *ngIf="isControlValid('nombre')">
-              Nombre Escrito Correctamente
-            </div>
-            <div
-              class="invalid-feedback"
-              *ngIf="controlHasError('required', 'nombre')"
-            >
-              Campo Requerido*
-            </div>
-            <div
-              class="invalid-feedback"
-              *ngIf="controlHasError('minlength', 'nombre')"
-            >
-              Minimo 3 letras
-            </div>
-            <div
-              class="invalid-feedback"
-              *ngIf="controlHasError('maxlength', 'nombre')"
-            >
-              Maximo 100 letras
-            </div>
-            <mat-error *ngIf="nombre!.errors?.required">
-              * Obligatorio
-            </mat-error>
-          </div>
+        <div style="color: white; padding-top: 1%; padding-bottom: 1%;" class="text-center modal-title h5 col-12">
+          Datos del Húesped
         </div>
-
-
-        <div class="form-group row">
-
-        <div class="col-lg-6">
-          <label class="form-label">Email</label>
-          <input
-            type="email"
-            class="form-control form-control-lg form-control-solid"
-            name="email"
-            placeholder="Email"
-            autocomplete="off"
-            formControlName="email"
-            [class.is-invalid]="isControlInvalid('email')"/>
-            <!--(input)="emailValidator($event.target.value)/>"-->
-          <!--
-          [class.is-invalid]="isControlInvalid('email')"
-            [class.is-valid]="isControlValid('email')"-->
-          <!-- <div class="valid-feedback" *ngIf="isControlValid('email')">
-            Email Escrito Correctamente
-          </div>
-          <div
-            class="invalid-feedback"
-            *ngIf="controlHasError('minlength', 'email')"
-          >
-            Minimo 3 letras
-          </div>
-          <div
-            class="invalid-feedback"
-            *ngIf="controlHasError('maxlength', 'email')"
-          >
-            Maximo 100 letras
-          </div>
-          <div
-          class="invalid-feedback"
-          *ngIf="controlHasError('pattern', 'email')"
-        >
-          Escriba un correo valido
-        </div> -->
-        </div>
-
-        <div class="col-lg-6">
-          <label class="form-label">Teléfono</label>
-          <input
-            type="tel"
-            class="form-control form-control-lg form-control-solid"
-            name="telefono"
-            placeholder="Teléfono"
-            autocomplete="off"
-            formControlName="telefono"
-            [class.is-invalid]="isControlInvalid('telefono')"
-            [class.is-valid]="isControlValid('telefono')"/>
-          <!-- <div class="invalid-feedback" *ngIf="isControlValid('telefono')">
-            Teléfono Invalido
-          </div> -->
-         <div class="valid-feedback" *ngIf="isControlValid('telefono')">
-            Teléfono Escrito Correctamente
-          </div>
-          <div
-            class="invalid-feedback"
-            *ngIf="controlHasError('minlength', 'telefono')"
-          >
-            Minimo 10 numeros
-          </div>
-          <div
-            class="invalid-feedback"
-            *ngIf="controlHasError('maxlength', 'telefono')"
-          >
-            Maximo 14 numeros
-          </div>
-          <div
-          class="invalid-feedback"
-          *ngIf="controlHasError('pattern', 'telefono')"
-          >
-           Solo se permiten letras
-        </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div style="background-color:var(--deep-red-background);" class="modal-header">
-      <div style="text-align: center; color: white;" class="text-center modal-title h4 col-12 "
-        id="example-modal-sizes-title-lg">
-       Confirmar el Tipo de Reserva
-          <div class="form-group row">
-            <div class="form-group col-lg-6 ">
-                  <button
-                  class="btn"
-                  style="background-color:var(--walkin-btn); width: 100%;"
-                  type="submit"
-                  name="estatus"
-                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !noDisabledCheckIn || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                  (click)="setEstatus(1);closeModal()"
-                  >
-                    Realiza Walk-In
-                  </button>
-            </div>
-            <div class="form-group col-lg-6 ">
-                  <button
-                  class="btn"
-                  style="background-color:var(--rsv-btn); width: 100%;"
-                  type="submit"
-                  name="estatus"
-                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                  (click)="setEstatus(2); closeModal()"
-                  >
-                    Agrega Reserva
-                  </button>
-            </div>
-            <div class="form-group col-lg-6 ">
-                  <button
-                  class="btn"
-                  style="background-color:var(--internal-use-btn); width: 100%;"
-                  type="submit"
-                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                  (click)="setEstatus(5);closeModal()"
-                  >
+       </div>
   
-                    Reserva Uso Interno
-                  </button>
-            </div>
-            <div class="form-group col-lg-6">
-                  <button
-                  
-                    class="btn"
-                    style="background-color:var(--temporal-rsv-btn); width: 100%;"
-                    type="submit"
-                    value="7"
-                    [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                    (click)="setEstatus(7); closeModal()"
-                    >
-                    Reserva Temporal
-                  </button>
+      <div class="cursor-default  modal-body" style="background-color: #dadcdf">
+          <div class="row">
+            <div class="col-lg-12">
+              <label class="form-label">Nombre Completo</label>
+              <input
+                type="text"
+                class="form-control form-control-lg form-control-solid"
+                name="nombre"
+                placeholder="Nombre completo"
+                autocomplete="off"
+                [value]="currentHuesped.nombre"
+                [class.is-invalid]="isControlInvalid('nombre')"
+                formControlName="nombre"
+              /><!--[class.is-valid]="isControlValid('nombre')"-->
+              <div class="valid-feedback" *ngIf="isControlValid('nombre')">
+                Nombre Escrito Correctamente
+              </div>
+              <div
+                class="invalid-feedback"
+                *ngIf="controlHasError('required', 'nombre')"
+              >
+                Campo Requerido*
+              </div>
+              <div
+                class="invalid-feedback"
+                *ngIf="controlHasError('minlength', 'nombre')"
+              >
+                Minimo 3 letras
+              </div>
+              <div
+                class="invalid-feedback"
+                *ngIf="controlHasError('maxlength', 'nombre')"
+              >
+                Maximo 100 letras
+              </div>
+              <mat-error *ngIf="nombre!.errors?.required">
+                * Obligatorio
+              </mat-error>
             </div>
           </div>
+  
+  
+          <div class="form-group row">
+  
+          <div class="col-lg-6">
+            <label class="form-label">Email</label>
+            <input
+              type="email"
+              class="form-control form-control-lg form-control-solid"
+              name="email"
+              placeholder="Email"
+              autocomplete="off"
+              [value]="currentHuesped.email"
+              formControlName="email"
+              [class.is-invalid]="isControlInvalid('email')"/>
+          </div>
+  
+          <div class="col-lg-6">
+            <label class="form-label">Teléfono</label>
+            <input
+              type="tel"
+              class="form-control form-control-lg form-control-solid"
+              name="telefono"
+              placeholder="Teléfono"
+              autocomplete="off"
+              [value]="currentHuesped.telefono"
+              formControlName="telefono"
+              [class.is-invalid]="isControlInvalid('telefono')"
+              [class.is-valid]="isControlValid('telefono')"/>
+            <!-- <div class="invalid-feedback" *ngIf="isControlValid('telefono')">
+              Teléfono Invalido
+            </div> -->
+           <div class="valid-feedback" *ngIf="isControlValid('telefono')">
+              Teléfono Escrito Correctamente
+            </div>
+            <div
+              class="invalid-feedback"
+              *ngIf="controlHasError('minlength', 'telefono')"
+            >
+              Minimo 10 numeros
+            </div>
+            <div
+              class="invalid-feedback"
+              *ngIf="controlHasError('maxlength', 'telefono')"
+            >
+              Maximo 14 numeros
+            </div>
+            <div
+            class="invalid-feedback"
+            *ngIf="controlHasError('pattern', 'telefono')"
+            >
+             Solo se permiten letras
+          </div>
+          </div>
+  
         </div>
-      </div>
-
-    
-
+      </div> 
 </form>
+</form>
+<button style="width: 100%;" class="btn btn-success" (click)="onSubmit()">Guardar Cambios</button>
 </div>
 
   

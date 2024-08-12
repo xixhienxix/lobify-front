@@ -1,57 +1,46 @@
-/* eslint-disable @angular-eslint/no-output-on-prefix */
-import {  AfterContentInit, AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, ChangeDetectorRef, Input, AfterViewInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { DateTime } from 'luxon';
+import { ModalDismissReasons, NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
+import { DisponibilidadService } from 'src/app/services/disponibilidad.service';
+import { DEFAULT_HUESPED, Huesped } from 'src/app/models/huesped.model';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
-import { ModalDismissReasons, NgbActiveModal, NgbDateAdapter, NgbDateParserFormatter, NgbModal, } from '@ng-bootstrap/ng-bootstrap';
-import { firstValueFrom } from 'rxjs';
+import { preAsig } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
 import { Habitacion } from 'src/app/models/habitaciones.model';
-import { Tarifas, TarifasRadioButton } from 'src/app/models/tarifas';
-import { DisponibilidadService } from 'src/app/services/disponibilidad.service';
-import { HabitacionesService } from 'src/app/services/habitaciones.service';
-import { TarifasService } from 'src/app/services/tarifas.service';
-import { CustomAdapter, CustomDateParserFormatter } from 'src/app/tools/date-picker.utils';
-import { Huesped } from 'src/app/models/huesped.model';
-import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
-import { Foliador } from 'src/app/pages/calendar/_models/foliador.model';
+import { TarifasRadioButton, Tarifas } from 'src/app/models/tarifas';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
-import { DateTime } from 'luxon'; 
-export interface preAsig {
-  numero:string,
-  codigo:string,
-  checked:boolean,
-  disabled:boolean
-}
+import { Foliador } from 'src/app/pages/calendar/_models/foliador.model';
+import { HuespedService } from 'src/app/services/huesped.service';
+
 
 @Component({
-  selector: 'app-edit-customer-modal',
-  templateUrl: './nva-reserva.component.html',
-  styleUrls: ['./nva-reserva.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-
-  // NOTE: For this example we are only providing current component, but probably
-  // NOTE: you will w  ant to provide your main App Module
-  providers: [
-    {provide: NgbDateAdapter, useClass: CustomAdapter},
-    {provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter},
-  ]
+  selector: 'app-modifica-reserva',
+  templateUrl: './modifica.reserva.component.html',
+  styleUrls: ['./modifica.reserva.component.scss']
 })
+export class ModificaReservaComponent implements OnInit , AfterViewInit{
 
-
-export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
-{
   constructor(
     private modal: NgbActiveModal,
     private fb: FormBuilder,
     private modalService:NgbModal,
     private _disponibilidadService: DisponibilidadService,
-    private changeDetector: ChangeDetectorRef
+    private changeDetector: ChangeDetectorRef,
+    private _huespedService: HuespedService,
+    private cdr: ChangeDetectorRef
   ){
-
+    // this._huespedService.currentHuesped$.subscribe({
+    //     next:(reserva:Huesped)=>{
+    //       this.currentHuesped = reserva
+    //     }
+    //   })
   }
 
   formGroup:FormGroup
   formGroup2:FormGroup
+  currentDataFormGroup:FormGroup
   isLoading:boolean=false;
   accordionDisplay="";
   bandera:boolean=false;
@@ -70,9 +59,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   /** Models */
   roomCodes:Habitacion[]=[];
   mySet = new Set();
-  mySetAvaible = new Set();
-
-  @Input() ratesArray:Tarifas[]=[];
   ratesArrayComplete:Tarifas[]=[]
   infoRoomsAndCodes:any=[];
   availavilityCodeRooms:Habitacion[]=[]
@@ -81,11 +67,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   filterRatesbyRoomName:Tarifas[]=[]
   roomCodesComplete:Habitacion[]=[]
   preAsignadasArray:preAsig[]=[]
-  @Input() standardRatesArray:Tarifas[]=[]
-  @Input() tempRatesArray:Tarifas[]=[]
-  @Input() checkOut:string
-  @Input() checkIn:string
-  @Input() zona:string='America/Mexico_City'
+
+
   estatusArray:Estatus[]=[];
   folios:Foliador[]=[];
   huespedInformation:Huesped[]=[];
@@ -121,7 +104,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   displayedColumnsFooter: string[] = ['Habitacion', 'Numero'];
 
   //**AGREGAR HUESPED TEMPALTE */
-  get nombre(){return this.formGroup.get('nombre')}
+  get nombre(){return this.currentDataFormGroup.get('nombre')}
   currentStatus:string='';
   currentFolio:Foliador;
   origenReserva:string='';
@@ -129,8 +112,11 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   todayDate:Date = new Date();
   // closeResult: string;
 
-  @Output() onNvaReserva: EventEmitter<Huesped[]> = new EventEmitter();
-  @Output() onGetDisponibilidad: EventEmitter<any> = new EventEmitter();
+  @Input() ratesArray:Tarifas[]=[];
+  @Input() standardRatesArray:Tarifas[]=[]
+  @Input() tempRatesArray:Tarifas[]=[]
+  @Input() currentHuesped:Huesped=DEFAULT_HUESPED
+  @Output() honUpdateHuesped: EventEmitter<Huesped[]> = new EventEmitter();
   get inputs() {
     return this.formGroup.controls["nombreHabs"] as FormArray;
   }
@@ -138,6 +124,12 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   async ngOnInit() {
 
+    // Initialize the form controls with the dates
+    this.intialDateFC = new FormControl(new Date(this.currentHuesped.llegada));
+    this.endDateFC = new FormControl(new Date(this.currentHuesped.salida));
+    this.stayNights = this.currentHuesped.noches
+
+    
     this.loadForm();
     this.todaysDateComparer();
   }
@@ -150,78 +142,78 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   onSubmit(){
     /**Check only one tarifa is selected per Room */
     if(this.formGroup.valid){
-      this.save();
-    }else if(this.formGroup.invalid)
-    {
+        if(this.currentDataFormGroup.valid){
+            this.save();
+        }else{
+            this.findInvalidControlsRecursive(this.currentDataFormGroup);
+        }
+    }else if(this.formGroup.invalid){
       this.findInvalidControlsRecursive(this.formGroup);
     }
   }
 
   save(){
     const formData = this.formGroup.value;
-    
+    const formCurrentData = this.currentDataFormGroup.value;
+
       for(let i=0; i<this.preAsignadasArray.length; i++){
         if(this.preAsignadasArray[i].checked === true){
           const tarifa  = this.tarifaSeleccionada.find(obj =>
             obj.Habitacion.some(item => item === this.preAsignadasArray[i].codigo));
 
-            let initialDate = DateTime.local().setZone(this.zona).set({
+            let initialDate = DateTime.local().set({
                 day:this.intialDate.getDate(),
                 month:this.intialDate.getMonth()+1,
                 year:this.intialDate.getFullYear(), 
-                hour:parseInt(this.checkOut.split(":")[0]),
-                minute:parseInt(this.checkOut.split(":")[1])
               }).toISO()
-              let endDate = DateTime.local().setZone(this.zona).set({
+              let endDate = DateTime.local().set({
                 day:this.endDate.getDate(),
                 month:this.endDate.getMonth()+1,
                 year:this.endDate.getFullYear(), 
-                hour:parseInt(this.checkIn.split(":")[0]),
-                minute:parseInt(this.checkIn.split(":")[1])
+
               }).toISO()
 
 
           const huesped = {
-            folio:this.currentFolio.Letra + this.currentFolio.Folio,
+            folio:this.currentHuesped.folio,
             adultos:this.quantity,
             ninos:this.quantityNin,
-            nombre:formData.nombre,
-            estatus: this.currentStatus,
+            nombre:this.currentDataFormGroup.controls["nombre"].value,
+            estatus: this.currentHuesped.estatus,
             llegada:initialDate ?? this.intialDate.toISOString(),
             salida:endDate ?? this.endDate.toISOString(),
             noches:this.stayNights,
             tarifa:tarifa === undefined ? '' : tarifa.Tarifa,
             porPagar:this.totalPorCuenta,
             pendiente:this.totalPorCuenta,
-            origen:this.origenReserva,
+            origen:this.currentHuesped.origen,
             habitacion:this.preAsignadasArray[i].codigo,
-            telefono:formData.telefono,
-            email:formData.email,
-            numeroDeCuarto:this.preAsignadasArray[i].numero,
-            creada:new Date().toISOString(),
-            motivo:'',
-            fechaNacimiento:'',
-            trabajaEn:'',
-            tipoDeID:'',
-            numeroDeID:'',
-            direccion:'',
-            pais:'',
-            ciudad:'',
-            codigoPostal:'',
-            lenguaje:'',
+            telefono:formCurrentData.telefono,
+            email:formCurrentData.email,
+            creada:this.currentHuesped.creada,
+            motivo:this.currentHuesped.motivo,
+            fechaNacimiento:this.currentHuesped.fechaNacimiento,
+            trabajaEn:this.currentHuesped.trabajaEn,
+            tipoDeID:this.currentHuesped.tipoDeID,
+            numeroDeID:this.currentHuesped.numeroDeID,
+            direccion:this.currentHuesped.direccion,
+            pais:this.currentHuesped.pais,
+            ciudad:this.currentHuesped.ciudad,
+            codigoPostal:this.currentHuesped.codigoPostal,
+            lenguaje:this.currentHuesped.lenguaje,
             numeroCuarto:this.preAsignadasArray[i].numero,
-            tipoHuesped:'',
-            notas:'',
-            vip:'',
-            ID_Socio:0,
-            estatus_Ama_De_Llaves:'LIMPIA',      
+            tipoHuesped:this.currentHuesped.tipoHuesped,
+            notas:this.currentHuesped.notas,
+            vip:this.currentHuesped.vip,
+            ID_Socio:this.currentHuesped.ID_Socio,
+            estatus_Ama_De_Llaves:this.currentHuesped.estatus_Ama_De_Llaves,      
           }
     
            this.huespedInformation.push(huesped)
         }
     }
     
-    this.onNvaReserva.emit(this.huespedInformation);
+    this.honUpdateHuesped.emit(this.huespedInformation);
     
   }
 
@@ -260,18 +252,25 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   loadForm(){
     this.formGroup = this.fb.group({
-      adultos:[{value:1, disabled:true }, Validators.required],
-      ninos:[{value:0,disabled:true}, Validators.required],
+      adultos:[{value:this.currentHuesped.adultos, disabled:true }, Validators.required],
+      ninos:[{value:this.currentHuesped.ninos,disabled:true}, Validators.required],
       habitacion:['', Validators.compose([Validators.required])],
       checkbox:[{value:false, disabled:true},Validators.required],
-      nombre: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
-      email: ['', Validators.compose([Validators.email,Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"),Validators.minLength(3),Validators.maxLength(50)])],
-      telefono: ['', Validators.compose([Validators.nullValidator,Validators.pattern('[0-9]+'),Validators.minLength(10),Validators.maxLength(14)])],
       searchTerm:['',Validators.maxLength(100)]
     });
+
+    this.currentDataFormGroup = this.fb.group({
+        nombre: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
+        email: ['', Validators.compose([Validators.email,Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"),Validators.minLength(3),Validators.maxLength(50)])],
+        telefono: ['', Validators.compose([Validators.nullValidator,Validators.pattern('[0-9]+'),Validators.minLength(10),Validators.maxLength(14)])],
+    })
     this.formGroup2 = this.fb.group({
       checkbox:[false,Validators.required],
     })
+
+    this.currentDataFormGroup.controls["nombre"].patchValue(this.currentHuesped.nombre);
+    this.currentDataFormGroup.controls["email"].patchValue(this.currentHuesped.email);
+    this.currentDataFormGroup.controls["telefono"].patchValue(this.currentHuesped.telefono);
 
 
   }
@@ -314,6 +313,10 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     if(this.preAsignadasArray.length >= 0){
       const index = this.preAsignadasArray.findIndex((item) => item.numero === numero)
       if(index != -1){
+        this.preAsignadasArray.forEach((item,index)=>{
+            item.checked = false;
+            item.disabled = false;
+        });
         this.preAsignadasArray[index].checked = checked
         this.preAsignadasArray[index].disabled = disabled
       }else{
@@ -322,7 +325,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     }else{
       this.preAsignadasArray.push({numero,codigo,checked, disabled})
     }
-    this.formGroup.controls
 }
 
 ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cuarto, tarifaPromedio:boolean = false){
@@ -528,12 +530,6 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
                   }) 
                 }
               });
-
-              const key = 'Codigo';
-
-              this.availavilityRooms = [...new Map(this.availavilityRooms.map(item =>
-                [item[key], item])).values()];
-
               this.availavilityRooms.forEach(item=>{
                 this.preAsignadasArray.push({
                   numero:item.Numero,
@@ -541,9 +537,9 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
                   checked:false,
                   disabled:true
                 })
-              })
-              console.log(this.availavilityRooms)
-          },
+              });
+              this.cdr.detectChanges(); // Manually trigger change detection if needed
+            },
           error:()=>{
           },
           complete:()=>{
@@ -772,28 +768,44 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
   /** End Custom Plus Minus Button */
 
   isControlValid(controlName: string): boolean {
-    const control = this.formGroup.controls[controlName];
+    const control = this.currentDataFormGroup.controls[controlName];
     return control.valid && (control.dirty || control.touched);
   }
 
   isControlInvalid(controlName: string): boolean {
-    const control = this.formGroup.controls[controlName];
+    const control = this.currentDataFormGroup.controls[controlName];
     return control.invalid && (control.dirty || control.touched);
   }
 
   controlHasError(validation:any, controlName:string): boolean {
-    const control = this.formGroup.controls[controlName];
+    const control = this.currentDataFormGroup.controls[controlName];
     return control.hasError(validation) && (control.dirty || control.touched);
   }
-
   isControlTouched(controlName:string): boolean {
+    const control = this.currentDataFormGroup.controls[controlName];
+    return control.dirty || control.touched;
+  }
+  //Second FormGroup
+  isControlTouchedFirst(controlName:string): boolean {
     const control = this.formGroup.controls[controlName];
     return control.dirty || control.touched;
   }
 
-  ngOnDestroy(): void {
-    
+  isControlValidFirst(controlName: string): boolean {
+    const control = this.formGroup.controls[controlName];
+    return control.valid && (control.dirty || control.touched);
   }
+
+  isControlInvalidFirst(controlName: string): boolean {
+    const control = this.formGroup.controls[controlName];
+    return control.invalid && (control.dirty || control.touched);
+  }
+
+  controlHasErrorFirst(validation:any, controlName:string): boolean {
+    const control = this.formGroup.controls[controlName];
+    return control.hasError(validation) && (control.dirty || control.touched);
+  }
+
 
   closeModal()
   {
@@ -892,5 +904,6 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
     }
   }
 
-}
 
+ 
+}

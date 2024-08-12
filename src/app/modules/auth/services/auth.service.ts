@@ -76,7 +76,6 @@ export class AuthService implements OnDestroy {
     );
   }
 
-
   logout() {
     localStorage.removeItem('ACCESS_TOKEN');
     this.router.navigate(['/auth/login'], {
@@ -169,6 +168,11 @@ export class AuthService implements OnDestroy {
       console.error(error);
       return undefined;
     }
+  }
+
+  getUserInfo(): any {
+    const userInfo = localStorage.getItem("USER");
+    return userInfo ? JSON.parse(userInfo) : null;
   }
 
   private tokenExpired(token: string) {

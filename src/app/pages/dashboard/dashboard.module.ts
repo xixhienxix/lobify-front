@@ -15,10 +15,14 @@ import { AbandonReservationsWidgetComponent } from './widgets/abandon-reservatio
 import { InHouseComponent } from '../reports/widgets/in-house/in-house.component';
 import { ArrivalsComponent } from '../reports/widgets/arrivals/arrivals.component';
 import { DeparturesComponent } from '../reports/widgets/departures/departures.component';
+import { SharedModule } from 'src/app/_metronic/shared/shared.module';
+import { LlegadasTableComponent } from '../reports/widgets/_helpers/llegadas-table/llegadas.table.component';
+import { SalidasTableComponent } from '../reports/widgets/_helpers/salidas-table/salidas.table.component';
+import { EnCasaTableComponent } from '../reports/widgets/_helpers/encasa-table/encasa.table.component';
 
 @NgModule({
   declarations: [DashboardComponent, CleanStatusWidgetComponent, OccupacyAndIncomeWidgetComponent, BadgeWidgetComponent, FutureReservationsComponent, CanceledReservationsComponent, TemporalReservationsWidgetComponent, AbandonReservationsWidgetComponent,
-    ArrivalsComponent, DeparturesComponent, InHouseComponent
+    ArrivalsComponent, DeparturesComponent, InHouseComponent, LlegadasTableComponent, SalidasTableComponent, EnCasaTableComponent
   ],
   imports: [
     TranslateModule,
@@ -31,6 +35,7 @@ import { DeparturesComponent } from '../reports/widgets/departures/departures.co
     ]),
     WidgetsModule,
     ModalsModule,
+    SharedModule
   ],
 })
 export class DashboardModule {}

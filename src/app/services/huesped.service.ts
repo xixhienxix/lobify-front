@@ -133,6 +133,11 @@ export class HuespedService {
       )
     }
 
+    updateHuespedModifica(huespedAnterior:any){
+      return this.http
+      .post(environment.apiUrl+'/reportes/actualiza/huesped/modifica',{huespedAnterior})
+    }
+
     updateEstatusHuesped(huesped:Huesped,){
       return this.http.post(environment.apiUrl+'/actualiza/estatus/huesped',{huesped})
     }

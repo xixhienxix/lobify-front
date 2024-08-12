@@ -1,6 +1,6 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewEncapsulation } from '@angular/core';
-import { ModalDismissReasons, NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ModalDismissReasons, NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { DEFAULT_HUESPED, Huesped } from 'src/app/models/huesped.model';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { HuespedService } from 'src/app/services/huesped.service';
@@ -19,6 +19,9 @@ import { SaldoCuentaComponent } from './components/edoCuenta/components/saldar.c
 import { edoCuenta } from 'src/app/models/edoCuenta.model';
 import { EstatusService } from '../../../_services/estatus.service';
 import { Codigos } from 'src/app/models/codigos.model';
+import { ModificaReservaComponent } from './components/modifica/modifica.reserva.component';
+import { NvaReservaComponent } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
+import { Tarifas } from 'src/app/models/tarifas';
 
 @Component({
   selector: 'app-edit-reserva',
@@ -73,10 +76,12 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   @Input() currentRoom:Habitacion;
   @Input() codigosCargo:Codigos[]
   @Input() folio:string
+  @Input() ratesArrayComplete:Tarifas[]=[]
+  @Input() roomCodesComplete:Habitacion[]=[]
+
 
   @Output() onAgregarPago: EventEmitter<edoCuenta> = new EventEmitter();
   @Output() onEditRsv: EventEmitter<Huesped[]> = new EventEmitter();
-  @Output() onOpenModifica: EventEmitter<Huesped> = new EventEmitter();
   @Output() onOpenEnviarReservacion: EventEmitter<boolean> = new EventEmitter();
   @Output() onGetAdicionales: EventEmitter<boolean> = new EventEmitter();
   @Output() onGetPromesas: EventEmitter<string> = new EventEmitter();
@@ -89,6 +94,7 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   @Output() onCheckOut: EventEmitter<any> = new EventEmitter();
   @Output() onFetchReservations: EventEmitter<Huesped> = new EventEmitter();
   @Output() onActualizarCuenta: EventEmitter<any> = new EventEmitter();
+  @Output() honUpdateHuesped: EventEmitter<any> = new EventEmitter();
   constructor(      
     public modal: NgbActiveModal,
     private modalService: NgbModal,
@@ -257,6 +263,68 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     });
   }
 
+  setStep(index:number){
+    this.selectedIndex=index;
+  }
+
+  openModifica(){
+    const standardRatesArray = this.ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa Base');
+    const tempRatesArray = this.ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa De Temporada');
+    const roomCodes = Object.values(
+      this.roomCodesComplete.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
+    ); 
+
+    const modalRef = this.modalService.open(ModificaReservaComponent,{ size: 'lg', backdrop:'static' })  
+    modalRef.componentInstance.currentHuesped = this.currentHuesped;
+    // modalRef.componentInstance.adultos = this.currentHuesped.adultos;
+    // modalRef.componentInstance.ninos = this.currentHuesped.ninos;
+    modalRef.componentInstance.estatusArray = this.estatusArray
+    modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
+    modalRef.componentInstance.roomCodes=roomCodes
+    modalRef.componentInstance.ratesArrayComplete = this.ratesArrayComplete
+    modalRef.componentInstance.standardRatesArray = standardRatesArray
+    modalRef.componentInstance.tempRatesArray = tempRatesArray
+    modalRef.componentInstance.honUpdateHuesped.subscribe({
+      next:async (huespedArray:Huesped[])=>{
+        let pago:edoCuenta=
+        {Folio:'',
+            Forma_de_Pago:'',
+            Fecha:new Date(),
+                  Descripcion:'HOSPEDAJE',
+                  Cantidad:1,
+                  Cargo:0,
+                  Abono:0,
+                  Total:0,
+                  Estatus:'Activo'}
+        
+        huespedArray.map((item)=>{
+          pago={
+            Folio:item.folio,
+            Forma_de_Pago:'',
+            Fecha:new Date(),
+                  Descripcion:'HOSPEDAJE',
+                  Cantidad:1,
+                  Cargo:item.pendiente,
+                  Abono:0,
+                  Total:item.pendiente,
+                  Estatus:'Activo',
+          }
+        });
+        this.honUpdateHuesped.emit({updatedHuesped:huespedArray,pago})
+
+      }
+    })
+    
+    modalRef.result.then((result) => {
+        console.log(result)
+      this.closeResult = `Closed with: ${result}`;
+      }, (reason) => {
+          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      });
+  
+      return
+  }
+
   ///// NOT OPTIMIZED 
 
   async getCuentas(){
@@ -283,10 +351,6 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     if(flag){
       await this.getCuentas();
     }
-  }
-
-  setStep(index:number){
-    this.selectedIndex=index;
   }
 
   backgroundColor(estatus:string){
@@ -328,10 +392,6 @@ export class EditReservaComponent implements OnInit, OnDestroy{
         return false
       }
   }
-
-    openModifica(){
-      this.onOpenModifica.emit(this.currentHuesped);
-    }
 
     onChangeAma(cuarto:string,estatus:string){
       this.colorAma = this.houseKeepingCodes.find((item)=> item.Descripcion === estatus)!?.Color

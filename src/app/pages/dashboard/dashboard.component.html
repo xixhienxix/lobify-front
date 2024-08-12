@@ -2,13 +2,10 @@
 <!-- begin::Row -->
 <div class="row gy-5 g-xl-8">
     <div class="col-xl-4">
-      <!--class="card card-xl-stretch mb-xl-8"-->
-      <ng-container>
         <app-arrivals 
         [changing]="changingValue"
         [allReservations]="allReservations"
         ></app-arrivals>
-      </ng-container>
     </div>
     <div class="col-xl-4">
       <app-departures
@@ -48,33 +45,43 @@
 </div>
 <!--end::Row-->
 <!-- begin::Row -->
-<div class="row g-5 g-xl-8">
-  <div class="col-xl-3">
-    <app-future-reservations
-      [allReservations]="allReservations"
-      [changing]="changingValue"
-    ></app-future-reservations>
-  </div>
+<div class="container mt-3">
+  <div class="row g-5 g-xl-8 flex-equal-height">
+    <div class="col-xl-3 col-lg-6 col-md-12 mb-4">
+      <div class="child-item">
+        <app-future-reservations
+          [allReservations]="allReservations"
+          [changing]="changingValue"
+        ></app-future-reservations>
+      </div>
+    </div>
 
-  <div class="col-xl-3">
-    <app-canceled-reservations
-      [allReservations]="allReservations"
-      [changing]="changingValue"
-    ></app-canceled-reservations>
-  </div>
+    <div class="col-xl-3 col-lg-6 col-md-12 mb-4">
+      <div class="child-item">
+        <app-canceled-reservations
+          [allReservations]="allReservations"
+          [changing]="changingValue"
+        ></app-canceled-reservations>
+      </div>
+    </div>
 
-  <div class="col-xl-3">
-    <app-temporal-reservations-widget
-      [allReservations]="allReservations"
-      [changing]="changingValue"
-    ></app-temporal-reservations-widget>
-  </div>
+    <div class="col-xl-3 col-lg-6 col-md-12 mb-4">
+      <div class="child-item">
+        <app-temporal-reservations-widget
+          [allReservations]="allReservations"
+          [changing]="changingValue"
+        ></app-temporal-reservations-widget>
+      </div>
+    </div>
 
-  <div class="col-xl-3">
-    <app-abandon-reservations-widget
-      [allReservations]="allReservations"
-      [changing]="changingValue"
-    ></app-abandon-reservations-widget>
+    <div class="col-xl-3 col-lg-6 col-md-12 mb-4">
+      <div class="child-item">
+        <app-abandon-reservations-widget
+          [allReservations]="allReservations"
+          [changing]="changingValue"
+        ></app-abandon-reservations-widget>
+      </div>
+    </div>
   </div>
 </div>
 <!-- end::Row -->

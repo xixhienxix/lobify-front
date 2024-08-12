@@ -98,7 +98,8 @@ export class ContentComponent implements OnInit{
     0:'#99d284',
     1:'#fab3db',
     2:'#d0aaec',
-    3:'#fac34e'
+    3:'#fac34e',
+    4:'#DD4F5D'
 
     //#fab3db - Reserva Temporal
     //#d0aaec - Reserva Uso Temporal
@@ -175,7 +176,7 @@ export class ContentComponent implements OnInit{
             Folio: item.folio,
             Codigo: item.habitacion,
             Numero: item.numeroCuarto,
-            CategoryColor:item.origen === 'Walk-In' ? this.colorDict[0] : item.origen === 'Reserva' ? this.colorDict[3] : item.origen === 'Reserva Temporal' ? this.colorDict[1] : item.origen === 'Uso Interno' ? this.colorDict[2] : this.colorDict[3]
+            CategoryColor:item.origen === 'Reserva' && item.estatus === 'Huesped en Casa' ? this.colorDict[0] : item.estatus === 'No Show' ? this.colorDict[4] : item.origen === 'Walk-In' ? this.colorDict[0] : item.origen === 'Reserva' ? this.colorDict[3] : item.origen === 'Reserva Temporal' ? this.colorDict[1] : item.origen === 'Uso Interno' ? this.colorDict[2] : this.colorDict[3]
           }
         this.datasourceArray.push(pushArray)
       })

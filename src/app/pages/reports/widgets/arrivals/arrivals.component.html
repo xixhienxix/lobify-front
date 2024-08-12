@@ -58,5 +58,21 @@
 </div>
 <!-- end::Body -->
 <!--begin::Button-->
-    <button mat-flat-button class="align-items-center p-5 mb-7 w-100 fw-bolder fs-2" style="background-color: var(--deep-red-background); color: white; text-align: center;" >{{"ArrivalsComponent.go-to-reports" | translate}}</button>
+<div class="container mt-3" >
+    <div class="row">
+      <div class="col">
+        <label class="font-weight-bold text-left" style="margin-left: 10%;"> # Reserva</label>
+      </div>
+      <div class="col">
+        <label class="font-weight-bold text-left" style="margin-left: 10%;">Húesped</label>
+      </div>
+      <div class="col">
+        <label class="font-weight-bold text-left">Acciones</label>
+      </div>
+    </div>
+    <app-llegadas-table
+      [dataSource]="porLlegar"
+    ></app-llegadas-table>
+    <br>
+</div>
 <!-- end::Button-->
