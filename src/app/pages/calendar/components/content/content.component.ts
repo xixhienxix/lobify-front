@@ -258,8 +258,10 @@ export class ContentComponent implements OnInit{
       //TaskID NumCuarto
         args.cancel = true;
         const events = this.scheduleObj.getEvents();
-        const codigoCuarto = events.find(item=>item.ProjectId === args.data.ProjectId)?.Codigo;
         const numeroCuarto = events.find(item=>item.TaskId === args.data.TaskId)?.Numero;
+        const codigoCuarto = this.roomCodesComplete.find(item=>item.Numero === numeroCuarto)?.Codigo;
+
+
         // const ProjectId = this.checkGroupId(item.habitacion),
         // const TaskId = this.checkTaskID(item.numeroCuarto),
         this.honNvaRsvDateRange.emit({ data:args.data, numeroCuarto, codigoCuarto});
