@@ -121,7 +121,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   currentStatus:string='';
   currentFolio:Foliador;
   origenReserva:string='';
-  noDisabledCheckIn:boolean;
+  noDisabledCheckIn:boolean=true;
   todayDate:Date = new Date();
   // closeResult: string;
 
@@ -149,7 +149,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   async ngOnInit() {
 
     this.loadForm();
-    this.todaysDateComparer();
+    this.todaysDateComparer(this.checkCheckInIntial);
 
     if(this.startTime !== '' && this.endTime !== ''){
       this.updateDatePicker(this.startTime,this.endTime);
@@ -174,6 +174,16 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
       this.getDisponibilidad(this.intialDate, this.endDate, this.cuarto, this.stayNights, "No Folio");
     }  
   }
+
+    // Method to manually set a FormControl to valid
+    setFormControlToValid(controlName: string) {
+      const control = this.formGroup.get(controlName);
+      if (control) {
+        control.setErrors(null); // Clear all errors
+        control.markAsTouched(); // Mark the control as touched if needed
+        control.updateValueAndValidity(); // Update its validity status
+      }
+    }
 
   ngAfterViewInit(): void {
     this.changeDetector.detectChanges();
@@ -286,9 +296,9 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     }
   }
 
-  todaysDateComparer(){
+  todaysDateComparer(initialDate:Date){
         //Disable CheckIn if the sTart Day is not today
-        if(this.checkCheckInIntial.setHours(0,0,0,0) === this.todayDate.setHours(0,0,0,0)) {
+        if(initialDate.setHours(0,0,0,0) === this.todayDate.setHours(0,0,0,0)) {
           this.noDisabledCheckIn=true
         }     
         else{
@@ -693,7 +703,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
     this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
 
     this.resetDispo();
-    this.todaysDateComparer();
+    this.todaysDateComparer(this.intialDate);
   }
 
   addEventEndDate(type: string, event: MatDatepickerInputEvent<Date>) {
@@ -706,7 +716,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
     this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
 
     this.resetDispo();
-    this.todaysDateComparer();
+    this.todaysDateComparer(this.endDate);
 
   }
 

@@ -298,6 +298,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
           takeUntil(this.ngUnsubscribe))
           .subscribe({
             next: async (value)=>{
+              
             this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
             this.eventsSubject.next(value);
             this.promptMessage('Exito','Reservacion Guardada con exito');

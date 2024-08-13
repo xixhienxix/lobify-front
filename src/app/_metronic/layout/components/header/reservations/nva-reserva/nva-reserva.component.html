@@ -469,7 +469,7 @@
                   style="background-color:var(--walkin-btn); width: 100%;"
                   type="submit"
                   name="estatus"
-                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !noDisabledCheckIn || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
+                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || noDisabledCheckIn || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
                   (click)="setEstatus(1);closeModal()"
                   >
                     Realiza Walk-In
@@ -481,7 +481,7 @@
                   style="background-color:var(--rsv-btn); width: 100%;"
                   type="submit"
                   name="estatus"
-                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
+                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') ||  cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
                   (click)="setEstatus(2); closeModal()"
                   >
                     Agrega Reserva
@@ -492,7 +492,7 @@
                   class="btn"
                   style="background-color:var(--internal-use-btn); width: 100%;"
                   type="submit"
-                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
+                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') ||  cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
                   (click)="setEstatus(5);closeModal()"
                   >
   
@@ -506,7 +506,7 @@
                     style="background-color:var(--temporal-rsv-btn); width: 100%;"
                     type="submit"
                     value="7"
-                    [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !isControlValid('habitacion') || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
+                    [disabled]="preAsignadasArray.length===0||!isControlValid('nombre')  || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
                     (click)="setEstatus(7); closeModal()"
                     >
                     Reserva Temporal
