@@ -1,5 +1,5 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
-import {  AfterContentInit, AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewEncapsulation } from '@angular/core';
+import {  AfterContentInit, AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewEncapsulation } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
@@ -81,11 +81,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   filterRatesbyRoomName:Tarifas[]=[]
   roomCodesComplete:Habitacion[]=[]
   preAsignadasArray:preAsig[]=[]
-  @Input() standardRatesArray:Tarifas[]=[]
-  @Input() tempRatesArray:Tarifas[]=[]
-  @Input() checkOut:string
-  @Input() checkIn:string
-  @Input() zona:string='America/Mexico_City'
+
   estatusArray:Estatus[]=[];
   folios:Foliador[]=[];
   huespedInformation:Huesped[]=[];
@@ -111,7 +107,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   /** Flags */
   dropDownHabValueIndex:any
-  cuarto:string=''
   variable:boolean[]=[]
 
 
@@ -129,6 +124,20 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   todayDate:Date = new Date();
   // closeResult: string;
 
+  @Input() standardRatesArray:Tarifas[]=[]
+  @Input() tempRatesArray:Tarifas[]=[]
+  @Input() checkOut:string
+  @Input() checkIn:string
+  @Input() zona:string='America/Mexico_City'
+
+  //On Calendar Trigger DefaultValue
+  @Input() numeroCuarto:string=''
+  @Input() rsvFromCalendar:boolean=false
+  @Input() startTime:string=''
+  @Input() endTime:string=''
+  @Input()cuarto:string=''
+
+
   @Output() onNvaReserva: EventEmitter<Huesped[]> = new EventEmitter();
   @Output() onGetDisponibilidad: EventEmitter<any> = new EventEmitter();
   get inputs() {
@@ -140,12 +149,30 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
     this.loadForm();
     this.todaysDateComparer();
+    if(this.startTime !== '' && this.endTime !== ''){
+      this.updateDatePicker(this.startTime,this.endTime);
+      this.intialDate = new Date(this.startTime);
+      this.endDate = new Date(this.endTime);
+      //Minus 1 day 
+      this.endDate.setDate(this.endDate.getDate() - 1);
+
+      let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
+      this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+
+      this.getDisponibilidad(this.intialDate, this.endDate, this.cuarto, this.stayNights, "No Folio");
+    }  
   }
 
   ngAfterViewInit(): void {
     this.changeDetector.detectChanges();
   }
 
+  updateDatePicker(newStartTime: string, newEndTime: string): void {
+    const newInitialDate = new Date(newStartTime);
+    const newEndDate = new Date(new Date(newEndTime).valueOf() - 1000 * 3600 * 24);
+    this.intialDateFC.setValue(newInitialDate);
+    this.endDateFC.setValue(newEndDate);
+  }
 
   onSubmit(){
     /**Check only one tarifa is selected per Room */
@@ -245,12 +272,11 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
         return false
       }
     }
-    
   }
 
   todaysDateComparer(){
         //Disable CheckIn if the sTart Day is not today
-        if(this.intialDate.setHours(0,0,0,0) == this.todayDate.setHours(0,0,0,0)) {
+        if(this.intialDate.setHours(0,0,0,0) === this.todayDate.setHours(0,0,0,0)) {
           this.noDisabledCheckIn=true
         }     
         else{
@@ -470,7 +496,72 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
     return tarifaTotal
   }
 
+  getDisponibilidad(intialDate:Date,endDate:Date, habitacion:string, stayNights:number, folio:string){
+    this._disponibilidadService.getDisponibilidad(intialDate,endDate, habitacion, stayNights, folio)
+    .subscribe({      
+        next:(response)=>{
+
+              this.roomCodesComplete.forEach((val)=>{ this.mySet.add(val.Numero) })
+              //ELimina habitaciones no disponibles del Set
+              response.forEach((val)=>{this.mySet.delete(val)})   
+            //}
+
+            this.mySet.forEach((value)=> {
+              const results = this.roomCodesComplete.find((item) => item.Numero === value )  
+              const filterResultRoomCode = this.roomCodes.find((val)=> val.Numero === value);
+
+              if(filterResultRoomCode !== undefined){
+                this.availavilityCodeRooms.push(filterResultRoomCode);
+              }
+
+              if(results !== undefined){
+                this.availavilityRooms.push(results);
+                this.infoRoomsAndCodes.push({
+                  nombreHabitacion:value,
+                  tipodeCuarto:results.Codigo
+                }) 
+              }
+            });
+
+            // const key = 'Codigo';
+
+            // this.availavilityRooms = [...new Map(this.availavilityRooms.map(item =>
+            //   [item[key], item])).values()];
+
+            this.availavilityRooms.forEach(item=>{
+              this.preAsignadasArray.push({
+                numero:item.Numero,
+                codigo:item.Codigo,
+                checked:false,
+                disabled:true
+              })
+            })
+
+            if(this.cuarto === '1'){
+              const availavilityRooms = Object.values(this.availavilityRooms.reduce((acc, item) => {
+                if (!acc[item.Codigo]) {
+                  acc[item.Codigo] = item;
+                }
+                return acc;
+              }, {}));
+              console.log(availavilityRooms)
+
+            }
+            console.log(this.availavilityRooms)
+        },
+        error:()=>{
+        },
+        complete:()=>{
+          this.accordionDisplay=''
+          this.isLoading=false;
+          this.changeDetector.detectChanges();
+
+        }}
+    )
+  }
+
   buscaDispo(habitacion:any){
+    this.rsvFromCalendar=false
     // No Option Selected
     this.resetDispo();
 
@@ -491,7 +582,6 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
 
     this.filterRates();
 
-
     this.maxPeopleCheck(habitacion);
 
     if(this.selectedRoom === '1'){
@@ -502,58 +592,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
       this.dropDownHabValueIndex=''
     }
 
-      this._disponibilidadService.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio)
-      .subscribe(
-        {      
-          next:(response)=>{
-
-                this.roomCodesComplete.forEach((val)=>{ this.mySet.add(val.Numero) })
-                //ELimina habitaciones no disponibles del Set
-                response.forEach((val)=>{this.mySet.delete(val)})   
-              //}
-  
-              this.mySet.forEach((value)=> {
-                const results = this.roomCodesComplete.find((item) => item.Numero === value )  
-                const filterResultRoomCode = this.roomCodes.find((val)=> val.Numero === value);
-  
-                if(filterResultRoomCode !== undefined){
-                  this.availavilityCodeRooms.push(filterResultRoomCode);
-                }
-  
-                if(results !== undefined){
-                  this.availavilityRooms.push(results);
-                  this.infoRoomsAndCodes.push({
-                    nombreHabitacion:value,
-                    tipodeCuarto:results.Codigo
-                  }) 
-                }
-              });
-
-              const key = 'Codigo';
-
-              this.availavilityRooms = [...new Map(this.availavilityRooms.map(item =>
-                [item[key], item])).values()];
-
-              this.availavilityRooms.forEach(item=>{
-                this.preAsignadasArray.push({
-                  numero:item.Numero,
-                  codigo:item.Codigo,
-                  checked:false,
-                  disabled:true
-                })
-              })
-              console.log(this.availavilityRooms)
-          },
-          error:()=>{
-          },
-          complete:()=>{
-            this.accordionDisplay=''
-            this.isLoading=false;
-            this.changeDetector.detectChanges();
-
-          }}
-      )
-    // this.onGetDisponibilidad.emit({intialDate:this.intialDate, endDate:this.endDate, habitacion:habitacion, stayNights:this.stayNights, folio:folio});
+    this.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio);
   }
 
   revisaCapacidad(codigoCuarto:string){

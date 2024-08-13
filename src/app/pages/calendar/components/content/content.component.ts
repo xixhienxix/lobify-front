@@ -117,6 +117,7 @@ export class ContentComponent implements OnInit{
   @Output() honEditRsv: EventEmitter<any> = new EventEmitter();
   @Output() onChangeEstatus: EventEmitter<any> = new EventEmitter();
   @Output() onRefreshingFinished: EventEmitter<boolean> = new EventEmitter();
+  @Output() honNvaRsvDateRange: EventEmitter<any> = new EventEmitter();
 
   @ViewChild("scheduleObj") public scheduleObj: ScheduleComponent;
 
@@ -244,15 +245,25 @@ export class ContentComponent implements OnInit{
    * @param args This functions is to fill the dropdown of Time that appears whenever yo create or modifiy and existing reservation
    */
   onPopupOpen = (args:any) => {
-   if (args.type === 'Editor' || args.type === 'QuickInfo')  {
-    args.cancel = true;
-    // const huesped = this.reservacionesArray.find((item)=>
-    //   item.folio === args.data.Folio    
-    // )
-    //if(huesped !== undefined){
     if(args.data.hasOwnProperty("Folio")){
-      this.honEditRsv.emit({row:args,folio:args.data.Folio});
-    }    //}
+      if (args.type === 'Editor' || args.type === 'QuickInfo')  {
+        args.cancel = true;
+    
+        if(args.data.hasOwnProperty("Folio")){
+          this.honEditRsv.emit({row:args,folio:args.data.Folio});
+        }    //}
+        }
+    }else if(args.type === 'QuickInfo'){
+      //PorjectID Hab
+      //TaskID NumCuarto
+        args.cancel = true;
+        const events = this.scheduleObj.getEvents();
+        const codigoCuarto = events.find(item=>item.ProjectId === args.data.ProjectId)?.Codigo;
+        const numeroCuarto = events.find(item=>item.TaskId === args.data.TaskId)?.Numero;
+        // const ProjectId = this.checkGroupId(item.habitacion),
+        // const TaskId = this.checkTaskID(item.numeroCuarto),
+        this.honNvaRsvDateRange.emit({ data:args.data, numeroCuarto, codigoCuarto});
+      
     }
   }
   /**
@@ -309,12 +320,15 @@ onDataBound(){
       endDate.setDate(startDate.getDate() + 1); // add one day
       const events = this.scheduleObj.getEvents(startDate, endDate);
       const cellProjectId = this.scheduleObj.getResourcesByIndex(Number(cell.getAttribute("data-group-index"))).groupData!.ProjectId;        
-      events.forEach(event => {
-          if (event.ProjectId === cellProjectId) {
-              projectEvents.push(event);
-          } 
-      });
-      (cell as HTMLElement).innerText = projectEvents.length.toString();
+      //Header of avaibility
+        events.forEach(event => {
+            if (event.ProjectId === cellProjectId) {
+                projectEvents.push(event);
+            } 
+        });
+        const totalChildResources = this.habitacionPorTipoDataSource.filter(category => category.groupId === cellProjectId).length;
+        const emptyChildResources = totalChildResources - projectEvents.length;
+        (cell as HTMLElement).innerText = emptyChildResources.toString();
   });
         //Code Block for Rates on grouping column
         // this.ratesArrayComplete.map((item) => {

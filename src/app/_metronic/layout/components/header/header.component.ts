@@ -277,8 +277,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
         let pago:edoCuenta[]=[]; 
         
         huespedArray.map((item)=>{
-          this._logService.logNvaReserva('Created Nueva Reserva',this.currentUser, item.folio);
-
           pago.push({
             Folio:item.folio,
             Forma_de_Pago:'',
@@ -304,6 +302,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
             this.eventsSubject.next(value);
             this.promptMessage('Exito','Reservacion Guardada con exito');
             this.submitLoading=false
+            },
             error: () =>{
                 this.isLoading=false
                 if(!promptFLag){
@@ -312,7 +311,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
                 }
                           
             }
-          }
         }); 
       }
     })

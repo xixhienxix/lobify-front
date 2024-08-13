@@ -33,7 +33,7 @@ export class LogService {
 
   getLogs(username:string) :Observable<ActivityLogs[]> {
     return this.http
-      .get<ActivityLogs[]>(`${environment.apiUrl}/activity/log`)
+      .get<ActivityLogs[]>(`${environment.apiUrl}/activity/log/`+username)
       .pipe(
         map((responseData) => {
           console.log('Response Data:', responseData); // Debug statement

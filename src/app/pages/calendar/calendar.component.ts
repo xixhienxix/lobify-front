@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, Input, OnInit, ViewChild } from '@angular
 
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
-import { BehaviorSubject, Subject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, Subject, async, concat, firstValueFrom, forkJoin, takeUntil } from 'rxjs';
 import { WarningComponent } from './_helpers/warning.prompt.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
@@ -26,6 +26,13 @@ import { Edo_Cuenta_Service } from 'src/app/services/edoCuenta.service';
 import { Codigos } from 'src/app/models/codigos.model';
 import { CodigosService } from 'src/app/services/codigos.service';
 import { edoCuenta } from 'src/app/models/edoCuenta.model';
+import { NvaReservaComponent } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
+import { Foliador } from './_models/foliador.model';
+import { FoliosService } from './_services/folios.service';
+import { ParametrosService } from '../parametros/_services/parametros.service';
+import { Parametros } from '../parametros/_models/parametros';
+import { LogService } from 'src/app/services/activity-logs.service';
+import { AuthService } from 'src/app/modules/auth';
 
 
 @Component({
@@ -35,11 +42,16 @@ import { edoCuenta } from 'src/app/models/edoCuenta.model';
 })
 
 export class CalendarComponent implements OnInit {
+  private ngUnsubscribe = new Subject<void>();
+
   submitLoading: boolean = false
   closeResult: string
   currentFolio = ''
   stayNights: number = 1
   // eventsSubject: Subject<Huesped[]> = new Subject<Huesped[]>();
+  folios:Foliador[]=[];
+  isLoading:boolean=false;
+
   colorDict = {
     0: '#99d284',
     1: '#fab3db',
@@ -54,6 +66,11 @@ export class CalendarComponent implements OnInit {
   estatusArray: Estatus[] = []
   @Input() allReservations: Huesped[] = []
   ratesArrayComplete: Tarifas[] = [];
+  standardRatesArray:Tarifas[]=[]
+  ratesArray:Tarifas[]=[];
+  tempRatesArray:Tarifas[]=[];
+  currentUser:string;
+
 
   promesasDisplay: boolean = false;
   onSuccessResponse: Subject<boolean> = new Subject();
@@ -71,6 +88,7 @@ export class CalendarComponent implements OnInit {
   _isRefreshing: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
 
   @ViewChild('email') emailModal: null;
+  eventsSubject: Subject<Huesped[]> = new Subject<Huesped[]>();
 
   constructor(
     private modalService: NgbModal,
@@ -83,9 +101,14 @@ export class CalendarComponent implements OnInit {
     private _promesasService: PromesaService,
     private _adicionalService: AdicionalService,
     private _codigosCargoService: CodigosService,
-    private _edoCuentaService: Edo_Cuenta_Service
+    private _edoCuentaService: Edo_Cuenta_Service,
+    private _folioservice: FoliosService,
+    private _parametrosService:ParametrosService,
+    private _logService: LogService,
+    private _authService: AuthService,
+    private _estadoDeCuenta: Edo_Cuenta_Service,
   ) {
-
+    this.currentUser = this._authService.getUserInfo().username
   }
 
   async ngOnInit() {
@@ -96,6 +119,7 @@ export class CalendarComponent implements OnInit {
         }
       }
     });
+    await this.checkFoliadorIndexDB();
     await this.checkRoomCodesIndexDB();
     await this.getReservations();
     await this.checkEstatusIndexDB();
@@ -186,6 +210,16 @@ export class CalendarComponent implements OnInit {
     }
   }
 
+  async checkFoliadorIndexDB(){
+    const foliosIndexDB:Foliador[] = await this._folioservice.readIndexDB("Foliosr");
+        /** Check if EstatusCodes are on IndexDb */
+      if(foliosIndexDB){
+          this.folios = foliosIndexDB;
+      }else{
+          this.folios = await firstValueFrom(this._folioservice.getAll());      
+      }
+  }
+
   async checkAdicionalesIndexDB() {
     const adicionalesIndexDB: Adicional[] = await this._adicionalService.readIndexDB("Adicional");
     /** Check if RoomsCode are on IndexDb */
@@ -196,12 +230,93 @@ export class CalendarComponent implements OnInit {
     }
   }
 
+  async checkParametrosIndexDB(){
+    const parametrosIndexDB:Parametros = await this._parametrosService.readIndexDB("Parametros");
+    if(parametrosIndexDB){
+      this._parametrosService.setCurrentParametrosValue = parametrosIndexDB;
+    }else {
+      this._parametrosService.getParametros().subscribe();
+    }
+  }
+  
+
   onEditRsv(data: any){
     const currentHuesped = this.allReservations.find(item => item.folio === data.folio)!;
 
     this._huespedService.currentHuesped$.next(currentHuesped);
 
     this.onEditRsvOpen(data.row);
+  }
+
+  onNvaRsvDateRange(data:any){
+
+      const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' })  
+      modalRef.componentInstance.folios = this.folios;
+      modalRef.componentInstance.estatusArray = this.estatusArray
+      modalRef.componentInstance.checkIn = this._parametrosService.getCurrentParametrosValue.checkIn
+      modalRef.componentInstance.checkOut=this._parametrosService.getCurrentParametrosValue.checkOut
+      modalRef.componentInstance.zona=this._parametrosService.getCurrentParametrosValue.zona
+      modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
+      modalRef.componentInstance.roomCodes=this.roomCodes
+      modalRef.componentInstance.ratesArrayComplete = this.ratesArrayComplete
+      modalRef.componentInstance.standardRatesArray = this.standardRatesArray
+      modalRef.componentInstance.tempRatesArray = this.tempRatesArray
+
+      /** Default Values */
+      modalRef.componentInstance.numeroCuarto = data.numeroCuarto
+      modalRef.componentInstance.cuarto = data.codigoCuarto
+      modalRef.componentInstance.startTime = data.data.startTime
+      modalRef.componentInstance.endTime = data.data.endTime
+      modalRef.componentInstance.rsvFromCalendar=true
+
+
+      modalRef.componentInstance.onNvaReserva.subscribe({
+        next:async (huespedArray:Huesped[])=>{
+          this.submitLoading = true;
+          let pago: edoCuenta[] = [];
+          
+          huespedArray.forEach((item) => {
+            pago.push({
+              Folio: item.folio,
+              Forma_de_Pago: '',
+              Fecha: new Date(),
+              Descripcion: 'HOSPEDAJE',
+              Cantidad: 1,
+              Cargo: item.pendiente,
+              Abono: 0,
+              Total: item.pendiente,
+              Estatus: 'Activo',
+            });
+          });
+          
+          let promptFlag = false;
+          
+          const request1 = this._huespedService.addPost(huespedArray);
+          const request2 = this._estadoDeCuenta.agregarHospedaje(pago);
+          
+          forkJoin([request1, request2])
+            .pipe(takeUntil(this.ngUnsubscribe))
+            .subscribe({
+              next: async (values) => {
+                values[0].forEach((item: Huesped) => {
+                  this._logService.logNvaReserva('Created Nueva Reserva', this.currentUser, item.folio);
+                });
+          
+                this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
+                this.eventsSubject.next(values);
+                this.promptMessage('Exito', 'Reservacion Guardada con exito');
+                this.submitLoading = false;
+              },
+              error: () => {
+                this.isLoading = false;
+                if (!promptFlag) {
+                  this.promptMessage('Error', 'No se pudo guardar la habitación intente de nuevo mas tarde');
+                  promptFlag = true;
+                }
+              },
+            }); 
+        }
+      })
   }
 
   onEditRsvOpen(data: any) {
@@ -422,10 +537,14 @@ export class CalendarComponent implements OnInit {
 
     /** Checks if RatesArray is on IndexDb */
     if (ratesIndexDB) {
-      this.ratesArrayComplete = [...ratesIndexDB]
+      this.ratesArrayComplete = [...ratesIndexDB];
+      this.standardRatesArray = ratesIndexDB.filter((item)=>item.Tarifa === 'Tarifa Base');
+      this.tempRatesArray = ratesIndexDB.filter((item)=>item.Tarifa === 'Tarifa De Temporada');
     } else {
+      this.ratesArray = await firstValueFrom(this._tarifasService.getAll());
       this.ratesArrayComplete = await firstValueFrom(this._tarifasService.getAll());
-    }
+      this.standardRatesArray = this.ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa Base');
+      this.tempRatesArray = this.ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa De Temporada');    }
   }
 
   openEnviarReservacion() {
