@@ -511,7 +511,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
 
                 this.roomCodesComplete.forEach((val)=>{ this.mySet.add(val.Numero) })
                 //ELimina habitaciones no disponibles del Set
-                response.forEach((val)=>{this.mySet.delete(val)})   
+                response.forEach((val:any)=>{this.mySet.delete(val)})   
               //}
   
               this.mySet.forEach((value)=> {

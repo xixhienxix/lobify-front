@@ -17,7 +17,7 @@ import { Foliador } from 'src/app/pages/calendar/_models/foliador.model';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { DateTime } from 'luxon'; 
 export interface preAsig {
-  numero:string,
+  numero:any,
   codigo:string,
   checked:boolean,
   disabled:boolean
@@ -69,7 +69,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   /** Models */
   roomCodes:Habitacion[]=[];
-  mySet = new Set();
+  ocupadasSet = new Set();
   mySetAvaible = new Set();
 
   @Input() ratesArray:Tarifas[]=[];
@@ -501,53 +501,36 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
     .subscribe({      
         next:(response)=>{
 
-              this.roomCodesComplete.forEach((val)=>{ this.mySet.add(val.Numero) })
-              //ELimina habitaciones no disponibles del Set
-              response.forEach((val)=>{this.mySet.delete(val)})   
-            //}
+          this.ocupadasSet = new Set(response);
 
-            this.mySet.forEach((value)=> {
-              const results = this.roomCodesComplete.find((item) => item.Numero === value )  
-              const filterResultRoomCode = this.roomCodes.find((val)=> val.Numero === value);
+          // Filtrar las habitaciones disponibles
+          const habitacionesDisponibles = this.roomCodesComplete.filter(habitacion => !this.ocupadasSet.has(habitacion.Numero));
+          console.log("habitacionesDisponibles ", habitacionesDisponibles)
 
-              if(filterResultRoomCode !== undefined){
-                this.availavilityCodeRooms.push(filterResultRoomCode);
-              }
+          // Paso 1: Crear el array preAsignadasArray
+          this.preAsignadasArray = habitacionesDisponibles.map(item => ({
+            numero: item.Numero,
+            codigo: item.Codigo,
+            checked: false,
+            disabled: true
+          }));
 
-              if(results !== undefined){
-                this.availavilityRooms.push(results);
-                this.infoRoomsAndCodes.push({
-                  nombreHabitacion:value,
-                  tipodeCuarto:results.Codigo
-                }) 
-              }
-            });
-
-            // const key = 'Codigo';
-
-            // this.availavilityRooms = [...new Map(this.availavilityRooms.map(item =>
-            //   [item[key], item])).values()];
-
-            this.availavilityRooms.forEach(item=>{
-              this.preAsignadasArray.push({
-                numero:item.Numero,
-                codigo:item.Codigo,
-                checked:false,
-                disabled:true
-              })
-            })
-
-            if(this.cuarto === '1'){
-              const availavilityRooms = Object.values(this.availavilityRooms.reduce((acc, item) => {
-                if (!acc[item.Codigo]) {
-                  acc[item.Codigo] = item;
-                }
-                return acc;
-              }, {}));
-              console.log(availavilityRooms)
-
+          // Paso 2: Filtrar para obtener solo un objeto único por cada 'Codigo'
+          if(this.cuarto === '1'){
+            const habitacionesUnicas:any = {};
+            habitacionesDisponibles.forEach(habitacion => {
+            if (!habitacionesUnicas[habitacion.Codigo]) {
+              habitacionesUnicas[habitacion.Codigo] = habitacion;
             }
-            console.log(this.availavilityRooms)
+          });
+          const habitacionesUnicasArray = Object.values(habitacionesUnicas);
+          this.availavilityRooms = [...habitacionesUnicasArray]
+          }else{
+            this.availavilityRooms = [...habitacionesDisponibles];
+          }
+          console.log("this.intialDate DIspono",this.intialDate)
+          console.log("this.endDate DIspono",this.endDate)
+          console.log("this.staynights DIspono",this.stayNights)
         },
         error:()=>{
         },
@@ -718,7 +701,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
     this.cuarto=''
     this.availavilityCodeRooms = [];
     this.availavilityRooms = [];
-    this.mySet.clear;
+    this.ocupadasSet.clear;
     this.formGroup.patchValue({['habitacion']: 0});
   }
 
@@ -750,7 +733,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
   }
 
   getRooms(){
-    this.mySet.forEach((element)=>{
+    this.ocupadasSet.forEach((element)=>{
       this.roomCodes.forEach((roomsElemts)=>{
         if(roomsElemts.Numero === element){
           return roomsElemts.Numero

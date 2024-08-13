@@ -129,7 +129,7 @@
 
 <ng-container *ngIf="rsvFromCalendar">
     <ng-container *ngFor="let codigosCuarto of availavilityCodeRooms; ">
-      <div *ngIf="codigosCuarto.Codigo===cuarto" style="font-weight:bold; color: rgba(128, 128, 128, 0.623);" class=" modal-header"><h2 style="color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2> (Cap. Max.: {{codigosCuarto.Adultos}})</div>
+      <div *ngIf="codigosCuarto.Codigo === cuarto" style="font-weight:bold; color: rgba(128, 128, 128, 0.623);" class=" modal-header"><h2 style="color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2> (Cap. Max.: {{codigosCuarto.Adultos}})</div>
     </ng-container>
 
     <table mat-table [dataSource]="roomRates(cuarto)">
@@ -182,7 +182,7 @@
 </ng-container>
 
             <!-- Avaibility Table -->
-            <ng-container *ngIf="cuarto!=='' && rsvFromCalendar === false" style="margin-top: 10px;">
+            <ng-container *ngIf="cuarto !== '' && rsvFromCalendar === false" style="margin-top: 10px;">
               <mat-accordion [style]="accordionDisplay" class="example-headers-align" multi>
                 <mat-expansion-panel  [expanded]="step === 1"  hideToggle>
                   <!-- HEADER DEL ACCORDION DE DISPONIBILIDAD -->

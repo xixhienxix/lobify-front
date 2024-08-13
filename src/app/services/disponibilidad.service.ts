@@ -13,7 +13,7 @@ export class DisponibilidadService {
 
     }
 
-    getDisponibilidad(initialDate:Date, endDate:Date, habitacion: Habitacion | string, dias:number, folio:string) :Observable<Disponibilidad[]>{
+    getDisponibilidad(initialDate:Date, endDate:Date, habitacion: Habitacion | string, dias:number, folio:string) :Observable<any>{
 
         const params ={
             initialDate:initialDate.toISOString(),
@@ -26,7 +26,7 @@ export class DisponibilidadService {
         }
 
 
-        return this.http.post<Disponibilidad[]>(environment.apiUrl + '/disponibilidad/reservas', {params})
+        return this.http.post<any>(environment.apiUrl + '/disponibilidad/reservas', {params})
         .pipe(
             map(responseData=>{
             //  this.writeIndexDB("Rates",responseData);
