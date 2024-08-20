@@ -3,26 +3,18 @@ import { VisibilityRates } from "./visibility.model";
 interface TarifasDisponibles {
     Activa:boolean,
         Descripcion:string,
-        Tarifa_1:number,
-        Tarifa_2:number,
-        Tarifa_3:number,
-        Tarifa_N:number,
+        Tarifa_1:number, // Tarifa para una persona
+        Tarifa_2:number,// Tarifa para dos persona
+        Tarifa_3:number,// Tarifa para tres persona
+        Tarifa_N:number,// Tarifa para mas de tres persona
         Dias:{
             rateIndex:number,
             name: string;
             value: number;
-            checked: boolean;
+            checked: boolean; // si es true la tarifa es valida para este dia de la semana
         }[],
 }
 
-// interface TarifaBase {
-//     Activa:boolean,
-//     Descripcion:string,
-//     Tarifa_1:number,
-//     Tarifa_2:number,
-//     Tarifa_3:number,
-//     Tarifa_N:number
-// }
 export interface Tarifas {
     _id?:string;
     Tarifa:string;
@@ -43,16 +35,10 @@ export interface Tarifas {
         checked: boolean;
     }[],
     TarifasActivas:TarifasDisponibles[]
-    // Tarifa_Especial_1:TarifaEspecial,
-    // Tarifa_Especial_2:TarifaEspecial,
-    // Tarifa_Sin_Variantes: TarifaBase,
-    // Tarifa_Extra_Sin:TarifaBase,
-    // Tarifa_Extra_Con: TarifaBase,
     Visibilidad:VisibilityRates,
     Cancelacion:Politicas[],
     hotel?:string;
     Descuento?:number
-
 }
 
 

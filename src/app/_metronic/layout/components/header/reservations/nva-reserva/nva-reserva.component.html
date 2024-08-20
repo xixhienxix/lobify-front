@@ -24,10 +24,11 @@
             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-date-range-picker #picker></mat-date-range-picker>
           </mat-form-field>
+    
 
           <label class="h1" style="padding-left: 5%;">Noches: </label>
             <label style="padding-left: 5%; padding-top: 2%; color:#00506a; font-weight: bold;" class="h1">
-              {{ stayNights }}
+              {{ stayNights < 0 ? 1 : stayNights}}
             </label>
 
             <div style="margin-top: 10px;" class="row">
@@ -107,7 +108,6 @@
                 <mat-select #tipodeCuartoDropDown
                 class="form-control form-control-lg "
                 name="habitacion"
-                formControlName="habitacion"
                 placeholder="-- Seleccione Tipo de Habitación -- "
                 required
                 (selectionChange)="buscaDispo($event.value)"
@@ -469,7 +469,7 @@
                   style="background-color:var(--walkin-btn); width: 100%;"
                   type="submit"
                   name="estatus"
-                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || noDisabledCheckIn || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
+                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !noDisabledCheckIn || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
                   (click)="setEstatus(1);closeModal()"
                   >
                     Realiza Walk-In

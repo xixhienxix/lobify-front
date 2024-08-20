@@ -33,8 +33,21 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
 import { AjustesComponent } from './components/content/edit-reserva/components/transacciones/components/ajustes/ajustes.component';
 import { ReservationActionsComponent } from './components/content/edit-reserva/_helpers/action-buttons.component';
 import { ModificaReservaComponent } from './components/content/edit-reserva/components/modifica/modifica.reserva.component';
+import { MatMomentDateModule, MomentDateAdapter } from '@angular/material-moment-adapter';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 
-
+// Optionally define your date format
+export const MY_DATE_FORMATS = {
+  parse: {
+    dateInput: 'LL',
+  },
+  display: {
+    dateInput: 'LL',
+    monthYearLabel: 'MMMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
 @NgModule({
   declarations: [
     CalendarComponent, 
@@ -56,6 +69,7 @@ import { ModificaReservaComponent } from './components/content/edit-reserva/comp
   ],
   imports: [
     TranslateModule,
+    MatMomentDateModule,
     CommonModule,
     SharedModule,
     BryntumSchedulerModule,
@@ -77,6 +91,11 @@ import { ModificaReservaComponent } from './components/content/edit-reserva/comp
         component: CalendarComponent,
       }
     ]),
-  ]
+  ],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'es-MX' },
+    { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE] },
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+  ],
 })
 export class CalendarModule { }

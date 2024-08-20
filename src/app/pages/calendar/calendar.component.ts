@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, Input, OnInit, ViewChild } from '@angular
 
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
-import { BehaviorSubject, Subject, async, concat, firstValueFrom, forkJoin, takeUntil } from 'rxjs';
+import { BehaviorSubject, Subject, async, catchError, concat, firstValueFrom, forkJoin, of, switchMap, takeUntil } from 'rxjs';
 import { WarningComponent } from './_helpers/warning.prompt.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
@@ -33,6 +33,7 @@ import { ParametrosService } from '../parametros/_services/parametros.service';
 import { Parametros } from '../parametros/_models/parametros';
 import { LogService } from 'src/app/services/activity-logs.service';
 import { AuthService } from 'src/app/modules/auth';
+import { PropertiesChanged } from 'src/app/models/activity-log.model';
 
 
 @Component({
@@ -50,6 +51,7 @@ export class CalendarComponent implements OnInit {
   stayNights: number = 1
   // eventsSubject: Subject<Huesped[]> = new Subject<Huesped[]>();
   folios:Foliador[]=[];
+  currentParametros:Parametros
   isLoading:boolean=false;
 
   colorDict = {
@@ -75,7 +77,7 @@ export class CalendarComponent implements OnInit {
   promesasDisplay: boolean = false;
   onSuccessResponse: Subject<boolean> = new Subject();
 
-  roomCodesComplete: Habitacion[];
+  roomCodesComplete: any[];
   roomCodes: Habitacion[];
   houseKeepingCodes: HouseKeeping[] = []
   indexDbLoaded: boolean = false
@@ -127,6 +129,7 @@ export class CalendarComponent implements OnInit {
     await this.checkRatesIndexDB();
     await this.checkReservationsIndexDB();
     await this.checkCodgiosCargoIndexDB();
+    await this.checkParametrosIndexDB();
     this.indexDbLoaded = true;
   }
 
@@ -189,6 +192,7 @@ export class CalendarComponent implements OnInit {
       this.codigosCargo = await firstValueFrom(this._codigosCargoService.getAll());
     }
   }
+  
 
   async checkReservationsIndexDB() {
     const reservationsIndexDB: Huesped[] = await this._huespedService.readIndexDB("Reservations");
@@ -233,8 +237,10 @@ export class CalendarComponent implements OnInit {
   async checkParametrosIndexDB(){
     const parametrosIndexDB:Parametros = await this._parametrosService.readIndexDB("Parametros");
     if(parametrosIndexDB){
+      this.currentParametros = parametrosIndexDB
       this._parametrosService.setCurrentParametrosValue = parametrosIndexDB;
     }else {
+      this.currentParametros = await firstValueFrom(this._parametrosService.getParametros());
       this._parametrosService.getParametros().subscribe();
     }
   }
@@ -253,14 +259,15 @@ export class CalendarComponent implements OnInit {
       const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' })  
       modalRef.componentInstance.folios = this.folios;
       modalRef.componentInstance.estatusArray = this.estatusArray
-      modalRef.componentInstance.checkIn = this._parametrosService.getCurrentParametrosValue.checkIn
-      modalRef.componentInstance.checkOut=this._parametrosService.getCurrentParametrosValue.checkOut
-      modalRef.componentInstance.zona=this._parametrosService.getCurrentParametrosValue.zona
+      modalRef.componentInstance.checkIn = this.currentParametros.checkIn
+      modalRef.componentInstance.checkOut=this.currentParametros.checkOut
+      modalRef.componentInstance.zona=this.currentParametros.zona
       modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
       modalRef.componentInstance.roomCodes=this.roomCodes
       modalRef.componentInstance.ratesArrayComplete = this.ratesArrayComplete
       modalRef.componentInstance.standardRatesArray = this.standardRatesArray
       modalRef.componentInstance.tempRatesArray = this.tempRatesArray
+      modalRef.componentInstance.editHuesped = true;
 
       /** Default Values */
       modalRef.componentInstance.numeroCuarto = data.numeroCuarto
@@ -295,26 +302,36 @@ export class CalendarComponent implements OnInit {
           const request2 = this._estadoDeCuenta.agregarHospedaje(pago);
           
           forkJoin([request1, request2])
-            .pipe(takeUntil(this.ngUnsubscribe))
-            .subscribe({
-              next: async (values) => {
-                values[0].forEach((item: Huesped) => {
-                  this._logService.logNvaReserva('Created Nueva Reserva', this.currentUser, item.folio);
-                });
-          
-                this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
-                this.eventsSubject.next(values);
-                this.promptMessage('Exito', 'Reservacion Guardada con exito');
-                this.submitLoading = false;
-              },
-              error: () => {
-                this.isLoading = false;
-                if (!promptFlag) {
-                  this.promptMessage('Error', 'No se pudo guardar la habitación intente de nuevo mas tarde');
-                  promptFlag = true;
-                }
-              },
-            }); 
+          .pipe(
+            takeUntil(this.ngUnsubscribe),
+            switchMap(async (values) => {
+              const logRequests = values[0].addedDocuments.map((item: Huesped) =>
+                this._logService.logNvaReserva('Created Nueva Reserva', this.currentUser, item.folio).pipe(
+                  catchError(error => {
+                    // Handle error for individual log request if needed
+                    console.error(`Failed to log reservation for folio: ${item.folio}`, error);
+                    return of(null); // Return a null observable to keep forkJoin working
+                  })
+                )
+              );
+              await firstValueFrom(forkJoin(logRequests)); // Using firstValueFrom to handle the observable
+        
+              // Fetch all reservations after logging
+              this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
+              this.eventsSubject.next(values);
+              this.promptMessage('Exito', 'Reservacion Guardada con exito');
+              this.submitLoading = false;
+            })
+          )
+          .subscribe({
+            error: () => {
+              this.isLoading = false;
+              if (!promptFlag) {
+                this.promptMessage('Error', 'No se pudo guardar la habitación intente de nuevo mas tarde');
+                promptFlag = true;
+              }
+            },
+          });
         }
       })
   }
@@ -340,6 +357,10 @@ export class CalendarComponent implements OnInit {
       modalRef.componentInstance.colorAmaLlaves = colorAma
       modalRef.componentInstance.ratesArrayComplete = this.ratesArrayComplete
       modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
+      modalRef.componentInstance.checkIn = this.currentParametros.checkIn
+      modalRef.componentInstance.checkOut=this.currentParametros.checkOut
+      modalRef.componentInstance.zona=this.currentParametros.zona
+
       //DataSource Promesas
       modalRef.componentInstance.onEstatusChange.subscribe({
         next: (value: any) => {
@@ -443,6 +464,44 @@ export class CalendarComponent implements OnInit {
       modalRef.componentInstance.honUpdateHuesped.subscribe({
         next:(value:any)=>{
           console.log(value)
+          this.submitLoading = true;
+          const pago: edoCuenta = value.pago;
+          const  huesped = value.updatedHuesped;
+
+          const updatedProperties: PropertiesChanged = {...value[0]}
+                    
+          const request1 = this._huespedService.updateReserva(huesped);
+          const request2 = this._estadoDeCuenta.updateRowByConcepto(value.updatedHuesped.folio, 'HOSPEDAJE', pago);
+          
+          forkJoin([request1, request2])
+          .pipe(
+            takeUntil(this.ngUnsubscribe),
+            switchMap(async (values) => {
+              const logRequests = values[0].addedDocuments.map((item: Huesped) =>
+                this._logService.logUpdateReserva('Reserva Modificada', this.currentUser, item.folio, updatedProperties).pipe(
+                  catchError(error => {
+                    // Handle error for individual log request if needed
+                    console.error(`Failed to log reservation for folio: ${item.folio}`, error);
+                    return of(null); // Return a null observable to keep forkJoin working
+                  })
+                )
+              );
+              await firstValueFrom(forkJoin(logRequests)); // Using firstValueFrom to handle the observable
+        
+              // Fetch all reservations after logging
+              this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
+              this.eventsSubject.next(values);
+              this.promptMessage('Exito', 'Reservacion Guardada con exito');
+              this.submitLoading = false;
+            })
+          )
+          .subscribe({
+            error: (err) => {
+              this.isLoading = false;
+                this.promptMessage('Error', 'No se pudo guardar la habitación intente de nuevo mas tarde');              
+            },
+          });
+
         }
       });
       // modalRef.componentInstance.onUpdateEstatusHuesped.subscribe({
@@ -508,7 +567,7 @@ export class CalendarComponent implements OnInit {
 
   onChangedRate(data: any) {
 
-    this._huespedService.updateReserva(data).subscribe({
+    this._huespedService.updateReservaResize(data).subscribe({
       next: async (data) => {
         await this.getReservations();
         this.promptMessage('Exito', 'Reservacion actualizada con exito');
@@ -556,15 +615,31 @@ export class CalendarComponent implements OnInit {
     });
   }
 
-  onChangeEstatus(data: any) {
-    // this.submitLoading = true;
-    this._housekeepingService.updateEstatus(data.cuarto, data.estatus).subscribe({
-      next: async () => {
-        this.checkRoomCodesIndexDB(true);
-        this.getReservations();
-        //MEthod to update the locks columns
-      }
-    });
+  async onChangeEstatus(data: { cuarto: string; estatus: string }) {
+    // Extract old status before making the HTTP request
+    const oldStatus = this.roomCodesComplete.find(item => item.Numero === data.cuarto)?.Estatus;
+  
+    try {
+      // Perform the status update
+      await firstValueFrom(this._housekeepingService.updateEstatus(data.cuarto, data.estatus)).then(() => {
+        console.log('Log entry successfully posted.');
+      })
+      .catch((error) => {
+        console.error('Error posting log entry:', error);
+      });
+
+  
+      // Perform subsequent operations
+      this.checkRoomCodesIndexDB(true);
+      this.getReservations();
+  
+      // Log the status change
+      this._logService.logChangeStatus(data.cuarto, data.estatus, oldStatus!, this.currentUser);
+    } catch (error) {
+      // Handle any errors that occur during the status update
+      console.error('Error updating room status:', error);
+      // Optionally log the error
+    }
   }
 
   onEstatusChange(data: any) {

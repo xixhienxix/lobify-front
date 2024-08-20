@@ -12,13 +12,14 @@ import { Habitacion } from 'src/app/models/habitaciones.model';
 import { TarifasRadioButton, Tarifas } from 'src/app/models/tarifas';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { Foliador } from 'src/app/pages/calendar/_models/foliador.model';
-import { HuespedService } from 'src/app/services/huesped.service';
 
-
+import * as moment from 'moment';
+import { Moment } from 'moment';
+import { PropertiesChanged } from 'src/app/models/activity-log.model';
 @Component({
   selector: 'app-modifica-reserva',
   templateUrl: './modifica.reserva.component.html',
-  styleUrls: ['./modifica.reserva.component.scss']
+  styleUrls: ['./modifica.reserva.component.scss'],
 })
 export class ModificaReservaComponent implements OnInit , AfterViewInit{
 
@@ -28,7 +29,6 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
     private modalService:NgbModal,
     private _disponibilidadService: DisponibilidadService,
     private changeDetector: ChangeDetectorRef,
-    private _huespedService: HuespedService,
     private cdr: ChangeDetectorRef
   ){
     // this._huespedService.currentHuesped$.subscribe({
@@ -37,6 +37,7 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
     //     }
     //   })
   }
+  ocupadasSet = new Set();
 
   formGroup:FormGroup
   formGroup2:FormGroup
@@ -71,17 +72,18 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
 
   estatusArray:Estatus[]=[];
   folios:Foliador[]=[];
-  huespedInformation:Huesped[]=[];
+  huespedInformation:PropertiesChanged[]=[];
 
 
   /** Dates */
   intialDateEvent: string[] = [];
   endDateEvent: string[] = [];
   intialDate:Date = new Date();
-  endDate:Date = new Date((new Date()).valueOf() + 1000*3600*24);
+  endDate:any;
   intialDateFC = new FormControl(new Date());
   endDateFC = new FormControl(new Date((new Date()).valueOf() + 1000*3600*24));
-
+  readonly minDate = new Date();
+  minSalidaDate: Date;
   stayNights:number = 1;
 
   /** Personas */
@@ -94,9 +96,11 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
 
   /** Flags */
   dropDownHabValueIndex:any
-  cuarto:string=''
   variable:boolean[]=[]
 
+  // Define your form controls
+  llegadaDateFC = new FormControl();
+  salidaDateFC = new FormControl();
 
   /**Table */
   displayedColumns: string[] = ['Tarifa', '$ Promedio x Noche', 'Total', 'Acciones'];
@@ -110,33 +114,138 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   origenReserva:string='';
   noDisabledCheckIn:boolean;
   todayDate:Date = new Date();
+  cuarto=''
   // closeResult: string;
 
   @Input() ratesArray:Tarifas[]=[];
+  isCheckIn:boolean=false;
+  @Input() rsvFromCalendar:boolean=false
+  @Input() checkOut:string
+  @Input() checkIn:string
+
+  @Input() editHuesped:boolean=false;
   @Input() standardRatesArray:Tarifas[]=[]
   @Input() tempRatesArray:Tarifas[]=[]
   @Input() currentHuesped:Huesped=DEFAULT_HUESPED
-  @Output() honUpdateHuesped: EventEmitter<Huesped[]> = new EventEmitter();
+  @Output() honUpdateHuesped: EventEmitter<PropertiesChanged[]> = new EventEmitter();
   get inputs() {
     return this.formGroup.controls["nombreHabs"] as FormArray;
   }
   /** Subscription */
 
   async ngOnInit() {
+    // Cuando hay bloqueos filtra los dias del calendario
+    // myFilter = (d: Date | null): boolean => {
+    //   const day = (d || new Date()).getDay();
+    //   // Prevent Saturday and Sunday from being selected.
+    //   return day !== 0 && day !== 6;
+    // };
 
     // Initialize the form controls with the dates
-    this.intialDateFC = new FormControl(new Date(this.currentHuesped.llegada));
-    this.endDateFC = new FormControl(new Date(this.currentHuesped.salida));
-    this.stayNights = this.currentHuesped.noches
+    const llegadaDate = new Date(this.currentHuesped.llegada);
+    const oneDayAfterLlegada = new Date(llegadaDate);
+    oneDayAfterLlegada.setDate(llegadaDate.getDate() + 1);
 
+    this.llegadaDateFC.setValue(llegadaDate);
+    this.salidaDateFC.setValue(oneDayAfterLlegada);
     
+    this.preAsignadasArray.push({
+      numero: this.currentHuesped.numeroCuarto,
+      codigo: this.currentHuesped.habitacion,
+      checked: true,
+      disabled: true
+    });
+
+    this.availavilityRooms = [this.roomCodesComplete.find(item => item.Codigo === this.currentHuesped.habitacion) ?? []]
+
+
+    if(this.currentHuesped.origen === 'Check-In'){
+      this.isCheckIn = true;
+    }
+
+    const startTime = this.currentHuesped.llegada
+    const endTime = this.currentHuesped.salida
+
+    if( startTime !== '' && endTime !== ''){
+      this.cuarto = this.currentHuesped.habitacion
+      this.updateDatePicker(startTime,endTime);
+      this.intialDate = new Date(startTime);
+      this.endDate = new Date(endTime);
+      //Minus 1 day 
+      // Check if endDate is different from intialDate
+      // if (this.endDate.getTime() !== this.intialDate.getTime()) {
+      //   this.todaysDateComparer(this.intialDate);
+
+      //   // Subtract one day from endDate
+      //   const adjustedEndDate = new Date(this.endDate);
+      //   adjustedEndDate.setDate(adjustedEndDate.getDate() - 1);
+
+      //   // Ensure adjustedEndDate is not equal to intialDate
+      //   if (adjustedEndDate.getTime() !== this.intialDate.getTime()) {
+      //     this.endDate = adjustedEndDate;
+      //   }
+      // }
+
+      let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
+      this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+
+      // this.getDisponibilidad(this.intialDate, this.endDate, this.cuarto, this.stayNights, "No Folio");
+    }
+
     this.loadForm();
-    this.todaysDateComparer();
+
+    this.formGroup.controls["habitacion"].setValue(this.currentHuesped.habitacion);
+    this.formGroup.controls["habitacion"].setErrors(null);
+
+    this.todaysDateComparer(this.intialDate);
   }
+
+  salidaDateFilter = (d: Date | null): boolean => {
+    if (!d) return false;
+    const llegadaDate = new Date(this.currentHuesped.llegada);
+    // Disable dates before the llegada date
+    return d >= llegadaDate;
+  };
 
   ngAfterViewInit(): void {
     this.changeDetector.detectChanges();
   }
+
+  updateDatePicker(newStartTime: string, newEndTime: string): void {
+    const newInitialDate = new Date(newStartTime);
+    const newEndDate = new Date(new Date(newEndTime).valueOf() - 1000 * 3600 * 24);
+    this.intialDateFC.setValue(newInitialDate);
+    this.endDateFC.setValue(newEndDate);
+  }
+
+  // Event handlers for date changes
+addEventLlegadaDate(eventType: string, event: any) {
+  this.intialDate = event.value 
+  console.log(`${eventType}: ${event.value}`);
+  // Add your custom logic here
+}
+
+addEventSalidaDate(eventType: string, event: any) {
+  this.rsvFromCalendar=false
+
+    this.endDateEvent = []
+    this.endDateEvent.push(`${eventType}: ${event.value}`);
+    this.endDate = new Date(event.value!);
+
+    let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
+
+    this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+
+    this.resetDispo();
+    this.todaysDateComparer(this.intialDate);
+
+    this.formGroup.controls["habitacion"].setErrors({ invalid: true });
+
+  // this.endDate = event.value;
+  
+  // console.log(`${eventType}: ${event.value}`);
+  // Add your custom logic here
+}
 
 
   onSubmit(){
@@ -153,25 +262,31 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   }
 
   save(){
-    const formData = this.formGroup.value;
     const formCurrentData = this.currentDataFormGroup.value;
 
-      for(let i=0; i<this.preAsignadasArray.length; i++){
-        if(this.preAsignadasArray[i].checked === true){
-          const tarifa  = this.tarifaSeleccionada.find(obj =>
-            obj.Habitacion.some(item => item === this.preAsignadasArray[i].codigo));
+    // Assuming this.preAsignadasArray is defined somewhere in your component
+    this.preAsignadasArray
+    .filter(habitacion => habitacion.checked)  // Filter out only the checked items
+    .forEach(habitacion => {
+      const tarifa  = this.tarifaSeleccionada.find(obj =>
+        obj.Habitacion.some(item => item === habitacion.codigo));
 
-            let initialDate = DateTime.local().set({
-                day:this.intialDate.getDate(),
-                month:this.intialDate.getMonth()+1,
-                year:this.intialDate.getFullYear(), 
-              }).toISO()
-              let endDate = DateTime.local().set({
-                day:this.endDate.getDate(),
-                month:this.endDate.getMonth()+1,
-                year:this.endDate.getFullYear(), 
+        let initialDate = DateTime.local().set({
+            day:this.intialDate.getDate(),
+            month:this.intialDate.getMonth()+1,
+            year:this.intialDate.getFullYear(), 
+            hour:parseInt(this.checkOut.split(":")[0]),
+            minute:parseInt(this.checkOut.split(":")[1])
+          }).toISO()
+          const endDate = new Date(this.endDate);
 
-              }).toISO()
+          let endDateDateTime = DateTime.local().set({
+            day:endDate.getDate(),
+            month:endDate.getMonth()+1,
+            year:endDate.getFullYear(), 
+            hour:parseInt(this.checkIn.split(":")[0]),
+            minute:parseInt(this.checkIn.split(":")[1])
+          }).toISO()
 
 
           const huesped = {
@@ -179,39 +294,20 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
             adultos:this.quantity,
             ninos:this.quantityNin,
             nombre:this.currentDataFormGroup.controls["nombre"].value,
-            estatus: this.currentHuesped.estatus,
             llegada:initialDate ?? this.intialDate.toISOString(),
-            salida:endDate ?? this.endDate.toISOString(),
+            salida:endDateDateTime ?? this.endDate._d.toISOString(),
             noches:this.stayNights,
             tarifa:tarifa === undefined ? '' : tarifa.Tarifa,
-            porPagar:this.totalPorCuenta,
-            pendiente:this.totalPorCuenta,
-            origen:this.currentHuesped.origen,
-            habitacion:this.preAsignadasArray[i].codigo,
+            porPagar:this.totalPorCuenta === 0 ? this.currentHuesped.porPagar! : this.totalPorCuenta,
+            pendiente:this.totalPorCuenta === 0 ? this.currentHuesped.porPagar! : this.totalPorCuenta,
+            habitacion:habitacion.codigo,
             telefono:formCurrentData.telefono,
             email:formCurrentData.email,
-            creada:this.currentHuesped.creada,
-            motivo:this.currentHuesped.motivo,
-            fechaNacimiento:this.currentHuesped.fechaNacimiento,
-            trabajaEn:this.currentHuesped.trabajaEn,
-            tipoDeID:this.currentHuesped.tipoDeID,
-            numeroDeID:this.currentHuesped.numeroDeID,
-            direccion:this.currentHuesped.direccion,
-            pais:this.currentHuesped.pais,
-            ciudad:this.currentHuesped.ciudad,
-            codigoPostal:this.currentHuesped.codigoPostal,
-            lenguaje:this.currentHuesped.lenguaje,
-            numeroCuarto:this.preAsignadasArray[i].numero,
-            tipoHuesped:this.currentHuesped.tipoHuesped,
-            notas:this.currentHuesped.notas,
-            vip:this.currentHuesped.vip,
-            ID_Socio:this.currentHuesped.ID_Socio,
-            estatus_Ama_De_Llaves:this.currentHuesped.estatus_Ama_De_Llaves,      
+            numeroCuarto:habitacion.numero,     
           }
-    
-           this.huespedInformation.push(huesped)
-        }
-    }
+
+          this.huespedInformation.push(huesped)
+    });
     
     this.honUpdateHuesped.emit(this.huespedInformation);
     
@@ -240,23 +336,23 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
     
   }
 
-  todaysDateComparer(){
-        //Disable CheckIn if the sTart Day is not today
-        if(this.intialDate.setHours(0,0,0,0) == this.todayDate.setHours(0,0,0,0)) {
-          this.noDisabledCheckIn=true
-        }     
-        else{
-          this.noDisabledCheckIn=false
-        }
-  }
+  todaysDateComparer(initialDate:Date){
+    //Disable CheckIn if the sTart Day is not today
+    if(initialDate.setHours(0,0,0,0) === this.todayDate.setHours(0,0,0,0)) {
+      this.noDisabledCheckIn=true
+    }     
+    else{
+      this.noDisabledCheckIn=false
+    }
+}
 
   loadForm(){
     this.formGroup = this.fb.group({
       adultos:[{value:this.currentHuesped.adultos, disabled:true }, Validators.required],
       ninos:[{value:this.currentHuesped.ninos,disabled:true}, Validators.required],
-      habitacion:['', Validators.compose([Validators.required])],
+      habitacion:['',Validators.required],
       checkbox:[{value:false, disabled:true},Validators.required],
-      searchTerm:['',Validators.maxLength(100)]
+      searchTerm:['',Validators.maxLength(100)],
     });
 
     this.currentDataFormGroup = this.fb.group({
@@ -273,6 +369,19 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
     this.currentDataFormGroup.controls["telefono"].patchValue(this.currentHuesped.telefono);
 
 
+  }
+
+  formatDateTo(dateString: string): string {
+    const date = new Date(dateString);
+    const event = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long' as 'long',  // Explicitly casting to the correct type
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    };
+  
+    return event.toLocaleDateString('es-MX', options).split(',')[1];
   }
 
 
@@ -327,153 +436,128 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
     }
 }
 
-ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cuarto, tarifaPromedio:boolean = false){
+ratesTotalCalc(tarifa: Tarifas, estanciaPorNoche: number, codigosCuarto = this.cuarto, tarifaPromedio = false) {
+  const adultos = this.quantity;
+  const ninos = this.quantityNin;
+  let tarifaTotal = 0;
 
-    const adultos = this.quantity
-    const ninos = this.quantityNin
-    let tarifaTotal = 0;
+  const applyRate = (item: any) => {
+    let rate = 0;
+    switch (adultos) {
+      case 1:
+        rate = item.Tarifa_1;
+        break;
+      case 2:
+        rate = item.Tarifa_2;
+        break;
+      case 3:
+        rate = item.Tarifa_3;
+        break;
+      default:
+        rate = item.Tarifa_3;
+    }
+    tarifaTotal += rate * adultos;
+    if (ninos !== 0) {
+      tarifaTotal += item.Tarifa_N * ninos;
+    }
+  };
 
-    if(tarifa.Tarifa !== 'Tarifa Base'){
-      if(tarifa.Estado === true){
-        const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"];
+  if (tarifa.Tarifa !== 'Tarifa Base') {
+    if (tarifa.Estado) {
+      const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
 
-        // Cycle All Days
-        for (let start = new Date(this.intialDate); start.setHours(0,0,0,0) < this.endDate.setHours(0,0,0,0); start.setDate(start.getDate() + 1)) {
-          tarifa.TarifasActivas.map((item)=>{
-            const validDays = item.Dias!.filter((x)=> x.checked === true)    
-            const day = start.getDay();
-            const validDay = validDays.find((item) => item.name === dayNames[day])?.checked // Revisar si el dia es valido
-
-            if(validDay){
-              if(item.Activa === true){
-                switch (adultos) {
-                  case 1:
-                    tarifaTotal += item.Tarifa_1*(adultos)
-                    break;
-                  case 2:
-                    tarifaTotal += item.Tarifa_2*(adultos)
-                    break;
-                  case 3:
-                    tarifaTotal += item.Tarifa_3*(adultos)
-                    break;
-                  default:
-                    tarifaTotal += (item.Tarifa_3*(adultos))
-                }
-                  if(ninos !==0 ){
-                    tarifaTotal += (item.Tarifa_N*ninos)
-                  }
-              } 
-            }else { // La Tarifa Especial No Es Valida para este dia entonses se tomara el precio de la base
-              tarifaTotal += this.retriveBaseRatePrice(codigosCuarto,start);
-            }
-          });
-        }
-      }
-      // return Math.trunc(tarifa.TarifaRack!*estanciaPorNoche);
-
-    }else if(tarifa.Tarifa === 'Tarifa Base'){
       for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
-        tarifaTotal += this.retriveBaseRatePrice(codigosCuarto,start);
+        tarifa.TarifasActivas.forEach(item => {
+          const day = start.getDay();
+          const validDay = item.Dias?.some(x => x.name === dayNames[day] && x.checked);
+          if (validDay && item.Activa) {
+            applyRate(item);
+          } else {
+            tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
+          }
+        });
       }
     }
-    if(tarifaPromedio){
-      return Math.ceil(tarifaTotal/this.stayNights);
-    }else{
-      return (tarifaTotal);
+  } else {
+    for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
+      tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
     }
   }
 
-  retriveBaseRatePrice(codigosCuarto:string, checkDay:Date){
-    let tarifaTotal = 0;
-    const adultos = this.quantity
-    const ninos = this.quantityNin
+  return tarifaPromedio ? Math.ceil(tarifaTotal / this.stayNights) : tarifaTotal;
+}
 
-    const tarifaBase = this.standardRatesArray.find(obj =>
-      obj.Habitacion.some(item => item === codigosCuarto)); 
+retriveBaseRatePrice(codigosCuarto: string, checkDay: Date) {
+  const tarifaBase = this.standardRatesArray.find(obj => obj.Habitacion.includes(codigosCuarto));
+  const tarifaTemporada = this.checkIfTempRateAvaible(codigosCuarto, checkDay);
 
-    const tarifaTemporada = this.checkIfTempRateAvaible(codigosCuarto,checkDay);
-
-    if(tarifaTemporada !== 0){
-      return Math.ceil(tarifaTemporada)
-    }else{
-      tarifaBase?.TarifasActivas.map((item)=>{
-        switch (adultos) {
-          case 1:
-            tarifaTotal += item.Tarifa_1*(adultos)
-          break;
-          case 2:
-            tarifaTotal += item.Tarifa_2*(adultos)
-          break;
-          case 3:
-            tarifaTotal += item.Tarifa_3*(adultos)
-          break;
-          default:
-          tarifaTotal += (item.Tarifa_3*(adultos))
-          }
-
-          if(ninos !==0 ){
-            tarifaTotal += (item.Tarifa_N*ninos)}
-      });
-      return Math.ceil(tarifaTotal);
-    }
+  if (tarifaTemporada !== 0) {
+    return Math.ceil(tarifaTemporada);
   }
 
-  checkIfTempRateAvaible(codigoCuarto:string, fecha:Date){
-    let tarifaTotal = 0;
-    const adultos = this.quantity
-    const ninos = this.quantityNin
-
-    const tarifaTemporada = this.tempRatesArray.filter(obj =>
-      obj.Habitacion.some(item => item === codigoCuarto)); 
-
-    tarifaTemporada.map(item=>{
-        const dayNames = ["Dom","Lun","Mar","Mie","Jue","Vie","Sab"];
-        // let secondValidDates
-        let validDays = item?.TarifasActivas[0].Dias!.filter((x)=> x.checked === true);
-        //Check if Second Temp Rate Exist
-        // if(item?.TarifasActivas.length === 2 && validDays === undefined){
-        //   secondValidDates = item?.TarifasActivas[1].Dias!.filter((x)=> x.checked === true);
-        // }
-        // if(secondValidDates){
-        //   validDays = secondValidDates;
-        // }
-
-        const day = fecha.getDay();
-        const validDay = validDays.find((item) => item.name === dayNames[day])?.checked
-
-        if(validDay){
-          if(item.Estado === true) {
-            item?.TarifasActivas.map((item)=>{
-              switch (adultos) {
-                case 1:
-                  tarifaTotal += item.Tarifa_1*(adultos)
-                break;
-                case 2:
-                  tarifaTotal += item.Tarifa_2*(adultos)
-                break;
-                case 3:
-                  tarifaTotal += item.Tarifa_3*(adultos)
-                break;
-                default:
-                tarifaTotal += (item.Tarifa_3*(adultos))
-                }
-        
-                if(ninos !==0 ){
-                  tarifaTotal += (item.Tarifa_N*ninos)}
-            });
-            return Math.ceil(tarifaTotal);
-          }else{
-            tarifaTotal=0;
-          }
-        }else{
-          return tarifaTotal=0
-        }
-    })
-    return tarifaTotal
+  let tarifaTotal = 0;
+  if (tarifaBase) {
+    tarifaBase.TarifasActivas.forEach(item => {
+      let rate = 0;
+      switch (this.quantity) {
+        case 1:
+          rate = item.Tarifa_1;
+          break;
+        case 2:
+          rate = item.Tarifa_2;
+          break;
+        case 3:
+          rate = item.Tarifa_3;
+          break;
+        default:
+          rate = item.Tarifa_3;
+      }
+      tarifaTotal += rate * this.quantity;
+      if (this.quantityNin !== 0) {
+        tarifaTotal += item.Tarifa_N * this.quantityNin;
+      }
+    });
   }
+  return Math.ceil(tarifaTotal);
+}
+checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
+  const tarifaTemporada = this.tempRatesArray.find(obj => obj.Habitacion.includes(codigoCuarto));
+  if (!tarifaTemporada) return 0;
+
+  const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
+  const day = fecha.getDay();
+  const validDay = tarifaTemporada.TarifasActivas[0]?.Dias?.some(x => x.name === dayNames[day] && x.checked);
+
+  if (validDay && tarifaTemporada.Estado) {
+    let tarifaTotal = 0;
+    tarifaTemporada.TarifasActivas.forEach(item => {
+      let rate = 0;
+      switch (this.quantity) {
+        case 1:
+          rate = item.Tarifa_1;
+          break;
+        case 2:
+          rate = item.Tarifa_2;
+          break;
+        case 3:
+          rate = item.Tarifa_3;
+          break;
+        default:
+          rate = item.Tarifa_3;
+      }
+      tarifaTotal += rate * this.quantity;
+      if (this.quantityNin !== 0) {
+        tarifaTotal += item.Tarifa_N * this.quantityNin;
+      }
+    });
+    return Math.ceil(tarifaTotal);
+  }
+  return 0;
+}
 
   buscaDispo(habitacion:any){
     // No Option Selected
+    this.editHuesped=false;
     this.resetDispo();
 
     if(habitacion === '0'){
@@ -504,52 +588,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
       this.dropDownHabValueIndex=''
     }
 
-      this._disponibilidadService.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio)
-      .subscribe(
-        {      
-          next:(response)=>{
-
-                this.roomCodesComplete.forEach((val)=>{ this.mySet.add(val.Numero) })
-                //ELimina habitaciones no disponibles del Set
-                response.forEach((val:any)=>{this.mySet.delete(val)})   
-              //}
-  
-              this.mySet.forEach((value)=> {
-                const results = this.roomCodesComplete.find((item) => item.Numero === value )  
-                const filterResultRoomCode = this.roomCodes.find((val)=> val.Numero === value);
-  
-                if(filterResultRoomCode !== undefined){
-                  this.availavilityCodeRooms.push(filterResultRoomCode);
-                }
-  
-                if(results !== undefined){
-                  this.availavilityRooms.push(results);
-                  this.infoRoomsAndCodes.push({
-                    nombreHabitacion:value,
-                    tipodeCuarto:results.Codigo
-                  }) 
-                }
-              });
-              this.availavilityRooms.forEach(item=>{
-                this.preAsignadasArray.push({
-                  numero:item.Numero,
-                  codigo:item.Codigo,
-                  checked:false,
-                  disabled:true
-                })
-              });
-              this.cdr.detectChanges(); // Manually trigger change detection if needed
-            },
-          error:()=>{
-          },
-          complete:()=>{
-            this.accordionDisplay=''
-            this.isLoading=false;
-            this.changeDetector.detectChanges();
-
-          }}
-      )
-    // this.onGetDisponibilidad.emit({intialDate:this.intialDate, endDate:this.endDate, habitacion:habitacion, stayNights:this.stayNights, folio:folio});
+    this.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio)
   }
 
   revisaCapacidad(codigoCuarto:string){
@@ -581,9 +620,63 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
     availbleRates  = availbleRates.filter(obj =>
       obj.Habitacion.some(item => item === minihabs));
     
-    availbleRates = availbleRates.filter(item => item.Tarifa !== 'Tarifa De Temporada');
+    availbleRates = availbleRates.filter(item => item.Tarifa !== 'Tarifa De Temporada')
+                                    // Add date filtering
+    availbleRates = availbleRates.filter(item =>
+      new Date(item.Llegada) <= this.endDate && new Date(item.Salida) >= this.intialDate
+    );
     
     return availbleRates
+  }
+
+  getDisponibilidad(intialDate:Date,endDate:Date, habitacion:string, stayNights:number, folio:string){
+    this._disponibilidadService.getDisponibilidad(intialDate,endDate, habitacion, stayNights, folio)
+    .subscribe({      
+        next:(response)=>{
+
+          this.ocupadasSet = new Set(response);
+          // Take out current huesped room from the no avaible rooms
+          this.ocupadasSet.delete(this.currentHuesped.numeroCuarto);
+          // Filtrar las habitaciones disponibles
+          const habitacionesDisponibles = this.roomCodesComplete.filter(habitacion => !this.ocupadasSet.has(habitacion.Numero));
+
+          // Paso 1: Crear el array preAsignadasArray
+          this.preAsignadasArray = habitacionesDisponibles.map(item => ({
+            numero: item.Numero,
+            codigo: item.Codigo,
+            checked: false,
+            disabled: true
+          }));
+          this.preAsignadasArray.map(item=>{
+            if(item.numero === this.currentHuesped.numeroCuarto){
+              item.checked = true
+            }
+          })
+
+          // Paso 2: Filtrar para obtener solo un objeto único por cada 'Codigo'
+          if(this.cuarto === '1'){
+            const habitacionesUnicas:any = {};
+            habitacionesDisponibles.forEach(habitacion => {
+            if (!habitacionesUnicas[habitacion.Codigo]) {
+              habitacionesUnicas[habitacion.Codigo] = habitacion;
+            }
+          });
+          const habitacionesUnicasArray = Object.values(habitacionesUnicas);
+          this.availavilityRooms = [...habitacionesUnicasArray]
+          }else{
+            this.availavilityRooms = [...habitacionesDisponibles];
+          }
+
+        },
+        error:()=>{
+        },
+        complete:()=>{
+          this.accordionDisplay=''
+          this.isLoading=false;
+          this.changeDetector.detectChanges();
+
+        }}
+    )
   }
 
   filterRates(){
@@ -670,6 +763,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
   }
 
   resetDispo(){
+    this.editHuesped = false;
     this.preAsignadasArray=[];
     this.accordionDisplay="display:none"
     this.cuarto=''
@@ -689,7 +783,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
     this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
 
     this.resetDispo();
-    this.todaysDateComparer();
+    this.todaysDateComparer(this.intialDate);
 
   }
 
@@ -703,7 +797,7 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
     this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
 
     this.resetDispo();
-    this.todaysDateComparer();
+    this.todaysDateComparer(this.endDate);
   }
 
   getRooms(){
@@ -907,3 +1001,4 @@ ratesTotalCalc(tarifa:Tarifas, estanciaPorNoche:number, codigosCuarto = this.cua
 
  
 }
+

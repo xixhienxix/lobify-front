@@ -91,7 +91,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   intialDateEvent: string[] = [];
   endDateEvent: string[] = [];
   intialDate:Date = new Date();
-  checkCheckInIntial:Date = new Date();
   endDate:Date = new Date((new Date()).valueOf() + 1000*3600*24);
   intialDateFC = new FormControl(new Date());
   endDateFC = new FormControl(new Date((new Date()).valueOf() + 1000*3600*24));
@@ -136,7 +135,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   @Input() rsvFromCalendar:boolean=false
   @Input() startTime:string=''
   @Input() endTime:string=''
-  @Input()cuarto:string=''
+  @Input() cuarto:string=''
 
 
   @Output() onNvaReserva: EventEmitter<Huesped[]> = new EventEmitter();
@@ -149,7 +148,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   async ngOnInit() {
 
     this.loadForm();
-    this.todaysDateComparer(this.checkCheckInIntial);
 
     if(this.startTime !== '' && this.endTime !== ''){
       this.updateDatePicker(this.startTime,this.endTime);
@@ -158,6 +156,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
       //Minus 1 day 
       // Check if endDate is different from intialDate
       if (this.endDate.getTime() !== this.intialDate.getTime()) {
+        this.todaysDateComparer(this.intialDate);
+
         // Subtract one day from endDate
         const adjustedEndDate = new Date(this.endDate);
         adjustedEndDate.setDate(adjustedEndDate.getDate() - 1);
@@ -209,66 +209,68 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   save(){
     const formData = this.formGroup.value;
     
-      for(let i=0; i<this.preAsignadasArray.length; i++){
-        if(this.preAsignadasArray[i].checked === true){
-          const tarifa  = this.tarifaSeleccionada.find(obj =>
-            obj.Habitacion.some(item => item === this.preAsignadasArray[i].codigo));
+    // Assuming this.preAsignadasArray is defined somewhere in your component
+    this.preAsignadasArray
+      .filter(habitacion => habitacion.checked)  // Filter out only the checked items
+      .forEach(habitacion => {
+        // Your logic here, e.g.,
+        const tarifa  = this.tarifaSeleccionada.find(obj =>
+          obj.Habitacion.some(item => item === habitacion.codigo));
 
-            let initialDate = DateTime.local().setZone(this.zona).set({
-                day:this.intialDate.getDate(),
-                month:this.intialDate.getMonth()+1,
-                year:this.intialDate.getFullYear(), 
-                hour:parseInt(this.checkOut.split(":")[0]),
-                minute:parseInt(this.checkOut.split(":")[1])
-              }).toISO()
-              let endDate = DateTime.local().setZone(this.zona).set({
-                day:this.endDate.getDate(),
-                month:this.endDate.getMonth()+1,
-                year:this.endDate.getFullYear(), 
-                hour:parseInt(this.checkIn.split(":")[0]),
-                minute:parseInt(this.checkIn.split(":")[1])
-              }).toISO()
+          let initialDate = DateTime.local().setZone(this.zona).set({
+              day:this.intialDate.getDate(),
+              month:this.intialDate.getMonth()+1,
+              year:this.intialDate.getFullYear(), 
+              hour:parseInt(this.checkOut.split(":")[0]),
+              minute:parseInt(this.checkOut.split(":")[1])
+            }).toISO()
+            let endDate = DateTime.local().setZone(this.zona).set({
+              day:this.endDate.getDate(),
+              month:this.endDate.getMonth()+1,
+              year:this.endDate.getFullYear(), 
+              hour:parseInt(this.checkIn.split(":")[0]),
+              minute:parseInt(this.checkIn.split(":")[1])
+            }).toISO()
 
 
-          const huesped = {
-            folio:this.currentFolio.Letra + this.currentFolio.Folio,
-            adultos:this.quantity,
-            ninos:this.quantityNin,
-            nombre:formData.nombre,
-            estatus: this.currentStatus,
-            llegada:initialDate ?? this.intialDate.toISOString(),
-            salida:endDate ?? this.endDate.toISOString(),
-            noches:this.stayNights,
-            tarifa:tarifa === undefined ? '' : tarifa.Tarifa,
-            porPagar:this.totalPorCuenta,
-            pendiente:this.totalPorCuenta,
-            origen:this.origenReserva,
-            habitacion:this.preAsignadasArray[i].codigo,
-            telefono:formData.telefono,
-            email:formData.email,
-            numeroDeCuarto:this.preAsignadasArray[i].numero,
-            creada:new Date().toISOString(),
-            motivo:'',
-            fechaNacimiento:'',
-            trabajaEn:'',
-            tipoDeID:'',
-            numeroDeID:'',
-            direccion:'',
-            pais:'',
-            ciudad:'',
-            codigoPostal:'',
-            lenguaje:'',
-            numeroCuarto:this.preAsignadasArray[i].numero,
-            tipoHuesped:'',
-            notas:'',
-            vip:'',
-            ID_Socio:0,
-            estatus_Ama_De_Llaves:'LIMPIA',      
-          }
-    
-           this.huespedInformation.push(huesped)
+        const huesped = {
+          folio:this.currentFolio.Letra + this.currentFolio.Folio,
+          adultos:this.quantity,
+          ninos:this.quantityNin,
+          nombre:formData.nombre,
+          estatus: this.currentStatus,
+          llegada:initialDate ?? this.intialDate.toISOString(),
+          salida:endDate ?? this.endDate.toISOString(),
+          noches:this.stayNights,
+          tarifa:tarifa === undefined ? '' : tarifa.Tarifa,
+          porPagar:this.totalPorCuenta,
+          pendiente:this.totalPorCuenta,
+          origen:this.origenReserva,
+          habitacion:habitacion.codigo,
+          telefono:formData.telefono,
+          email:formData.email,
+          numeroDeCuarto:habitacion.numero,
+          creada:new Date().toISOString(),
+          motivo:'',
+          fechaNacimiento:'',
+          trabajaEn:'',
+          tipoDeID:'',
+          numeroDeID:'',
+          direccion:'',
+          pais:'',
+          ciudad:'',
+          codigoPostal:'',
+          lenguaje:'',
+          numeroCuarto:habitacion.numero,
+          tipoHuesped:'',
+          notas:'',
+          vip:'',
+          ID_Socio:0,
+          estatus_Ama_De_Llaves:'LIMPIA',      
         }
-    }
+  
+         this.huespedInformation.push(huesped)        
+      });
     
     this.onNvaReserva.emit(this.huespedInformation);
     
@@ -304,13 +306,15 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
         else{
           this.noDisabledCheckIn=false
         }
+        console.log("noDisabledCheckIn", this.noDisabledCheckIn)
+        console.log("initialDate", initialDate)
+        console.log("todayDate", this.todayDate)
   }
 
   loadForm(){
     this.formGroup = this.fb.group({
       adultos:[{value:1, disabled:true }, Validators.required],
       ninos:[{value:0,disabled:true}, Validators.required],
-      habitacion:['', Validators.compose([Validators.required])],
       checkbox:[{value:false, disabled:true},Validators.required],
       nombre: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
       email: ['', Validators.compose([Validators.email,Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"),Validators.minLength(3),Validators.maxLength(50)])],
@@ -320,8 +324,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     this.formGroup2 = this.fb.group({
       checkbox:[false,Validators.required],
     })
-
-
   }
 
 
@@ -694,19 +696,22 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
   }
 
   addEventIntialDate(type: string, event: MatDatepickerInputEvent<Date>) {
+    this.rsvFromCalendar=false
+
     this.intialDateEvent = []
     this.intialDateEvent.push(`${type}: ${event.value}`);
     this.intialDate = new Date(event.value!);
 
-    let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
-
-    this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+    // let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
+    // this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
 
     this.resetDispo();
     this.todaysDateComparer(this.intialDate);
   }
 
   addEventEndDate(type: string, event: MatDatepickerInputEvent<Date>) {
+    this.rsvFromCalendar=false
+
     this.endDateEvent = []
     this.endDateEvent.push(`${type}: ${event.value}`);
     this.endDate = new Date(event.value!);
@@ -716,7 +721,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
     this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
 
     this.resetDispo();
-    this.todaysDateComparer(this.endDate);
+    this.todaysDateComparer(this.intialDate);
 
   }
 
@@ -889,6 +894,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
         });
       }
       recursiveFunc(formToInvestigate);
+      console.log(invalidControls);
       return invalidControls;
     }
 

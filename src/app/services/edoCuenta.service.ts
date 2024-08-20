@@ -68,6 +68,14 @@ getNotification(){
       )));;
     }
 
+    updateRowByConcepto(folio:string,concepto:string,edoCuenta:edoCuenta){
+      return this.http.put(environment.apiUrl+"/edo_cuenta/update/concepto",{folio,concepto,edoCuenta}).pipe(
+        map((data=>{
+          this.sendNotification(true);
+          }
+      )));;
+    }
+
     getCuentas(folio:string ){
         return this.http.get<edoCuenta[]>(environment.apiUrl+'/edo_cuenta/'+folio)
         .pipe(

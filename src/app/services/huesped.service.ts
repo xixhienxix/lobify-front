@@ -117,7 +117,7 @@ export class HuespedService {
           )
     }
   
-    updateReserva(data:any){
+    updateReservaResize(data:any){
       return this.http.post<any>(environment.apiUrl+"/reserva/onreservaresize", {data})
       .pipe(
         map(responseData=>{
@@ -127,15 +127,26 @@ export class HuespedService {
             if(responseData.hasOwnProperty(key))
             postArray.push(responseData[key]);
            }
-  
+           this.updateReservations$.next(true);
            return responseData
       })
       )
     }
 
-    updateHuespedModifica(huespedAnterior:any){
-      return this.http
-      .post(environment.apiUrl+'/reportes/actualiza/huesped/modifica',{huespedAnterior})
+    updateReserva(data:Huesped[]){
+      return this.http.post<any>(environment.apiUrl+"/reserva/modifica/huesped", {data})
+      .pipe(
+        map(responseData=>{
+         const postArray = []
+          for(const key in responseData)
+          {
+            if(responseData.hasOwnProperty(key))
+            postArray.push(responseData[key]);
+           }
+           this.updateReservations$.next(true);
+           return responseData
+      })
+      )
     }
 
     updateEstatusHuesped(huesped:Huesped,){

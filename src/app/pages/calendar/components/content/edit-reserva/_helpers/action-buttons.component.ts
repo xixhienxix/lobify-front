@@ -70,6 +70,7 @@ import { AlertsMessageInterface } from 'src/app/models/message.model';
             class="btn btn-danger btn-block"
             type="submit"
             style="width: 100%;"
+            (click)="confirmaReserva(12,currentHuesped.folio);"
           >
             Cancela Reserva
           </button>

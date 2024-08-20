@@ -1,121 +1,71 @@
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-md-2 mt-3" style="text-align: center;">
+<div class="footer-container">
+    <div class="footer-row">
+        <div class="footer-col">
             <h3><span>{{"CalendarComponent.footer-status-recep" | translate}}</span></h3>
         </div>
-        <div class="col-md-2 mb-3 mt-3">
-            <div class="d-flex flex-stack flex-grow-1 p-2 rounded-2" style="background-color: var(--light-yellow-btn)">
-                <div class="d-flex flex-column me-2">
-                    <a href="#" class="text-gray-900 text-hover-primary fw-bolder fs-3">{{"CalendarComponent.btn-reserva-no-payment" | translate}}</a>
-                    <span class="text-muted fw-bold mt-1"></span>
-                </div>
-                <span class="symbol symbol-30px">
-                    <span class="symbol-label fw-bolder text-success" style="font-size: 2rem;">{{reservationsStatus.reservaSinPago.length}}</span>
-                </span>
+        <div class="footer-item" style="background-color: var(--light-yellow-btn)">
+            <div class="footer-item-content">
+                <a href="#" class="footer-item-title">{{"CalendarComponent.btn-reserva-no-payment" | translate}}</a>
+                <span class="footer-item-count">{{reservationsStatus.reservaSinPago.length}}</span>
             </div>
         </div>
-        <div class="col-md-2 mb-3 mt-3">
-            <div class="d-flex flex-stack flex-grow-1 p-2 rounded-2" style="background-color: var(--light-blue-btn)">
-                <div class="d-flex flex-column me-2">
-                    <a href="#" class="text-gray-900 text-hover-primary fw-bolder fs-3">{{"CalendarComponent.btn-reserva-confirm" | translate}}</a>
-                    <span class="text-muted fw-bold mt-1"></span>
-                </div>
-                <span class="symbol symbol-30px">
-                    <span class="symbol-label fw-bolder text-success" style="font-size: 2rem;">{{reservationsStatus.reservaConfirmada.length}}</span>
-                </span>
+        <div class="footer-item" style="background-color: var(--light-blue-btn)">
+            <div class="footer-item-content">
+                <a href="#" class="footer-item-title">{{"CalendarComponent.btn-reserva-confirm" | translate}}</a>
+                <span class="footer-item-count">{{reservationsStatus.reservaConfirmada.length}}</span>
             </div>
         </div>
-        <div class="col-md-2 mb-3 mt-3">
-            <div class="d-flex flex-stack flex-grow-1 p-2 rounded-2" style="background-color: var(--light-green-btn)">
-                <div class="d-flex flex-column me-2">
-                    <a href="#" class="text-gray-900 text-hover-primary fw-bolder fs-3">{{"CalendarComponent.btn-huesped-inhouse" | translate}}</a>
-                    <span class="text-muted fw-bold mt-1"></span>
-                </div>
-                <span class="symbol symbol-30px">
-                    <span class="symbol-label fw-bolder text-success" style="font-size: 2rem;">{{reservationsStatus.huespedEnCasa.length}}</span>
-                </span>
+        <div class="footer-item" style="background-color: var(--light-green-btn)">
+            <div class="footer-item-content">
+                <a href="#" class="footer-item-title">{{"CalendarComponent.btn-huesped-inhouse" | translate}}</a>
+                <span class="footer-item-count">{{reservationsStatus.huespedEnCasa.length}}</span>
             </div>
         </div>
-        <div class="col-md-2 mb-3 mt-3">
-            <div class="d-flex flex-stack flex-grow-1 p-2 rounded-2" style="background-color: var(--light-red-btn)">
-                <div class="d-flex flex-column me-2">
-                    <a href="#" class="text-gray-900 text-hover-primary fw-bolder fs-3">{{"CalendarComponent.btn-checkout" | translate}}</a>
-                    <span class="text-muted fw-bold mt-1"></span>
-                </div>
-                <span class="symbol symbol-30px">
-                    <span class="symbol-label fw-bolder text-success" style="font-size: 2rem;">{{reservationsStatus.checkOuts.length}}</span>
-                </span>
+        <div class="footer-item" style="background-color: var(--light-red-btn)">
+            <div class="footer-item-content">
+                <a href="#" class="footer-item-title">{{"CalendarComponent.btn-checkout" | translate}}</a>
+                <span class="footer-item-count">{{reservationsStatus.checkOuts.length}}</span>
             </div>
         </div>
-        <div class="col-md-2 mb-3 mt-3">
-            <div class="d-flex flex-stack flex-grow-1 p-2 rounded-2" style="background-color: var(--light-purple-btn)">
-                <div class="d-flex flex-column me-2">
-                    <a href="#" class="text-gray-900 text-hover-primary fw-bolder fs-3">{{"CalendarComponent.btn-internaluse" | translate}}</a>
-                    <span class="text-muted fw-bold mt-1"></span>
-                </div>
-                <span class="symbol symbol-30px">
-                    <span class="symbol-label fw-bolder text-success" style="font-size: 2rem;">{{reservationsStatus.usoInterno.length}}</span>
-                </span>
+        <div class="footer-item" style="background-color: var(--light-purple-btn)">
+            <div class="footer-item-content">
+                <a href="#" class="footer-item-title">{{"CalendarComponent.btn-internaluse" | translate}}</a>
+                <span class="footer-item-count">{{reservationsStatus.usoInterno.length}}</span>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-md-2 mt-3" style="text-align: center;">
+    <div class="footer-row">
+        <div class="footer-col">
             <h3><span>{{"CalendarComponent.footer-status-clean" | translate}}</span></h3>
         </div>
-        <div class="col-md-2 mb-3 mt-3">
-            <div class="d-flex flex-stack flex-grow-1 p-2 rounded-2" style="background-color: var(--deep-yellow-btn)">
-                <div class="d-flex flex-column me-2">
-                    <a href="#" class="text-gray-900 text-hover-primary fw-bolder fs-3">{{"CleanStatusWidgetComponent.review" | translate}}</a>
-                    <span class="text-muted fw-bold mt-1"></span>
-                </div>
-                <span class="symbol symbol-30px">
-                    <span class="symbol-label fw-bolder text-success" style="font-size: 2rem;">{{housekeepingStatus.limpiando.length}}</span>
-                </span>
+        <div class="footer-item" style="background-color: var(--deep-yellow-btn)">
+            <div class="footer-item-content">
+                <a href="#" class="footer-item-title">{{"CleanStatusWidgetComponent.review" | translate}}</a>
+                <span class="footer-item-count">{{housekeepingStatus.limpiando.length}}</span>
             </div>
         </div>
-        <div class="col-md-2 mb-3 mt-3">
-            <div class="d-flex flex-stack flex-grow-1 p-2 rounded-2" style="background-color: var(--deep-blue-btn)">
-                <div class="d-flex flex-column me-2">
-                    <a href="#" class="text-gray-900 text-hover-primary fw-bolder fs-3">{{"CleanStatusWidgetComponent.clean" | translate}}</a>
-                    <span class="text-muted fw-bold mt-1"></span>
-                </div>
-                <span class="symbol symbol-30px">
-                    <span class="symbol-label fw-bolder text-success" style="font-size: 2rem;">{{housekeepingStatus.limpias.length}}</span>
-                </span>
+        <div class="footer-item" style="background-color: var(--deep-blue-btn)">
+            <div class="footer-item-content">
+                <a href="#" class="footer-item-title">{{"CleanStatusWidgetComponent.clean" | translate}}</a>
+                <span class="footer-item-count">{{housekeepingStatus.limpias.length}}</span>
             </div>
         </div>
-        <div class="col-md-2 mb-3 mt-3">
-            <div class="d-flex flex-stack flex-grow-1 p-2 rounded-2" style="background-color: var(--deep-green-btn)">
-                <div class="d-flex flex-column me-2">
-                    <a href="#" class="text-gray-900 text-hover-primary fw-bolder fs-3">{{"CleanStatusWidgetComponent.retouch" | translate}}</a>
-                    <span class="text-muted fw-bold mt-1"></span>
-                </div>
-                <span class="symbol symbol-30px">
-                    <span class="symbol-label fw-bolder text-success" style="font-size: 2rem;">{{housekeepingStatus.retocar.length}}</span>
-                </span>
+        <div class="footer-item" style="background-color: var(--deep-green-btn)">
+            <div class="footer-item-content">
+                <a href="#" class="footer-item-title">{{"CleanStatusWidgetComponent.retouch" | translate}}</a>
+                <span class="footer-item-count">{{housekeepingStatus.retocar.length}}</span>
             </div>
         </div>
-        <div class="col-md-2 mb-3 mt-3">
-            <div class="d-flex flex-stack flex-grow-1 p-2 rounded-2" style="background-color: var(--deep-red-btn)">
-                <div class="d-flex flex-column me-2">
-                    <a href="#" class="text-gray-900 text-hover-primary fw-bolder fs-3">{{"CleanStatusWidgetComponent.dirty" | translate}}</a>
-                    <span class="text-muted fw-bold mt-1"></span>
-                </div>
-                <span class="symbol symbol-30px">
-                    <span class="symbol-label fw-bolder text-success" style="font-size: 2rem;">{{housekeepingStatus.sucias.length}}</span>
-                </span>
+        <div class="footer-item" style="background-color: var(--deep-red-btn)">
+            <div class="footer-item-content">
+                <a href="#" class="footer-item-title">{{"CleanStatusWidgetComponent.dirty" | translate}}</a>
+                <span class="footer-item-count">{{housekeepingStatus.sucias.length}}</span>
             </div>
         </div>
-        <div class="col-md-2 mb-3 mt-3">
-            <div class="d-flex flex-stack flex-grow-1 p-2 rounded-2" style="background-color: var(--deep-grey-btn)">
-                <div class="d-flex flex-column me-2">
-                    <a href="#" class="text-gray-900 text-hover-primary fw-bolder fs-3">{{"CalendarComponent.btn-bloqued" | translate}}</a>
-                    <span class="text-muted fw-bold mt-1"></span>
-                </div>
-                <span class="symbol symbol-30px">
-                    <span class="symbol-label fw-bolder text-success" style="font-size: 2rem;">0</span>
-                </span>
+        <div class="footer-item" style="background-color: var(--deep-grey-btn)">
+            <div class="footer-item-content">
+                <a href="#" class="footer-item-title">{{"CalendarComponent.btn-bloqued" | translate}}</a>
+                <span class="footer-item-count">0</span>
             </div>
         </div>
     </div>

@@ -4,7 +4,7 @@ import { ModalDismissReasons, NgbActiveModal, NgbModal, NgbModalOptions } from '
 import { DEFAULT_HUESPED, Huesped } from 'src/app/models/huesped.model';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { HuespedService } from 'src/app/services/huesped.service';
-import { Subject, Subscription, firstValueFrom } from 'rxjs';
+import { Subject, Subscription, catchError, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
 import { AlertsMessageInterface } from 'src/app/models/message.model';
 import { Adicional } from 'src/app/models/adicional.model';
 import { Promesa } from 'src/app/pages/calendar/_models/promesas.model';
@@ -22,6 +22,8 @@ import { Codigos } from 'src/app/models/codigos.model';
 import { ModificaReservaComponent } from './components/modifica/modifica.reserva.component';
 import { NvaReservaComponent } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
 import { Tarifas } from 'src/app/models/tarifas';
+import { LogService } from 'src/app/services/activity-logs.service';
+import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
 
 @Component({
   selector: 'app-edit-reserva',
@@ -66,8 +68,6 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   porPagar:number=0;
   pendiente:number=0;
   
-
-
   @Input() promesasDisplay:boolean=false;
   @Input() houseKeepingCodes:HouseKeeping[]=[]
   @Input() estatusArray:Estatus[]=[];
@@ -77,8 +77,11 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   @Input() codigosCargo:Codigos[]
   @Input() folio:string
   @Input() ratesArrayComplete:Tarifas[]=[]
-  @Input() roomCodesComplete:Habitacion[]=[]
-
+  @Input() roomCodesComplete:Habitacion[]=[]  
+  @Input() currentUser:string='';
+  @Input() checkOut:string
+  @Input() checkIn:string
+  @Input() zona:string
 
   @Output() onAgregarPago: EventEmitter<edoCuenta> = new EventEmitter();
   @Output() onEditRsv: EventEmitter<Huesped[]> = new EventEmitter();
@@ -103,6 +106,8 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     private _huespedService: HuespedService,
     private _estatusService: EstatusService,
     private cdRef: ChangeDetectorRef,
+    private _logService: LogService,
+    private _parametrosService: ParametrosService
   ){
     this._huespedService.currentHuesped$.subscribe({
       next:(reserva:Huesped)=>{
@@ -220,11 +225,29 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     });
   }  
 
-  onEstatusUpdate(estatus:number){
-    const sb = this._estatusService.actualizaEstatus(estatus.toString(), this.folio, this.currentHuesped).subscribe({
-      next: () => {
+  onEstatusUpdate(estatus: number): void {
+    const oldStatus = this.currentHuesped.estatus;
+    this.isLoading = true;
+  
+    this._estatusService.actualizaEstatus(estatus.toString(), this.folio, this.currentHuesped).pipe(
+      switchMap(() => {
+  
+        if (estatus === 1) {
+          return this._logService.logChangeStatus(this.currentHuesped.numeroCuarto, 'Check-In', oldStatus, this.currentUser).pipe(
+            catchError(error => {
+              console.error(`Failed to log reservation for folio: ${this.currentHuesped.folio}`, error);
+              return of(null); // Return a null observable to keep the chain working
+            })
+          );
+        }
+        
+        return of(null); // Return an observable if no logging is needed
+      }),
+      finalize(() => {
         this.isLoading = false;
-    
+      })
+    ).subscribe({
+      next: () => {
         const statusMessages: { [key: number]: string } = {
           3: "Reservación confirmada",
           2: "Reservación realizada con éxito",
@@ -233,33 +256,30 @@ export class EditReservaComponent implements OnInit, OnDestroy{
           11: "No-show, para reactivar la reservación haga clic en el botón en la parte inferior",
           12: "Reservación cancelada con éxito"
         };
-    
+  
         this.onAlertMessage.emit({ tittle: 'ÉXITO', message: statusMessages[estatus] || '' });
         this.onFetchReservations.emit();
         this.closeModal();
       },
       error: (err) => {
-        if (err) {
-          this.isLoading = false;
-    
-          const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
-          modalRef.componentInstance.alertHeader = 'ERROR';
-          modalRef.componentInstance.mensaje = 'Ocurrió un error al actualizar el estatus, vuelve a intentarlo';
-          modalRef.result.then(
-            result => {
-              this.closeResult = `Closed with: ${result}`;
-            },
-            reason => {
-              this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-            }
-          );
-    
-          setTimeout(() => {
-            modalRef.close('Close click');
-          }, 4000);
-        }
-      },
-      complete: () => {}
+        this.isLoading = false;
+  
+        const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+        modalRef.componentInstance.alertHeader = 'ERROR';
+        modalRef.componentInstance.mensaje = 'Ocurrió un error al actualizar el estatus, vuelve a intentarlo';
+        modalRef.result.then(
+          result => {
+            this.closeResult = `Closed with: ${result}`;
+          },
+          reason => {
+            this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+          }
+        );
+  
+        setTimeout(() => {
+          modalRef.close('Close click');
+        }, 4000);
+      }
     });
   }
 
@@ -284,32 +304,28 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     modalRef.componentInstance.ratesArrayComplete = this.ratesArrayComplete
     modalRef.componentInstance.standardRatesArray = standardRatesArray
     modalRef.componentInstance.tempRatesArray = tempRatesArray
+    modalRef.componentInstance.editHuesped = true;
+    modalRef.componentInstance.checkIn = this.checkIn
+    modalRef.componentInstance.checkOut=this.checkOut
+    modalRef.componentInstance.zona=this.zona
+
+
+
     modalRef.componentInstance.honUpdateHuesped.subscribe({
       next:async (huespedArray:Huesped[])=>{
-        let pago:edoCuenta=
-        {Folio:'',
-            Forma_de_Pago:'',
-            Fecha:new Date(),
-                  Descripcion:'HOSPEDAJE',
-                  Cantidad:1,
-                  Cargo:0,
-                  Abono:0,
-                  Total:0,
-                  Estatus:'Activo'}
         
-        huespedArray.map((item)=>{
-          pago={
-            Folio:item.folio,
+          const pago = {
+            Folio:huespedArray[0].folio,
             Forma_de_Pago:'',
             Fecha:new Date(),
                   Descripcion:'HOSPEDAJE',
                   Cantidad:1,
-                  Cargo:item.pendiente,
+                  Cargo:huespedArray[0].pendiente,
                   Abono:0,
-                  Total:item.pendiente,
+                  Total:huespedArray[0].pendiente,
                   Estatus:'Activo',
           }
-        });
+
         this.honUpdateHuesped.emit({updatedHuesped:huespedArray,pago})
 
       }

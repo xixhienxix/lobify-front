@@ -164,7 +164,9 @@ export class ContentComponent implements OnInit{
         const minutes = parseInt(item.llegada.split('T')[1].split(':')[1]);
         const llegada = new Date(item.llegada);
         const salida = new Date(item.salida);
-
+if(item.folio === 'R1033'){
+  console.log(item)
+}
         const pushArray = 
           {
             Id: index+1,   
@@ -177,8 +179,22 @@ export class ContentComponent implements OnInit{
             Folio: item.folio,
             Codigo: item.habitacion,
             Numero: item.numeroCuarto,
-            CategoryColor:item.origen === 'Reserva' && item.estatus === 'Huesped en Casa' ? this.colorDict[0] : item.estatus === 'No Show' ? this.colorDict[4] : item.origen === 'Walk-In' ? this.colorDict[0] : item.origen === 'Reserva' ? this.colorDict[3] : item.origen === 'Reserva Temporal' ? this.colorDict[1] : item.origen === 'Uso Interno' ? this.colorDict[2] : this.colorDict[3]
-          }
+            CategoryColor: item.estatus === 'Reserva Cancelada' 
+            ? this.colorDict[4] 
+            : item.origen === 'Reserva' && item.estatus === 'Huesped en Casa' 
+              ? this.colorDict[0] 
+              : item.estatus === 'No Show' 
+                ? this.colorDict[4] 
+                : item.origen === 'Walk-In' 
+                  ? this.colorDict[0] 
+                  : item.origen === 'Reserva' 
+                    ? this.colorDict[3] 
+                    : item.origen === 'Reserva Temporal' 
+                      ? this.colorDict[1] 
+                      : item.origen === 'Uso Interno' 
+                        ? this.colorDict[2] 
+                        : this.colorDict[3]          
+                      }
         this.datasourceArray.push(pushArray)
       })
       this.refreshCalendar(this.datasourceArray);
