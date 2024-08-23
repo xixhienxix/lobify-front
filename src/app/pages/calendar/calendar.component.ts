@@ -9,7 +9,7 @@ import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { TarifasService } from 'src/app/services/tarifas.service';
 import { Estatus } from './_models/estatus.model';
 import { EstatusService } from './_services/estatus.service';
-import { HuespedService } from 'src/app/services/huesped.service';
+import { EMPTY_CUSTOMER, HuespedService } from 'src/app/services/huesped.service';
 import { HouseKeeping } from './_models/housekeeping.model';
 import { HouseKeepingService } from 'src/app/services/housekeeping.service';
 import { Huesped } from 'src/app/models/huesped.model';
@@ -463,66 +463,58 @@ export class CalendarComponent implements OnInit {
       })
       modalRef.componentInstance.honUpdateHuesped.subscribe({
         next:(value:any)=>{
-          console.log(value)
           this.submitLoading = true;
           const pago: edoCuenta = value.pago;
-          const  huesped = value.updatedHuesped;
 
-          const updatedProperties: PropertiesChanged = {...value[0]}
+          const huesped = this.allReservations.find(item=> item.folio === value.updatedHuesped.folio);
+          const huespedArray = huesped ? huesped : EMPTY_CUSTOMER;
+          const updatedHuesped = this.fillHuesped(value.updatedHuesped,huespedArray);
+
+          const updatedPropertiesHuesped = value.updatedHuesped;
+          const  oldPropertiesHuesped = value.oldProperties;
+
+          const updatedProperties = this.getDifferences(oldPropertiesHuesped,updatedPropertiesHuesped);
+
                     
-          const request1 = this._huespedService.updateReserva(huesped);
-          const request2 = this._estadoDeCuenta.updateRowByConcepto(value.updatedHuesped.folio, 'HOSPEDAJE', pago);
-          
-          forkJoin([request1, request2])
-          .pipe(
-            takeUntil(this.ngUnsubscribe),
-            switchMap(async (values) => {
-              const logRequests = values[0].addedDocuments.map((item: Huesped) =>
-                this._logService.logUpdateReserva('Reserva Modificada', this.currentUser, item.folio, updatedProperties).pipe(
-                  catchError(error => {
-                    // Handle error for individual log request if needed
-                    console.error(`Failed to log reservation for folio: ${item.folio}`, error);
-                    return of(null); // Return a null observable to keep forkJoin working
-                  })
-                )
-              );
-              await firstValueFrom(forkJoin(logRequests)); // Using firstValueFrom to handle the observable
+            const request1 = this._huespedService.updateReserva([updatedHuesped]);
+            const request2 = this._estadoDeCuenta.updateRowByConcepto(value.updatedHuesped.folio, 'HOSPEDAJE', pago);
+            
+            
+            forkJoin([request1, request2])
+            .pipe(
+              takeUntil(this.ngUnsubscribe),
+              switchMap(async (values) => {
+                console.log('Response from updateReserva:', values[0]); // Log the response to check its structure
         
-              // Fetch all reservations after logging
-              this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
-              this.eventsSubject.next(values);
-              this.promptMessage('Exito', 'Reservacion Guardada con exito');
-              this.submitLoading = false;
-            })
-          )
-          .subscribe({
-            error: (err) => {
-              this.isLoading = false;
-                this.promptMessage('Error', 'No se pudo guardar la habitación intente de nuevo mas tarde');              
-            },
-          });
-
+                if (!values[0] || !values[0]) {
+                  throw new Error('Added documents not found in the response');
+                }
+                
+                const logRequests = (values[0] || []).map((item: Huesped) =>
+                  this._logService.logUpdateReserva('Reserva Modificada', this.currentUser, item.folio, updatedProperties).pipe(
+                    catchError(error => {
+                      console.error(`Failed to log reservation for folio: ${item.folio}`, error);
+                      return of(null);
+                    })
+                  )
+                );
+                await firstValueFrom(forkJoin(logRequests)); // Using firstValueFrom to handle the observable
+          
+                // Fetch all reservations after logging
+                this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
+                this.eventsSubject.next(values);
+                this.promptMessage('Exito', 'Reservacion Guardada con exito');
+                this.submitLoading = false;
+              })
+            )
+            .subscribe({
+              error: (err) => {
+                this.isLoading = false;
+                  this.promptMessage('Error', 'No se pudo guardar la habitación intente de nuevo mas tarde');              
+              },
+            });
         }
       });
-      // modalRef.componentInstance.onUpdateEstatusHuesped.subscribe({
-      //   next: (huesped: Huesped) => {
-      //     this.submitLoading = true;
-      //     this._huespedService.updateEstatusHuesped(huesped).subscribe(
-      //       {
-      //         next: (val) => {
-      //           this.promptMessage('Exito', 'Datos del huesped Actualizados');
-      //         },
-      //         error: (error) => {
-      //           this.promptMessage('Error', 'Error al Guardar Promesa de Pago');
-      //           this.promesasDisplay = false
-      //         },
-      //         complete: () => {
-      //           this.submitLoading = false;
-      //         }
-      //       })
-      //   }
-      // });
-
     }
   }
 
@@ -589,6 +581,73 @@ export class CalendarComponent implements OnInit {
     availbleRates = availbleRates.filter(obj =>
       obj.Habitacion.some(item => item === minihabs));
     return availbleRates
+  }
+
+  getDifferences(obj1: Record<string, any>, obj2: Record<string, any>): Record<string, any> {
+    const differences: Record<string, any> = {};
+  
+    // Helper function to recursively get differences
+    function findDifferences(innerObj1: any, innerObj2: any, path: string[] = []) {
+      // Get all unique keys from both objects
+      const allKeys = new Set([...Object.keys(innerObj1), ...Object.keys(innerObj2)]);
+  
+      allKeys.forEach(key => {
+        const currentPath = [...path, key];
+        const value1 = innerObj1[key];
+        const value2 = innerObj2[key];
+  
+        if (typeof value1 === 'object' && typeof value2 === 'object' && value1 !== null && value2 !== null) {
+          // Recursively find differences if both values are objects
+          findDifferences(value1, value2, currentPath);
+        } else if (value1 !== value2) {
+          // Store only the new value if there is a difference
+          differences[currentPath.join('.')] = value2;
+        }
+      });
+    }
+  
+    findDifferences(obj1, obj2);
+    return differences;
+  }
+
+  fillHuesped(propertiesChanged: PropertiesChanged, currentHuesped:Huesped): Huesped {
+    const currentDate = new Date().toISOString(); // Use the current date-time for created and other dynamic fields
+  
+    return {
+      folio: currentHuesped.folio,
+      adultos: propertiesChanged.adultos,
+      ninos: propertiesChanged.ninos,
+      nombre: propertiesChanged.nombre,
+      estatus: currentHuesped.estatus, // Example default value
+      llegada: currentHuesped.llegada, // Placeholder value, you can replace it with actual data if available
+      salida: propertiesChanged.salida,
+      noches: propertiesChanged.noches,
+      tarifa: propertiesChanged.tarifa,
+      porPagar: propertiesChanged.porPagar,
+      pendiente: propertiesChanged.pendiente,
+      origen: currentHuesped.origen, // Example default value
+      habitacion: propertiesChanged.habitacion,
+      telefono: propertiesChanged.telefono,
+      email: propertiesChanged.email,
+      motivo: currentHuesped.motivo, // Example default value
+      fechaNacimiento: currentHuesped.fechaNacimiento, // Example default value
+      trabajaEn: currentHuesped.trabajaEn, // Example default value
+      tipoDeID: currentHuesped.tipoDeID, // Example default value
+      numeroDeID: currentHuesped.numeroDeID, // Example default value
+      direccion: currentHuesped.direccion, // Example default value
+      pais: currentHuesped.pais, // Example default value
+      ciudad: currentHuesped.ciudad, // Example default value
+      codigoPostal: currentHuesped.codigoPostal, // Example default value
+      lenguaje: currentHuesped.lenguaje, // Example default value
+      numeroCuarto: propertiesChanged.numeroCuarto,
+      creada: currentDate, // Set created date to current date-time
+      tipoHuesped: currentHuesped.tipoHuesped, // Example default value
+      notas: currentHuesped.notas, // Example default value
+      vip: currentHuesped.vip, // Example default value
+      ID_Socio: undefined, // Default or placeholder value
+      estatus_Ama_De_Llaves: currentHuesped.estatus_Ama_De_Llaves, // Example default value
+      hotel: currentHuesped.hotel // Example default value
+    };
   }
 
   async checkRatesIndexDB() {

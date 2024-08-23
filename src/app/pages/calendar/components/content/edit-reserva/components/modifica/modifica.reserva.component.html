@@ -28,29 +28,26 @@
                 <input
                   matInput
                   [matDatepicker]="llegadaPicker"
-                  placeholder="Fecha de Llegada"
-                  [value]="currentHuesped.llegada"
+                  [value]="llegadaDateFC.value"
                   disabled
                 >
                 <mat-datepicker-toggle matIconSuffix [for]="llegadaPicker"></mat-datepicker-toggle>
                 <mat-datepicker #llegadaPicker></mat-datepicker>
               </mat-form-field>
-              
+                         
               <mat-form-field>
                 <mat-label>{{ formatDateTo(currentHuesped.salida) }}</mat-label>
                 <input
                   matInput
                   [matDatepicker]="salidaPicker"
-                  [matDatepickerFilter]="salidaDateFilter"
-                  [formControl]="salidaDateFC"
+                  [value]="salidaDateFC.value"
                   (dateChange)="addEventSalidaDate('change', $event)"
+                  [matDatepickerFilter]="salidaDateFilter"
                   placeholder="Fecha de Salida"
                 >
                 <mat-datepicker-toggle matSuffix [for]="salidaPicker"></mat-datepicker-toggle>
                 <mat-datepicker #salidaPicker></mat-datepicker>
               </mat-form-field>
-              
-              
               
             </div>
             
@@ -185,12 +182,12 @@
             
                 <ng-container matColumnDef="$ Promedio x Noche">
                   <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-                  <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights)/stayNights | currency : 'MXN' : 'symbol' : '1.0-0'}} - {{stayNights}}</td>
+                  <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights)/stayNights | currency : 'MXN' : 'symbol' : '1.0-0'}}</td>
                 </ng-container>
             
                 <ng-container matColumnDef="Total">
                   <th mat-header-cell *matHeaderCellDef> Total </th>
-                  <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights) | currency : 'MXN' : 'symbol' : '1.0-0'}} {{stayNights}}</td>
+                  <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights) | currency : 'MXN' : 'symbol' : '1.0-0'}}</td>
                 </ng-container>
           
                 <ng-container matColumnDef="Acciones">
@@ -317,7 +314,7 @@
               </mat-accordion>
              </ng-container>
 <!--FIN DE DISPONIBILIDAD-->
-
+</form>
 <br>
 <form [formGroup]="currentDataFormGroup">
     <div style="background-color:var(--deep-red-background);" class="modal-tittle">
@@ -423,7 +420,6 @@
   
         </div>
       </div> 
-</form>
 </form>
 <button style="width: 100%;" class="btn btn-success" (click)="onSubmit()">Guardar Cambios</button>
 </div>

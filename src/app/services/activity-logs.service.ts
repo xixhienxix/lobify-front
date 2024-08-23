@@ -107,7 +107,7 @@ export class LogService {
       );
   }
 
-  logUpdateReserva(message: string, username: string, folio: string, propertiesChanged:PropertiesChanged): Observable<any> {
+  logUpdateReserva(message: string, username: string, folio: string, propertiesChanged:any): Observable<any> {
     const date = new Date();
     const formattedDate = this.formatDate(date);
     const logEntry = {

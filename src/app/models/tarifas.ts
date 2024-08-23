@@ -1,6 +1,6 @@
 import { Politicas } from "./politicas.model";
 import { VisibilityRates } from "./visibility.model";
-interface TarifasDisponibles {
+export interface TarifasDisponibles {
     Activa:boolean,
         Descripcion:string,
         Tarifa_1:number, // Tarifa para una persona

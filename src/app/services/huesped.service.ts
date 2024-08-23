@@ -4,7 +4,7 @@ import { BehaviorSubject, Observable, Subject, map } from "rxjs";
 import { DEFAULT_HUESPED, Huesped } from "../models/huesped.model";
 import { environment } from "src/environments/environment";
 import { LocalForageCache } from "../tools/cache/indexdb-expire";
-const EMPTY_CUSTOMER: Huesped = {
+export const EMPTY_CUSTOMER: Huesped = {
   folio:'',
   adultos:1,
   ninos:1,

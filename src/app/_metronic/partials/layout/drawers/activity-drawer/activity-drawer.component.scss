@@ -1,0 +1,18 @@
+@media (max-width: 576px) {
+    .card {
+      padding: 0.5rem;
+    }
+    
+    .timeline {
+      padding: 0.5rem;
+    }
+    
+    .timeline-item {
+      flex-direction: column;
+    }
+  
+    .timeline-icon {
+      margin-bottom: 0.5rem;
+    }
+  }
+  

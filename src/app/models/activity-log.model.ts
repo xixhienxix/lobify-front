@@ -1,7 +1,8 @@
 export interface ActivityLogs{
     folio?:string;
     timestamp: string; 
-    message: string; 
+    message: string;
+    propertiesChanged?:Record<string, any>;  // Updated type to match the provided value
     username:string;
     hotel?:string
     oldStatus?:string
@@ -15,7 +16,7 @@ export const DEFAULT_LOG = {
     username: '',
 }
 export interface PropertiesChanged {
-    llegada:string;
+    folio:string;
     salida:string;
     adultos:number;
     ninos:number;

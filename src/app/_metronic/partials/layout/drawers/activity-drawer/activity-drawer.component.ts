@@ -11,6 +11,7 @@ export class ActivityDrawerComponent implements OnInit {
   logs: ActivityLogs[] = [];
   logsType1: ActivityLogs[] = []; // Reservas
   logsType2: ActivityLogs[] = []; // Estatus
+  logsType3: ActivityLogs[] = []; // Estatus
   estatusLogs: ActivityLogs[] = [];
   currentUser: string;
 
@@ -47,9 +48,14 @@ export class ActivityDrawerComponent implements OnInit {
     });
   }
 
+  getPropertiesChangedArray(log: ActivityLogs): [string, any][] {
+    return log.propertiesChanged ? Object.entries(log.propertiesChanged) : [];
+  }
+
   splitLogsByType() {
     this.logsType1 = this.logs.filter(log => log.logType === 1);
     this.logsType2 = this.logs.filter(log => log.logType === 2);
+    this.logsType3 = this.logs.filter(log => log.logType === 3);
   }
 
   // Get Time

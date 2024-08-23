@@ -9,7 +9,7 @@ import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
 import { preAsig } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
 import { Habitacion } from 'src/app/models/habitaciones.model';
-import { TarifasRadioButton, Tarifas } from 'src/app/models/tarifas';
+import { TarifasRadioButton, Tarifas, TarifasDisponibles } from 'src/app/models/tarifas';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { Foliador } from 'src/app/pages/calendar/_models/foliador.model';
 
@@ -72,7 +72,6 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
 
   estatusArray:Estatus[]=[];
   folios:Foliador[]=[];
-  huespedInformation:PropertiesChanged[]=[];
 
 
   /** Dates */
@@ -115,6 +114,7 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   noDisabledCheckIn:boolean;
   todayDate:Date = new Date();
   cuarto=''
+  beforeChangesCustomer:PropertiesChanged;
   // closeResult: string;
 
   @Input() ratesArray:Tarifas[]=[];
@@ -127,27 +127,40 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   @Input() standardRatesArray:Tarifas[]=[]
   @Input() tempRatesArray:Tarifas[]=[]
   @Input() currentHuesped:Huesped=DEFAULT_HUESPED
-  @Output() honUpdateHuesped: EventEmitter<PropertiesChanged[]> = new EventEmitter();
+  @Output() honUpdateHuesped: EventEmitter<any> = new EventEmitter();
   get inputs() {
     return this.formGroup.controls["nombreHabs"] as FormArray;
   }
   /** Subscription */
 
   async ngOnInit() {
-    // Cuando hay bloqueos filtra los dias del calendario
-    // myFilter = (d: Date | null): boolean => {
-    //   const day = (d || new Date()).getDay();
-    //   // Prevent Saturday and Sunday from being selected.
-    //   return day !== 0 && day !== 6;
-    // };
+  this.quantity = this.currentHuesped.adultos
+  this.quantityNin = this.currentHuesped.ninos
 
-    // Initialize the form controls with the dates
+    this.beforeChangesCustomer = { 
+            folio:this.currentHuesped.folio,
+            adultos:this.currentHuesped.adultos,
+            ninos:this.currentHuesped.ninos,
+            nombre:this.currentHuesped.nombre,
+            salida:this.currentHuesped.salida,
+            noches:this.currentHuesped.noches,
+            tarifa:this.currentHuesped.tarifa,
+            porPagar:this.currentHuesped.porPagar!,
+            pendiente:this.currentHuesped.pendiente!,
+            habitacion:this.currentHuesped.habitacion,
+            telefono:this.currentHuesped.telefono,
+            email:this.currentHuesped.email,
+            numeroCuarto:this.currentHuesped.numeroCuarto
+          }
+
+          console.log("-------------------->",this.beforeChangesCustomer)
+
     const llegadaDate = new Date(this.currentHuesped.llegada);
-    const oneDayAfterLlegada = new Date(llegadaDate);
-    oneDayAfterLlegada.setDate(llegadaDate.getDate() + 1);
+    const salidaDate = new Date(this.currentHuesped.salida);
 
+  
     this.llegadaDateFC.setValue(llegadaDate);
-    this.salidaDateFC.setValue(oneDayAfterLlegada);
+    this.salidaDateFC.setValue(salidaDate);
     
     this.preAsignadasArray.push({
       numero: this.currentHuesped.numeroCuarto,
@@ -156,56 +169,58 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
       disabled: true
     });
 
-    this.availavilityRooms = [this.roomCodesComplete.find(item => item.Codigo === this.currentHuesped.habitacion) ?? []]
+    const tarifaPrevia = this.ratesArrayComplete.map(item => {
+      if(item.Tarifa === this.currentHuesped.tarifa){
+        if(item.Habitacion.some(item => item === this.currentHuesped.habitacion)){
+          this.tarifaRadioButton(this.currentHuesped.porPagar!, item, true, this.currentHuesped.habitacion! )
+        }
+      }
+    });
 
-
-    if(this.currentHuesped.origen === 'Check-In'){
+      
+    this.availavilityRooms = [this.roomCodesComplete.find(item => item.Codigo === this.currentHuesped.habitacion) ?? []];
+  
+    if (this.currentHuesped.origen === 'Check-In') {
       this.isCheckIn = true;
     }
+  
+    const startTime = new Date(this.currentHuesped.llegada);
+    const endTime = new Date(this.currentHuesped.salida);
 
-    const startTime = this.currentHuesped.llegada
-    const endTime = this.currentHuesped.salida
-
-    if( startTime !== '' && endTime !== ''){
-      this.cuarto = this.currentHuesped.habitacion
-      this.updateDatePicker(startTime,endTime);
-      this.intialDate = new Date(startTime);
-      this.endDate = new Date(endTime);
-      //Minus 1 day 
-      // Check if endDate is different from intialDate
-      // if (this.endDate.getTime() !== this.intialDate.getTime()) {
-      //   this.todaysDateComparer(this.intialDate);
-
-      //   // Subtract one day from endDate
-      //   const adjustedEndDate = new Date(this.endDate);
-      //   adjustedEndDate.setDate(adjustedEndDate.getDate() - 1);
-
-      //   // Ensure adjustedEndDate is not equal to intialDate
-      //   if (adjustedEndDate.getTime() !== this.intialDate.getTime()) {
-      //     this.endDate = adjustedEndDate;
-      //   }
-      // }
-
-      let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
-      this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
-
-      // this.getDisponibilidad(this.intialDate, this.endDate, this.cuarto, this.stayNights, "No Folio");
+      // Convert Date objects to strings
+    const startTimeStr = startTime.toISOString();
+    const endTimeStr = endTime.toISOString();
+  
+    if (startTime && endTime) {
+      this.cuarto = this.currentHuesped.habitacion;
+      this.updateDatePicker(startTimeStr, endTimeStr);
+      this.intialDate = startTime;
+      this.endDate = endTime;
+  
+      const differenceInTime = this.endDate.getTime() - this.intialDate.getTime();
+      this.stayNights = Math.ceil(differenceInTime / (1000 * 3600 * 24));
+  
+      this.getDisponibilidad(this.intialDate, this.endDate, this.cuarto, this.stayNights, "No Folio");
     }
-
+  
     this.loadForm();
-
     this.formGroup.controls["habitacion"].setValue(this.currentHuesped.habitacion);
     this.formGroup.controls["habitacion"].setErrors(null);
-
+  
     this.todaysDateComparer(this.intialDate);
   }
 
-  salidaDateFilter = (d: Date | null): boolean => {
-    if (!d) return false;
-    const llegadaDate = new Date(this.currentHuesped.llegada);
-    // Disable dates before the llegada date
-    return d >= llegadaDate;
+  // The filter function for disabling dates before 'llegada'
+  salidaDateFilter = (date: Date | null): boolean => {
+    //const llegadaDate = this.llegadaDateFC.value; // Disable before Llegadas 
+    const llegadaDate = this.todayDate;
+
+    if (!llegadaDate || !date) {
+      return true; // Allow all dates if no llegadaDate is set or date is null
+    }
+    return date >= new Date(llegadaDate);
   };
+  
 
   ngAfterViewInit(): void {
     this.changeDetector.detectChanges();
@@ -263,6 +278,8 @@ addEventSalidaDate(eventType: string, event: any) {
 
   save(){
     const formCurrentData = this.currentDataFormGroup.value;
+    let huesped : PropertiesChanged | null = null;
+    let oldHuesped : PropertiesChanged
 
     // Assuming this.preAsignadasArray is defined somewhere in your component
     this.preAsignadasArray
@@ -289,15 +306,14 @@ addEventSalidaDate(eventType: string, event: any) {
           }).toISO()
 
 
-          const huesped = {
+          huesped = {
             folio:this.currentHuesped.folio,
             adultos:this.quantity,
             ninos:this.quantityNin,
             nombre:this.currentDataFormGroup.controls["nombre"].value,
-            llegada:initialDate ?? this.intialDate.toISOString(),
             salida:endDateDateTime ?? this.endDate._d.toISOString(),
             noches:this.stayNights,
-            tarifa:tarifa === undefined ? '' : tarifa.Tarifa,
+            tarifa:tarifa === undefined ? 'Tarifa Base' : tarifa.Tarifa,
             porPagar:this.totalPorCuenta === 0 ? this.currentHuesped.porPagar! : this.totalPorCuenta,
             pendiente:this.totalPorCuenta === 0 ? this.currentHuesped.porPagar! : this.totalPorCuenta,
             habitacion:habitacion.codigo,
@@ -306,11 +322,12 @@ addEventSalidaDate(eventType: string, event: any) {
             numeroCuarto:habitacion.numero,     
           }
 
-          this.huespedInformation.push(huesped)
+          // this.huespedInformation.push({ huesped: huesped, beforeChanges:this.beforeChangesCustomer})
     });
-    
-    this.honUpdateHuesped.emit(this.huespedInformation);
-    
+    if(huesped){
+      this.honUpdateHuesped.emit({ huesped: huesped, beforeChanges:this.beforeChangesCustomer});
+    }
+
   }
 
   checkAvaibility(codigoCuarto:string){
@@ -352,7 +369,6 @@ addEventSalidaDate(eventType: string, event: any) {
       ninos:[{value:this.currentHuesped.ninos,disabled:true}, Validators.required],
       habitacion:['',Validators.required],
       checkbox:[{value:false, disabled:true},Validators.required],
-      searchTerm:['',Validators.maxLength(100)],
     });
 
     this.currentDataFormGroup = this.fb.group({
@@ -371,23 +387,24 @@ addEventSalidaDate(eventType: string, event: any) {
 
   }
 
-  formatDateTo(dateString: string): string {
-    const date = new Date(dateString);
-    const event = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: 'long' as 'long',  // Explicitly casting to the correct type
+  formatDateTo(date: string): string {
+    const dateObj = new Date(date);
+    return dateObj.toLocaleDateString('es-MX', { // Use the appropriate locale and options for your needs
       year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    };
-  
-    return event.toLocaleDateString('es-MX', options).split(',')[1];
+      month: 'short',
+      day: 'numeric'
+    });
   }
 
 
   tarifaRadioButton(totalTarifa:number,tarifas:Tarifas, event:any, codigo:string){
     this.totalPorCuenta = totalTarifa
-    const checkedStatus = event.source.checked
+    let checkedStatus
+    if(event.hasOwnProperty('source') ){
+      checkedStatus = event.source.checked
+    }else{
+      checkedStatus = event; 
+    }
     const tarifa = tarifas
 
     //Uncheck all checkboxes that are not for the roomCode
@@ -441,7 +458,7 @@ ratesTotalCalc(tarifa: Tarifas, estanciaPorNoche: number, codigosCuarto = this.c
   const ninos = this.quantityNin;
   let tarifaTotal = 0;
 
-  const applyRate = (item: any) => {
+  const applyRate = (item: TarifasDisponibles) => {
     let rate = 0;
     switch (adultos) {
       case 1:
@@ -462,30 +479,55 @@ ratesTotalCalc(tarifa: Tarifas, estanciaPorNoche: number, codigosCuarto = this.c
     }
   };
 
-  if (tarifa.Tarifa !== 'Tarifa Base') {
-    if (tarifa.Estado) {
-      const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
+  const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
 
-      for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
-        tarifa.TarifasActivas.forEach(item => {
-          const day = start.getDay();
-          const validDay = item.Dias?.some(x => x.name === dayNames[day] && x.checked);
-          if (validDay && item.Activa) {
-            applyRate(item);
+  for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
+    const day = start.getDay();
+
+    if (tarifa.Tarifa === 'Tarifa Base') {
+      const tarifaTemporada = this.checkIfTempRateAvaible(codigosCuarto, start);
+      if (tarifaTemporada !== 0) {
+        tarifaTotal += tarifaTemporada;
+      } else {
+        tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
+      }
+    } else if (tarifa.Tarifa === 'Tarifa De Temporada') {
+      if (tarifa.Estado && this.isInSeason(tarifa, start)) {
+        const validDay = tarifa.TarifasActivas.some(item => 
+          item.Dias?.some(x => x.name === dayNames[day] && x.checked && item.Activa)
+        );
+        if (validDay) {
+          tarifa.TarifasActivas.forEach(applyRate);
+        } else {
+          tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
+        }
+      } else {
+        tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
+      }
+    } else { // Tarifas especiales
+      if (tarifa.Estado && this.isInSeason(tarifa, start)) {
+        const validDay = tarifa.TarifasActivas.some(item => 
+          item.Dias?.some(x => x.name === dayNames[day] && x.checked && item.Activa)
+        );
+        if (validDay) {
+          tarifa.TarifasActivas.forEach(applyRate);
+        } else {
+          const tarifaTemporada = this.checkIfTempRateAvaible(codigosCuarto, start);
+          if (tarifaTemporada !== 0) {
+            tarifaTotal += tarifaTemporada;
           } else {
             tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
           }
-        });
+        }
+      } else {
+        tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
       }
-    }
-  } else {
-    for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
-      tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
     }
   }
 
   return tarifaPromedio ? Math.ceil(tarifaTotal / this.stayNights) : tarifaTotal;
 }
+
 
 retriveBaseRatePrice(codigosCuarto: string, checkDay: Date) {
   const tarifaBase = this.standardRatesArray.find(obj => obj.Habitacion.includes(codigosCuarto));
@@ -520,9 +562,10 @@ retriveBaseRatePrice(codigosCuarto: string, checkDay: Date) {
   }
   return Math.ceil(tarifaTotal);
 }
+
 checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
   const tarifaTemporada = this.tempRatesArray.find(obj => obj.Habitacion.includes(codigoCuarto));
-  if (!tarifaTemporada) return 0;
+  if (!tarifaTemporada || !this.isInSeason(tarifaTemporada, fecha)) return 0;
 
   const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
   const day = fecha.getDay();
@@ -554,6 +597,16 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
   }
   return 0;
 }
+
+
+isInSeason(tarifa: any, checkDate: Date): boolean {
+  const startDate = new Date(tarifa.Llegada);
+  const endDate = new Date(tarifa.Salida);
+
+  return checkDate >= startDate && checkDate < endDate;
+}
+
+
 
   buscaDispo(habitacion:any){
     // No Option Selected
@@ -892,6 +945,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
 
   isControlInvalidFirst(controlName: string): boolean {
     const control = this.formGroup.controls[controlName];
+    console.log(this.formGroup.controls);
     return control.invalid && (control.dirty || control.touched);
   }
 

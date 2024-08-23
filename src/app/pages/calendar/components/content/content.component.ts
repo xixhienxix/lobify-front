@@ -260,30 +260,38 @@ if(item.folio === 'R1033'){
    * Event that triggers when popup add event window triggers, and lets you interact with popup
    * @param args This functions is to fill the dropdown of Time that appears whenever yo create or modifiy and existing reservation
    */
-  onPopupOpen = (args:any) => {
-    if(args.data.hasOwnProperty("Folio")){
-      if (args.type === 'Editor' || args.type === 'QuickInfo')  {
-        args.cancel = true;
-    
-        if(args.data.hasOwnProperty("Folio")){
-          this.honEditRsv.emit({row:args,folio:args.data.Folio});
-        }    //}
-        }
-    }else if(args.type === 'QuickInfo'){
-      //PorjectID Hab
-      //TaskID NumCuarto
-        args.cancel = true;
-        const events = this.scheduleObj.getEvents();
-        const numeroCuarto = events.find(item=>item.TaskId === args.data.TaskId)?.Numero;
-        const codigoCuarto = this.roomCodesComplete.find(item=>item.Numero === numeroCuarto)?.Codigo;
+  onPopupOpen = (args: any) => {
+    // Check if the 'Folio' property exists
+    args.cancel = true;
 
-
-        // const ProjectId = this.checkGroupId(item.habitacion),
-        // const TaskId = this.checkTaskID(item.numeroCuarto),
-        this.honNvaRsvDateRange.emit({ data:args.data, numeroCuarto, codigoCuarto});
+    if (args.data.hasOwnProperty("Folio")) {
+      if (args.type === 'Editor' || args.type === 'QuickInfo') {
+        args.cancel = true;
+        this.honEditRsv.emit({ row: args, folio: args.data.Folio });
+      }
+    } else if (args.type === 'QuickInfo') {
+      args.cancel = true;
+  
+      // Get current date and filter events
+      const now = new Date();
+      const events = this.scheduleObj.getEvents();
+      const filteredEvents = events.filter(event => new Date(event.EndTime) >= now);
       
+      // Check if there is an existing reservation on the same date and room
+      const hasOverlap = filteredEvents.some(event =>
+        event.ProjectId === args.data.ProjectId &&
+        event.TaskId === args.data.TaskId &&
+        new Date(event.EndTime).toISOString().split('T')[0] > new Date(args.data.startTime).toISOString().split('T')[0]
+      );
+  
+      if (!hasOverlap) {
+        const numeroCuarto = events.find(item => item.TaskId === args.data.TaskId)?.Numero;
+        const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+        this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
+      }
     }
   }
+
   /**
    * This function shows how to move a reservation in an estimated time of minutes, the interval parameter determines how many in how many minutes the event will be moved when you drag it across the calendar
    *

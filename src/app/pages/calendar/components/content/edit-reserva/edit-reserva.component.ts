@@ -118,7 +118,6 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     })
   }
   async ngOnInit(){
-
     this.formGroup = this.fb.group({
       estatus : [this.currentHuesped.estatus],
       ama:[this.currentRoom.Estatus]
@@ -312,21 +311,20 @@ export class EditReservaComponent implements OnInit, OnDestroy{
 
 
     modalRef.componentInstance.honUpdateHuesped.subscribe({
-      next:async (huespedArray:Huesped[])=>{
+      next:async (huespedArray:any)=>{
         
           const pago = {
-            Folio:huespedArray[0].folio,
+            Folio:huespedArray.huesped.folio,
             Forma_de_Pago:'',
             Fecha:new Date(),
                   Descripcion:'HOSPEDAJE',
                   Cantidad:1,
-                  Cargo:huespedArray[0].pendiente,
+                  Cargo:huespedArray.huesped.pendiente,
                   Abono:0,
-                  Total:huespedArray[0].pendiente,
+                  Total:huespedArray.huesped.pendiente,
                   Estatus:'Activo',
           }
-
-        this.honUpdateHuesped.emit({updatedHuesped:huespedArray,pago})
+        this.honUpdateHuesped.emit({updatedHuesped:huespedArray.huesped,pago, oldProperties:huespedArray.beforeChanges})
 
       }
     })
