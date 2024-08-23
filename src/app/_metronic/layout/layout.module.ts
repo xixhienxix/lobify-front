@@ -40,6 +40,7 @@ import { ReportsComponent } from './components/toolbar/reports/reports.component
 import { SaasComponent } from './components/toolbar/saas/saas.component';
 import {SharedModule} from "../shared/shared.module";
 import { NvaReservaComponent } from './components/header/reservations/nva-reserva/nva-reserva.component';
+import { BloqueoReservaComponent } from './components/header/bloqueos/nvo-bloqueo/nvo-bloqueo.component';
 
 const routes: Routes = [
   {
@@ -54,6 +55,7 @@ const routes: Routes = [
     LayoutComponent,
     HeaderComponent,
     NvaReservaComponent,
+    BloqueoReservaComponent,
     ContentComponent,
     FooterComponent,
     ScriptsInitComponent,

@@ -23,6 +23,7 @@ import { Edo_Cuenta_Service } from 'src/app/services/edoCuenta.service';
 import { edoCuenta } from 'src/app/models/edoCuenta.model';
 import { LogService } from 'src/app/services/activity-logs.service';
 import { AuthService } from 'src/app/modules/auth';
+import { BloqueoReservaComponent } from './bloqueos/nvo-bloqueo/nvo-bloqueo.component';
 
 @Component({
   selector: 'app-header',
@@ -340,6 +341,15 @@ export class HeaderComponent implements OnInit, OnDestroy {
       });
   
       return
+  }
+
+  async openNuevoBloqueo(){
+
+    const modalRef = this.modalService.open(BloqueoReservaComponent,{ size: 'lg', backdrop:'static' });
+    modalRef.componentInstance.codigoCuarto = this.roomCodesComplete
+    modalRef.componentInstance.estatusArray = this.estatusArray
+
+
   }
 
   async checkRoomCodesIndexDB(){

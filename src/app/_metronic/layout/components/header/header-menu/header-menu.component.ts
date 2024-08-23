@@ -17,6 +17,7 @@ import { Observable } from 'rxjs';
 export class HeaderMenuComponent implements OnInit {
 
   @Output() onOpenNuevaReserva: EventEmitter<boolean> = new EventEmitter();
+  @Output() onOpenNvoBloqueo: EventEmitter<boolean> = new EventEmitter();
   @Input() onSavedReservation: Observable<Huesped[]>;
 
   constructor(private router: Router, private layout: LayoutService, private layoutInit: LayoutInitService, private translateService:TranslateService) {
@@ -33,6 +34,9 @@ export class HeaderMenuComponent implements OnInit {
     this.onOpenNuevaReserva.emit(true);
   }
 
+  openNvoBloqueo(){
+    this.onOpenNvoBloqueo.emit(true);
+  }
   //HEADER FUNCTIONS
 
   calculateMenuItemCssClass(url: string): string {

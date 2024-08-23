@@ -56,6 +56,7 @@
     },
     "CalendarComponent":{
         "nva-rsv": "New Reservation",
+        "nvo-bloqueo": "Nuevo Bloqueo",
         "btn-reserva-no-payment": "No Payment reservation",
         "btn-reserva-confirm": "Confirmed Reservation",
         "btn-huesped-inhouse": "In-House",
