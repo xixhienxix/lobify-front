@@ -82,6 +82,8 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   @Input() checkOut:string
   @Input() checkIn:string
   @Input() zona:string
+  @Input() estadoDeCuenta:edoCuenta[]
+  
 
   @Output() onAgregarPago: EventEmitter<edoCuenta> = new EventEmitter();
   @Output() onEditRsv: EventEmitter<Huesped[]> = new EventEmitter();
@@ -107,7 +109,6 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     private _estatusService: EstatusService,
     private cdRef: ChangeDetectorRef,
     private _logService: LogService,
-    private _parametrosService: ParametrosService
   ){
     this._huespedService.currentHuesped$.subscribe({
       next:(reserva:Huesped)=>{
@@ -140,7 +141,6 @@ export class EditReservaComponent implements OnInit, OnDestroy{
 
     let fechaDeLlegada = new Date(parseInt(this.currentHuesped.llegada.split('/')[2]),parseInt(this.currentHuesped.llegada.split('/')[1])-1,parseInt(this.currentHuesped.llegada.split('/')[0])) 
     this.intialDate = fechaDeLlegada
-    console.log(this.houseKeepingCodes);
     this.colorAma = this.houseKeepingCodes.find((item)=> item.Descripcion === this.currentRoom.Estatus)!?.Color
 
     // this.formGroup.controls["ama"].patchValue(this.currentRoom.Estatus);
@@ -348,9 +348,24 @@ export class EditReservaComponent implements OnInit, OnDestroy{
           this.cdRef.detectChanges();  
         },
         error:()=>{
-
         }
     })
+  }
+
+  calculateBalance(): number {
+    let cargos = 0;
+    let abonos = 0;
+  
+    this.estadoDeCuenta.forEach((item) => {
+      if (item.Cargo) {
+        cargos += item.Cargo;
+      }
+      if (item.Abono) {
+        abonos += item.Abono;
+      }
+    });
+  
+    return abonos - cargos;
   }
 
   isCurrentStatus(statuses: string[]): boolean {

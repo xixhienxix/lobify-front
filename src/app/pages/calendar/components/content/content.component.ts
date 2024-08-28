@@ -26,6 +26,7 @@ import * as numberingSystems from '../../../../../assets/i18/culture-files/numbe
 import * as gregorian from '../../../../../assets/i18/culture-files/ca-gregorian.json';
 import * as numbers from '../../../../../assets/i18/culture-files/numberingSystems.json';
 import * as timeZoneNames from '../../../../../assets/i18/culture-files/timeZoneNames.json';
+import { Bloqueo } from 'src/app/_metronic/layout/components/header/bloqueos/_models/bloqueo.model';
 
 @Component({
     selector      : 'app-content',
@@ -39,6 +40,7 @@ export class ContentComponent implements OnInit{
   fareValue=900;
   datasourceArray :Record<string, any>[]=[]
   reservationsArray:Huesped[];
+  bloqueosArray:Bloqueo[];
   @Input() allReservations:Huesped[];
 
   closeResult:string
@@ -99,7 +101,8 @@ export class ContentComponent implements OnInit{
     1:'#fab3db',
     2:'#d0aaec',
     3:'#fac34e',
-    4:'#DD4F5D'
+    4:'#DD4F5D',
+    5:'#808080'
 
     //#fab3db - Reserva Temporal
     //#d0aaec - Reserva Uso Temporal
@@ -107,7 +110,7 @@ export class ContentComponent implements OnInit{
   }
   @Input() tipoHabGroupDataSource: Record<string, any>[]
   @Input() habitacionPorTipoDataSource: Record<string, any>[]
-  @Input() changing: Subject<Huesped[]>;
+  @Input() changing: Subject<any[]>;
   @Input() roomCodesComplete:any[];
   @Input() roomCodes:Habitacion[];
   @Input() ratesArrayComplete:Tarifas[];
@@ -155,52 +158,85 @@ export class ContentComponent implements OnInit{
 
     await this.checkRoomCodesIndexDB();
 
-    this.changing.subscribe(dataSource => { 
-      this.datasourceArray=[]
-      this.reservationsArray=[]
-      dataSource.forEach((item, index)=>{
+    this.changing.subscribe((dataSource: any) => { 
+      this.datasourceArray = [];
+      this.reservationsArray = [];
+      this.bloqueosArray = [];
+    
+      const getTimeDetails = (dateStr: string) => {
+        const [hours, minutes] = dateStr.split('T')[1].split(':').map(Number);
+        return { hours, minutes };
+      };
+    
+      const getCategoryColor = (estatus: string, origen: string): string => {
+        const colorMap: Record<string, string> = {
+          'Check-Out': this.colorDict[4],
+          'Reserva Cancelada': this.colorDict[4],
+          'No Show': this.colorDict[4],
+          'Walk-In': this.colorDict[0],
+          'Reserva Temporal': this.colorDict[1],
+          'Uso Interno': this.colorDict[2],
+          'Reserva en Casa': this.colorDict[0],
+          'Reserva': this.colorDict[3],
+          'default': this.colorDict[3]
+        };
+        return colorMap[estatus] || colorMap[origen] || colorMap['default'];
+      };
+    
+      dataSource.value.forEach((item: Huesped, index: number) => {
         this.reservationsArray.push(item);
-        const hours = parseInt(item.llegada.split('T')[1].split(':')[0]);
-        const minutes = parseInt(item.llegada.split('T')[1].split(':')[1]);
+        const { hours, minutes } = getTimeDetails(item.llegada);
         const llegada = new Date(item.llegada);
         const salida = new Date(item.salida);
-if(item.folio === 'R1033'){
-  console.log(item)
-}
-        const pushArray = 
-          {
-            Id: index+1,   
-            Subject: item.nombre,
-            StartTime: new Date(llegada.setHours(hours)),
-            EndTime: new Date(salida.setHours(hours)),
-            IsAllDay: false,
-            ProjectId: this.checkGroupId(item.habitacion),
-            TaskId: this.checkTaskID(item.numeroCuarto),
-            Folio: item.folio,
-            Codigo: item.habitacion,
-            Numero: item.numeroCuarto,
-            CategoryColor: item.estatus === 'Reserva Cancelada' 
-            ? this.colorDict[4] 
-            : item.origen === 'Reserva' && item.estatus === 'Huesped en Casa' 
-              ? this.colorDict[0] 
-              : item.estatus === 'No Show' 
-                ? this.colorDict[4] 
-                : item.origen === 'Walk-In' 
-                  ? this.colorDict[0] 
-                  : item.origen === 'Reserva' 
-                    ? this.colorDict[3] 
-                    : item.origen === 'Reserva Temporal' 
-                      ? this.colorDict[1] 
-                      : item.origen === 'Uso Interno' 
-                        ? this.colorDict[2] 
-                        : this.colorDict[3]          
-                      }
-        this.datasourceArray.push(pushArray)
-      })
+    
+        const pushArray = {
+          Id: index + 1,   
+          Subject: item.nombre,
+          StartTime: new Date(llegada.setHours(hours, minutes)),
+          EndTime: new Date(salida.setHours(hours, minutes)),
+          IsAllDay: false,
+          ProjectId: this.checkGroupId(item.habitacion),
+          TaskId: this.checkTaskID(item.numeroCuarto),
+          Folio: item.folio,
+          Codigo: item.habitacion,
+          Numero: item.numeroCuarto,
+          CategoryColor: getCategoryColor(item.estatus, item.origen)
+        };
+    
+        this.datasourceArray.push(pushArray);
+      });
+    
+      console.log("Previo a Bloqueos: ", this.datasourceArray);
+    
+      dataSource.bloqueosArray.forEach((item: any) => {
+        this.bloqueosArray.push(item);
+        const { hours, minutes } = getTimeDetails(item.Desde);
+        const llegada = new Date(item.Desde);
+        const salida = new Date(item.Hasta);
+    
+        item.Cuarto.forEach((numCuarto: string, indexCuarto: number) => {
+          const bloqueoObj = {
+            Id: indexCuarto + 1,
+            Subject: 'Bloqueo',
+            StartTime: new Date(llegada.setHours(hours, minutes)),
+            EndTime: new Date(salida.setHours(hours, minutes)),
+            IsAllDay: true,
+            ProjectId: this.checkGroupId(item.Habitacion),
+            TaskId: this.checkTaskID(numCuarto),
+            Folio: 'B-' + (indexCuarto + 1),
+            Codigo: item.Habitacion,
+            Numero: numCuarto,
+            CategoryColor: this.colorDict[5]
+          };
+    
+          this.datasourceArray.push(bloqueoObj);
+        });
+      });
+    
+      console.log("Después de Bloqueos: ", this.datasourceArray);
+    
       this.refreshCalendar(this.datasourceArray);
     });
-
-    // await this.checkReservationsIndexDB();
   }
 
   refreshCalendar(datasource:Record<string, any>[]){

@@ -24,6 +24,7 @@ import { edoCuenta } from 'src/app/models/edoCuenta.model';
 import { LogService } from 'src/app/services/activity-logs.service';
 import { AuthService } from 'src/app/modules/auth';
 import { BloqueoReservaComponent } from './bloqueos/nvo-bloqueo/nvo-bloqueo.component';
+import { Bloqueo } from './bloqueos/_models/bloqueo.model';
 
 @Component({
   selector: 'app-header',
@@ -345,9 +346,23 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   async openNuevoBloqueo(){
 
-    const modalRef = this.modalService.open(BloqueoReservaComponent,{ size: 'lg', backdrop:'static' });
-    modalRef.componentInstance.codigoCuarto = this.roomCodesComplete
+    const modalRef = this.modalService.open(BloqueoReservaComponent,{ size: 'md', backdrop:'static' });
+    modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
     modalRef.componentInstance.estatusArray = this.estatusArray
+    modalRef.componentInstance.honUpdateCalendar.subscribe({
+      next:(value:Bloqueo)=>{
+        console.log(value);
+        
+          this._logService.logNvoBloqueo('Created Nuevo Bloqueo',this.currentUser, value).pipe(
+            catchError(error => {
+              // Handle error for individual log request if needed
+              console.error(`Failed to log bloqueo`, error);
+              return of(null); // Return a null observable to keep forkJoin working
+            })
+          )
+      }
+    })
+    
 
 
   }

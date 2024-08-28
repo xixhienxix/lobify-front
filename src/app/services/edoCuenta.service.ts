@@ -5,6 +5,8 @@ import { map } from "rxjs/operators";
 import { environment } from "src/environments/environment";
 import { edoCuenta } from "../models/edoCuenta.model";
 import { ParametrosService } from "../pages/parametros/_services/parametros.service";
+import { AuthService } from "../modules/auth";
+import { LogService } from "./activity-logs.service";
 
 const EMPTY_EDO = {
   Folio:0,
@@ -22,6 +24,7 @@ export class Edo_Cuenta_Service {
 
     public edoCuentaSubject = new BehaviorSubject<edoCuenta[]>([])
     public subject =new Subject<any>();
+    currentUser:string='root'
 
 sendNotification(value:any){
     this.subject.next({text:value});
@@ -41,7 +44,10 @@ getNotification(){
       this.edoCuentaSubject.next(user);
     }
 
-    constructor(private http: HttpClient, private _parametrosService:ParametrosService) { }
+    constructor(
+                private http: HttpClient, 
+              ) {
+               }
 
     agregarPago(edoCuenta:edoCuenta){
        return this.http.post<edoCuenta>(environment.apiUrl+'/edo_cuenta/pagos',{edoCuenta}).pipe(
@@ -98,7 +104,7 @@ getNotification(){
     }
 
     getTodasLasCuentas(){
-      return this.http.get<edoCuenta[]>(environment.apiUrl+'/edo_cuenta/cuentas')
+      return this.http.get<edoCuenta[]>(environment.apiUrl+'/ingresos/totales')
       .pipe(
           map((datosCuenta)=>{
           let estadoDeCuenta:edoCuenta[]=[];

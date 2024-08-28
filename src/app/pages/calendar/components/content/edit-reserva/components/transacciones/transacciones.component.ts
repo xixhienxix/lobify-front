@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild, ViewEncapsulation } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import { ModalDismissReasons, NgbModal } from "@ng-bootstrap/ng-bootstrap";
-import { Subscription } from "rxjs";
+import { catchError, firstValueFrom, of, Subscription } from "rxjs";
 import { Historico } from "src/app/models/historico.model";
 import { DetalleComponent } from "./components/detalle.component";
 import { Edo_Cuenta_Service } from "src/app/services/edoCuenta.service";
@@ -17,6 +17,8 @@ import { CodigosService } from "src/app/services/codigos.service";
 import { SuperUserComponent } from "src/app/modules/auth/components/super-user/super.user.component";
 import { AjustesComponent } from "./components/ajustes/ajustes.component";
 import { MatRadioChange } from "@angular/material/radio";
+import { AuthService } from "src/app/modules/auth";
+import { LogService } from "src/app/services/activity-logs.service";
 interface IEstadoCuenta {
   estadoDeCuenta:edoCuenta[],
   edoCuentaActivos:edoCuenta[],
@@ -65,6 +67,7 @@ interface StateMapping {
   
     folio:number
     cliente:Historico
+    currentUser:string='root'
 
     selectedService: boolean = true;    
     
@@ -160,8 +163,10 @@ interface StateMapping {
       private _codigoDeCargoService: CodigosService,
       private _edoCuentaService: Edo_Cuenta_Service,
       private fb : FormBuilder,
+      private _authService: AuthService,
+      private _logsService: LogService
     ){
-        
+      this.currentUser = this._authService.getUserInfo().username
     }
     ngOnInit(): void {
       if(this.currentHuesped.estatus === 'Reserva Cancelada' || this.currentHuesped.estatus === 'No Show' || this.currentHuesped.estatus === 'Check-Out'){
@@ -663,80 +668,70 @@ interface StateMapping {
       }
     }
   
-    onSubmitAbono(){
-      
-      if(this.abonoFormGroup.invalid)
-      {
-        this.submittedAbono=true
+    async onSubmitAbono() {
+      if (this.abonoFormGroup.invalid) {
+        this.submittedAbono = true;
         return;
       }
-  
-      this.isLoading=true
+    
+      this.isLoading = true;
+    
+      const pago: edoCuenta = {
+        Folio: this.currentHuesped.folio,
+        Fecha: new Date(),
+        Fecha_Cancelado: '',
+        Referencia: this.abonosf.notaAbono.value,
+        Descripcion: this.abonosf.conceptoManual.value,
+        Forma_de_Pago: this.abonosf.formaDePagoAbono.value,
+        Cantidad: 1,
+        Cargo: 0,
+        Abono: this.abonosf.cantidadAbono.value,
+        Estatus: 'Activo'
+      };
+    
+      try {
+        await firstValueFrom(this._edoCuentaService.agregarPago(pago));
       
-      let pago:edoCuenta;
-  
-      
-        pago = {
-  
-          Folio:this.currentHuesped.folio,
-          Fecha:new Date(),
-          Fecha_Cancelado:'',
-          Referencia:this.abonosf.notaAbono.value,
-          Descripcion:this.abonosf.conceptoManual.value,
-          Forma_de_Pago:this.abonosf.formaDePagoAbono.value,
-          Cantidad:1,
-          Cargo:0,
-          Abono:this.abonosf.cantidadAbono.value,
-          Estatus:'Activo'
-  
-        }
-      
-  
-      
-  this.isLoading=true
-      const sb = this._edoCuentaService.agregarPago(pago).subscribe(
-        ()=>{
-          this.isLoading=false
-          const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop:'static' });
-          modalRef.componentInstance.alertHeader = 'Exito'
-          modalRef.componentInstance.mensaje='Movimiento agregado al Estado de Cuenta del Húesped'
-          
-            setTimeout(() => {
-              modalRef.close('Close click');
-            },4000)
-              
-            this.resetFiltros();
-  
-          this.formGroup.reset();
-          this.abonoFormGroup.reset();
-          this.estadoDeCuenta=[]
-          this.getEdoCuenta();
-          
-        },
-        (err)=>
-        {
-          this.isLoading=false
-          if(err)
-          {
-            const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop:'static' });
-            modalRef.componentInstance.alertHeader = 'Error'
-            modalRef.componentInstance.mensaje=err.message
-          
-              setTimeout(() => {
-                modalRef.close('Close click');
-              },4000)
-              this.resetFiltros();
-  
-            this.isLoading=false
-        
-          }
-        },
-        ()=>{//FINALLY
-        }
+        const logRequests = this._logsService.logPagos('Movimiento Añadido', this.currentUser, pago).pipe(
+          catchError(error => {
+            // Handle error for individual log request if needed
+            console.error(`Failed to log parameters Change`, error);
+            return of(null); // Return a null observable to keep forkJoin working
+          })
         )
-        this.subscription.push(sb)
-    }
 
+      await firstValueFrom(logRequests); // Using firstValueFrom to handle the observable
+
+    
+        const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+        modalRef.componentInstance.alertHeader = 'Éxito';
+        modalRef.componentInstance.mensaje = 'Movimiento agregado al Estado de Cuenta del Húesped';
+    
+        setTimeout(() => {
+          modalRef.close('Close click');
+        }, 4000);
+    
+        this.resetFiltros();
+        this.formGroup.reset();
+        this.abonoFormGroup.reset();
+        this.estadoDeCuenta = [];
+        this.getEdoCuenta();
+    
+      } catch (err:any) {
+        const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+        modalRef.componentInstance.alertHeader = 'Error';
+        modalRef.componentInstance.mensaje = err.message;
+    
+        setTimeout(() => {
+          modalRef.close('Close click');
+        }, 4000);
+    
+        this.resetFiltros();
+      } finally {
+        this.isLoading = false;
+      }
+    }
+    
     getFechaCancelado(row:any){
       if(row.hasOwnProperty('Fecha_Cancelado')){
         return row.Fecha_Cancelado.split('T')[0]

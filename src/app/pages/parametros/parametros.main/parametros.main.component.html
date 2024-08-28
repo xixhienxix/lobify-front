@@ -134,25 +134,30 @@
                   <!-- <mat-error *ngIf="animalControl.hasError('required')">Please choose an animal</mat-error>
                   <mat-hint>{{animalControl.value?.sound}}</mat-hint> -->
                 </mat-form-field>
-                <div class="form-text text-muted">Seleccione la Hora en la que desea que el sistema marque de manera automatica un No-Show.</div>
               </div>
             </div>
-            <!-- <div class="form-group row">
-              <label class="col-lg-3 col-form-laSalidabel text-lg-right"
-                >Hora de Auditoria:</label
-              >
+
+
+            <div class="form-group row align-items-center">
+              <label class="col-lg-3 col-form-label text-lg-right">
+                Realiza Auto Check-Outs:
+              </label>
               <div class="col-lg-9 col-xl-4">
-                <mat-form-field appearance="fill">
-                  <mat-label>--Selecciona Hora--</mat-label>
-                  <mat-select formControlName="auditoria" required>
-                    <mat-option *ngFor="let auditoria of checkOutList" [value]="auditoria">
-                      {{auditoria}} 
-                    </mat-option>
-                  </mat-select>
-                </mat-form-field>
-                <div class="form-text text-muted">Seleccione la Hora en la que desea que el sistema realize la auditoria de cuartos.</div>
+                <mat-checkbox [checked]="getCheckEstatusAutoCheckOut()" formControlName="autoCheckOut" >
+                </mat-checkbox>
               </div>
-            </div> -->
+            </div>
+
+            <div class="form-group row align-items-center">
+              <label class="col-lg-3 col-form-label text-lg-right">
+                Realiza Auto No Show:
+              </label>
+              <div class="col-lg-9 col-xl-4">
+                <mat-checkbox [checked]="getCheckEstatusAutoNoShow()" formControlName="autoNoShow" >
+                </mat-checkbox>
+              </div>
+            </div>
+            
           
           </div>
           <!-- end::Header -->
@@ -164,33 +169,6 @@
     <!--end::Form-->
   </div>
   <!--end::Card-->
-  
-  <!-- <div class="card card-custom gutter-b">
-    <div class="card-header">
-      <div class="card-title">
-        <h3 class="card-label">Generated Config</h3>
-      </div>
-    </div>
-    <div class="card-body">
-      <div class="example mb-10">
-        <p>
-          Use for layout config in
-          <code>src/app/_metronic/configs/default-layout.config.ts</code>
-        </p>
-        <div class="example-code">
-          <div class="example-code">
-            <span
-              class="example-copy"
-              data-placement="left"
-              ngbTooltip="Copy code"
-            ></span>
-            <div class="example-highlight">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div> -->
   
   <ng-container *ngIf="isLoading">
     <app-loader-spinner></app-loader-spinner>

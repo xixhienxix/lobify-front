@@ -3,7 +3,7 @@
 <div class="d-flex align-items-center p-5" style="background-color: var(--header-background);">
     <!-- begin::Label -->
     <div class="flex-grow-1 me-2">
-        <a href="#" class="fw-bolder text-hover-primary fs-2" style="color: white;">
+        <a  class="fw-bolder text-hover-primary fs-2" style="color: white;">
             {{ "OccupacyAndIncomeWidgetComponent.tittle" | translate }}
         </a>
     </div>
@@ -16,7 +16,7 @@
 <div class="d-flex align-items-center p-5" style="background-color: var(--deep-red-background);">
     <!-- begin::Label -->
     <div class="flex-grow-1 me-2" >
-        <a href="#" class="fw-bolder text-hover-primary fs-2" style="color: white;">
+        <a  class="fw-bolder text-hover-primary fs-2" style="color: white;">
             {{"OccupacyAndIncomeWidgetComponent.adr" | translate}}
         </a>
         <!-- <small  style="color: var(--light-blue-font); font-weight: bold; padding-left: 10%;">
@@ -35,7 +35,7 @@
     <!-- end::Content -->
     <!-- begin::Label -->
     <div class="flex-grow-1 me-2">
-        <a href="#" class="fw-bolder text-hover-primary fs-2" style="color: white;">
+        <a  class="fw-bolder text-hover-primary fs-2" style="color: white;">
             {{"OccupacyAndIncomeWidgetComponent.revpar" | translate}}
         </a>
         <!-- <small href="#" style="color: var(--light-blue-font); font-weight: bold; padding-left: 10%;">
@@ -66,7 +66,7 @@
 <div class="d-flex align-items-center p-5 " style="background-color: var(--deep-red-background);">
     <!-- begin::Label -->
     <div class="flex-grow-1 me-2">
-        <a href="#" class="fw-bolder text-hover-primary fs-2" style="color: white;">
+        <a  class="fw-bolder text-hover-primary fs-2" style="color: white;">
             {{"OccupacyAndIncomeWidgetComponent.hotel-occupacy-rate" | translate}}
         </a>
         <!-- <small href="#" style="color: var(--light-blue-font); font-weight: bold; padding-left: 10%;">
@@ -85,7 +85,7 @@
     <!-- end::Content -->
     <!-- begin::Label -->
     <div class="flex-grow-1 me-2">
-        <a href="#" class="fw-bolder text-hover-primary fs-2" style="color: white;">
+        <a class="fw-bolder text-hover-primary fs-2" style="color: white;">
             {{"OccupacyAndIncomeWidgetComponent.total-revenue" | translate}}
         </a>
         <!-- <small href="#" style="color: var(--light-blue-font); font-weight: bold; padding-left: 10%;">
@@ -97,7 +97,7 @@
     <div class=" flex-grow-1 fw-bolder rounded-2 py-1">
         <div class="d-flex flex-column me-2">
             <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: var(--light-green-font); margin: inherit;">
-                $ 0
+               {{getTotalincome()}}
             </span>
         </div>
     </div>

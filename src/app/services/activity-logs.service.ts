@@ -5,6 +5,7 @@ import { environment } from 'src/environments/environment';
 import { ActivityLogs, DEFAULT_LOG, PropertiesChanged } from '../models/activity-log.model';
 import { BehaviorSubject, catchError, map, Observable, of, tap } from 'rxjs';
 import { Huesped } from '../models/huesped.model';
+import { Bloqueo } from '../_metronic/layout/components/header/bloqueos/_models/bloqueo.model';
 
 @Injectable({
   providedIn: 'root'
@@ -59,6 +60,25 @@ export class LogService {
       username,
       folio,
       logType:1
+    };
+    return this.sendLogToServer(logEntry).pipe(
+      tap(() => {
+        // Update userLogs BehaviorSubject after posting the log
+        const updatedLogs = [...this.userLogs$.value, logEntry];
+        this.userLogs$.next(updatedLogs);
+      })
+    );
+  }
+
+  logNvoBloqueo(message: string, username: string, bloqueo:Bloqueo){
+    const date = new Date();
+    const formattedDate = this.formatDate(date);
+    const logEntry = {
+      timestamp: formattedDate.toISOString(),
+      message,
+      username,
+      bloqueo,
+      logType:4
     };
     return this.sendLogToServer(logEntry).pipe(
       tap(() => {
@@ -127,6 +147,75 @@ export class LogService {
     );
   }
 
+  logChangedProperties(message: string, username: string, propertiesChanged:any): Observable<any> {
+    const date = new Date();
+    const formattedDate = this.formatDate(date);
+    const logEntry = {
+      timestamp: formattedDate.toISOString(),
+      propertiesChanged,
+      message,
+      username,
+      logType:3
+    };
+    return this.sendLogToServer(logEntry).pipe(
+      tap(() => {
+        // Update userLogs BehaviorSubject after posting the log
+        const updatedLogs = [...this.userLogs$.value, logEntry];
+        this.userLogs$.next(updatedLogs);
+      })
+    );
+  }
+
+  logPostBloqueos(message: string, username: string, bloquedProperties:any):Observable<any>{
+    const date = new Date();
+    const formattedDate = this.formatDate(date); 
+    const logEntry = {
+      timestamp: formattedDate.toISOString(),
+      propertiesChanged:bloquedProperties,
+      message,
+      username,
+      logType:4
+    };
+    return this.sendLogToServer(logEntry).pipe(
+      tap(() => {
+        // Update userLogs BehaviorSubject after posting the log
+        const updatedLogs = [...this.userLogs$.value, logEntry];
+        this.userLogs$.next(updatedLogs);
+      })
+    );
+  }
+
+  /**      const pago: edoCuenta = {
+        Folio: this.currentHuesped.folio,
+        Fecha: new Date(),
+        Fecha_Cancelado: '',
+        Referencia: this.abonosf.notaAbono.value,
+        Descripcion: this.abonosf.conceptoManual.value,
+        Forma_de_Pago: this.abonosf.formaDePagoAbono.value,
+        Cantidad: 1,
+        Cargo: 0,
+        Abono: this.abonosf.cantidadAbono.value,
+        Estatus: 'Activo'
+      }; */
+  logPagos(message: string, username: string, payment:any):Observable<any>{
+    const date = new Date();
+    const formattedDate = this.formatDate(date); 
+    const logEntry = {
+      timestamp: formattedDate.toISOString(),
+      payment:payment,
+      message,
+      username,
+      logType:5
+    };
+    return this.sendLogToServer(logEntry).pipe(
+      tap(() => {
+        // Update userLogs BehaviorSubject after posting the log
+        const updatedLogs = [...this.userLogs$.value, logEntry];
+        this.userLogs$.next(updatedLogs);
+      })
+    );
+  }
+
   formatDate(date: Date): Date {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
@@ -139,4 +228,31 @@ export class LogService {
   // private sendLogToServer(logEntry: { timestamp: Date; message: string }) {
   //   // Implement the logic to send logs to the server
    }
+
+   /**Helpers two compare Objects */
+   getChangedProperties(obj1: any, obj2: any): Record<string, any> {
+    const changedProperties: Record<string, any> = {};
+  
+    function findChanges(obj1: any, obj2: any, parentKey: string = ''): void {
+      for (const key in obj2) {
+        const fullKey = parentKey ? `${parentKey}.${key}` : key;
+  
+        if (!(key in obj1)) {
+          // If the key does not exist in obj1, we skip it.
+          continue;
+        } else if (typeof obj2[key] === 'object' && obj2[key] !== null && typeof obj1[key] === 'object' && obj1[key] !== null) {
+          // If both properties are objects, recurse
+          findChanges(obj1[key], obj2[key], fullKey);
+        } else if (obj1[key] !== obj2[key]) {
+          // Property value is different, add to changedProperties
+          changedProperties[fullKey] = obj2[key];
+        }
+      }
+    }
+  
+    findChanges(obj1, obj2);
+  
+    return changedProperties;
+  }
+  
 }

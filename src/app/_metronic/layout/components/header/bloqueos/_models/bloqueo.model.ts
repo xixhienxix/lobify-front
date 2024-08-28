@@ -1,15 +1,17 @@
 
 export interface Bloqueo
 {
-  _id:string;
-  Habitacion:Array<string>;
-  Cuarto:Array<number>;
-  Desde:string;
-  Hasta:string;
-  sinLlegadas:boolean;
-  sinSalidas:boolean;
-  fueraDeServicio:boolean;
+  _id?:string;
+  Habitacion:string;
+  Cuarto:Array<string>;
+  Desde:Date;
+  Hasta:Date;
+  bloqueoState: BloqueosState;
   Comentarios:string;
   hotel?:string;
-
 }
+
+export interface BloqueosState {
+  [key: string]: boolean;
+};
+

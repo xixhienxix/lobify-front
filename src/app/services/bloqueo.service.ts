@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { catchError, map, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
-import { Bloqueo } from '../_metronic/layout/components/header/bloqueos/_models/bloqueo.model';
+import { Bloqueo, BloqueosState } from '../_metronic/layout/components/header/bloqueos/_models/bloqueo.model';
 import { ParametrosService } from '../pages/parametros/_services/parametros.service';
+import { LocalForageCache } from '../tools/cache/indexdb-expire';
+import { SortDirection } from '@angular/material/sort';
 
 
 
@@ -12,8 +14,104 @@ import { ParametrosService } from '../pages/parametros/_services/parametros.serv
   providedIn: 'root'
 })
 export class BloqueoService  {
-    constructor(private http: HttpClient, private _parametrosService:ParametrosService) { }
+  indexDBStorage = new LocalForageCache().createInstance({
+    name: 'Lobify',
+    storeName: 'Bloqueos',
+    defaultExpiration: 10800
+});
 
+private currentBloqueos$=new BehaviorSubject<Bloqueo[]>([]);
+private currentBloqueosSubject =new Subject<any>();
+
+    constructor(private http: HttpClient) { }
+
+    async writeIndexDB(propertyName: string, propertyValue: any): Promise<void> {
+      if (propertyName && propertyValue) {
+          await this.indexDBStorage.setItem(propertyName, propertyValue);
+      }
+    }
+  
+    async readIndexDB(propertyName: string): Promise<any> {
+        if (propertyName) {
+            return  await this.indexDBStorage.getItem(propertyName);
+        }
+    }
+  
+    async deleteIndexDB(propertyName: string): Promise<void> {
+        if (propertyName) {
+            await this.indexDBStorage.removeItem(propertyName);
+        }
+    }
+
+    get getcurrentBloqueosValue(){
+      return this.currentBloqueos$;
+    }
+  
+    set setcurrentBloqueosValue(habitacion: any) {
+      this.currentBloqueos$.next(habitacion);
+    }
+
+    async sendCustomFormNotification(_nuevoDatoAgregado:boolean){
+      if(_nuevoDatoAgregado=true){
+        this.currentBloqueosSubject.next(true)
+      }
+    };
+
+    getcustomFormNotification() {
+      return this.currentBloqueosSubject.asObservable();
+    }
+
+    getAll() :Observable<Bloqueo[]> {
+      return this.http
+       .get<Bloqueo[]>(environment.apiUrl + '/bloqueos/getAll')
+       .pipe(
+         map(responseData=>{
+          const postArray = []
+           for(const key in responseData)
+           {
+             if(responseData.hasOwnProperty(key))
+             postArray.push(responseData[key]);
+            }
+            this.writeIndexDB("Bloqueos",responseData);
+            this.setcurrentBloqueosValue = responseData 
+  
+            return responseData
+       })
+       )
+     }
+
+     postBloqueo(
+      desde:Date,
+      hasta:Date,
+      cuarto:string,
+      numCuarto:Array<string>,
+      checkboxState:BloqueosState,
+      comentarios:string
+      ) {
+  
+      const bloqueoPayload: Bloqueo = {
+      Habitacion:cuarto,
+      Cuarto:numCuarto,
+      Desde:desde,
+      Hasta:hasta,
+      bloqueoState:checkboxState,
+      Comentarios:comentarios,
+      };
+  
+      return this.http.post<Bloqueo>(`${environment.apiUrl}/post/bloqueos`, bloqueoPayload).pipe(
+        map(response => {
+          // Example transformation: add a timestamp to the response
+          return {
+            ...response,
+            timestamp: new Date().toISOString()
+          };
+        })
+      );
+    }
+
+
+
+     /**POR BORRAR */
 
   getBloqueosbyTipo(id:string) : Observable<Bloqueo[]> {
   return  (this.http.get<Bloqueo[]>(environment.apiUrl+"/reportes/bloqueos/"+id)
@@ -39,13 +137,11 @@ export class BloqueoService  {
 
   actualizaBloqueos(
     _id:string,
-    desde:string,
-    hasta:string,
-    cuarto:Array<string>,
-    numCuarto:Array<number>,
-    sinLlegadasChecked:boolean,
-    sinSalidasChecked:boolean,
-    fueraDeServicio:boolean,
+    desde:Date,
+    hasta:Date,
+    cuarto:string,
+    numCuarto:Array<string>,
+    bloqueosState:BloqueosState,
     comentarios:string
     ) {
 
@@ -56,9 +152,7 @@ export class BloqueoService  {
                                 Cuarto:numCuarto,
                                 Desde:desde,
                                 Hasta:hasta,
-                                sinLlegadas:sinLlegadasChecked,
-                                sinSalidas:sinSalidasChecked,
-                                fueraDeServicio:fueraDeServicio,
+                                bloqueoState:bloqueosState,
                                 Comentarios:comentarios.trim(),
                                 };
 
@@ -83,55 +177,31 @@ export class BloqueoService  {
     )
 
   }
-  postBloqueo(
-    _id:string,
-    desde:string,
-    hasta:string,
-    cuarto:Array<string>,
-    numCuarto:Array<number>,
-    sinLlegadasChecked:boolean,
-    sinSalidasChecked:boolean,
-    fueraDeServicio:boolean,
-    text:string
-    ) {
 
-const bloqueos: Bloqueo = {
-_id:_id,
-Habitacion:cuarto,
-Cuarto:numCuarto,
-Desde:desde,
-Hasta:hasta,
-sinLlegadas:sinLlegadasChecked,
-sinSalidas:sinSalidasChecked,
-fueraDeServicio:fueraDeServicio,
-Comentarios:text,
-};
 
- return this.http.post<any>(environment.apiUrl+"/reportes/bloqueos/post", {bloqueos}, {observe:'response'})
+      liberaBloqueos(
+        _id:string,
+        desde:Date,
+        hasta:Date,
+        habitacion:string,
+        numCuarto:Array<string>,
+        ) {
 
-  }
+          let bloqueos: Bloqueo = {
+                                    _id:_id,
+                                    Habitacion:habitacion,
+                                    Cuarto:numCuarto,
+                                    Desde:desde,
+                                    Hasta:hasta,
+                                    bloqueoState:{
+                                      sinLlegadas:false,
+                                      sinSalidas:false,
+                                      fueraDeServicio:false
+                                    },
+                                    Comentarios:'',
+                                    };
 
-  liberaBloqueos(
-    _id:string,
-    desde:string,
-    hasta:string,
-    habitacion:Array<string>,
-    numCuarto:Array<number>,
-    ) {
-
-      let bloqueos: Bloqueo = {
-                                _id:_id,
-                                Habitacion:habitacion,
-                                Cuarto:numCuarto,
-                                Desde:desde,
-                                Hasta:hasta,
-                                sinLlegadas:false,
-                                sinSalidas:false,
-                                fueraDeServicio:false,
-                                Comentarios:'',
-                                };
-
-  return this.http.post<Bloqueo>(environment.apiUrl+"/libera/bloqueos", {bloqueos})
+      return this.http.post<Bloqueo>(environment.apiUrl+"/libera/bloqueos", {bloqueos})
 
       }
 

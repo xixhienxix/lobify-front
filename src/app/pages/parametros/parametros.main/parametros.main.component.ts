@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { firstValueFrom, Subscription } from 'rxjs';
+import { catchError, firstValueFrom, forkJoin, of, Subscription } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
@@ -10,6 +10,7 @@ import { Divisas } from '../_models/divisas';
 import { Parametros } from '../_models/parametros';
 import { DivisasService } from '../_services/divisas.service';
 import { ParametrosService } from '../_services/parametros.service';
+import { LogService } from 'src/app/services/activity-logs.service';
 
 const DEFAULT_TIMEZONE = {
   _id:'',
@@ -44,6 +45,7 @@ checkOutList : string[]=['00:00','00:30','01:00','01:30','02:00','02:30','03:00'
 cancelacionList:string[]=['No Reembolsable']
 currentUtc:string = ''
 parametrosModel:Parametros
+currentUser:string='root';
 
 constructor(
   public fb : FormBuilder,
@@ -51,23 +53,33 @@ constructor(
   public timezonesService : TimezonesService,
   public divisasService:DivisasService,
   public _parametrosService:ParametrosService,
-  public authService : AuthService
+  public _authService : AuthService,
+  private _logsService: LogService
 ) { 
+  this.currentUser = this._authService.getUserInfo().username
   this.fechas= new Date();
   this._parametrosService.getCurrentParametrosValue
 }
 
 
   async ngOnInit(): Promise<void> {
-  this.initForm();
-  await this.checkParametrosIndexDB();
-  this.setFormGroup();
+    this.initForm();
+    await this.checkParametrosIndexDB();  // Fetch parameters first
+    this.setFormGroup();  // Then set form values
   this.getTimeZones();
   this.getDivisas();
 }
 
 ngOnDestroy():void{
   this.susbcription.forEach(sb=>sb.unsubscribe())
+}
+
+getCheckEstatusAutoNoShow() {
+  return this.parametrosModel?.noShowAutoUpdated ?? false;
+}
+
+getCheckEstatusAutoCheckOut() {
+  return this.parametrosModel?.autoCheckOut ?? false;
 }
 
 setFormGroup(){
@@ -79,6 +91,8 @@ setFormGroup(){
       this.formGroup.controls['checkIn'].setValue(this.parametrosModel.checkIn);
       this.formGroup.controls['noShow'].setValue(this.parametrosModel.noShow);
       this.formGroup.controls['tarifasCancelacion'].setValue(this.parametrosModel.tarifasCancelacion);
+      this.formGroup.controls['autoCheckOut'].setValue(this.parametrosModel.autoCheckOut);
+      this.formGroup.controls['autoNoShow'].setValue(this.parametrosModel.noShowAutoUpdated);
 }
 
 getTimeZones(){
@@ -135,20 +149,25 @@ initForm(){
     checkOut:['',Validators.required],
     checkIn:['',Validators.required],
     noShow:['',Validators.required],
-    tarifasCancelacion:['',Validators.required]
+    tarifasCancelacion:['',Validators.required],
+    autoCheckOut:[''],
+    autoNoShow:[''],
   })
 
 }
 
-async checkParametrosIndexDB(){
-  const parametrosIndexDB:Parametros = await this._parametrosService.readIndexDB("Parametros");
-  /** Check if Parametros are on IndexDb */
-  if(parametrosIndexDB){
-      this.parametrosModel = parametrosIndexDB
-  }else{
+async checkParametrosIndexDB(refresh: boolean = false) {
+  if (refresh) {
     this.parametrosModel = await firstValueFrom(this._parametrosService.getParametros());
+    return;
   }
+
+  const parametrosIndexDB: Parametros | null = await this._parametrosService.readIndexDB("Parametros");
+
+  // Default to an empty object if nothing is found to prevent undefined errors
+  this.parametrosModel = parametrosIndexDB || await firstValueFrom(this._parametrosService.getParametros()) || {};
 }
+
 
 onSelectTimeZone(zona:string){
   this.timezone=zona;
@@ -194,13 +213,28 @@ submitParametros(){
     noShow:this.getFormGroupValues.noShow.value,
     checkOut:this.getFormGroupValues.checkOut.value,
     checkIn:this.getFormGroupValues.checkIn.value,
-    tarifasCancelacion:this.getFormGroupValues.tarifasCancelacion.value
+    tarifasCancelacion:this.getFormGroupValues.tarifasCancelacion.value,
+    autoCheckOut: this.getFormGroupValues.autoCheckOut.value,
+    noShowAutoUpdated: this.getFormGroupValues.autoNoShow.value 
   }
 
   const sb = this._parametrosService.postParametros(parametros).subscribe({
-    next:()=>{
-      this.isLoading=false
+    next:async(item)=>{
+      
+      const changedProperties = this._logsService.getChangedProperties(this.parametrosModel, parametros);
+      
+        const logRequests = this._logsService.logChangedProperties('Parametros Updated',this.currentUser, changedProperties).pipe(
+          catchError(error => {
+            // Handle error for individual log request if needed
+            console.error(`Failed to log parameters Change`, error);
+            return of(null); // Return a null observable to keep forkJoin working
+          })
+        )
 
+      await firstValueFrom(logRequests); // Using firstValueFrom to handle the observable
+      
+      this.isLoading=false
+      this.checkParametrosIndexDB(true);
      const modalRef = this.modal.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
      modalRef.componentInstance.alertHeader='Exito'
      modalRef.componentInstance.mensaje='Parametros Actualizados con exito'

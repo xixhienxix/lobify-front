@@ -9,10 +9,6 @@ import { LogService } from 'src/app/services/activity-logs.service';
 })
 export class ActivityDrawerComponent implements OnInit {
   logs: ActivityLogs[] = [];
-  logsType1: ActivityLogs[] = []; // Reservas
-  logsType2: ActivityLogs[] = []; // Estatus
-  logsType3: ActivityLogs[] = []; // Estatus
-  estatusLogs: ActivityLogs[] = [];
   currentUser: string;
 
   constructor(private _logService: LogService, private _authService: AuthService) {
@@ -27,8 +23,8 @@ export class ActivityDrawerComponent implements OnInit {
   fetchLogs() {
     this._logService.getLogs(this.currentUser).subscribe({
       next: (logs) => {
+        // Ordenar los logs por timestamp
         this.logs = logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        this.splitLogsByType();
       },
       error: (error) => {
         console.error('Failed to fetch logs:', error);
@@ -39,8 +35,8 @@ export class ActivityDrawerComponent implements OnInit {
   subscribeToUserLogs() {
     this._logService.userLogs$.subscribe({
       next: (logs) => {
+        // Ordenar los logs por timestamp
         this.logs = logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-        this.splitLogsByType();
       },
       error: (error) => {
         console.error('Failed to fetch logs from BehaviorSubject:', error);
@@ -49,13 +45,32 @@ export class ActivityDrawerComponent implements OnInit {
   }
 
   getPropertiesChangedArray(log: ActivityLogs): [string, any][] {
-    return log.propertiesChanged ? Object.entries(log.propertiesChanged) : [];
+    const flattenProperties = (obj: any, parentKey = ''): [string, any][] => {
+      let entries: [string, any][] = [];
+      for (const [key, value] of Object.entries(obj)) {
+        const newKey = parentKey ? `${parentKey}.${key}` : key;
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          entries = entries.concat(flattenProperties(value, newKey));
+        } else {
+          entries.push([newKey, value]);
+        }
+      }
+      return entries;
+    };
+  
+    return log.propertiesChanged ? flattenProperties(log.propertiesChanged) : [];
   }
 
-  splitLogsByType() {
-    this.logsType1 = this.logs.filter(log => log.logType === 1);
-    this.logsType2 = this.logs.filter(log => log.logType === 2);
-    this.logsType3 = this.logs.filter(log => log.logType === 3);
+  isArray(value: any): boolean {
+    return Array.isArray(value);
+  }
+
+  isObject(value: any): boolean {
+    return value && typeof value === 'object' && !Array.isArray(value);
+  }
+
+  getObjectKeys(obj: any): string[] {
+    return Object.keys(obj);
   }
 
   // Get Time
@@ -63,27 +78,15 @@ export class ActivityDrawerComponent implements OnInit {
     const time = new Date(timestamp);
     const hours = time.getHours().toString().padStart(2, '0');
     const minutes = time.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`
+    return `${hours}:${minutes}`;
   }
 
   formatDate(timestamp:string): string {
     const date = new Date(timestamp);
-
     const day = date.getDate().toString().padStart(2, '0');
-    
     const monthFormatter = new Intl.DateTimeFormat('es-ES', { month: 'long' });
     const month = monthFormatter.format(date);
-  
     const year = date.getFullYear();
-  
     return `${day} de ${month} del ${year}`;
-  }
-
-  formatTimeStamp(log:ActivityLogs){
-    const time = log.timestamp.split(' ')[2]
-    const month = log.timestamp.split(' ')[1]
-    const day = log.timestamp.split(' ')[0]
-
-    return 
   }
 }

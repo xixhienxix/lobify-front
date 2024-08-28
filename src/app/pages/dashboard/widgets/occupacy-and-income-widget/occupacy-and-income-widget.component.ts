@@ -14,6 +14,7 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit{
   @Input() allReservations: Huesped[];
   @Input() changing: Subject<Huesped[]>;
   @Input() changingValueRooms: Subject<Habitacion[]>;
+  @Input() totalIncome: any;
 
   constructor(private cdr: ChangeDetectorRef){
   }
@@ -32,7 +33,13 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit{
         this.inventario = [...roomSource]
         this.cdr.detectChanges(); // Manually trigger change detection if needed
       }
-    })
+    });
+
+  }
+
+  getTotalincome(){
+
+    return
   }
 
   occupancyPercentage(){

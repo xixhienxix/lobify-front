@@ -10,12 +10,13 @@
   <ng-container *ngTemplateOutlet="footerView"></ng-container>
 </ng-container>
 
+
+
 <ng-template #footerView>
   <!--begin::Copyright-->
-  <!-- <div class="text-gray-900 order-2 order-md-1">
-    <span class="text-muted fw-semibold me-1">{{currentDateStr}}&copy;</span>
-    <a href="https://keenthemes.com/" target="_blank" class="text-gray-800 text-hover-primary">Keenthemes</a>
-  </div> -->
+  <div class="text-gray-900 order-2 order-md-1">
+    <span class="text-muted fw-semibold me-1">{{version.split(',')[0]}}&copy;</span>
+  </div>
   <!--end::Copyright-->
 
   <!--begin::Menu-->

@@ -11,4 +11,6 @@ export interface Parametros {
     id?:string,
     hotel?:string;
     tarifasCancelacion?:string;
+    autoCheckOut?:boolean;
+    noShowAutoUpdated?:boolean;
 }

@@ -1,0 +1,17 @@
+.form-group.row {
+    display: flex;
+    align-items: center; /* Vertically center the items */
+  }
+  
+  .col-form-label {
+    margin-bottom: 0; /* Remove bottom margin to align vertically */
+  }
+  
+  .mat-checkbox-layout .mat-checkbox {
+    margin: 0; /* Remove default margin */
+    vertical-align: middle; /* Center vertically */
+  }
+  
+  .mat-checkbox {
+    transform: translateY(-2px); /* Adjust alignment if needed */
+  }

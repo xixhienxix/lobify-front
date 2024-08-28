@@ -3,6 +3,7 @@ export interface ActivityLogs{
     timestamp: string; 
     message: string;
     propertiesChanged?:Record<string, any>;  // Updated type to match the provided value
+    payment?:Record<string, any>;
     username:string;
     hotel?:string
     oldStatus?:string

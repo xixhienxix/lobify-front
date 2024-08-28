@@ -34,6 +34,8 @@ import { Parametros } from '../parametros/_models/parametros';
 import { LogService } from 'src/app/services/activity-logs.service';
 import { AuthService } from 'src/app/modules/auth';
 import { PropertiesChanged } from 'src/app/models/activity-log.model';
+import { Bloqueo } from 'src/app/_metronic/layout/components/header/bloqueos/_models/bloqueo.model';
+import { BloqueoService } from 'src/app/services/bloqueo.service';
 
 
 @Component({
@@ -58,7 +60,8 @@ export class CalendarComponent implements OnInit {
     0: '#99d284',
     1: '#fab3db',
     2: '#d0aaec',
-    3: '#fac34e'
+    3: '#fac34e',
+    4: '#DD4F5D'
 
     //#fab3db - Reserva Temporal
     //#d0aaec - Reserva Uso Temporal
@@ -82,8 +85,10 @@ export class CalendarComponent implements OnInit {
   houseKeepingCodes: HouseKeeping[] = []
   indexDbLoaded: boolean = false
   codigosCargo: Codigos[] = []
+  bloqueosArray:Bloqueo[] = []
 
   changingValue: Subject<any> = new Subject();
+  changingValueBloque: Subject<any> = new Subject();
   // changingPromesasValue: Subject<any> = new Subject();
   changingAdicionalesValue: Subject<Adicional[]> = new Subject();
   _isLoading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -109,6 +114,7 @@ export class CalendarComponent implements OnInit {
     private _logService: LogService,
     private _authService: AuthService,
     private _estadoDeCuenta: Edo_Cuenta_Service,
+    private _bloqueoService: BloqueoService
   ) {
     this.currentUser = this._authService.getUserInfo().username
   }
@@ -123,6 +129,7 @@ export class CalendarComponent implements OnInit {
     });
     await this.checkFoliadorIndexDB();
     await this.checkRoomCodesIndexDB();
+    await this.checkBloqueosIndexDb();
     await this.getReservations();
     await this.checkEstatusIndexDB();
     await this.checkAmaCodesIndexDB();
@@ -137,7 +144,8 @@ export class CalendarComponent implements OnInit {
     this._huespedService.getAll().subscribe({
       next: (value) => {
         this.allReservations = [];
-        this.changingValue.next(value);
+        
+        this.changingValue.next({value, bloqueosArray:this.bloqueosArray});
         this.allReservations = [...value]
       }
     });
@@ -180,6 +188,16 @@ export class CalendarComponent implements OnInit {
       this.estatusArray = estatusIndexDB
     } else {
       this.estatusArray = await firstValueFrom(this._estatusService.getAll());
+    }
+  }
+
+  async checkBloqueosIndexDb() {
+    const bloqueosIndexDb: Bloqueo[] = await this._bloqueoService.readIndexDB("Bloqueos");
+    /** Check if RoomsCode are on IndexDb */
+    if (bloqueosIndexDb) {
+      this.bloqueosArray = bloqueosIndexDb
+    } else {
+      this.bloqueosArray = await firstValueFrom(this._bloqueoService.getAll());
     }
   }
 
@@ -336,14 +354,20 @@ export class CalendarComponent implements OnInit {
       })
   }
 
-  onEditRsvOpen(data: any) {
-    if (data.data.hasOwnProperty("Id")) {
+  async checkEdoCuentaClient(folio:string){
+    return await firstValueFrom(this._edoCuentaService.getCuentas(folio));
+  }
 
+  async onEditRsvOpen(data: any) {
+    if (data.data.hasOwnProperty("Id")) {
+      const folio = data.data.Folio
       const currentHuesped = this.allReservations.find(item => item.folio === data.data.Folio)!;
       this.currentFolio = data.data.Folio;
       let colorAma = this.houseKeepingCodes.find(item =>
         item.Descripcion == currentHuesped.estatus_Ama_De_Llaves!.toUpperCase()
       )?.Color!
+
+      const estadoDeCuenta = await this.checkEdoCuentaClient(folio);
 
       const habitacion = this.roomCodesComplete.find((item) => item.Numero === data.data.Numero);
 
@@ -360,6 +384,7 @@ export class CalendarComponent implements OnInit {
       modalRef.componentInstance.checkIn = this.currentParametros.checkIn
       modalRef.componentInstance.checkOut=this.currentParametros.checkOut
       modalRef.componentInstance.zona=this.currentParametros.zona
+      modalRef.componentInstance.estadoDeCuenta = estadoDeCuenta
 
       //DataSource Promesas
       modalRef.componentInstance.onEstatusChange.subscribe({

@@ -73,7 +73,6 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   estatusArray:Estatus[]=[];
   folios:Foliador[]=[];
 
-
   /** Dates */
   intialDateEvent: string[] = [];
   endDateEvent: string[] = [];

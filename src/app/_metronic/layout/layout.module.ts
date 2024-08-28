@@ -41,6 +41,9 @@ import { SaasComponent } from './components/toolbar/saas/saas.component';
 import {SharedModule} from "../shared/shared.module";
 import { NvaReservaComponent } from './components/header/reservations/nva-reserva/nva-reserva.component';
 import { BloqueoReservaComponent } from './components/header/bloqueos/nvo-bloqueo/nvo-bloqueo.component';
+import { MomentDateAdapter } from '@angular/material-moment-adapter';
+import { MAT_DATE_LOCALE, DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { DistinctPipe } from './components/header/bloqueos/_helpers/distinct.pipe';
 
 const routes: Routes = [
   {
@@ -49,9 +52,21 @@ const routes: Routes = [
     children: Routing,
   },
 ];
-
+// Optionally define your date format
+export const MY_DATE_FORMATS = {
+  parse: {
+    dateInput: 'LL',
+  },
+  display: {
+    dateInput: 'LL',
+    monthYearLabel: 'MMMM YYYY',
+    dateA11yLabel: 'LL',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
 @NgModule({
   declarations: [
+    DistinctPipe,
     LayoutComponent,
     HeaderComponent,
     NvaReservaComponent,
@@ -92,6 +107,11 @@ const routes: Routes = [
     ThemeModeModule,
     SharedModule
   ],
-  exports: [RouterModule],
+  exports: [RouterModule,DistinctPipe],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'es-MX' },
+    { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE] },
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+  ],
 })
 export class LayoutModule {}

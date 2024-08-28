@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, pipe } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, pipe, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Parametros } from '../_models/parametros';
 import { DivisasService } from './divisas.service';
@@ -80,11 +80,18 @@ export class ParametrosService {
       }))
   }
 
-  postParametros(parametros:Parametros){
-
-    return this.http.post(environment.apiUrl+'/parametros',{parametros}).pipe(map(item=>{
-      return item
-    }))
+  postParametros(parametros: Parametros) {
+    console.log(environment.apiUrl);
+    return this.http
+      .post(`${environment.apiUrl}/parametros/save`, { parametros })
+      .pipe(
+        map((item) => {
+        }),
+        catchError((error) => {
+          console.error('Error:', error);
+          return throwError(error);
+        })
+      );
   }
 
 }

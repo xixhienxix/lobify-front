@@ -1,307 +1,279 @@
 <div class="modal-content">
-    <div style="background-color: #00506a;" class="modal-header">
-        <div style="text-align: center; color: white;" class="text-center modal-title h4 col-10"
-          id="example-modal-sizes-title-lg">
-          BLOQUEO DE HABITACIONES
-          <!-- <label>
-            {{huesped.folio}}</label> -->
-        </div>
-        <button style="background-color:#fa6d7c; font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
-  
+    <div style="background-color: var(--deep-red-background);" class="modal-header">
+      <div style="text-align: center; color: white;" class="text-center modal-title h4 col-8"
+        id="example-modal-sizes-title-lg">
+        Bloqueo de Fechas
+        <!-- <label>
+          {{huesped.folio}}</label> -->
       </div>
-  </div>
-  <!--(submit)="save(text.value); "-->
-  <form [formGroup]="bloqueoFormGroup" (ngSubmit)="onFormSubmit(text.value)" class="form form-label-right"
-    style="background-color: #e6e9ed">
-    <div class="cursor-default overlay overlay-block modal-body" style="background-color: #e6e9ed">
-  
-  
-  
-        <div class="col-4">
-            <mat-form-field>
-              <mat-label>{{ formatDateTo(intialDateFC) }}</mat-label>
-              <input
-                matInput
-                [matDatepicker]="llegadaPicker"
-                [value]="llegadaDateFC.value"
-                disabled
-              >
-              <mat-datepicker-toggle matIconSuffix [for]="llegadaPicker"></mat-datepicker-toggle>
-              <mat-datepicker #llegadaPicker></mat-datepicker>
-            </mat-form-field>
-          
-            <mat-form-field>
-              <mat-label>{{ formatDateTo(endDateFC) }}</mat-label>
-              <input
-                matInput
-                [matDatepicker]="salidaPicker"
-                [value]="salidaDateFC.value"
-                (dateChange)="onSalidaDateChange($event)"
-                [matDatepickerFilter]="salidaDateFilter"
-                placeholder="Fecha de Salida"
-              >
-              <mat-datepicker-toggle matSuffix [for]="salidaPicker"></mat-datepicker-toggle>
-              <mat-datepicker #salidaPicker></mat-datepicker>
-            </mat-form-field>
-          </div>
-          
-  
-      <div *ngIf="display===false" class="row">
-         <small> <label #contentPlaceholder  style="color: #fa6d7c; font-weight:bold">La fecha inicial no puede ser mayor que la fecha final seleccione otro rango de fechas para el bloqueo</label></small>
-     </div>
-  
-      <div class="row">
-        <label style="color:#00506a; font-weight: bold;" class="form-label">Tipo de Habitación </label>
-        <div class="col-lg-12">
-          <mat-select 
-                      formControlName="tipoCuarto"
-                      class="form-control form-control-lg form-control-solid"
-                      name="habitacion"
-                      (selectionChange)="habValue($event)"
-                      #habitacion
-                      placeholder="-- Seleccione Tipo de Habitación -- " required
-                      >
-              <mat-option value="1">Todos los Tipos de Cuartos</mat-option>
-              <mat-option *ngFor="let tipoCuarto of codigoCuarto" [value]="tipoCuarto">{{tipoCuarto}} </mat-option>
-          </mat-select>
-              <!--Error Block-->
-          <mat-error *ngIf="tipoCuarto!.hasError('required') && inicio===false">
-            <strong>*Campo Obligatorio</strong>
-          </mat-error>
-  
-        </div>
-      </div>
-  <br>
-      <div class="row">
-        <label style="color:#00506a; font-weight: bold;" class="form-label">Numero de Habitacion </label>
-        <div class="col-lg-12">
-            <mat-select 
-            #itemSelect
-            class="form-control form-control-lg form-control-solid"
-            multiple
-            formControlName="numeroHab"
-            placeholder="-- {{placeHolder}} -- ">
-            <footer class="col-sm-12">
-              <button (click)="itemSelect.close()" mat-raised-button class="col-sm-4 btn btn-primary">Confirmar</button>
-            </footer>
-  
-            <!-- <mat-option (click)="Allchecked($event)">Todos</mat-option> -->
-              <div>
-                <mat-option #allSelected (click)="toggleAllSelection()" [value]="0">Todos</mat-option>
-                <mat-option #matOption (click)="tosslePerOne(allSelected.viewValue);cuartoValue(matOption.selected,matOption.value);" [value]="numero.key" *ngFor="let numero of disponiblesIndexados" >{{numero.value}}</mat-option>
-              </div>
-            </mat-select>
-           
-                        <!--Error Block-->
-          <mat-error *ngIf="numeroHab!.hasError('required') && inicio===false">
-            <strong>*Campo Obligatorio</strong>
-          </mat-error>
-          <br>
-          <mat-error *ngIf="disponiblesIndexados.length===0 && inicio===false && habitacion.value!==1">
-            <strong>*Los Cuartos de {{habitacion.value}} se encuentran ocupados seleccione otro tipo de habitacion</strong>
-          </mat-error>
-          <br>
-          <mat-error *ngIf="disponiblesIndexados.length===0 && inicio===false && habitacion.value===1">
-            <strong>*Todas las habitaciones se encuentran ocupadas para esta fecha, seleccione otro rango de fechas</strong>
-          </mat-error>
-        </div>
-      </div>
-      <br>
-      <div class="row">
-        <label style="color:#00506a; font-weight: bold;" class="form-label">Restricciones:</label>
-      <div style="background-color: transparent;" class="form-control">
-            <section class="example-section">
-              <mat-checkbox
-                            #sinLlegadas
-                            (change)="toggleLlegadas($event)"
-                            style="margin: 5pxpx; color:#00506a; font-weight: bold;"
-                            [checked]="sinLlegadasChecked">
-                            No hay Llegadas &nbsp;
-              </mat-checkbox>
-              <mat-checkbox
-                            #sinSalidas
-                            (change)="toggleSalidas($event)"
-                            style="color:#00506a; font-weight: bold;"
-                            [checked]="sinSalidasChecked">
-                            No Hay Salidas
-              </mat-checkbox>
-              &nbsp;
-              <mat-checkbox
-                            #sinSalidas
-                            (change)="toggleFuera($event)"
-                            style="color:#00506a; font-weight: bold;"
-                            [checked]="fueraDeServicioChecked">
-                            Fuera de Servicio
-              </mat-checkbox>
-            </section>
-          <!-- <small>No Hay Llegadas + Salidas = <label  style="color: #fa6d7c; font-weight:bold">Fuera de Servicio</label></small> -->
-        </div>
-          </div>
-          <br>
-          <br>
-          <label style="color:#00506a; font-weight: bold;" class="form-label"> Comentarios: </label>
-        <div class="row">
-          <textarea  #text class="form-control">
-  
-          </textarea>
-  
-        </div>
-  </div>
-  
-  
-  
-  
-  
-  <div style="background-color:#00506a;" class="modal-header">
-    <mat-error *ngIf="datosFaltantes && inicio===false">
-      <strong>*Faltan Datos po capturar</strong>
-    </mat-error>
-    <div style="color: white; padding-top: 1%; padding-bottom: 1%;" class="text-center modal-title h5 col-12">
-      <button  type="submit" style="background-color: #319dd7; color: white; font-weight: bold;" class="btn btn-block">GUARDAR BLOQUEO</button>
+      <button style=" background-color:var(--header-background); font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
     </div>
-  </div>
+</div>
+
+<div  class="cursor-default overlay overlay-block modal-body" style="background-color: #e6e9ed;">
+    <form [formGroup]="bloqueoFormGroup" class="form form-label-right" style="background-color: #e6e9ed">
+
+        <div class="row container" style="margin-bottom: 16px;">
+            <!-- Date Picker -->
+            <div class="row">
+              <mat-form-field appearance="fill">
+                <mat-label>{{ formatDateTo(llegada) }}</mat-label>
+                <input
+                  matInput
+                  [matDatepicker]="llegadaPicker"
+                  (dateChange)="addEventLlegadaDate('change', $event)"
+                  [value]="llegadaDateFC.value"
+                  [matDatepickerFilter]="salidaDateFilter"
+                />
+                <mat-datepicker-toggle matIconSuffix [for]="llegadaPicker"></mat-datepicker-toggle>
+                <mat-datepicker #llegadaPicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+            <div class="row">
+              <mat-form-field appearance="fill">
+                <mat-label>{{ formatDateTo(salida) }}</mat-label>
+                <input
+                  matInput
+                  [matDatepicker]="salidaPicker"
+                  [value]="salidaDateFC.value"
+                  (dateChange)="addEventSalidaDate('change', $event)"
+                  [matDatepickerFilter]="salidaDateFilter"
+                  placeholder="Fecha de Salida"
+                />
+                <mat-datepicker-toggle matSuffix [for]="salidaPicker"></mat-datepicker-toggle>
+                <mat-datepicker #salidaPicker></mat-datepicker>
+              </mat-form-field>
+            </div>
+          </div>
+
+    <div class="row">
+      <label style="color:#00506a; font-weight: bold;" class="form-label">Tipo de Habitación</label>
+      <div class="col-lg-12">
+        <mat-select
+          formControlName="tipoCuarto"
+          class="form-control form-control-lg form-control-solid"
+          name="habitacion"
+          (selectionChange)="habValue($event)"
+          #habitacion
+          placeholder="-- Seleccione Tipo de Habitación --"
+          required
+        >
+          <mat-option value="1">Todos los Tipos de Cuartos</mat-option>
+          <mat-option *ngFor="let tipoCuarto of roomCodesComplete | distinct:'Codigo'" [value]="tipoCuarto.Codigo">
+            {{ tipoCuarto.Codigo }}
+          </mat-option>
+        </mat-select>
+        <!--Error Block-->
+        <!-- <mat-error *ngIf="tipoCuarto!.hasError('required')">
+          <strong>*Campo Obligatorio</strong>
+        </mat-error> -->
+      </div>
+    </div>
+    
+    <br>
+    <div class="row">
+      <ng-container *ngIf="disponiblesIndexados.length !== 0 ? true : false">
+      <label style="color:#00506a; font-weight: bold;" class="form-label">Numero de Habitacion </label>
+      <div class="col-lg-12">
+
+        <mat-select  #select multiple
+        #itemSelect
+        class="form-control form-control-lg form-control-solid"
+        multiple
+        formControlName="numeroHab"
+        placeholder="-- Selecciona Cuartos -- ">
+        <footer class="col-sm-12">
+          <button style="color:white" (click)="itemSelect.close()" mat-button class="col-sm-4 btn btn-primary">Confirmar</button>
+        </footer>
+          <div class="select-all">
+              <mat-checkbox [(ngModel)]="allSelected"
+                              [ngModelOptions]="{standalone: true}"
+                              (change)="toggleAllSelection()">Selecciona Todos</mat-checkbox>
+          </div>
+          <mat-option (click)="optionClick()" *ngFor="let numero of disponiblesIndexados" [value]="numero.key">
+            {{numero.value}}
+          </mat-option>
+        </mat-select>      
+
+        <br>
+
+      </div>
+      </ng-container>
+    </div>
+    <br>
+    <div class="row">
+      <label style="color:#00506a; font-weight: bold;" class="form-label">Restricciones:</label>
+    <div style="background-color: transparent;" class="form-control">
+      <section class="example-section">
+        <mat-checkbox
+          (change)="toggleCheckbox('sinLlegadas', $event)"
+          style="margin: 5px; color:#00506a; font-weight: bold;"
+          [checked]="checkboxState.sinLlegadas">
+          No hay Llegadas
+        </mat-checkbox>
+        
+        <mat-checkbox
+          (change)="toggleCheckbox('sinSalidas', $event)"
+          style="color:#00506a; font-weight: bold;"
+          [checked]="checkboxState.sinSalidas">
+          No Hay Salidas
+        </mat-checkbox>
+        
+        <mat-checkbox
+          (change)="toggleCheckbox('fueraDeServicio', $event)"
+          style="color:#00506a; font-weight: bold;"
+          [checked]="checkboxState.fueraDeServicio">
+          Fuera de Servicio
+        </mat-checkbox>
+      </section>    
+      </div>
+        </div>
+        <br>
+        <label style="color:#00506a; font-weight: bold;" class="form-label"> Comentarios: </label>
+      <div class="row">
+        <textarea formControlName="comentarios" #text class="form-control">
+
+        </textarea>
+      </div>
+
+<br>
+          <button  
+            (click)="onSubmit()"  
+            [disabled]="bloqueoFormGroup.invalid || !isButtonEnabled"
+            type="submit" 
+            style="background-color: #319dd7; color: white; font-weight: bold; width: 100%;" 
+            class="btn btn-block">GUARDAR BLOQUEO
+          </button>
   </form>
-  
-  
-  <div class="table-responsive angular-bootstrap-table">
+
+  <!-- START OF TABLE -->
+  <div class="example-container mat-elevation-z8">
+  <div class="example-table-container">
     <div class="font-weight-bold text-uppercase modal-header">Lista de Bloqueos
       <!-- <button style="background-color: #319dd7; color: white; font-weight: bold;" class="btn" (click)="getBloqueos()"> Actualizar</button> -->
     </div>
-    <table style="overflow-y: 100px;" class="table table-head-custom table-vertical-center ">
-      <thead>
-        <th>
-          Habitacion
-        </th>
-        <th>
-          Mov Rooms
-        </th>
-        <th>
-          Fechas
-        </th>
-        <th>
-          Restricciones
-        </th>
-        <th>
-          Comentarios
-        </th>
-        <th>Acciones</th>
+<!-- Angular Material Table -->
+<mat-table style="width: 1000px; overflow-y: auto;" [dataSource]="dataSource" class="mat-elevation-z8" *ngIf="!isLoading; else loadingTemplate">
+
+  <!-- Habitacion Column -->
+  <ng-container matColumnDef="Habitacion">
+    <mat-header-cell *matHeaderCellDef> Habitacion </mat-header-cell>
+    <mat-cell *matCellDef="let bloqueo">
+      {{bloqueo.Habitacion}}
+    </mat-cell>
+  </ng-container>
+
+  <!-- Mov Rooms Column -->
+  <ng-container matColumnDef="Cuarto">
+    <mat-header-cell *matHeaderCellDef> Mov Rooms </mat-header-cell>
+    <mat-cell *matCellDef="let bloqueo">
+      <div [innerHTML]="displayRooms(bloqueo)"></div>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Fechas Column -->
+  <ng-container matColumnDef="Desde">
+    <mat-header-cell *matHeaderCellDef> Fechas </mat-header-cell>
+    <mat-cell *matCellDef="let bloqueo">
+      <div [innerHTML]="displayFechas(bloqueo)"></div>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Restricciones Column -->
+  <ng-container matColumnDef="Estatus">
+    <mat-header-cell *matHeaderCellDef> Restricciones </mat-header-cell>
+    <mat-cell *matCellDef="let bloqueo">
+      <section class="example-section">
+        <ng-container *ngFor="let entry of objectEntries(bloqueo.Estatus)">
+          <mat-checkbox
+            [checked]="entry.value"
+            (change)="onCheckboxChange(bloqueo,entry.key, $event.checked)"
+            style="margin: 5px; color: #00506a; font-weight: bold;">
+            {{ entry.key }}
+          </mat-checkbox>
+        </ng-container>
+      </section>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Comentarios Column -->
+  <ng-container matColumnDef="Comentarios">
+    <mat-header-cell *matHeaderCellDef> Comentarios </mat-header-cell>
+    <mat-cell *matCellDef="let bloqueo">
+      <textarea
+        style="width: 100%;"
+        [(ngModel)]="bloqueo.Comentarios">
+      </textarea>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Acciones Column -->
+  <ng-container matColumnDef="acciones">
+    <mat-header-cell *matHeaderCellDef> Acciones </mat-header-cell>
+    <mat-cell *matCellDef="let bloqueo">
+      <a
+        title="Guardar Cambios"
+        class="mx-3 btn btn-icon btn-light btn-hover-primary btn-sm"
+        (click)="edit(bloqueo._id, bloqueo.Desde, bloqueo.Hasta, bloqueo.Habitacion, bloqueo.Cuarto, bloqueo.sinLlegadas, bloqueo.sinSalidas, bloqueo.fueraDeServicio, bloqueo.Comentarios)">
+        <app-keenicon name="pencil" class=" svg-icon-md text-primary"></app-keenicon>
+
+      </a>
+
+      <a
+        title="Eliminar Bloqueo"
+        class="btn btn-icon btn-light btn-hover-danger btn-sm"
+        (click)="openDeleteModal(deleteID,bloqueo._id, bloqueo.Desde, bloqueo.Hasta, bloqueo.Habitacion, bloqueo.Cuarto)">
+        <app-keenicon name="trash" class=" svg-icon-md text-primary"></app-keenicon>
+      </a>
+    </mat-cell>
+  </ng-container>
+
+  <!-- Header and Row Definitions -->
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
   
-      </thead>
-      <tbody *ngIf="!isLoading">
-        <ng-container *ngFor="let bloqueos of listaBloqueos">
-          <tr>
-            <td>
-              <ng-container *ngFor="let habitacion of bloqueos.Habitacion">
-                {{habitacion}} 
-              </ng-container>
-            </td>
-            <td>
-              <ng-container *ngFor="let cuartos of bloqueos.Cuarto">
-                {{cuartos}}
-              </ng-container>
-            </td>
-            <td >{{ bloqueos.Desde}}  {{ bloqueos.Hasta}}</td>
-            <td >
-  
-              <section class="example-section">
-                  <mat-checkbox
-                        [checked]="bloqueos.sinLlegadas"
-                        style="margin: 5pxpx; color:#00506a; font-weight: bold;"
-                        class="example-margin"
-                        #sinLlegadas
-                        >
-                        No hay Llegadas &nbsp;
-                  </mat-checkbox>
-                  <mat-checkbox
-                        [checked]="bloqueos.sinSalidas"
-                        style="color:#00506a; font-weight: bold;"
-                        class="example-margin"
-                        #sinSalidas>
-                        No Hay Salidas
-                  </mat-checkbox>
-                  <mat-checkbox
-                        [checked]="bloqueos.fueraDeServicio"
-                        style="color:#00506a; font-weight: bold;"
-                        class="example-margin"
-                        #fueraDeServicio>
-                        Fuera de Servicio
-                  </mat-checkbox>
-              </section>
-            </td>
-            <td>
-             <textarea
-             #textArea>
-              {{bloqueos.Comentarios}}
-             </textarea>
-            </td>
-            <a
-            title="Guardar Cambios"
-            class="mx-3 btn btn-icon btn-light btn-hover-primary btn-sm"
-            (click)="edit(bloqueos._id,bloqueos.Desde,bloqueos.Hasta,bloqueos.Habitacion,bloqueos.Cuarto,sinLlegadas.checked,sinSalidas.checked,fueraDeServicio.checked,textArea.value);"
-            >
-            <span [inlineSVG]="'./assets/media/svg/icons/Communication/Write.svg'"
-              class="svg-icon svg-icon-md svg-icon-primary">
-            </span>
-          </a>
-  
-          <a  title="Eliminar Bloqueo"
-              class="btn btn-icon btn-light btn-hover-danger btn-sm"
-              (click)="openDelete(deleteID,bloqueos._id,bloqueos.Desde,bloqueos.Hasta,bloqueos.Habitacion,bloqueos.Cuarto)"
-              >
-            <span [inlineSVG]="'./assets/media/svg/icons/General/Trash.svg'" 
-              class="svg-icon svg-icon-md svg-icon-danger">
-            </span>
-          </a>
-          </tr>
-      </ng-container>
-      </tbody>
-      <tbody *ngIf="isLoading">
-        <h3>Cargando Datos...
-          </h3>
-        <div class="spinner-border text-primary" role="status">
-          <span class="sr-only">Cargando</span>
-        </div>
-      </tbody>
-    </table>
+</mat-table>
+    
   </div>
-  
-  <div *ngIf="error!==null" class="font-weight-bold text-uppercase modal-header">
-    <h3>{{error}}</h3>
+  <mat-paginator [length]="resultsLength" [pageSize]="30" aria-label="Select page of GitHub search results"></mat-paginator>
+
   </div>
-  
-  
-  
-  <ng-template #exito let-modal>
-    <div class="modal-header">
-      <h4 class="modal-title">{{statusBloqueo}}</h4>
-      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-        <span aria-hidden="true">&times;</span>
-      </button>
+
+
+</div>
+
+<!-- Loading Spinner Template -->
+<ng-template #loadingTemplate>
+  <div class="loading-container">
+    <h3>Cargando Datos...</h3>
+    <div class="spinner-border text-primary" role="status">
+      <span class="sr-only">Cargando</span>
     </div>
-    <!-- <div class="modal-body">
-      <p>One fine body&hellip;</p>
-    </div> -->
-    <div class="modal-footer">
-      <button type="button" class="btn btn-light" (click)="modal.close('Close click');getBloqueos()">Cerrar</button>
-    </div>
-  </ng-template>
-  
-  <ng-template #deleteID let-modal>
-    <div class="modal-body">
-      <p>¿Estas seguro Que quieres Borrar el Bloqueo?&hellip;</p>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-primary" (click)="borrar(idDelete,desdeDelete,hastaDelete,habitacionDelete,numeroDelete);modal.close('Close click')">Borrar</button>
-      <button type="button" class="btn btn-danger" (click)="modal.close('Close click')">Cerrar</button>
-    </div>
-  </ng-template>
-  
-  <ng-template #fechaIncorrecta let-modal>
-    <div class="modal-body">
-      <p>La fecha final no puede ser Menor a la Fecha incial intente otro rango de fechas?&hellip;</p>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-danger" (click)="modal.close('Close click')">Cerrar</button>
-    </div>
-  </ng-template>
-  
+  </div>
+</ng-template>
+
+<!-- No Data Available Template -->
+<ng-template #noDataTemplate>
+  <div class="no-data-container">
+    <h3>No hay datos disponibles.</h3>
+  </div>
+</ng-template>
+
+<ng-template #deleteID let-modal>
+  <div class="modal-body">
+    <p>¿Estas seguro Que quieres Borrar el Bloqueo?&hellip;</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="borrar(idDelete,desdeDelete,hastaDelete,habitacionDelete,numeroDelete);modal.close('Close click')">Borrar</button>
+    <button type="button" class="btn btn-danger" (click)="modal.close('Close click')">Cerrar</button>
+  </div>
+</ng-template>
+
+<ng-template #fechaIncorrecta let-modal>
+  <div class="modal-body">
+    <p>La fecha final no puede ser Menor a la Fecha incial intente otro rango de fechas?&hellip;</p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-danger" (click)="modal.close('Close click')">Cerrar</button>
+  </div>
+</ng-template>

@@ -15,4 +15,13 @@
       margin-bottom: 0.5rem;
     }
   }
+  .log-details {
+    display: flex;
+    flex-direction: column; /* Asegura que los elementos se apilen verticalmente */
+  }
+  
+  .custom-mat-list-item {
+    margin: 0;
+    padding: 2px 0; /* Ajusta el padding según sea necesario */
+  }
   
