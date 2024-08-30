@@ -64,10 +64,10 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   private subscriptions: Subscription[] = [];
 
   //Model
-  currentHuesped:Huesped
   porPagar:number=0;
   pendiente:number=0;
-  
+
+  @Input() currentHuesped:Huesped;
   @Input() promesasDisplay:boolean=false;
   @Input() houseKeepingCodes:HouseKeeping[]=[]
   @Input() estatusArray:Estatus[]=[];
@@ -96,7 +96,7 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   @Output() onChangeAmaStatus: EventEmitter<any> = new EventEmitter();
   @Output() onEstatusChange: EventEmitter<any> = new EventEmitter();
   @Output() onEstatusAplicado: EventEmitter<Huesped> = new EventEmitter();
-  @Output() onCheckOut: EventEmitter<any> = new EventEmitter();
+  // @Output() onCheckOut: EventEmitter<any> = new EventEmitter();
   @Output() onFetchReservations: EventEmitter<Huesped> = new EventEmitter();
   @Output() onActualizarCuenta: EventEmitter<any> = new EventEmitter();
   @Output() honUpdateHuesped: EventEmitter<any> = new EventEmitter();
@@ -119,6 +119,7 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     })
   }
   async ngOnInit(){
+    console.log("CurrentRoom:", this.currentRoom)
     this.formGroup = this.fb.group({
       estatus : [this.currentHuesped.estatus],
       ama:[this.currentRoom.Estatus]
@@ -149,42 +150,45 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   }
 
   //OPTIMIZED FUNCTIONS
-  honCheckOut(estatus:number, folio:number){  
-    const todayDate = new Date();
-    const currentHuesped = this.currentHuesped;
+  onCheckOut(data:any){  
+    const estatus = data.status
+    const folio = data.folio
+    const todayDate = DateTime.now();
+    const { llegada, salida, pendiente } = this.currentHuesped;
 
-    const getTimeDifference = (date1: Date, date2: Date) => Math.ceil((date1.getTime() - date2.getTime()) / (1000 * 3600 * 24));
+    // Calculate nochesAlojadas and nochesReservadas using Luxon
+    const fechaLlegada = DateTime.fromISO(llegada.split("T")[0]);
+    const fechaSalida = DateTime.fromISO(salida.split("T")[0]);
 
-    const nochesAlojadas = getTimeDifference(todayDate, new Date(currentHuesped.llegada));
-    const nochesReservadas = getTimeDifference(new Date(currentHuesped.salida), new Date(currentHuesped.llegada));
+    const nochesAlojadas = Math.ceil(todayDate.diff(fechaLlegada, 'days').days);
+    const nochesReservadas = Math.ceil(fechaSalida.diff(fechaLlegada, 'days').days);
 
     this.nochesReales = nochesAlojadas === 0 ? 1 : nochesAlojadas;
     this.totalAlojamientoNuevo = 0; // this.huesped.tarifa * this.nochesReales
 
-    const cargosSinAlojamiento = this._edoCuentaService.currentCuentaValue.filter(cargo => cargo.Cargo! > 0 && cargo.Descripcion !== 'Alojamiento');
-    const abonos = this._edoCuentaService.currentCuentaValue.filter(abono => abono.Abono! > 0);
-    const alojamientoAnterior = this._edoCuentaService.currentCuentaValue.find(alojamiento => alojamiento.Descripcion === 'Alojamiento');
+    const cuentaValue = this._edoCuentaService.currentCuentaValue;
+    const cargosSinAlojamiento = cuentaValue.filter(({ Cargo, Descripcion }) => Cargo! > 0 && Descripcion !== 'Alojamiento');
+    const abonos = cuentaValue.filter(({ Abono }) => Abono! > 0);
+    const alojamientoAnterior = cuentaValue.find(({ Descripcion }) => Descripcion === 'Alojamiento');
 
     if (alojamientoAnterior) {
       this.alojamiento_id = alojamientoAnterior._id!;
     }
 
-    const totalAbonos = abonos.reduce((total, abono) => total + abono.Abono!, 0);
-    const totalCargosSinAlojamiento = cargosSinAlojamiento.reduce((total, cargo) => total + cargo.Cargo!, 0);
+    const totalAbonos = abonos.reduce((total, { Abono }) => total + Abono!, 0);
+    const totalCargosSinAlojamiento = cargosSinAlojamiento.reduce((total, { Cargo }) => total + Cargo!, 0);
 
     this.saldoPendiente = totalCargosSinAlojamiento + this.totalAlojamientoNuevo - totalAbonos;
 
-    const fechaSalida = DateTime.fromISO(currentHuesped.salida.split("T")[0]);
-    const fechaLlegada = DateTime.fromISO(currentHuesped.llegada.split("T")[0]);
-    const luxonTodayDate = DateTime.fromJSDate(todayDate);
-
-    if (fechaSalida.startOf("day") >= luxonTodayDate.startOf("day")) {
+    // Determine if checkout process is needed
+    if (fechaSalida.startOf('day') >= todayDate.startOf('day')) {
       const modalRef = this.modalService.open(AlertsComponent, { size: 'sm' });
       modalRef.componentInstance.alertHeader = 'Advertencia';
       modalRef.componentInstance.mensaje = 'La fecha de salida del huésped es posterior al día de hoy, ¿desea realizar un Check-Out anticipado?';
+
       modalRef.result.then((result) => {
         if (result === 'Aceptar') {
-          if (this.saldoPendiente === 0) {   
+          if (this.saldoPendiente === 0) {
             this.checkOutfunction();
           } else {
             this.promptToLiquidateAccount();
@@ -196,13 +200,15 @@ export class EditReservaComponent implements OnInit, OnDestroy{
         this.isLoading = false;
         this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
       });
+
     } else {
-      if (currentHuesped.pendiente === 0) {
-        this.onEstatusChange.emit({ huesped: currentHuesped, estatus, checkout: true });
+      if (pendiente === 0) {
+        this.onEstatusChange.emit({ huesped: this.currentHuesped, estatus, checkout: true });
       } else {
         this.promptToLiquidateAccount();
       }
     }
+
   }
 
   handleLoading(isLoading: boolean) {
@@ -352,7 +358,7 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     })
   }
 
-  calculateBalance(): number {
+  calculatePendiente(): number {
     let cargos = 0;
     let abonos = 0;
   
@@ -366,6 +372,34 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     });
   
     return abonos - cargos;
+  }
+
+  calculateBalance(){
+    let cargos = 0;  
+    this.estadoDeCuenta.forEach((item) => {
+      if (item.Cargo) {
+        cargos += item.Cargo;
+      }
+    });
+  
+    return cargos;
+  }
+
+  calculaPagosYPendientes(){
+    let abonos = 0;  
+    this.estadoDeCuenta.forEach((item) => {
+      if (item.Abono) {
+        abonos += item.Abono;
+      }
+    });
+  
+    return abonos;
+  }
+
+  async actualizaSaldos(refresh:boolean){
+    this.estadoDeCuenta=[];
+    this.estadoDeCuenta =  await firstValueFrom(this._edoCuentaService.getCuentas(this.currentHuesped.folio));  
+    
   }
 
   isCurrentStatus(statuses: string[]): boolean {

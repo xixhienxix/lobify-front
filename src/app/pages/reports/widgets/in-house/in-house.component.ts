@@ -1,7 +1,13 @@
-import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
+/* eslint-disable @angular-eslint/no-output-on-prefix */
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { Subject } from 'rxjs';
+import { Codigos } from 'src/app/models/codigos.model';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { Huesped } from 'src/app/models/huesped.model';
+import { Tarifas } from 'src/app/models/tarifas';
+import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
+import { HouseKeeping } from 'src/app/pages/calendar/_models/housekeeping.model';
+import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 
 @Component({
   selector: 'app-in-house',
@@ -18,6 +24,14 @@ export class InHouseComponent implements OnInit{
   @Input() allReservations: Huesped[];
   @Input() changing: Subject<Huesped[]>;
   @Input() changingValueRooms: Subject<Habitacion[]>;
+  @Input() houseKeepingCodes: HouseKeeping[] = [];
+  @Input() codigosCargo: Codigos[] = [];
+  @Input() estatusArray: Estatus[] = [];
+  @Input() ratesArrayComplete: Tarifas[] = [];
+  @Input() roomCodesComplete: Habitacion[] = [];
+  @Input() parametrosModel: Parametros;
+
+ 
 
   constructor(private cdr: ChangeDetectorRef){
 
@@ -60,6 +74,6 @@ export class InHouseComponent implements OnInit{
         }          
         }
     });
-
   }
+
 }

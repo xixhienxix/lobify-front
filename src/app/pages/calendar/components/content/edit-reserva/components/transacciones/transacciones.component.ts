@@ -158,6 +158,7 @@ interface StateMapping {
     @Output() honFetchReservations: EventEmitter<Huesped> = new EventEmitter();
     @Output() honAddPayment: EventEmitter<edoCuenta> = new EventEmitter();
     @Output() honRefreshEdoCuenta: EventEmitter<boolean> = new EventEmitter();
+    @Output() honActualizaSaldo: EventEmitter<boolean> = new EventEmitter();
     constructor(    
       public modalService: NgbModal,
       private _codigoDeCargoService: CodigosService,
@@ -323,6 +324,7 @@ interface StateMapping {
       let pago:edoCuenta
       if(tipo === 'Cargo'){
         pago = {
+          id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
                 Folio:this.currentHuesped.folio,
                 Fecha:new Date(),
                 Fecha_Cancelado:'',
@@ -337,6 +339,7 @@ interface StateMapping {
         this.honAddPayment.emit(pago);
       }else if(tipo === 'Abono' ){
         pago = {
+          id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
           Folio:this.currentHuesped.folio,
           Fecha:new Date(),
           Fecha_Cancelado:'',
@@ -353,6 +356,7 @@ interface StateMapping {
     }
   
     selectedValue(value:Codigos){
+      this.quantity = 1;
       this.selectedService = false; // Enable buttons when a value is selected
 
      this.nuevosConceptos=false
@@ -562,105 +566,6 @@ interface StateMapping {
       }
     }
   
-    // onSubmit(){
-    //   let pago:edoCuenta={
-    //     Folio:this.currentHuesped.folio,
-    //     Fecha:new Date(),
-    //     Fecha_Cancelado:'',
-    //     Referencia:'',
-    //     Descripcion:'',
-    //     Forma_de_Pago:'No Aplica',
-    //     Cantidad:0,
-    //     Cargo:0,
-    //     Abono:0,
-    //     Estatus:'Activo'
-    //   };
-  
-    //   if(this.nuevosConceptos){
-    //     if(this.nuevosConceptosFormGroup.invalid){
-    //       this.submitted=true
-    //       return;
-    //     }
-    //     this.isLoading=true
-
-    //       pago = {
-    //       Folio:this.currentHuesped.folio,
-    //       Fecha:new Date(),
-    //       Fecha_Cancelado:'',
-    //       Referencia:'',
-    //       Descripcion:this.nuevas.nuevoConcepto.value,
-    //       Forma_de_Pago:'No Aplica',
-    //       Cantidad:this.quantityNva,
-    //       Cargo:this.nuevas.nuevoPrecio.value,
-    //       Abono:0,
-    //       Estatus:'Activo'
-    //       }
-    //   }else if(!this.nuevosConceptos){
-    //     if(this.formGroup.invalid){
-    //         this.submitted=true
-    //         return;
-    //       }
-    //       this.isLoading=true
-  
-    //         pago = {
-    //         Folio:this.currentHuesped.folio,
-    //         Fecha:new Date(),
-    //         Fecha_Cancelado:'',
-    //         Referencia:'',
-    //         Descripcion:'', //this.codigoDeCargo.Descripcion
-    //         Forma_de_Pago:'no Aplica',
-    //         Cantidad:this.quantity,
-    //         Cargo:this.f.precio.value,
-    //         Abono:0,
-    //         Estatus:'Activo'
-    //     }
-    //     this.quantity=1;
-    //   }    
-    //   this.honAddPayment.emit(pago);
-      
-    //   const sb = this._edoCuentaService.agregarPago(pago).subscribe(
-    //     ()=>{
-    //       this.isLoading=false
-    //       const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop:'static' });
-    //       modalRef.componentInstance.alertHeader = 'Exito'
-    //       modalRef.componentInstance.mensaje='Movimiento agregado al Estado de Cuenta del Húesped'
-          
-    //         setTimeout(() => {
-    //           modalRef.close('Close click');
-    //         },4000)
-              
-  
-    //       this.nuevosConceptosFormGroup.reset();
-    //       this.formGroup.reset();
-    //       this.resetFiltros();
-  
-    //       this.estadoDeCuenta=[]
-    //       this.honRefreshEdoCuenta.emit(true);
-          
-    //     },
-    //     (err)=>
-    //     {
-    //       this.isLoading=false
-    //       if(err)
-    //       {
-    //         const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop:'static' });
-    //         modalRef.componentInstance.alertHeader = 'Error'
-    //         modalRef.componentInstance.mensaje=err.message
-          
-    //           setTimeout(() => {
-    //             modalRef.close('Close click');
-    //           },4000)
-                
-    //         this.isLoading=false
-    //         this.resetFiltros();
-  
-    //       }
-    //     },
-    //     ()=>{//FINALLY
-    //     }
-    //     )
-    //     this.subscription.push(sb)
-    // }
 
     ngOnChanges(change: SimpleChanges) {
       if(change.currentEdoCuenta) {
@@ -668,7 +573,7 @@ interface StateMapping {
       }
     }
   
-    async onSubmitAbono() {
+    async onSubmitAbono(tipo: string) {
       if (this.abonoFormGroup.invalid) {
         this.submittedAbono = true;
         return;
@@ -676,48 +581,78 @@ interface StateMapping {
     
       this.isLoading = true;
     
-      const pago: edoCuenta = {
-        Folio: this.currentHuesped.folio,
-        Fecha: new Date(),
-        Fecha_Cancelado: '',
-        Referencia: this.abonosf.notaAbono.value,
-        Descripcion: this.abonosf.conceptoManual.value,
-        Forma_de_Pago: this.abonosf.formaDePagoAbono.value,
-        Cantidad: 1,
-        Cargo: 0,
-        Abono: this.abonosf.cantidadAbono.value,
-        Estatus: 'Activo'
-      };
+      // Create the payment object based on the tipo
+      let pago: edoCuenta;
+    
+      if (tipo === 'Cargo') {
+        pago = {
+          id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
+          Folio: this.currentHuesped.folio,
+          Fecha: new Date(),
+          Fecha_Cancelado: '',
+          Referencia: '',
+          Descripcion: this.codigoDeCargo.Descripcion,
+          Forma_de_Pago: 'No Aplica',
+          Cantidad: this.quantity,
+          Cargo: this.codigoDeCargo.Precio! * this.quantity,
+          Abono: 0,
+          Estatus: 'Activo',
+          hotel: this.currentHuesped.hotel
+        };
+      } else if (tipo === 'Abono') {
+        pago = {
+          id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
+          Folio: this.currentHuesped.folio,
+          Fecha: new Date(),
+          Fecha_Cancelado: '',
+          Referencia: this.abonoFormGroup.controls["notaAbono"].value,
+          Descripcion: this.abonoFormGroup.controls["conceptoManual"].value,
+          Forma_de_Pago: this.abonoFormGroup.controls["formaDePagoAbono"].value,
+          Cantidad: 1,
+          Cargo: 0,
+          Abono: this.abonoFormGroup.controls["cantidadAbono"].value,
+          Estatus: 'Activo',
+          hotel: this.currentHuesped.hotel
+        };
+      } else {
+        // Handle unexpected tipo values
+        console.error('Unexpected tipo value:', tipo);
+        this.isLoading = false;
+        return;
+      }
     
       try {
+        // Submit the payment
         await firstValueFrom(this._edoCuentaService.agregarPago(pago));
-      
+        
+        // Log the payment
         const logRequests = this._logsService.logPagos('Movimiento Añadido', this.currentUser, pago).pipe(
           catchError(error => {
-            // Handle error for individual log request if needed
             console.error(`Failed to log parameters Change`, error);
-            return of(null); // Return a null observable to keep forkJoin working
+            return of(null);
           })
-        )
-
-      await firstValueFrom(logRequests); // Using firstValueFrom to handle the observable
-
+        );
+        await firstValueFrom(logRequests);
     
+        // Show success modal
         const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
         modalRef.componentInstance.alertHeader = 'Éxito';
         modalRef.componentInstance.mensaje = 'Movimiento agregado al Estado de Cuenta del Húesped';
     
+        this.honActualizaSaldo.emit(true);
         setTimeout(() => {
           modalRef.close('Close click');
         }, 4000);
     
+        // Reset the form and fetch updated data
         this.resetFiltros();
         this.formGroup.reset();
         this.abonoFormGroup.reset();
         this.estadoDeCuenta = [];
         this.getEdoCuenta();
     
-      } catch (err:any) {
+      } catch (err: any) {
+        // Show error modal
         const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
         modalRef.componentInstance.alertHeader = 'Error';
         modalRef.componentInstance.mensaje = err.message;
@@ -732,12 +667,17 @@ interface StateMapping {
       }
     }
     
+    
     getFechaCancelado(row:any){
       if(row.hasOwnProperty('Fecha_Cancelado')){
         return row.Fecha_Cancelado.split('T')[0]
       }else{
         return ''
       }
+    }
+
+    calculoFooter(row:any){
+      return 0
     }
     
   
@@ -873,22 +813,7 @@ interface StateMapping {
       this.devolucionesChecked=false;
       this.todosChecked=false;
     }
-    /*form Helpers*/
-    // atLeatOneValidator(validator: ValidatorFn, controls:string[] = ['']) 
-    //  {
-    //   let group:FormGroup
-  
-    //   if(!controls){
-    //     controls = Object.keys(group.controls)
-    //   }
-  
-    //   const hasAtLeastOne = group && group.controls && controls
-    //     .some(k => !validator(group.controls[k]));
-  
-    //   return hasAtLeastOne ? null : {
-    //     atLeastOne: true,
-    //   };
-    // };
+
   
     isControlValid(controlName: string): boolean {
       const control = this.formGroup.controls[controlName];

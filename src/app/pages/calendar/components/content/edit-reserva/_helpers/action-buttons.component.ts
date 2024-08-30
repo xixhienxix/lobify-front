@@ -89,6 +89,7 @@ import { AlertsMessageInterface } from 'src/app/models/message.model';
         </div>
         <div class="form-group col-lg-6" *ngIf="isHuespedEnCasa">
           <button
+          (click)="onCheckOut(4,currentHuesped.folio)"
             class="btn btn-danger btn-block"
             type="submit"
             style="width: 100%;"
@@ -121,6 +122,7 @@ export class ReservationActionsComponent {
   @Output() honSetStep: EventEmitter<number> = new EventEmitter();
   @Output() honEstatusUpdate: EventEmitter<number> = new EventEmitter();
   @Output() honModificaReserva: EventEmitter<any> = new EventEmitter();
+  @Output() honCheckOut: EventEmitter<any> = new EventEmitter();
 
   get isReservable() {
     return ['Reserva Confirmada', 'Reserva Sin Pago', 'Reserva Temporal', 'Esperando Deposito', 'Deposito Realizado', 'Totalmente Pagada'].includes(this.estatus);
@@ -177,6 +179,10 @@ export class ReservationActionsComponent {
 
   openModifica() {
     this.honModificaReserva.emit();
+  }
+
+  onCheckOut(status:number, folio:string){
+    this.honCheckOut.emit({status,folio});
   }
 
   todaysDateComparer() {

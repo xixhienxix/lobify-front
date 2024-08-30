@@ -145,7 +145,7 @@
 <br>
 <!--Agregar Abono-->
 <div class="container">
-  <form [formGroup]="abonoFormGroup" (ngSubmit)="onSubmitAbono()">
+  <form [formGroup]="abonoFormGroup" (ngSubmit)="onSubmitAbono('Abono')">
     <div style="text-align: right;" class="row col-md-12">
       <small *ngIf="submittedAbono" style=" color: red;">Captura los Datos Faltantes</small>
     </div>
@@ -277,7 +277,7 @@
 </div>
 
 
-<div class="row col-md-12" style="justify-content: center;">
+<div class="row col-md-12 container" style="justify-content: center;">
   <table mat-table [dataSource]="dataSource" matSort
     class="table overflow-hidden table-head-custom table-vertical-center">
 
@@ -383,7 +383,7 @@
           $ -{{row.Abono.toLocaleString("es-MX",{ minimumFractionDigits: 2 })}}
         </ng-container>
       </td>
-      <td mat-footer-cell *matFooterCellDef> ${{totalCalculado.toLocaleString("es-MX",{ minimumFractionDigits: 2 })}}
+      <td mat-footer-cell *matFooterCellDef="let row"> ${{calculoFooter(row).toLocaleString("es-MX",{ minimumFractionDigits: 2 })}}
       </td>
     </ng-container>
 

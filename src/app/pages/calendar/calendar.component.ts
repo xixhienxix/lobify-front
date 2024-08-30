@@ -464,7 +464,7 @@ export class CalendarComponent implements OnInit {
         error: () => {
           this.promptMessage('Error', 'No se pudo realizar el checkout intente de nuevo mas tarde');
         }
-      })
+      });
 
       modalRef.componentInstance.onActualizarCuenta.subscribe({
         next: () => {

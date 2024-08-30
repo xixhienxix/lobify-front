@@ -15,9 +15,15 @@
     </div>
     <div class="col-xl-4">
       <app-in-house
-      [changing]="changingValue"
-      [changingValueRooms]="changingValueRooms"
-      [allReservations]="allReservations"
+        [parametrosModel]="parametrosModel"
+        [roomCodesComplete]="roomCodesComplete"
+        [estatusArray]="estatusArray"
+        [ratesArrayComplete]="ratesArrayComplete"
+        [houseKeepingCodes]="houseKeepingCodes"
+        [codigosCargo]="codigosCargo"
+        [allReservations]="allReservations"
+        [changing]="changingValue"
+        [changingValueRooms]="changingValueRooms"
       ></app-in-house>
     </div>
 </div>
@@ -86,3 +92,6 @@
   </div>
 </div>
 <!-- end::Row -->
+<ng-container *ngIf="_isLoading | async">
+  <app-loader-spinner></app-loader-spinner>
+</ng-container>

@@ -102,7 +102,7 @@
         <label class="font-weight-bold">Pagos y Descuentos:</label>
       </div>
       <label class="large-text">
-        $ {{ (porPagar! - pendiente).toLocaleString("es-MX") }}.00
+        $ {{ calculaPagosYPendientes().toLocaleString("es-MX") }}.00
       </label>
     </div>
   
@@ -111,7 +111,7 @@
         <label class="font-weight-bold">Pendiente:</label>
       </div>
       <label class="large-text">
-        $ {{ pendiente.toLocaleString("es-MX") }}.00
+        $ {{ calculatePendiente().toLocaleString("es-MX") }}.00
       </label>
     </div>
   </div>
@@ -155,6 +155,7 @@
         (honAddPayment)="honAgregarPago($event)"
         (honFetchReservations)="honFetchReservations($event)"
         (honRefreshEdoCuenta)="onRefreshEdoCuenta($event)"
+        (honActualizaSaldo)="actualizaSaldos($event)"
         ></app-transacciones>
     </mat-tab>
   
@@ -177,6 +178,7 @@
     (honSetStep)="setStep($event)"
     (honEstatusUpdate)="onEstatusUpdate($event)"  
     (honModificaReserva)="openModifica()"
+    (honCheckOut)="onCheckOut($event)"
     >
   </app-reservation-actions>
 
