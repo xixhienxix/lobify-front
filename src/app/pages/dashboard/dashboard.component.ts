@@ -3,7 +3,7 @@ import { ModalConfig, ModalComponent } from '../../_metronic/partials';
 import { ParametrosService } from '../parametros/_services/parametros.service';
 import { Huesped } from 'src/app/models/huesped.model';
 import { EMPTY_CUSTOMER, HuespedService } from 'src/app/services/huesped.service';
-import { BehaviorSubject, catchError, firstValueFrom, forkJoin, of, Subject, Subscription, switchMap, takeUntil } from 'rxjs';
+import { BehaviorSubject, catchError, firstValueFrom, forkJoin, of, Subject, Subscription, switchMap, takeUntil, tap } from 'rxjs';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { Parametros } from '../parametros/_models/parametros';
@@ -26,6 +26,7 @@ import { Adicional } from 'src/app/models/adicional.model';
 import { AdicionalService } from 'src/app/services/adicionales.service';
 import { edoCuenta } from 'src/app/models/edoCuenta.model';
 import { PropertiesChanged } from 'src/app/models/activity-log.model';
+import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -45,6 +46,8 @@ export class DashboardComponent implements OnInit {
   eventsSubject: Subject<Huesped[]> = new Subject<Huesped[]>();
   _isLoading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   changingAdicionalesValue: Subject<Adicional[]> = new Subject();
+  isDataLoaded = false;
+  totalRooms:number = 0;
 
   closeResult:string
   currentUser:string;
@@ -59,14 +62,16 @@ export class DashboardComponent implements OnInit {
   codigosCargo:Codigos[]=[]
   estatusArray:Estatus[]=[]
   ratesArrayComplete: Tarifas[] = [];
-
+  standardRatesArray: Tarifas[] = [];
+  tempRatesArray: Tarifas[] = [];
+  allAccounts:edoCuenta[]=[]
 
   @ViewChild('modal') private modalComponent: ModalComponent;
   
 
   constructor(
-    private _huespedService: HuespedService,
     private _roomService: HabitacionesService,
+    private _huespedService: HuespedService,
     private _parametrosService: ParametrosService,
     private _edoCuentaService: Edo_Cuenta_Service,
     private _housekeepingService: HouseKeepingService,
@@ -80,7 +85,8 @@ export class DashboardComponent implements OnInit {
     private _authService: AuthService,
     private _promesasService: PromesaService,
     private _adicionalService: AdicionalService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private _checkIndexDbService: IndexDBCheckingService
 
   ) {
     this.currentUser = this._authService.getUserInfo().username
@@ -88,18 +94,24 @@ export class DashboardComponent implements OnInit {
 
   async ngOnInit() {
     await this.checkParametrosIndexDB();
+    this._isLoading.next(true);
 
     this._huespedService.updateReservations$.subscribe({
       next:async (value)=>{
         if(value){
+          // await this.getReservations();
           await this.getReservations();
         }
       }
-    })
+    });
+
     await this.getReservations();
     await this.checkRoomCodesIndexDB();
     await this.checkAmaCodesIndexDB();
     await this.checkCodgiosCargoIndexDB();
+
+    this.processDashboard();
+
     await this.getCuentas();
     await this.checkEstatusIndexDB();
     await this.checkRatesIndexDB();
@@ -111,15 +123,18 @@ export class DashboardComponent implements OnInit {
       this._editReservaOpenModalService.getModalOutputs().subscribe({
         next: async (output) => {
           switch (output.type) {
-            case 'onAgregarPago':
-              this._edoCuentaService.agregarPago(output.data).subscribe({
-                next: () => {
-                  // Handle success...
-                },
-                error: (err) => {
-                  this.promptMessage('Error', 'No se pudo añadir el cargo, intente de nuevo más tarde');
-                },
-              });
+            // case 'onAgregarPago':
+            //   this._edoCuentaService.agregarPago(output.data).subscribe({
+            //     next: () => {
+            //       this.promptMessage('Exito', 'Cargo agregado con exito');
+            //     },
+            //     error: (err) => {
+            //       this.promptMessage('Error', 'No se pudo añadir el cargo, intente de nuevo más tarde');
+            //     },
+            //   });
+            //   break;
+            case 'honRefershDashboard':
+                await this.getCuentas();
               break;
       
             case 'onEditRsv':
@@ -179,6 +194,7 @@ export class DashboardComponent implements OnInit {
               this.promptMessage('Exito', 'Movimiento agregado al Estado de cuenta del cliente');
               this._huespedService.updateEstatusHuesped(output.data).subscribe({
                 next: (value) => {
+                  // this.getReservations();
                   this.getReservations();
                 },
                 error: (error) => {
@@ -196,11 +212,13 @@ export class DashboardComponent implements OnInit {
               break;
       
             case 'onFetchReservations':
-              this.getReservations();
+              // this.getReservations();
+              await this.getReservations();
               break;
       
             case 'onActualizarCuenta':
-              this.getReservations();
+              // this.getReservations();
+              await this.getReservations();
               break;
       
             case 'onAlertMessage':
@@ -220,7 +238,60 @@ export class DashboardComponent implements OnInit {
         },
       })
     );
+    this._isLoading.next(false);
+
+    // this.isDataLoaded = true;
   }
+  
+  processDashboard() {
+    forkJoin({
+      parametrosModel: this._checkIndexDbService.parametros$,
+      ratesIndexDB: this._checkIndexDbService.tarifas$,
+      roomsCodesIndexDB: this._checkIndexDbService.habitaciones$,
+      reservations: this._checkIndexDbService.reservaciones$,
+      houseKeepingCodes: this._checkIndexDbService.houseKeepingCodes$,
+      codigos: this._checkIndexDbService.codigos$,
+      estatus: this._checkIndexDbService.estatus$
+    })
+    .pipe(
+      tap(({parametrosModel, ratesIndexDB, roomsCodesIndexDB, reservations, houseKeepingCodes, codigos, estatus }) => {
+        // Process Parametros
+        this.parametrosModel = parametrosModel
+        if(parametrosModel){
+          this.reviewCheckOuts();
+          this.reviewNoShow();
+        }
+
+        // Process Tarifa
+        this.ratesArrayComplete = ratesIndexDB;
+        this.standardRatesArray = ratesIndexDB.filter(item => item.Tarifa === 'Tarifa Base');
+        this.tempRatesArray = ratesIndexDB.filter(item => item.Tarifa === 'Tarifa De Temporada');
+        
+        // Process Habitaciones
+        this.roomCodesComplete = [...roomsCodesIndexDB];
+        this.totalRooms = this.roomCodesComplete.length;
+        this.changingValueRooms.next(this.roomCodesComplete);
+        
+        // Process Reservaciones
+        this.allReservations = [...reservations];
+        this.changingValue.next(reservations);
+  
+        // Process HouseKeeping
+        this.houseKeepingCodes = houseKeepingCodes;
+  
+        // Process Codigos
+        this.codigosCargo = codigos;
+  
+        // Process Estatus
+        this.estatusArray = estatus;
+        
+        // Detect changes (only needed once after all updates)
+        this.cdr.detectChanges();
+      })
+    )
+    .subscribe();
+  }
+  
 
   honUpdateHuesped(value:any){
     //this.submitLoading = true;
@@ -349,6 +420,7 @@ export class DashboardComponent implements OnInit {
   async getCuentas(){
     this._edoCuentaService.getTodasLasCuentas().subscribe({
       next:(value)=>{
+        this.allAccounts = value;
         const todayDate = new Date();
         const saldoDelDia = value.filter(item => {
             // Create a new Date object for the item and normalize it
@@ -387,7 +459,8 @@ export class DashboardComponent implements OnInit {
   
           const results = await Promise.all(updatePromises);
           if (results.every(result => result)) {
-            this.getReservations();
+            // this.getReservations();
+            await this.getReservations();
           }
         } catch (err) {
           console.error('Error updating reservations:', err);
@@ -418,7 +491,8 @@ export class DashboardComponent implements OnInit {
   
           const results = await Promise.all(updatePromises);
           if (results.every(result => result)) {
-            this.getReservations();
+            await this.getReservations();
+            // this.getReservations();
           }
         } catch (err) {
           console.error('Error updating reservations:', err);
@@ -470,6 +544,8 @@ export class DashboardComponent implements OnInit {
     this.changingValueRooms.next(this.roomCodesComplete);
   }
 
+
+
   promptMessage(header: string, message: string) {
     const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' })
     modalRef.componentInstance.alertHeader = header
@@ -499,6 +575,7 @@ export class DashboardComponent implements OnInit {
     data.huesped.estatus = data.estatus;
     this._huespedService.updateEstatusHuesped(data.huesped).subscribe({
       next: () => {
+        // this.getReservations();
         this.getReservations();
         if (data.checkout === true) {
           this.promptMessage('Exito', 'Checkout Realizado con exito')
@@ -522,9 +599,11 @@ export class DashboardComponent implements OnInit {
 
   
       // Perform subsequent operations
-      this.checkRoomCodesIndexDB(true);
-      this.getReservations();
-  
+      this._checkIndexDbService.checkIndexedDB(['habitaciones'], true)
+      // this.checkRoomCodesIndexDB(true);
+      // this.getReservations();
+      await this.getReservations();
+
       // Log the status change
       this._logService.logChangeStatus(data.cuarto, data.estatus, oldStatus!, this.currentUser);
     } catch (error) {

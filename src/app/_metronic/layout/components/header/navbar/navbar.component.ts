@@ -1,6 +1,10 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, Subscription } from 'rxjs';
-import { Huesped } from 'src/app/models/huesped.model';
+import { Habitacion } from 'src/app/models/habitaciones.model';
+import { Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
+import { Tarifas } from 'src/app/models/tarifas';
+import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
+import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 
 @Component({
   selector: 'app-navbar',
@@ -12,8 +16,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   @Input() appHeaderDefaulMenuDisplay: boolean;
   @Input() isRtl: boolean;
+  
+  @Input() parametrosModel: Parametros;
+  @Input() roomCodesComplete: Habitacion[];
+  @Input() estatusArray: Estatus[];
+  @Input() ratesArrayComplete: Tarifas[];
+  @Input() houseKeepingCodes: boolean;  
+  @Input() codigosCargo: boolean;
+  @Input() dataSource: boolean;
+
+
+
   llegadas: number;
   salidas: number;
+  noShow: number;
+  tabVisible: boolean = false;
 
   @Input() reservasSubject: BehaviorSubject<Huesped[]> = new BehaviorSubject<Huesped[]>([]);
 
@@ -32,12 +49,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
       })
   }
 
+  toggleTab() {
+    this.tabVisible = !this.tabVisible;
+  }
+
   async initializeCounter(reservations:Huesped[]){
+    const statusGroup2 = reservationStatusMap[2];// Reservations Groups
 
     const todayDate = new Date();
     const llegadas = reservations.filter((item)=>{
 
-      if(item.origen === 'Reserva'){
+      if(statusGroup2.includes(item.estatus)){
         const llegada = new Date(item.llegada);
 
         if(llegada.setHours(0,0,0,0) === todayDate.setHours(0,0,0,0)){
@@ -55,6 +77,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
       }
     });
     this.salidas = salidas.length;
+
+    const noShow = reservations.filter((item)=>{
+      const llegada = new Date(item.llegada);
+  
+        if(llegada.setHours(0,0,0,0) >= todayDate.setHours(0,0,0,0)){
+          if(statusGroup2.includes(item.estatus)){
+            return item
+          }
+        }
+      });
+      this.noShow = noShow.length;
 
     this.changeDetector.detectChanges();
 

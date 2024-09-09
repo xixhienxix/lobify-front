@@ -2,6 +2,9 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 // language list
 import { ThemeModeService } from './_metronic/partials/layout/theme-mode-switcher/theme-mode.service';
+import { IndexDBCheckingService } from './services/_shared/indexdb.checking.service';
+import { AuthService } from './modules/auth';
+import { Router } from '@angular/router';
 
 // import { setCulture,L10n } from '@syncfusion/ej2-base';
 // import { default as EJ2_LOCALE } from "../../node_modules/@syncfusion/ej2-locale/src/es.json";
@@ -23,7 +26,8 @@ export class AppComponent implements OnInit {
 
   constructor(
     private translateServeice: TranslateService,
-    private modeService: ThemeModeService
+    private modeService: ThemeModeService,
+
   ) {
     // register translations
     translateServeice.addLangs(this.supportedLanguages);
@@ -31,6 +35,10 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+
+
     this.modeService.init();
+
+
   }
 }

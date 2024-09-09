@@ -1,7 +1,14 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { Huesped } from 'src/app/models/huesped.model';
+import { Codigos } from 'src/app/models/codigos.model';
+import { Habitacion } from 'src/app/models/habitaciones.model';
+import { Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
+import { Tarifas } from 'src/app/models/tarifas';
+import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
+import { HouseKeeping } from 'src/app/pages/calendar/_models/housekeeping.model';
+import { Parametros } from 'src/app/pages/parametros/_models/parametros';
+import { DashboardService } from 'src/app/services/_shared/dashboard.service';
 
 @Component({
   selector: 'app-arrivals',
@@ -9,19 +16,27 @@ import { Huesped } from 'src/app/models/huesped.model';
   styleUrls: ['./arrivals.component.scss']
 })
 export class ArrivalsComponent implements OnInit{
-  llegadasDelDia: Huesped[] = [];
+  llegadasDelDia: number;
   yaLlegaron: Huesped[] = [];
   porLlegar: Huesped[] = [];
   @Input() changing: Subject<Huesped[]>;
 
   @Input() color: string = '';
   @Input() allReservations: Huesped[] = [];
-
+  @Input() houseKeepingCodes: HouseKeeping[] = [];
+  @Input() codigosCargo: Codigos[] = [];
+  @Input() estatusArray: Estatus[] = [];
+  @Input() ratesArrayComplete: Tarifas[] = [];
+  @Input() roomCodesComplete: Habitacion[] = [];
+  @Input() parametrosModel: Parametros;
+  
   customers!: any[];
 
   constructor(
     private translateService:TranslateService, 
-    private cdr: ChangeDetectorRef){
+    private cdr: ChangeDetectorRef,
+    private _dashboardService:DashboardService
+      ){
     this.translateService.use('es');
   }
 
@@ -37,26 +52,10 @@ export class ArrivalsComponent implements OnInit{
   }
 
   processReservations() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    this.llegadasDelDia = [];
-    this.yaLlegaron = [];
-    this.porLlegar = [];
-
-    this.allReservations.forEach(item => {
-      const llegada = new Date(item.llegada);
-      llegada.setHours(0, 0, 0, 0);
-
-      if (llegada.getTime() === today.getTime()) {
-        this.llegadasDelDia.push(item);
-
-        if (item.origen === 'Walk-In') {
-          this.yaLlegaron.push(item);
-        } else if (item.origen === 'Reserva') {
-          this.porLlegar.push(item);
-        }
-      }
-    });
+    const today= new Date();
+    const arrivals = this._dashboardService.filterReservationsByArrivalDate(this.allReservations, today);
+    this.yaLlegaron = arrivals[1];
+    this.porLlegar = arrivals[2];
+    this.llegadasDelDia = arrivals[1].length + arrivals[2].length
   }
 }

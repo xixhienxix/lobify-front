@@ -18,17 +18,22 @@ const Routing: Routes = [
   },
   {
     path: 'params',
-    loadChildren: () => import('./parametros/parametros.module').then((m)=> m.ParametrosModule) 
+    loadChildren: () => import('./parametros/parametros.module').then((m) => m.ParametrosModule),
   },
   {
-    path: '',
+    path: 'reports',
+    loadChildren: () => import('./reports/reports.module').then((m) => m.ReportsModule),
+  },
+  {
+    path: '', // Root path
     redirectTo: '/dashboard',
-    pathMatch: 'full',
+    pathMatch: 'full', // Make sure it matches the empty URL fully
   },
   {
-    path: '**',
+    path: '**', // Wildcard path for 404 error
     redirectTo: 'error/404',
   },
 ];
+
 
 export { Routing };

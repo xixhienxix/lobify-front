@@ -24,6 +24,7 @@ import { SharedModule } from './_metronic/shared/shared.module';
 import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireStorageModule } from '@angular/fire/compat/storage';
+import { IndexDBCheckingService } from './services/_shared/indexdb.checking.service';
 
 
 function appInitializer(authService: AuthService) {

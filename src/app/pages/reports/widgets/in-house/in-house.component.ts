@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output } fro
 import { Subject } from 'rxjs';
 import { Codigos } from 'src/app/models/codigos.model';
 import { Habitacion } from 'src/app/models/habitaciones.model';
-import { Huesped } from 'src/app/models/huesped.model';
+import { Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
 import { Tarifas } from 'src/app/models/tarifas';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { HouseKeeping } from 'src/app/pages/calendar/_models/housekeeping.model';
@@ -24,12 +24,6 @@ export class InHouseComponent implements OnInit{
   @Input() allReservations: Huesped[];
   @Input() changing: Subject<Huesped[]>;
   @Input() changingValueRooms: Subject<Habitacion[]>;
-  @Input() houseKeepingCodes: HouseKeeping[] = [];
-  @Input() codigosCargo: Codigos[] = [];
-  @Input() estatusArray: Estatus[] = [];
-  @Input() ratesArrayComplete: Tarifas[] = [];
-  @Input() roomCodesComplete: Habitacion[] = [];
-  @Input() parametrosModel: Parametros;
 
  
 
@@ -47,8 +41,10 @@ export class InHouseComponent implements OnInit{
     this.changingValueRooms.subscribe({
       next:(roomSource)=>{
         this.inventario = [...roomSource]
-        this.avaibleRooms = (roomSource.length-(this.huespedEnCasa.length - this.porLlegar.length))
-        this.cdr.detectChanges(); // Manually trigger change detection if needed
+        this.avaibleRooms = Math.max(0, roomSource.length - (this.huespedEnCasa.length + this.porLlegar.length));
+        console.log("Huespede En Casa", this.huespedEnCasa)
+        console.log("porLlegar En Casa", this.porLlegar)
+        this.cdr.detectChanges(); // Manually trigger change detction if needed
       }
     })
   }
@@ -65,11 +61,11 @@ export class InHouseComponent implements OnInit{
       const llegada = new Date(item.llegada);
       llegada.setHours(0, 0, 0, 0);
 
-        if (item.estatus === 'Huesped en Casa') {
+        if (reservationStatusMap[1].includes(item.estatus)) {
           this.huespedEnCasa.push(item);
         } 
         if (llegada.getTime() === today.getTime()) {
-          if (item.origen === 'Reserva') {
+          if (reservationStatusMap[2].includes(item.estatus)) {
             this.porLlegar.push(item);
         }          
         }

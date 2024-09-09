@@ -961,28 +961,43 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
 
 
 
-  setEstatus(value:any) {
+  setEstatus(value: number): void {
+    this.origenReserva = 'Recepcion';
 
-    if(this.estatusArray){
-      this.currentStatus = this.estatusArray.find(item=> item.id === value)?.estatus!;
+    // Update the current status based on estatusArray
+    if (this.estatusArray) {
+        this.currentStatus = this.estatusArray.find(item => item.id === value)?.estatus || '';
     }
 
-    if(value===1){
-      this.currentFolio=this.folios[2]
-      this.origenReserva='Walk-In'
+    // Define the folios based on the status value
+    let selectedFolio: Foliador | undefined;
+
+    switch (value) {
+        case 1:
+            selectedFolio = this.folios[2];
+            break;
+        case 2:
+            selectedFolio = this.folios[0];
+            break;
+        case 5:
+            selectedFolio = this.folios[1];
+            break;
+        case 7:
+            selectedFolio = this.folios[3];
+            break;
+        default:
+            selectedFolio = undefined; // Handle cases where value does not match any case
+            break;
     }
-    else if(value===2){
-    this.currentFolio=this.folios[0]
-    this.origenReserva='Reserva'}
-    else if(value === 5){
-      this.currentFolio=this.folios[1]
-      this.origenReserva='Uso Interno'
-    }else if(value === 7){
-      this.currentFolio=this.folios[3]
-      this.origenReserva='Reserva Temporal'
+
+    // Set currentFolio if selectedFolio is found
+    if (selectedFolio) {
+        this.currentFolio = selectedFolio;
     }
+
+    // Call the submit method
     this.onSubmit();
-  }
+}
 
   /**
    * 

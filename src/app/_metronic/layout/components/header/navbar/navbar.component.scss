@@ -1,0 +1,10 @@
+.mat-tab-container {
+    position: absolute;
+    top: 100%; /* Positions the tab below the span */
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* Ensures it appears above other content */
+    background-color: white; /* Ensures it's visible and has a background */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow for better visibility */
+    border-radius: 4px; /* Optional, for rounded corners */
+  }

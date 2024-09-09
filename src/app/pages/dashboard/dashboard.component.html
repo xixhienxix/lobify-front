@@ -3,24 +3,26 @@
 <div class="row gy-5 g-xl-8">
     <div class="col-xl-4">
         <app-arrivals 
-        [changing]="changingValue"
-        [allReservations]="allReservations"
-        ></app-arrivals>
-    </div>
-    <div class="col-xl-4">
-      <app-departures
-      [changing]="changingValue"
-      [allReservations]="allReservations"
-      ></app-departures>
-    </div>
-    <div class="col-xl-4">
-      <app-in-house
         [parametrosModel]="parametrosModel"
         [roomCodesComplete]="roomCodesComplete"
         [estatusArray]="estatusArray"
         [ratesArrayComplete]="ratesArrayComplete"
         [houseKeepingCodes]="houseKeepingCodes"
         [codigosCargo]="codigosCargo"
+        [allReservations]="allReservations"
+        [changing]="changingValue"
+        [allReservations]="allReservations"
+        ></app-arrivals>
+    </div>
+    <div class="col-xl-4">
+      <app-departures
+      [allReservations]="allReservations"
+      [changing]="changingValue"
+      [allReservations]="allReservations"
+      ></app-departures>
+    </div>
+    <div class="col-xl-4">
+      <app-in-house
         [allReservations]="allReservations"
         [changing]="changingValue"
         [changingValueRooms]="changingValueRooms"
@@ -42,6 +44,12 @@
   <!--begin::Col-->
   <div class="col-xxl-6 mb-5 mb-xl-10">
     <app-occupacy-and-income-widget
+      [roomCodesComplete]="roomCodesComplete"
+      [totalRooms]="totalRooms"
+      [ratesArrayComplete]="ratesArrayComplete"
+      [tempRatesArray]="tempRatesArray"
+      [standardRatesArray]="standardRatesArray"
+      [allAccounts]="allAccounts"
       [allReservations]="allReservations"
       [changingValueRooms]="changingValueRooms"
       [changing]="changingValue"

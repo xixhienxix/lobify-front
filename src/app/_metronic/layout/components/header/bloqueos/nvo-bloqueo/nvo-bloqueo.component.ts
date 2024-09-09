@@ -112,6 +112,9 @@ export class BloqueoReservaComponent implements  OnInit
 
   @Output() honBloqueosToastEvent: EventEmitter<string> = new EventEmitter();
   @Output() honUpdateCalendar: EventEmitter<Bloqueo> = new EventEmitter();
+  @Output() honToastEmit: EventEmitter<boolean> = new EventEmitter();
+
+  
   
   
   @ViewChild('select') select: MatSelect;
@@ -212,7 +215,9 @@ displayFechas(element:any){
 
   // Convert object to array of entries
   objectEntries(obj: Record<string, boolean>): { key: string; value: boolean }[] {
-    return Object.entries(obj).map(([key, value]) => ({ key, value: value as boolean }));
+    const { sinLlegadas, sinSalidas, ...newObj } = obj;
+
+    return Object.entries(newObj).map(([key, value]) => ({ key, value: value as boolean }));
   }
   
 
@@ -405,6 +410,10 @@ habValue($event:any){
               console.log(response);
               this.modal.close();
           }
+
+          this.honToastEmit.emit(true);
+
+
         },
         error:(err)=>{
 

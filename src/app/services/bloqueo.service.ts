@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject, throwError } from 'rxjs';
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { catchError, map, tap } from 'rxjs/operators';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Bloqueo, BloqueosState } from '../_metronic/layout/components/header/bloqueos/_models/bloqueo.model';
 import { ParametrosService } from '../pages/parametros/_services/parametros.service';
@@ -81,35 +81,39 @@ private currentBloqueosSubject =new Subject<any>();
      }
 
      postBloqueo(
-      desde:Date,
-      hasta:Date,
-      cuarto:string,
-      numCuarto:Array<string>,
-      checkboxState:BloqueosState,
-      comentarios:string
-      ) {
-  
+      desde: Date,
+      hasta: Date,
+      cuarto: string,
+      numCuarto: Array<string>,
+      checkboxState: BloqueosState,
+      comentarios: string
+    ) {
       const bloqueoPayload: Bloqueo = {
-      Habitacion:cuarto,
-      Cuarto:numCuarto,
-      Desde:desde,
-      Hasta:hasta,
-      bloqueoState:checkboxState,
-      Comentarios:comentarios,
+        Habitacion: cuarto,
+        Cuarto: numCuarto,
+        Desde: desde,
+        Hasta: hasta,
+        bloqueoState: checkboxState,
+        Comentarios: comentarios,
       };
-  
-      return this.http.post<Bloqueo>(`${environment.apiUrl}/post/bloqueos`, bloqueoPayload).pipe(
+    
+      return this.http.post<{ message: string }>(`${environment.apiUrl}/post/bloqueos`, bloqueoPayload).pipe(
         map(response => {
-          // Example transformation: add a timestamp to the response
-          return {
-            ...response,
-            timestamp: new Date().toISOString()
-          };
+          if (response.message === 'Bloqueo guardado con éxito') {
+            // Fetch the updated list of bloqueos and update IndexedDB
+            this.getAll().subscribe({
+              next:(updatedBloqueos)=>{
+                this.writeIndexDB('Bloqueos', updatedBloqueos);
+              },
+              error:(error) => {
+                console.error('Error fetching updated bloqueos:', error);
+              }
+            });
+          }
+          return response;
         })
       );
     }
-
-
 
      /**POR BORRAR */
 

@@ -1,7 +1,7 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewEncapsulation } from '@angular/core';
 import { ModalDismissReasons, NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { DEFAULT_HUESPED, Huesped } from 'src/app/models/huesped.model';
+import { DEFAULT_HUESPED, Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { HuespedService } from 'src/app/services/huesped.service';
 import { Subject, Subscription, catchError, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
@@ -23,7 +23,6 @@ import { ModificaReservaComponent } from './components/modifica/modifica.reserva
 import { NvaReservaComponent } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { LogService } from 'src/app/services/activity-logs.service';
-import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
 
 @Component({
   selector: 'app-edit-reserva',
@@ -31,7 +30,7 @@ import { ParametrosService } from 'src/app/pages/parametros/_services/parametros
   styleUrls: ['./edit-reserva.component.scss'],
   encapsulation: ViewEncapsulation.None,
 })
-export class EditReservaComponent implements OnInit, OnDestroy{
+export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
 
   /**LOADING SUBJECT */
   loadingSubject: Subject<boolean> = new Subject<boolean>();
@@ -53,13 +52,15 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   changingPromesasValue: Subject<Promesa[]> = new Subject();
   onSuccessResponse:Subject<boolean> = new Subject();
   adicionalSubject:Subject<Adicional[]> = new Subject();
-
+  standardRatesArray:Tarifas[]=[]
+  tempRatesArray:Tarifas[]=[]
   //Checkout
   nochesReales:number;
   totalAlojamientoNuevo:number;
   alojamiento_id:string;
   saldoPendiente:number;
   closeResult: string;
+  @Input() isReservaCancelada:boolean=false;
 
   private subscriptions: Subscription[] = [];
 
@@ -100,6 +101,7 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   @Output() onFetchReservations: EventEmitter<Huesped> = new EventEmitter();
   @Output() onActualizarCuenta: EventEmitter<any> = new EventEmitter();
   @Output() honUpdateHuesped: EventEmitter<any> = new EventEmitter();
+  @Output() honRefershDashboard: EventEmitter<boolean> = new EventEmitter();
   constructor(      
     public modal: NgbActiveModal,
     private modalService: NgbModal,
@@ -118,12 +120,22 @@ export class EditReservaComponent implements OnInit, OnDestroy{
       }
     })
   }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['ratesArrayComplete'] && Array.isArray(changes['ratesArrayComplete'].currentValue)) {
+      this.standardRatesArray = this.ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa Base');
+      this.tempRatesArray = this.ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa De Temporada');
+    }
+  }
+
   async ngOnInit(){
-    console.log("CurrentRoom:", this.currentRoom)
     this.formGroup = this.fb.group({
       estatus : [this.currentHuesped.estatus],
       ama:[this.currentRoom.Estatus]
     });
+    // if(this.currentHuesped.estatus === 'Reserva Cancelada' || 'No Show'){
+    //   this.isReservaCancelada=true;
+    // }
 
     this.adicionalSubject.subscribe({
       next:(value:Adicional[])=>{
@@ -146,6 +158,11 @@ export class EditReservaComponent implements OnInit, OnDestroy{
 
     // this.formGroup.controls["ama"].patchValue(this.currentRoom.Estatus);
     this.cdRef.detectChanges();
+
+    if(this.ratesArrayComplete && this.ratesArrayComplete.length > 0){
+      this.standardRatesArray = this.ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa Base');
+      this.tempRatesArray = this.ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa De Temporada');
+    }
 
   }
 
@@ -181,7 +198,7 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     this.saldoPendiente = totalCargosSinAlojamiento + this.totalAlojamientoNuevo - totalAbonos;
 
     // Determine if checkout process is needed
-    if (fechaSalida.startOf('day') >= todayDate.startOf('day')) {
+    if (fechaSalida.startOf('day') > todayDate.startOf('day')) {
       const modalRef = this.modalService.open(AlertsComponent, { size: 'sm' });
       modalRef.componentInstance.alertHeader = 'Advertencia';
       modalRef.componentInstance.mensaje = 'La fecha de salida del huésped es posterior al día de hoy, ¿desea realizar un Check-Out anticipado?';
@@ -228,7 +245,11 @@ export class EditReservaComponent implements OnInit, OnDestroy{
     }, (reason) => {
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
-  }  
+  }
+  
+  reactivaReserva(){
+    
+  }
 
   onEstatusUpdate(estatus: number): void {
     const oldStatus = this.currentHuesped.estatus;
@@ -371,7 +392,7 @@ export class EditReservaComponent implements OnInit, OnDestroy{
       }
     });
   
-    return abonos - cargos;
+    return cargos - abonos;
   }
 
   calculateBalance(){
@@ -399,7 +420,9 @@ export class EditReservaComponent implements OnInit, OnDestroy{
   async actualizaSaldos(refresh:boolean){
     this.estadoDeCuenta=[];
     this.estadoDeCuenta =  await firstValueFrom(this._edoCuentaService.getCuentas(this.currentHuesped.folio));  
-    
+    this.currentEdoCuenta = this.estadoDeCuenta
+    this.honRefershDashboard.emit(true);
+    this.cdRef.detectChanges();    
   }
 
   isCurrentStatus(statuses: string[]): boolean {
@@ -498,9 +521,9 @@ export class EditReservaComponent implements OnInit, OnDestroy{
       this.onGuardarPromesa.emit(promesa);
     }
 
-    honAgregarPago(pago:edoCuenta){
-      this.onAgregarPago.emit(pago)
-    }
+    // honAgregarPago(pago:edoCuenta){
+    //   this.onAgregarPago.emit(pago)
+    // }
 
     honFetchReservations(huesped:Huesped){
       this.onFetchReservations.emit(huesped);

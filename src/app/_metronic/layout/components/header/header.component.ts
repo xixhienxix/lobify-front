@@ -25,6 +25,10 @@ import { LogService } from 'src/app/services/activity-logs.service';
 import { AuthService } from 'src/app/modules/auth';
 import { BloqueoReservaComponent } from './bloqueos/nvo-bloqueo/nvo-bloqueo.component';
 import { Bloqueo } from './bloqueos/_models/bloqueo.model';
+import { DashboardService } from 'src/app/services/_shared/dashboard.service';
+import { HouseKeepingService } from 'src/app/services/housekeeping.service';
+import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
+import { HouseKeeping } from 'src/app/pages/calendar/_models/housekeeping.model';
 
 @Component({
   selector: 'app-header',
@@ -72,6 +76,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   standardRatesArray:Tarifas[]=[]
   ratesArray:Tarifas[]=[];
   tempRatesArray:Tarifas[]=[];
+  parametrosModel:Parametros
+  houseKeepingCodes:HouseKeeping[];
+ 
 
   /**Flags */
   accordionDisplay="";
@@ -81,6 +88,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   llegadas:number;
   allReservations:Huesped[]
   currentUser:string;
+
+  llegadasDelDia: number;
+  yaLlegaron: Huesped[] = [];
+  porLlegar: Huesped[] = [];
 
   eventsSubject: Subject<Huesped[]> = new Subject<Huesped[]>();
   sendReservations: BehaviorSubject<Huesped[]> = new BehaviorSubject<Huesped[]>([]);
@@ -97,7 +108,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private _parametrosService:ParametrosService,
     private _estadoDeCuenta: Edo_Cuenta_Service,
     private _logService: LogService,
-    private _authService: AuthService
+    private _authService: AuthService,
+    private _dashboardService: DashboardService,
+
+    private _checkInitialValues: IndexDBCheckingService
   ) {
     this.currentUser = this._authService.getUserInfo().username
     this.routingChanges();
@@ -177,6 +191,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit() {
+
     this.checkFoliadorIndexDB();
     this.checkEstatusIndexDB();
     this.checkRoomCodesIndexDB();
@@ -251,10 +266,31 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }else {
       this._parametrosService.getParametros().subscribe({
         next:(item)=>{
+          this.parametrosModel = item
+
           this.openNvaReserva();
         }
       });
     }
+    this.parametrosModel = parametrosIndexDB
+  }
+
+  async checkRoomCodesIndexDB(){
+    const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("Rooms");
+
+        /** Check if RoomsCode are on IndexDb */
+        if(roomsCodesIndexDB){
+          this.roomCodesComplete = roomsCodesIndexDB;
+          this.roomCodes = Object.values(
+            roomsCodesIndexDB.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
+        ); 
+      }else{
+          this.roomCodes = await firstValueFrom(this._habitacionService.getAll());
+          this.roomCodesComplete = this.roomCodes
+          this.roomCodes = Object.values(
+            this.roomCodes.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
+        );         
+      }
   }
 
   async checkParameters(){
@@ -349,6 +385,13 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const modalRef = this.modalService.open(BloqueoReservaComponent,{ size: 'md', backdrop:'static' });
     modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
     modalRef.componentInstance.estatusArray = this.estatusArray
+    modalRef.componentInstance.honToastEmit.subscribe({
+      next:(val:boolean)=>{
+        if(val){
+          this.promptMessage('Exito','Bloqueo Generado con Exito')
+        }
+      }
+    })
     modalRef.componentInstance.honUpdateCalendar.subscribe({
       next:(value:Bloqueo)=>{
         console.log(value);
@@ -362,27 +405,14 @@ export class HeaderComponent implements OnInit, OnDestroy {
           )
       }
     })
-    
-
-
   }
 
-  async checkRoomCodesIndexDB(){
-    const roomsCodesIndexDB:Habitacion[] = await this._habitacionService.readIndexDB("Rooms");
-
-        /** Check if RoomsCode are on IndexDb */
-        if(roomsCodesIndexDB){
-          this.roomCodesComplete = roomsCodesIndexDB;
-          this.roomCodes = Object.values(
-            roomsCodesIndexDB.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
-        ); 
-      }else{
-          this.roomCodes = await firstValueFrom(this._habitacionService.getAll());
-          this.roomCodesComplete = this.roomCodes
-          this.roomCodes = Object.values(
-            this.roomCodes.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
-        );         
-      }
+  processReservations() {
+    const today= new Date();
+    const arrivals = this._dashboardService.filterReservationsByArrivalDate(this.allReservations, today);
+    this.yaLlegaron = arrivals[1];
+    this.porLlegar = arrivals[2];
+    this.llegadasDelDia = arrivals[1].length + arrivals[2].length
   }
 
   promptMessage(header:string,message:string){

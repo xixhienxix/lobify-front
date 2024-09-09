@@ -32,6 +32,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { ScheduleModule, RecurrenceEditorModule, DayService, WeekService, WorkWeekService, MonthService, MonthAgendaService, TimelineMonthService } from '@syncfusion/ej2-angular-schedule'
 import { InlineSpinnerComponent } from 'src/app/services/_helpers/inlineSpinner/inline-spinner.component';
 import {MatCardModule} from '@angular/material/card';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @NgModule({
   declarations: [
@@ -107,7 +108,8 @@ import {MatCardModule} from '@angular/material/card';
     ScheduleModule,
     RecurrenceEditorModule,
     InlineSpinnerComponent,
-    MatCardModule
+    MatCardModule,
+    MatTooltipModule
   ],
   providers:[
     DayService,

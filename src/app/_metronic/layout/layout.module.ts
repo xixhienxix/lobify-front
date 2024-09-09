@@ -44,6 +44,7 @@ import { BloqueoReservaComponent } from './components/header/bloqueos/nvo-bloque
 import { MomentDateAdapter } from '@angular/material-moment-adapter';
 import { MAT_DATE_LOCALE, DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
 import { DistinctPipe } from './components/header/bloqueos/_helpers/distinct.pipe';
+import { DashboardModule } from 'src/app/pages/dashboard/dashboard.module';
 
 const routes: Routes = [
   {
@@ -105,7 +106,8 @@ export const MY_DATE_FORMATS = {
     NgbTooltipModule,
     TranslateModule,
     ThemeModeModule,
-    SharedModule
+    SharedModule,
+    DashboardModule
   ],
   exports: [RouterModule,DistinctPipe],
   providers: [

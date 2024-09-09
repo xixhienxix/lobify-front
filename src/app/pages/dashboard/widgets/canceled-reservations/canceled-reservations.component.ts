@@ -38,7 +38,7 @@ export class CanceledReservationsComponent implements OnInit {
         llegada.setHours(0, 0, 0, 0);
   
         if (llegada.getTime() === today.getTime()) {
-          if (item.origen === 'Reserva' && item.estatus === 'Reserva Cancelada') {
+          if (item.estatus === 'Reserva Cancelada') {
             this.reservasCanceladas.push(item);
           } 
         }

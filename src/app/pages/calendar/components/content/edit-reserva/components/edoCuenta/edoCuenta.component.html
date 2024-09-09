@@ -14,7 +14,7 @@
         </div>
       
         <div class="col-sm-6">
-            <label class="control-label">{{_huespedService.getCurrentHuespedValue.habitacion}}</label>
+            <label class="control-label">{{currentHuesped.tarifa}}</label>
         </div>
     </div>
     <div class="row">
@@ -23,7 +23,7 @@
           </div>
       
           <div class="col-sm-6">
-            <label class="control-label">{{_huespedService.getCurrentHuespedValue.adultos}}</label>
+            <label class="control-label">{{currentHuesped.adultos}}</label>
         </div>
     </div>
     <div class="row">
@@ -33,7 +33,7 @@
           </div>
       
           <div class="col-sm-6">
-            <label class="control-label">{{_huespedService.getCurrentHuespedValue.ninos}}</label>
+            <label class="control-label">{{currentHuesped.ninos}}</label>
           </div>
     </div>
 
@@ -43,7 +43,7 @@
           </div>
     
           <div class="col-sm-6">
-            <label class="control-label">{{_huespedService.getCurrentHuespedValue.noches}}</label>
+            <label class="control-label">{{currentHuesped.noches}}</label>
         </div>
     </div>
 </div>
@@ -80,15 +80,15 @@
 <br>
 
 <div class="container">
-    <ng-container *ngFor="let edoAlojamiento of edoCuentaAlojamientosActivos">
+    <ng-container *ngFor="let edoAlojamiento of tarifaDelDia">
             <div class="row ">
                 <div style="text-align: left;" class="col-sm-10">
-                    <label style="color: black;" class="control-label"> {{edoAlojamiento.Fecha}}
+                    <label style="color: black;" class="control-label"> {{edoAlojamiento.fecha}}
                     </label>
                 </div>
 
                 <div style="text-align: center;" class="col-sm-2">
-                    <label class="control-label">$ {{edoAlojamiento.Cargo.toLocaleString('es-MX')}}
+                    <label class="control-label">$ {{edoAlojamiento.tarifaTotal.toLocaleString('es-MX')}}
                     </label>
                 </div>
             </div>
@@ -443,7 +443,7 @@
                 class="h4"
                 style="color: aliceblue; text-align: center; padding-top: 5px"
               >
-              {{this.divisasService.getcurrentDivisa.Simbolo}} {{(_huespedService.getCurrentHuespedValue.pendiente!).toLocaleString('es-MX')}}
+              {{this.divisasService.getcurrentDivisa.Simbolo}} {{(currentHuesped.pendiente!).toLocaleString('es-MX')}}
               </label>
             </div>
         </div>

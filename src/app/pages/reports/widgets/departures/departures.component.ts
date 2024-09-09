@@ -1,7 +1,13 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
+import { Codigos } from 'src/app/models/codigos.model';
+import { Habitacion } from 'src/app/models/habitaciones.model';
 import { Huesped } from 'src/app/models/huesped.model';
+import { Tarifas } from 'src/app/models/tarifas';
+import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
+import { HouseKeeping } from 'src/app/pages/calendar/_models/housekeeping.model';
+import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 
 @Component({
   selector: 'app-departures',
@@ -15,6 +21,8 @@ export class DeparturesComponent implements OnInit{
 
   @Input() allReservations: Huesped[];
   @Input() changing: Subject<Huesped[]>;
+  @Input() changingValueRooms: Subject<Habitacion[]>;
+
 
   constructor(private translateService : TranslateService,
     private cdr: ChangeDetectorRef

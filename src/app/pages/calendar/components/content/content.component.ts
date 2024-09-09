@@ -18,7 +18,7 @@ import { loadCldr,L10n } from '@syncfusion/ej2-base';
 import { Subject, firstValueFrom } from 'rxjs';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
-import { Huesped } from 'src/app/models/huesped.model';
+import { Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
 import { Tarifas } from 'src/app/models/tarifas';
 import { HouseKeeping } from '../../_models/housekeeping.model';
 
@@ -46,7 +46,7 @@ export class ContentComponent implements OnInit{
   closeResult:string
   public selectedDate: Date = new Date();
   todayDate = new Date();
-  public timeScale: TimeScaleModel = { enable: true, interval: 1440, slotCount: 1 };
+  public timeScale: TimeScaleModel = { enable: false, interval: 1440, slotCount: 1 };
   /**
    * Used to Set how many days displays on the Scheduler in one view
    */
@@ -168,42 +168,54 @@ export class ContentComponent implements OnInit{
         return { hours, minutes };
       };
     
-      const getCategoryColor = (estatus: string, origen: string): string => {
+      const getCategoryColor = (estatus: string): string => {
         const colorMap: Record<string, string> = {
+          'Huesped en Casa': this.colorDict[0], // Assuming this is similar to 'Reserva en Casa'
+          'Reserva Sin Pago': this.colorDict[3], // Grouped under 'Reserva'
+          'Reserva Confirmada': this.colorDict[3], // Grouped under 'Reserva'
+          'Deposito Realizado': this.colorDict[3], // Grouped under 'Reserva'
+          'Esperando Deposito': this.colorDict[3], // Grouped under 'Reserva'
+          'Totalmente Pagada': this.colorDict[3], // Grouped under 'Reserva'
+          'Hizo Checkout': this.colorDict[4], // Grouped under 'Check-Out'
+          'Uso Interno': this.colorDict[2],
+          'Bloqueo': this.colorDict[3], // Assuming similar to 'Reserva' or could have a different color
+          'Reserva Temporal': this.colorDict[1],
+          'No Show': this.colorDict[4], // Grouped under 'Check-Out'
           'Check-Out': this.colorDict[4],
           'Reserva Cancelada': this.colorDict[4],
-          'No Show': this.colorDict[4],
-          'Walk-In': this.colorDict[0],
-          'Reserva Temporal': this.colorDict[1],
-          'Uso Interno': this.colorDict[2],
-          'Reserva en Casa': this.colorDict[0],
-          'Reserva': this.colorDict[3],
-          'default': this.colorDict[3]
+          'Walk-In': this.colorDict[0], // Assuming this is similar to 'Huesped en Casa'
+          'Reserva en Casa': this.colorDict[0], // Assuming this is 'Huesped en Casa'
+          'Reserva': this.colorDict[3], // Generic group for reservations
+          'default': this.colorDict[0] // Default color for any unspecified status
         };
-        return colorMap[estatus] || colorMap[origen] || colorMap['default'];
+      
+        return colorMap[estatus] || colorMap['default'];
       };
+      
     
       dataSource.value.forEach((item: Huesped, index: number) => {
         this.reservationsArray.push(item);
-        const { hours, minutes } = getTimeDetails(item.llegada);
-        const llegada = new Date(item.llegada);
-        const salida = new Date(item.salida);
-    
-        const pushArray = {
-          Id: index + 1,   
-          Subject: item.nombre,
-          StartTime: new Date(llegada.setHours(hours, minutes)),
-          EndTime: new Date(salida.setHours(hours, minutes)),
-          IsAllDay: false,
-          ProjectId: this.checkGroupId(item.habitacion),
-          TaskId: this.checkTaskID(item.numeroCuarto),
-          Folio: item.folio,
-          Codigo: item.habitacion,
-          Numero: item.numeroCuarto,
-          CategoryColor: getCategoryColor(item.estatus, item.origen)
-        };
-    
-        this.datasourceArray.push(pushArray);
+          if(!reservationStatusMap[8].includes(item.estatus)){
+            const { hours, minutes } = getTimeDetails(item.llegada);
+            const llegada = new Date(item.llegada);
+            const salida = new Date(item.salida);
+        
+            const pushArray = {
+              Id: index + 1,   
+              Subject: item.nombre,
+              StartTime: new Date(llegada.setHours(hours, minutes)),
+              EndTime: new Date(salida.setHours(hours, minutes)),
+              IsAllDay: false,
+              ProjectId: this.checkGroupId(item.habitacion),
+              TaskId: this.checkTaskID(item.numeroCuarto),
+              Folio: item.folio,
+              Codigo: item.habitacion,
+              Numero: item.numeroCuarto,
+              CategoryColor: getCategoryColor(item.estatus)
+            };
+        
+            this.datasourceArray.push(pushArray);
+          }
       });
     
       console.log("Previo a Bloqueos: ", this.datasourceArray);

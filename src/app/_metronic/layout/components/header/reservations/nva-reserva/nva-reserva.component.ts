@@ -24,7 +24,7 @@ export interface preAsig {
 }
 
 @Component({
-  selector: 'app-edit-customer-modal',
+  selector: 'app-nva-reserv-modal',
   templateUrl: './nva-reserva.component.html',
   styleUrls: ['./nva-reserva.component.scss'],
   encapsulation: ViewEncapsulation.None,
@@ -68,7 +68,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   styleDisponibilidad:string='background-color:#99d284;'
 
   /** Models */
-  roomCodes:Habitacion[]=[];
   ocupadasSet = new Set();
   mySetAvaible = new Set();
 
@@ -119,7 +118,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   get nombre(){return this.formGroup.get('nombre')}
   currentStatus:string='';
   currentFolio:Foliador;
-  origenReserva:string='';
+  origenReserva:string='Recepcion';
   noDisabledCheckIn:boolean=true;
   todayDate:Date = new Date();
   // closeResult: string;
@@ -136,10 +135,13 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   @Input() startTime:string=''
   @Input() endTime:string=''
   @Input() cuarto:string=''
+  @Input() roomCodes:Habitacion[]=[];
+  
 
 
   @Output() onNvaReserva: EventEmitter<Huesped[]> = new EventEmitter();
   @Output() onGetDisponibilidad: EventEmitter<any> = new EventEmitter();
+
   get inputs() {
     return this.formGroup.controls["nombreHabs"] as FormArray;
   }
@@ -725,15 +727,15 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
 
   }
 
-  getRooms(){
-    this.ocupadasSet.forEach((element)=>{
-      this.roomCodes.forEach((roomsElemts)=>{
-        if(roomsElemts.Numero === element){
-          return roomsElemts.Numero
-        }
-      })
-    })
-  }
+  // getRooms(){
+  //   this.ocupadasSet.forEach((element)=>{
+  //     this.roomCodes.forEach((roomsElemts)=>{
+  //       if(roomsElemts.Numero === element){
+  //         return roomsElemts.Numero
+  //       }
+  //     })
+  //   })
+  // }
 
   /** Mat-expansioln-Pane [Acordion] */
   step = 0;
@@ -817,28 +819,45 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
 
 
 
-  setEstatus(value:any) {
+  setEstatus(value: number): void {
+    this.origenReserva = 'Recepcion';
 
-    if(this.estatusArray){
-      this.currentStatus = this.estatusArray.find(item=> item.id === value)?.estatus!;
+    // Update the current status based on estatusArray
+    if (this.estatusArray) {
+        this.currentStatus = this.estatusArray.find(item => item.id === value)?.estatus || '';
     }
 
-    if(value===1){
-      this.currentFolio=this.folios[2]
-      this.origenReserva='Walk-In'
+    // Define the folios based on the status value
+    let selectedFolio: Foliador | undefined;
+
+    switch (value) {
+        case 1:
+            selectedFolio = this.folios[2];
+            break;
+        case 2:
+            selectedFolio = this.folios[0];
+            break;
+        case 5:
+            selectedFolio = this.folios[1];
+            break;
+        case 7:
+            selectedFolio = this.folios[3];
+            break;
+        default:
+            selectedFolio = undefined; // Handle cases where value does not match any case
+            break;
     }
-    else if(value===2){
-    this.currentFolio=this.folios[0]
-    this.origenReserva='Reserva'}
-    else if(value === 5){
-      this.currentFolio=this.folios[1]
-      this.origenReserva='Uso Interno'
-    }else if(value === 7){
-      this.currentFolio=this.folios[3]
-      this.origenReserva='Reserva Temporal'
+
+    // Set currentFolio if selectedFolio is found
+    if (selectedFolio) {
+        this.currentFolio = selectedFolio;
     }
+
+    // Call the submit method
     this.onSubmit();
-  }
+}
+
+  
 
   /**
    * 

@@ -74,6 +74,10 @@ export class EditReservasModalService {
             this.outputSubject.error({ type: 'onAgregarPago', error });
         }
       });
+
+      modalRef.componentInstance.honRefershDashboard.subscribe((data:any)=>{
+        this.outputSubject.next({ type: 'honRefershDashboard', data });
+      })
   
       modalRef.componentInstance.onEditRsv.subscribe((data: any) => {
         this.outputSubject.next({ type: 'onEditRsv', data });

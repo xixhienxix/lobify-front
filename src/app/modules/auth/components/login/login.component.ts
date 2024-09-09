@@ -4,6 +4,7 @@ import { Subscription, Observable } from 'rxjs';
 import { UserModel } from '../../models/user.model';
 import { AuthService } from '../../services/auth.service';
 import { ActivatedRoute, Router } from '@angular/router';
+import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 export interface userAccesed {
   user: UserModel | undefined,
   accessToken: string;
@@ -30,7 +31,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private fb: FormBuilder,
     private authService: AuthService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private _checkIndexDbService: IndexDBCheckingService
   ) {
     this.isLoading$ = this.authService.isLoading$;
     // redirect to home if already logged in
@@ -43,7 +45,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.initForm();
     // get return url from route parameters or default to '/'
     this.returnUrl =
-      this.route.snapshot.queryParams['returnUrl'.toString()] || '/';
+      this.route.snapshot.queryParams['returnUrl'.toString()] || '/dashboard';
   }
 
   // convenience getter for easy access to form fields
@@ -72,6 +74,21 @@ export class LoginComponent implements OnInit, OnDestroy {
       .login(this.f.username.value, this.f.password.value)
       .subscribe(() => {
         if (this.authService.getcurrentUserValue?.accessToken) {
+          
+          const servicesToCheck = [
+            'parametros', 
+            'housekeeping', 
+            'bloqueos', 
+            'estatus', 
+            'habitaciones', 
+            'logs', 
+            'reservaciones', 
+            'tarifas', 
+            'codes'
+          ];
+
+          this._checkIndexDbService.checkIndexedDB(servicesToCheck);
+
           this.router.navigate([this.returnUrl]);
         } else {
           this.message = 'Usuario y/o contraseña inexistente'

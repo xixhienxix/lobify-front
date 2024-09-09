@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, Input, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { Huesped } from 'src/app/models/huesped.model';
+import { Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
 
 @Component({
   selector: 'app-future-reservations',
@@ -39,7 +39,7 @@ export class FutureReservationsComponent implements OnInit {
         llegada.setHours(0, 0, 0, 0);
   
         if (llegada.getTime() !== today.getTime() && llegada.getTime() > today.getTime()) {
-          if (item.origen === 'Reserva') {
+          if (reservationStatusMap[2].includes(item.estatus)) {
             this.reservasFuturas.push(item);
           } 
         }

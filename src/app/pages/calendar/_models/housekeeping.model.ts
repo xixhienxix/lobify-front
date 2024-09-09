@@ -3,5 +3,4 @@ export interface HouseKeeping{
     Descripcion:string;
     Color:string;
     hotel?:string;
-
 }

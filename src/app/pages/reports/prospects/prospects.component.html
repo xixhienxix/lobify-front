@@ -1,0 +1,102 @@
+<mat-form-field appearance="outline">
+    <mat-label>Folio or Nombre</mat-label>
+    <input matInput [(ngModel)]="filterText" (input)="applyFilter($event)" placeholder="Filtro por Folio o Nombre">
+
+  </mat-form-field>
+
+  <button style="margin-left: 1rem;" mat-raised-button color="primary" class="btn btn-primary" (click)="resetFilters()">Reset Filters</button>
+
+  
+  <div class="filter-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Select Specific Date</mat-label>
+      <input matInput [matDatepicker]="specificDate" [(ngModel)]="specificDateValue" (dateChange)="applySpecificDateFilter($event.value)">
+      <mat-datepicker-toggle matSuffix [for]="specificDate"></mat-datepicker-toggle>
+      <mat-datepicker #specificDate></mat-datepicker>
+    </mat-form-field>
+  
+    <mat-form-field appearance="outline">
+      <mat-label>Filter by Llegada</mat-label>
+      <input matInput [matDatepicker]="llegadaDate" [(ngModel)]="llegadaDateValue" (dateChange)="applyLlegadaDateFilter($event.value)">
+      <mat-datepicker-toggle matSuffix [for]="llegadaDate"></mat-datepicker-toggle>
+      <mat-datepicker #llegadaDate></mat-datepicker>
+    </mat-form-field>
+  
+    <mat-form-field appearance="outline">
+      <mat-label>Filter by Salida</mat-label>
+      <input matInput [matDatepicker]="salidaDate" [(ngModel)]="salidaDateValue" (dateChange)="applySalidaDateFilter($event.value)">
+      <mat-datepicker-toggle matSuffix [for]="salidaDate"></mat-datepicker-toggle>
+      <mat-datepicker #salidaDate></mat-datepicker>
+    </mat-form-field>
+  
+    <mat-form-field appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyStatusFilter($event.value)">
+        <mat-option *ngFor="let status of statusOptions" [value]="status">{{ status }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+  
+  
+  <!-- mat-table -->
+  <table mat-table [dataSource]="filteredReservations" class="mat-elevation-z8">
+
+    <!-- Estatus Column -->
+    <ng-container matColumnDef="nombre">
+      <th mat-header-cell *matHeaderCellDef> Nombre </th>
+      <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
+    </ng-container>
+
+        <!-- Telefono Column -->
+    <ng-container matColumnDef="telefono">
+      <th mat-header-cell *matHeaderCellDef> Teléfono </th>
+      <td mat-cell *matCellDef="let element"> {{element.telefono}} </td>
+    </ng-container>
+
+        <!-- Email Column -->
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef> Email </th>
+      <td mat-cell *matCellDef="let element"> {{element.email}} </td>
+    </ng-container>
+  
+    <!-- Llegada Column -->
+    <ng-container matColumnDef="llegada">
+      <th mat-header-cell *matHeaderCellDef> Llegada </th>
+      <td mat-cell *matCellDef="let element"> {{element.llegada | date}} </td>
+    </ng-container>
+  
+    <!-- Salida Column -->
+    <ng-container matColumnDef="salida">
+      <th mat-header-cell *matHeaderCellDef> Salida </th>
+      <td mat-cell *matCellDef="let element"> {{element.salida | date}} </td>
+    </ng-container>
+
+  <!-- Estatus Column -->
+  <ng-container matColumnDef="estatus">
+    <th mat-header-cell *matHeaderCellDef> Estatus </th>
+    <td mat-cell *matCellDef="let element">
+      <div class="estatus-container">
+        <mat-form-field appearance="outline" class="estatus-form-field">
+          <mat-select [value]="element.estatus" >
+            <mat-option *ngFor="let status of statusOptions" [value]="status" [ngStyle]="{'background-color': getColor(status)}">
+              {{ status }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </td>
+  </ng-container>
+
+      <!-- Acciones Column -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef> Ver Folio </th>
+        <td mat-cell *matCellDef="let element"> 
+            <button (click)="verFolio(element)" class="btn btn-primary">Ver Folio</button>    
+        </td>
+      </ng-container>
+  
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+  <!-- Paginator -->
+<mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator>

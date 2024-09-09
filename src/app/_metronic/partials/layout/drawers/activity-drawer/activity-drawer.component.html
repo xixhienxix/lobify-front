@@ -13,6 +13,17 @@
     <div class="card-header" id="kt_activities_header">
       <h3 class="card-title fw-bolder text-gray-900">Activity Logs</h3>
 
+        <!-- Search Input -->
+        <div class="ms-3" style="margin-top:1rem">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Busca por Folio"
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="filterLogs()"
+          />
+        </div>
+
       <div class="card-toolbar">
         <button
           type="button"
@@ -35,7 +46,7 @@
       >
         <div class="timeline">
           <!-- Combinación y filtrado de logs según su logType -->
-          <ng-container *ngFor="let log of logs">
+          <ng-container *ngFor="let log of filteredLogs">
             <ng-container *ngIf="log.logType === 1">
               <!-- LogType 1 -->
               <div class="timeline-item">

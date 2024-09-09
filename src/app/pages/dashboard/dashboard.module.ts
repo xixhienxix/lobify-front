@@ -19,6 +19,7 @@ import { SharedModule } from 'src/app/_metronic/shared/shared.module';
 import { LlegadasTableComponent } from '../reports/widgets/_helpers/llegadas-table/llegadas.table.component';
 import { SalidasTableComponent } from '../reports/widgets/_helpers/salidas-table/salidas.table.component';
 import { EnCasaTableComponent } from '../reports/widgets/_helpers/encasa-table/encasa.table.component';
+import {MatTooltipModule} from '@angular/material/tooltip';
 
 @NgModule({
   declarations: [DashboardComponent, CleanStatusWidgetComponent, OccupacyAndIncomeWidgetComponent, BadgeWidgetComponent, FutureReservationsComponent, CanceledReservationsComponent, TemporalReservationsWidgetComponent, AbandonReservationsWidgetComponent,
@@ -37,5 +38,8 @@ import { EnCasaTableComponent } from '../reports/widgets/_helpers/encasa-table/e
     ModalsModule,
     SharedModule
   ],
+  exports:[
+    LlegadasTableComponent
+  ]
 })
 export class DashboardModule {}

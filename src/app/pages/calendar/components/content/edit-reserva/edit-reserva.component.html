@@ -45,46 +45,64 @@
   
     <br />
     <!-- </div>  -->
-    <form [formGroup]="formGroup">
-    <div class="row container">
-        <div class="col-lg-7">
-          <ng-container *ngIf="isCurrentStatus(['Huesped en Casa', 'Check-Out', 'Uso Interno', 'Bloqueo / Sin Llegadas', 'Reserva Temporal'])">
-            <mat-select formControlName='estatus' style="font-weight: bold; font-size: larger; color: white;" [style.background-color]="backgroundColor(currentHuesped.estatus)" name="filter_for" id="demo" class="btn">
-              <mat-option style="color: white; font-weight: bold; font-size: larger;" [style.background-color]="backgroundColor(currentHuesped.estatus)" [value]="currentHuesped.estatus">{{currentHuesped.estatus}}</mat-option>
-            </mat-select>
-          </ng-container>
-          
-          <ng-container *ngIf="isCurrentStatus(['Reserva Sin Pago', 'Deposito Realizado', 'Esperando Deposito', 'Totalmente Pagada', 'Reserva Confirmada'])">
-            <mat-select formControlName='estatus' style="font-weight: bold; font-size: larger; color: white;" #selected (selectionChange)="openDialog(currentHuesped, selected.value)" [style.background-color]="backgroundColor(currentHuesped.estatus)" name="filter_for" id="demo" class="btn">
-              <ng-container *ngFor="let estatus of filteredEstatusArray([2, 3, 8, 9, 10])">
-                <mat-option style="color: white; font-weight: bold; font-size: medium;" [style.background-color]="estatus.color" [value]="estatus.estatus">{{estatus.estatus}}</mat-option>
-              </ng-container>
-            </mat-select>
-          </ng-container>
-          
-          <ng-container *ngIf="isCurrentStatus(['No Show', 'Reserva Cancelada'])">
-            <mat-select formControlName='estatus' style="color: white;" [style.background-color]="backgroundColor(currentHuesped.estatus)" name="filter_for" id="demo" class="btn">
-              <mat-option style="color: white; font-weight: bold; font-size: medium;" [style.background-color]="backgroundColor(currentHuesped.estatus)" [value]="currentHuesped.estatus">{{currentHuesped.estatus}}</mat-option>
-            </mat-select>
-          </ng-container>
+    
+    <div *ngIf="isReservaCancelada" class="h4 modal-content" style="background-color: var(--deep-red-background); text-align: center; padding: 5px 0;">
+        <div class="form-group col-lg-12">
+          <button
+            class="btn btn-success btn-block"
+            type="submit"
+            style="width: 100%;"
+            (click)="openModifica()"
+          >
+            Reactivar Reservación
+          </button>
+          <br>
         </div>
-          <div class="col-lg-5">
-              <mat-select 
-                panelClass="dropDown-seasons-panel" 
-                #selectedAma 
-                (selectionChange)='onChangeAma(currentHuesped.numeroCuarto,selectedAma.value)' 
-                formControlName='ama' 
-                style="color: white; font-weight: bold; font-size: larger; " 
-                [style.background-color]="colorAma" 
-                name="estatusAma" id="amaDellaves" class="btn" 
-                >
-                <ng-container *ngFor="let estatusAmaDeLlaves of houseKeepingCodes" >
-                  <mat-option style="font-weight: bold; font-size: medium;  color: white;" [value]="estatusAmaDeLlaves.Descripcion" [style.background-color]="estatusAmaDeLlaves.Color"> {{estatusAmaDeLlaves.Descripcion.toUpperCase()}}</mat-option>
-                </ng-container>
-              </mat-select>
-          </div>
     </div>
-  </form>
+
+    <ng-container *ngIf="!isReservaCancelada">
+      <form [formGroup]="formGroup">
+        <div class="row container">
+            <div class="col-lg-7">
+              <ng-container *ngIf="isCurrentStatus(['Huesped en Casa', 'Check-Out', 'Uso Interno', 'Bloqueo / Sin Llegadas', 'Reserva Temporal'])">
+                <mat-select formControlName='estatus' style="font-weight: bold; font-size: larger; color: white;" [style.background-color]="backgroundColor(currentHuesped.estatus)" name="filter_for" id="demo" class="btn">
+                  <mat-option style="color: white; font-weight: bold; font-size: larger;" [style.background-color]="backgroundColor(currentHuesped.estatus)" [value]="currentHuesped.estatus">{{currentHuesped.estatus}}</mat-option>
+                </mat-select>
+              </ng-container>
+              
+              <ng-container *ngIf="isCurrentStatus(['Reserva Sin Pago', 'Deposito Realizado', 'Esperando Deposito', 'Totalmente Pagada', 'Reserva Confirmada'])">
+                <mat-select formControlName='estatus' style="font-weight: bold; font-size: larger; color: white;" #selected (selectionChange)="openDialog(currentHuesped, selected.value)" [style.background-color]="backgroundColor(currentHuesped.estatus)" name="filter_for" id="demo" class="btn">
+                  <ng-container *ngFor="let estatus of filteredEstatusArray([2, 3, 8, 9, 10])">
+                    <mat-option style="color: white; font-weight: bold; font-size: medium;" [style.background-color]="estatus.color" [value]="estatus.estatus">{{estatus.estatus}}</mat-option>
+                  </ng-container>
+                </mat-select>
+              </ng-container>
+              
+              <ng-container *ngIf="isCurrentStatus(['No Show', 'Reserva Cancelada'])">
+                <mat-select formControlName='estatus' style="color: white;" [style.background-color]="backgroundColor(currentHuesped.estatus)" name="filter_for" id="demo" class="btn">
+                  <mat-option style="color: white; font-weight: bold; font-size: medium;" [style.background-color]="backgroundColor(currentHuesped.estatus)" [value]="currentHuesped.estatus">{{currentHuesped.estatus}}</mat-option>
+                </mat-select>
+              </ng-container>
+            </div>
+              <div class="col-lg-5">
+                  <mat-select 
+                    panelClass="dropDown-seasons-panel" 
+                    #selectedAma 
+                    (selectionChange)='onChangeAma(currentHuesped.numeroCuarto,selectedAma.value)' 
+                    formControlName='ama' 
+                    style="color: white; font-weight: bold; font-size: larger; " 
+                    [style.background-color]="colorAma" 
+                    name="estatusAma" id="amaDellaves" class="btn" 
+                    >
+                    <ng-container *ngFor="let estatusAmaDeLlaves of houseKeepingCodes" >
+                      <mat-option style="font-weight: bold; font-size: medium;  color: white;" [value]="estatusAmaDeLlaves.Descripcion" [style.background-color]="estatusAmaDeLlaves.Color"> {{estatusAmaDeLlaves.Descripcion.toUpperCase()}}</mat-option>
+                    </ng-container>
+                  </mat-select>
+              </div>
+        </div>
+      </form>
+    </ng-container>
+
   <br>
 
   <div class="row container text-center mx-auto mb-3">
@@ -126,7 +144,6 @@
           [adicionalSubject]="adicionalSubject"
           [onSuccessResponse]="onSuccessResponse"
           [changing]="changingPromesasValue"
-          (onAgregarPago)="honAgregarPago($event)"
           (onUpdateEstatusHuesped)="honUpdateEstatusHuesped($event)"
           (onAlertMessage)="honAlertMessage($event)"
           (onGetPromesas)="honGetPromesas($event)"
@@ -145,14 +162,14 @@
         [currentHuesped]="currentHuesped"
         ></app-huesped>
     </mat-tab>
-  
+
+  <ng-container *ngIf="!isReservaCancelada">
     <mat-tab label="Transacciones">
       <app-transacciones *ngIf="!!currentEdoCuenta"
         [codigosCargoList]="codigosCargo"
         [currentEdoCuenta]="currentEdoCuenta"
         [currentHuesped]="currentHuesped"
         (honAlertMessage)="honAlertMessage($event)"
-        (honAddPayment)="honAgregarPago($event)"
         (honFetchReservations)="honFetchReservations($event)"
         (honRefreshEdoCuenta)="onRefreshEdoCuenta($event)"
         (honActualizaSaldo)="actualizaSaldos($event)"
@@ -163,13 +180,18 @@
       <app-edo-cuenta-component *ngIf="!!currentEdoCuenta"
       [currentHuesped]="currentHuesped"
       [currentEdoCuenta]="currentEdoCuenta"
+      [standardRatesArray]="standardRatesArray"
+      [tempRatesArray]="tempRatesArray"
+      [ratesArrayComplete]="ratesArrayComplete"
       (honAlertMessage)="honAlertMessage($event)"
       ></app-edo-cuenta-component>
     </mat-tab>
+  </ng-container>
+
   </mat-tab-group>
   
   
-  <app-reservation-actions *ngIf="currentHuesped" 
+  <app-reservation-actions *ngIf="currentHuesped && !isReservaCancelada" 
     [currentHuesped]="currentHuesped" 
     [estatus]="currentHuesped.estatus"
     [currentEdoCuenta]="currentEdoCuenta"

@@ -47,10 +47,12 @@
         "dashboard":"Dashboard",
         "calendar":"Calendario",
         "reservations-guest":"Reservaciones y Húespedes",
-        "client-history":"Historico de Clientes",
+        "client-history":"Clientes (CRM)",
         "transactions": "Transacciones",
         "finance":"Finanzas",
         "configurations":"Configuraciones",
+        "reports":"Reportes",
+        "prospects":"Lista de Prospectos",
         "parameters":"Parametros",
         "catalogo-hab":"Catalogo de Habitaciones",
         "rates-tittle":"Tarifario"
@@ -141,5 +143,9 @@
         "TempvisibleOTAS": "CHANNEL MANAGER OTA's",
         "TemptarifaEspecialQuestion": "¿ QUISIERAS OFRECER UNA SEGUNDA TARIFA ?",
         "TempAddNewRate":"AGREGAR NUEVA TARIFA DE TEMPORADA"
+    },
+    "DashboardComponent":{
+        "adrTooltip":"Tarifa diaria promedio (ADR): el ingreso promedio obtenido por habitación por día, calculado dividiendo el ingreso total por habitación por la cantidad de habitaciones vendidas. Mide la estrategia de precios y el desempeño financiero de un hotel.",
+        "revParTooltip":"Ingresos por habitación disponible (RevPAR): una métrica de rendimiento clave en la industria hotelera que mide los ingresos generados por habitación disponible, ya sea que la habitación esté ocupada o no. Ayuda a medir el rendimiento general del hotel en términos de ocupación y tarifa."
     }
 }

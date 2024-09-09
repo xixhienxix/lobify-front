@@ -30,15 +30,15 @@
 
     <!-- Pages -->
     <div class="menu-item menu-accordion" data-kt-menu-trigger="click" routerLinkActive="active">
-      <span class="menu-link">
+      <!-- <span class="menu-link">
         <span class="menu-icon">
           <app-keenicon name="element-plus" class="fs-2"></app-keenicon>
         </span>
         <span
           class="menu-title">{{"SidebarMenuComponent.reservations-guest" | translate}}
         </span>
-        <!-- <span class="menu-arrow"></span> -->
-      </span>
+         <span class="menu-arrow"></span>
+      </span> -->
       <!-- <div class="menu-sub menu-sub-accordion" routerLinkActive="menu-active-bg">
         <div class="menu-item menu-accordion" routerLinkActive="active" data-kt-menu-trigger="click">
           <span class="menu-link">
@@ -143,14 +143,14 @@
 
     <!-- Accounts -->
     <div class="menu-item menu-accordion" data-kt-menu-trigger="click" routerLinkActive="active">
-      <span class="menu-link">
+      <!-- <span class="menu-link">
         <span class="menu-icon">
           <app-keenicon name="profile-circle" class="fs-2"></app-keenicon>
         </span>
         <span class="menu-title"
               data-link="">{{"SidebarMenuComponent.client-history" | translate}}
         </span>
-      </span>
+      </span> -->
       <!-- <div class="menu-sub menu-sub-accordion" routerLinkActive="menu-active-bg">
         <div class="menu-item">
           <a class="menu-link without-sub" routerLinkActive="active" routerLink="/crafted/account/overview">
@@ -179,14 +179,14 @@
 
     <!-- Errors -->
     <div class="menu-item menu-accordion" data-kt-menu-trigger="click" routerLinkActive="active">
-      <span class="menu-link">
+      <!-- <span class="menu-link">
         <span class="menu-icon">
           <app-keenicon name="phone" class="fs-2"></app-keenicon>
         </span>
         <span class="menu-title"
               data-link="">{{"SidebarMenuComponent.transactions" | translate}}
         </span>
-      </span>
+      </span> -->
       <!-- <div class="menu-sub menu-sub-accordion" routerLinkActive="menu-active-bg">
         <div class="menu-item">
           <a class="menu-link without-sub" routerLink="/error/404" routerLinkActive="active">
@@ -215,14 +215,14 @@
 
     <!-- Widgets -->
     <div class="menu-item menu-accordion" data-kt-menu-trigger="click" routerLinkActive="active">
-      <span class="menu-link">
+      <!-- <span class="menu-link">
         <span class="menu-icon">
           <app-keenicon name="element-7" class="fs-2"></app-keenicon>
         </span>
         <span class="menu-title"
               data-link="">{{"SidebarMenuComponent.finance" | translate}}
         </span>
-      </span>
+      </span> -->
       <!-- <div class="menu-sub menu-sub-accordion" routerLinkActive="menu-active-bg">
         <div class="menu-item">
           <a class="menu-link without-sub" routerLinkActive="active" routerLink="/crafted/widgets/lists">
@@ -291,6 +291,21 @@
           </a>
         </div>
       </div> -->
+    </div>
+
+    <div class="menu-item">
+      <div class="menu-content pt-8 pb-2">
+        <span class="menu-section text-muted text-uppercase fs-8 ls-1">{{"SidebarMenuComponent.reports" | translate}}</span>
+      </div>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" routerLink="/reports/prospects" routerLinkActive="active">
+        <span class="menu-icon">
+          <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+        </span>
+        <span class="menu-title">{{"SidebarMenuComponent.prospects" | translate}}</span>
+      </a>
     </div>
 
     <!-- Separator -->

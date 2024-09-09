@@ -6,7 +6,7 @@ export interface Huesped {
     ninos:number;
     nombre: string;
     // apellido: string;
-    estatus: string; // Huesped en Casa = 1 | Reserva Sin Pagar = 2 | Reserva Confirmada = 3 | Hizo Checkout = 4 | Uso Interno = 5 | Bloqueo = 6 | Reserva Temporal = 7
+    estatus: string; // Huesped en Casa = 1 | Reserva Sin Pago = 2 | Reserva Confirmada = 3 | Hizo Checkout = 4 | Uso Interno = 5 | Bloqueo = 6 | Reserva Temporal = 7
     llegada: string;
     salida: string;
     noches: number;
@@ -80,4 +80,29 @@ export interface Huesped {
   
   }
   
+  export const reservationStatusMap: { [key: number]: string[] } = {
+    1: [
+      'Huesped en Casa',
+      'Walk-In',
+      'Reserva en Casa'
+    ],
+    2: [
+        'Reserva Sin Pago',
+        'Reserva Confirmada',
+        'Deposito Realizado',
+        'Esperando Deposito',
+        'Totalmente Pagada'
+    ],
+    4: [
+      'Hizo Checkout',
+      'Check-Out'
+    ],
+    5: ['Uso Interno'],
+    6: ['Bloqueo'],
+    7: ['Reserva Temporal'],
+    8: [
+      'No Show',
+      'Reserva Cancelada'
+    ]
+};
   

@@ -180,7 +180,12 @@ interface StateMapping {
     }
   
     maxCantidad(){
-      this.abonosf.cantidadAbono.patchValue(this.currentHuesped.pendiente)
+      if(this.calculatePendiente() < 0 ){
+        this.honAlertMessage.emit({tittle:"Info", message:"El huesped tiene saldo a favor!"});
+        return
+      }else{
+        this.abonosf.cantidadAbono.patchValue(this.calculatePendiente())
+      }
     }
   
     actualizaHuesped(huesped:Huesped){
@@ -320,40 +325,40 @@ interface StateMapping {
       this.onChangeQtyNva(this.quantityNva)
     }
 
-    addPayment(tipo:string){
-      let pago:edoCuenta
-      if(tipo === 'Cargo'){
-        pago = {
-          id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
-                Folio:this.currentHuesped.folio,
-                Fecha:new Date(),
-                Fecha_Cancelado:'',
-                Referencia:'',
-                Descripcion:this.codigoDeCargo.Descripcion,
-                Forma_de_Pago:'No Aplica',
-                Cantidad:this.quantity,
-                Cargo:this.codigoDeCargo.Precio! * this.quantity,
-                Abono:0,
-                Estatus:'Activo'
-              };
-        this.honAddPayment.emit(pago);
-      }else if(tipo === 'Abono' ){
-        pago = {
-          id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
-          Folio:this.currentHuesped.folio,
-          Fecha:new Date(),
-          Fecha_Cancelado:'',
-          Referencia:this.abonoFormGroup.controls["notaAbono"].value,
-          Descripcion:this.abonoFormGroup.controls["conceptoManual"].value,
-          Forma_de_Pago:this.abonoFormGroup.controls["formaDePagoAbono"].value,
-          Cantidad:1,
-          Cargo:0,
-          Abono:this.abonoFormGroup.controls["cantidadAbono"].value,
-          Estatus:'Activo'
-        };
-        this.honAddPayment.emit(pago);
-      }      
-    }
+    // addPayment(tipo:string){
+    //   let pago:edoCuenta
+    //   if(tipo === 'Cargo'){
+    //     pago = {
+    //       id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
+    //             Folio:this.currentHuesped.folio,
+    //             Fecha:new Date(),
+    //             Fecha_Cancelado:'',
+    //             Referencia:'',
+    //             Descripcion:this.codigoDeCargo.Descripcion,
+    //             Forma_de_Pago:'No Aplica',
+    //             Cantidad:this.quantity,
+    //             Cargo:this.codigoDeCargo.Precio! * this.quantity,
+    //             Abono:0,
+    //             Estatus:'Activo'
+    //           };
+    //     this.honAddPayment.emit(pago);
+    //   }else if(tipo === 'Abono' ){
+    //     pago = {
+    //       id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
+    //       Folio:this.currentHuesped.folio,
+    //       Fecha:new Date(),
+    //       Fecha_Cancelado:'',
+    //       Referencia:this.abonoFormGroup.controls["notaAbono"].value,
+    //       Descripcion:this.abonoFormGroup.controls["conceptoManual"].value,
+    //       Forma_de_Pago:this.abonoFormGroup.controls["formaDePagoAbono"].value,
+    //       Cantidad:1,
+    //       Cargo:0,
+    //       Abono:this.abonoFormGroup.controls["cantidadAbono"].value,
+    //       Estatus:'Activo'
+    //     };
+    //     this.honAddPayment.emit(pago);
+    //   }      
+    // }
   
     selectedValue(value:Codigos){
       this.quantity = 1;
@@ -572,9 +577,25 @@ interface StateMapping {
         this.getEdoCuenta();
       }
     }
+
+    calculatePendiente(): number {
+      let cargos = 0;
+      let abonos = 0;
+    
+      this.currentEdoCuenta.forEach((item) => {
+        if (item.Cargo) {
+          cargos += item.Cargo;
+        }
+        if (item.Abono) {
+          abonos += item.Abono;
+        }
+      });
+    
+      return cargos - abonos;
+    }
   
-    async onSubmitAbono(tipo: string) {
-      if (this.abonoFormGroup.invalid) {
+    async onSubmitPayment(tipo: string) {
+      if (this.abonoFormGroup.invalid && tipo === 'Abono') {
         this.submittedAbono = true;
         return;
       }

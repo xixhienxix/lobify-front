@@ -113,6 +113,7 @@ import { AlertsMessageInterface } from 'src/app/models/message.model';
   `,
 })
 export class ReservationActionsComponent {
+  
     @Input() currentHuesped: Huesped;
     @Input() currentEdoCuenta: edoCuenta[];
     @Input() estatus: string;
@@ -133,7 +134,7 @@ export class ReservationActionsComponent {
   }
 
   get isReservaCancelada() {
-    return this.estatus === 'Reserva Cancelada';
+    return this.estatus === 'Reserva Cancelada' || 'No Show';
   }
 
   get canSendConfirmation() {
