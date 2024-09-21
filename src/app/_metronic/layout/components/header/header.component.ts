@@ -29,6 +29,7 @@ import { DashboardService } from 'src/app/services/_shared/dashboard.service';
 import { HouseKeepingService } from 'src/app/services/housekeeping.service';
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { HouseKeeping } from 'src/app/pages/calendar/_models/housekeeping.model';
+import { CommunicationService } from 'src/app/pages/reports/_services/event.services';
 
 @Component({
   selector: 'app-header',
@@ -110,6 +111,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private _logService: LogService,
     private _authService: AuthService,
     private _dashboardService: DashboardService,
+    private _communicationService: CommunicationService,
 
     private _checkInitialValues: IndexDBCheckingService
   ) {
@@ -356,6 +358,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
             this.eventsSubject.next(values);
             this.promptMessage('Exito', 'Reservacion Guardada con exito');
             this.submitLoading = false;
+            this._communicationService.onNvareservaSubject.next(true);
           })
         )
         .subscribe({

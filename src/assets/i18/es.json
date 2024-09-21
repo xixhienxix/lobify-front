@@ -52,7 +52,8 @@
         "finance":"Finanzas",
         "configurations":"Configuraciones",
         "reports":"Reportes",
-        "prospects":"Lista de Prospectos",
+        "prospects":"Clientes CRM",
+        "reservationsreports":"Reservaciones y Húespedes",
         "parameters":"Parametros",
         "catalogo-hab":"Catalogo de Habitaciones",
         "rates-tittle":"Tarifario"

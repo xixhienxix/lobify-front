@@ -50,7 +50,8 @@
         "finance":"Finance",
         "configurations":"Configurations",
         "reports":"Reports",
-        "prospects":"Prospect List",
+        "prospects":"(CRM) Clients",
+        "reservationsreports":"Reservations and Clients",
         "parameters":"parameters",
         "catalogo-hab":"Room's Catalog",
         "rates-tittle":"Rates Catalog"

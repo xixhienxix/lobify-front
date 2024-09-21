@@ -17,6 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { SharedModule } from 'src/app/_metronic/shared/shared.module';
 import { MomentDateAdapter } from '@angular/material-moment-adapter';
+import { ReservationsReportsComponent } from './reservations/reservations.component';
 export const MY_DATE_FORMATS = {
   parse: {
     dateInput: 'LL',
@@ -32,7 +33,8 @@ export const MY_DATE_FORMATS = {
 @NgModule({
   declarations: [
     ProspectsComponent,
-    ReportsComponent
+    ReportsComponent,
+    ReservationsReportsComponent
   ],
   imports: [
     MatTableModule,

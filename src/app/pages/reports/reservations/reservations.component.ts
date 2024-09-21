@@ -8,12 +8,12 @@ import { Habitacion } from "src/app/models/habitaciones.model";
 import { CommunicationService } from "../_services/event.services";
 
 @Component({
-    selector:'app-prospects',
-    templateUrl:'./prospects.component.html',
-    styleUrls:['./prospects.component.scss'],
+    selector:'app-reservations-clients-reports',
+    templateUrl:'./reservations.component.html',
+    styleUrls:['./reservations.component.scss'],
     encapsulation:ViewEncapsulation.None
 })
-export class ProspectsComponent implements OnInit {
+export class ReservationsReportsComponent implements OnInit {
 
       // Define color mappings
     colorDict = {
@@ -55,7 +55,7 @@ export class ProspectsComponent implements OnInit {
     displayedColumns: string[] = ['nombre', 'telefono', 'email', 'llegada', 'salida', 'estatus', 'acciones'];
     prospectsArray: Huesped[] = [];
     filteredReservations = new MatTableDataSource<Huesped>(this.prospectsArray);
-    statusOptions: string[] = reservationStatusMap[8].concat(reservationStatusMap[4]); // Assuming it returns an array of status strings
+    statusOptions: string[] = reservationStatusMap[1].concat(reservationStatusMap[2]); // Assuming it returns an array of status strings
   
     @Input() allReservaciones: Huesped[] = [];
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -91,7 +91,7 @@ export class ProspectsComponent implements OnInit {
           (llegadaDate.getMonth() === currentMonth && llegadaDate.getFullYear() === currentYear) ||
           (salidaDate.getMonth() === currentMonth && salidaDate.getFullYear() === currentYear);
   
-          const matchesEstatus = reservationStatusMap[8].includes(huesped.estatus) || reservationStatusMap[4].includes(huesped.estatus);
+          const matchesEstatus = reservationStatusMap[1].includes(huesped.estatus) || reservationStatusMap[2].includes(huesped.estatus);
   
         return isThisMonth && matchesEstatus;
       });

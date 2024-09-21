@@ -17,7 +17,6 @@ export const environment = {
     messagingSenderId: "82604568171",
     appId: "1:82604568171:web:21dafcd8a28f1767008b2e",
     databaseURL: "https://movnext-api-default-rtdb.firebaseio.com",
-
   }
 };
 

@@ -94,7 +94,6 @@ export interface Huesped {
         'Totalmente Pagada'
     ],
     4: [
-      'Hizo Checkout',
       'Check-Out'
     ],
     5: ['Uso Interno'],

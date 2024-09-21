@@ -23,6 +23,7 @@ import { ModificaReservaComponent } from './components/modifica/modifica.reserva
 import { NvaReservaComponent } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { LogService } from 'src/app/services/activity-logs.service';
+import { CommunicationService } from 'src/app/pages/reports/_services/event.services';
 
 @Component({
   selector: 'app-edit-reserva',
@@ -111,6 +112,7 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     private _estatusService: EstatusService,
     private cdRef: ChangeDetectorRef,
     private _logService: LogService,
+    private _communicationService: CommunicationService
   ){
     this._huespedService.currentHuesped$.subscribe({
       next:(reserva:Huesped)=>{
@@ -248,7 +250,7 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
   }
   
   reactivaReserva(){
-    
+    this._communicationService.reactivaSubject.next(this.currentHuesped);
   }
 
   onEstatusUpdate(estatus: number): void {

@@ -6,68 +6,83 @@
         <!-- <label>
           {{huesped.folio}}</label> -->
       </div>
-      <div style="text-align: center; color: white;" class="text-center modal-title h4 col-8"
+      <div style="text-align: center; color: white;" class="text-center modal-title h4 col-4"
         id="example-modal-sizes-title-lg">
         Modifica Reserva
         <!-- <label>
           {{huesped.folio}}</label> -->
       </div>
-      <button style=" background-color:var(--header-background); font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
+      <button style=" background-color:var(--header-background); font-weight: bold; color: white;" class="btn col-1" (click)="closeModal()"> X </button>
     </div>
 </div>
 
 <div  class="cursor-default overlay overlay-block modal-body" style="background-color: #e6e9ed;">
     <form [formGroup]="formGroup" class="form form-label-right" style="background-color: #e6e9ed">
 
-        <div class="row" style="margin-bottom: 16px;">
-            <!-- Date Picker -->
-            <div class="col-4">
-            
-              <mat-form-field>
-                <mat-label>{{ formatDateTo(currentHuesped.llegada) }}</mat-label>
-                <input
+      <div class="container-fluid" style="padding: 16px;">
+        <!-- Date Picker -->
+        <div class="row">
+          <!-- Arrival Date Picker -->
+          <div class="col-12">
+            <mat-form-field class="w-100">
+              <mat-label>Fecha de Llegada</mat-label>
+              <input
                   matInput
                   [matDatepicker]="llegadaPicker"
-                  [value]="llegadaDateFC.value"
-                  disabled
-                >
-                <mat-datepicker-toggle matIconSuffix [for]="llegadaPicker"></mat-datepicker-toggle>
-                <mat-datepicker #llegadaPicker></mat-datepicker>
-              </mat-form-field>
-                         
-              <mat-form-field>
-                <mat-label>{{ formatDateTo(currentHuesped.salida) }}</mat-label>
-                <input
-                  matInput
-                  [matDatepicker]="salidaPicker"
-                  [value]="salidaDateFC.value"
-                  (dateChange)="addEventSalidaDate('change', $event)"
-                  [matDatepickerFilter]="salidaDateFilter"
-                  placeholder="Fecha de Salida"
-                >
-                <mat-datepicker-toggle matSuffix [for]="salidaPicker"></mat-datepicker-toggle>
-                <mat-datepicker #salidaPicker></mat-datepicker>
-              </mat-form-field>
-              
-            </div>
-            
-          
-            <!-- Noches -->
-            <div class="col-4 d-flex flex-column align-items-center">
-              <div class="label-text">Noches:</div>
-              <div class="value-text">
-                {{ stayNights }}
-              </div>
-            </div>
-          
-            <!-- Habitacion -->
-            <div class="col-4 d-flex flex-column align-items-center">
-              <div class="label-text">Habitacion Actual:</div>
-              <div class="value-text">
-                {{ currentHuesped.habitacion + '-' + currentHuesped.numeroCuarto }}
-              </div>
-            </div>
+                  [formControl]="llegadaDateFC"
+                  [min]="minDate"
+                  (dateChange)="onArrivalDateChange()"
+                  placeholder="Selecciona la fecha de llegada"
+              >
+              <mat-datepicker-toggle matIconSuffix [for]="llegadaPicker"></mat-datepicker-toggle>
+              <mat-datepicker #llegadaPicker></mat-datepicker>
+          </mat-form-field>
           </div>
+      
+          <!-- Departure Date Picker -->
+          <div class="col-12">
+              <mat-form-field class="w-100">
+                  <mat-label>Fecha de Salida</mat-label>
+                  <input
+                    matInput
+                    [matDatepicker]="salidaPicker"
+                    [formControl]="salidaDateFC"
+                    [min]="llegadaDateFC.value"
+                    (dateChange)="onDepartureDateChange()"
+                    placeholder="Selecciona la fecha de salida"
+                  >
+                  <mat-datepicker-toggle matSuffix [for]="salidaPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #salidaPicker></mat-datepicker>
+              </mat-form-field>
+          </div>
+      </div>
+      
+      
+    
+        <!-- Noches -->
+        <div class="row">
+            <div class="col-12 d-flex flex-column align-items-center">
+                <div class="label-text">Noches:</div>
+                <div class="value-text">
+                    {{ stayNights }}
+                </div>
+            </div>
+        </div>
+    
+        <!-- Habitacion -->
+        <div class="row">
+            <div class="col-12 d-flex flex-column align-items-center">
+                <div class="label-text">Habitacion Actual:</div>
+                <div class="value-text">
+                    {{ currentHuesped.habitacion + '-' + currentHuesped.numeroCuarto }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+    
+    
 
 
 
@@ -147,21 +162,17 @@
 
               <div class="col-lg-12" style="margin-top:10px">
                 <mat-select #tipodeCuartoDropDown
-                class="form-control form-control-lg "
-                name="habitacion"
-                formControlName="habitacion"
-                placeholder="-- Seleccione Tipo de Habitacion para cambio -- "
-                required
-                (selectionChange)="buscaDispo($event.value)"
+                  class="form-control form-control-lg "
+                  name="habitacion"
+                  formControlName="habitacion"
+                  placeholder="-- Seleccione Tipo de Habitacion para cambio -- "
+                  required
+                  (selectionChange)="buscaDispo($event.value)"
                 >
                     <mat-option value="0">-- Selecciona Habitación --</mat-option>
                     <!-- <mat-option value="1">Todos los Tipos de Cuartos</mat-option> -->
                     <mat-option *ngFor="let tipoCuarto of roomCodes" [value]="tipoCuarto">{{tipoCuarto.Codigo.replace("_"," ")}} </mat-option>
                 </mat-select>
-
-                    <!-- <mat-error *ngIf="habitacion.errors?.required">
-                      * Campo Obligatorio
-                    </mat-error> -->
               </div>
             </div>
             <!-- Spinner -->
@@ -169,8 +180,8 @@
               <app-inline-spinner></app-inline-spinner>
             </ng-container>
 
-            <ng-container *ngIf="editHuesped">
-              <ng-container *ngFor="let codigosCuarto of availavilityCodeRooms; ">
+            <ng-container *ngIf="editHuesped && !reactivaReserva">
+              <ng-container *ngFor="let codigosCuarto of availavilityRooms; ">
                 <div *ngIf="codigosCuarto.Codigo === cuarto" style="font-weight:bold; color: rgba(128, 128, 128, 0.623);" class=" modal-header"><h2 style="color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2> (Cap. Max.: {{codigosCuarto.Adultos}})</div>
               </ng-container>
           
@@ -208,7 +219,7 @@
                       <h4 style="margin-top: 10px;"> Habitación: </h4>
                       <ng-container *ngFor="let habitacion of preAsignadasArray">
                         <ng-container *ngIf="habitacion.codigo === cuarto && currentHuesped.numeroCuarto === habitacion.numero">
-                          <mat-checkbox 
+                          <mat-checkbox
                           [disabled]="(currentHuesped.numeroCuarto === habitacion.numero ? false : habitacion.disabled) || revisaCapacidad(cuarto)"
                           [checked]="habitacion.checked"
                           (change)="preAsignar(habitacion.numero, habitacion.codigo, $event.checked, habitacion.disabled)">

@@ -308,9 +308,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
         else{
           this.noDisabledCheckIn=false
         }
-        console.log("noDisabledCheckIn", this.noDisabledCheckIn)
-        console.log("initialDate", initialDate)
-        console.log("todayDate", this.todayDate)
   }
 
   loadForm(){
@@ -497,6 +494,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
 }
 
   getDisponibilidad(intialDate:Date,endDate:Date, habitacion:string, stayNights:number, folio:string){
+
     this._disponibilidadService.getDisponibilidad(intialDate,endDate, habitacion, stayNights, folio)
     .subscribe({      
         next:(response)=>{
@@ -527,9 +525,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
           }else{
             this.availavilityRooms = [...habitacionesDisponibles];
           }
-          console.log("this.intialDate DIspono",this.intialDate)
-          console.log("this.endDate DIspono",this.endDate)
-          console.log("this.staynights DIspono",this.stayNights)
+
         },
         error:()=>{
         },
@@ -572,6 +568,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date) {
       this.bandera = false;
       this.dropDownHabValueIndex = '';
     }
+    console.log({initialDate:this.intialDate,endDate:this.endDate, habitacion:habitacion, noches:this.stayNights, folio})
     this.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio);
   }
 

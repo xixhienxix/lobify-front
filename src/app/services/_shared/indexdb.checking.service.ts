@@ -335,4 +335,8 @@ export class IndexDBCheckingService {
         return this.reservacionesSubject.getValue();
     }
 
+    getHabitaciones(): Habitacion[] {
+        return this.habitacionesSubject.getValue();
+    }
+
 }

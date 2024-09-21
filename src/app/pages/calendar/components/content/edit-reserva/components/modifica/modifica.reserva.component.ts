@@ -58,7 +58,6 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   styleDisponibilidad:string='background-color:#99d284;'
 
   /** Models */
-  roomCodes:Habitacion[]=[];
   mySet = new Set();
   ratesArrayComplete:Tarifas[]=[]
   infoRoomsAndCodes:any=[];
@@ -116,11 +115,16 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   beforeChangesCustomer:PropertiesChanged;
   // closeResult: string;
 
+
   @Input() ratesArray:Tarifas[]=[];
+  @Input() roomCodes:Habitacion[]=[];
+
   isCheckIn:boolean=false;
   @Input() rsvFromCalendar:boolean=false
   @Input() checkOut:string
   @Input() checkIn:string
+  @Input() reactivaReserva:boolean=false
+  @Input() zona:string='America/Mexico_City'
 
   @Input() editHuesped:boolean=false;
   @Input() standardRatesArray:Tarifas[]=[]
@@ -133,81 +137,94 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   /** Subscription */
 
   async ngOnInit() {
-  this.quantity = this.currentHuesped.adultos
-  this.quantityNin = this.currentHuesped.ninos
+    const today = new Date();
+    let llegadaDate: Date;
+    let salidaDate: Date;
 
-    this.beforeChangesCustomer = { 
-            folio:this.currentHuesped.folio,
-            adultos:this.currentHuesped.adultos,
-            ninos:this.currentHuesped.ninos,
-            nombre:this.currentHuesped.nombre,
-            salida:this.currentHuesped.salida,
-            noches:this.currentHuesped.noches,
-            tarifa:this.currentHuesped.tarifa,
-            porPagar:this.currentHuesped.porPagar!,
-            pendiente:this.currentHuesped.pendiente!,
-            habitacion:this.currentHuesped.habitacion,
-            telefono:this.currentHuesped.telefono,
-            email:this.currentHuesped.email,
-            numeroCuarto:this.currentHuesped.numeroCuarto
-          }
+    const setToMidnight = (date: Date): Date => {
+      date.setHours(0, 0, 0, 0);
+      return date;
+    };
+  
+    // If reactivaReserva is true, initialize currentHuesped.llegada and currentHuesped.salida
+    if (this.reactivaReserva) {
+      llegadaDate = setToMidnight(new Date());
+      salidaDate = new Date(llegadaDate);
+      salidaDate.setDate(llegadaDate.getDate() + 1);
+      salidaDate = setToMidnight(salidaDate);
 
-          console.log("-------------------->",this.beforeChangesCustomer)
-
-    const llegadaDate = new Date(this.currentHuesped.llegada);
-    const salidaDate = new Date(this.currentHuesped.salida);
+      this.currentHuesped.llegada = llegadaDate.toISOString();
+      this.currentHuesped.salida = salidaDate.toISOString();
+    } else {
+      llegadaDate = setToMidnight(new Date(this.currentHuesped.llegada));
+      salidaDate = setToMidnight(new Date(this.currentHuesped.salida));
+    }
 
   
+      // Initialize form controls with dates
     this.llegadaDateFC.setValue(llegadaDate);
     this.salidaDateFC.setValue(salidaDate);
-    
+
+    // Store the current customer state before making changes
+    this.beforeChangesCustomer = { 
+      ...this.currentHuesped, 
+      porPagar: this.currentHuesped.porPagar!,
+      pendiente: this.currentHuesped.pendiente!
+    };
+
+    // Initialize stayNights calculation and subscribe to date changes
+    this.calculateStayNights();
+    this.llegadaDateFC.valueChanges.subscribe(() => {
+      this.adjustDepartureDate();
+      this.calculateStayNights();
+    });
+    this.salidaDateFC.valueChanges.subscribe(() => this.calculateStayNights());
+
+    // Pre-assign the room data
     this.preAsignadasArray.push({
       numero: this.currentHuesped.numeroCuarto,
       codigo: this.currentHuesped.habitacion,
       checked: true,
       disabled: true
     });
-
-    const tarifaPrevia = this.ratesArrayComplete.map(item => {
-      if(item.Tarifa === this.currentHuesped.tarifa){
-        if(item.Habitacion.some(item => item === this.currentHuesped.habitacion)){
-          this.tarifaRadioButton(this.currentHuesped.porPagar!, item, true, this.currentHuesped.habitacion! )
-        }
+  
+    // Select the appropriate rate
+    this.ratesArrayComplete.forEach(item => {
+      if (item.Tarifa === this.currentHuesped.tarifa && item.Habitacion.includes(this.currentHuesped.habitacion)) {
+        this.tarifaRadioButton(this.currentHuesped.porPagar!, item, true, this.currentHuesped.habitacion!);
       }
     });
 
-      
-    this.availavilityRooms = [this.roomCodesComplete.find(item => item.Codigo === this.currentHuesped.habitacion) ?? []];
-  
-    if (this.currentHuesped.origen === 'Check-In') {
-      this.isCheckIn = true;
-    }
-  
-    const startTime = new Date(this.currentHuesped.llegada);
-    const endTime = new Date(this.currentHuesped.salida);
+    // Filter available rooms based on the current habitacion
+    this.availavilityRooms = [
+      this.roomCodesComplete.find(item => item.Codigo === this.currentHuesped.habitacion) ?? []
+    ];
 
-      // Convert Date objects to strings
-    const startTimeStr = startTime.toISOString();
-    const endTimeStr = endTime.toISOString();
-  
-    if (startTime && endTime) {
-      this.cuarto = this.currentHuesped.habitacion;
-      this.updateDatePicker(startTimeStr, endTimeStr);
-      this.intialDate = startTime;
-      this.endDate = endTime;
-  
+    // Set isCheckIn flag if origen is "Check-In"
+    this.isCheckIn = this.currentHuesped.origen === 'Check-In';
+
+    // Handle date-related logic and room availability
+    this.intialDate = llegadaDate;
+    this.endDate = salidaDate;
+
+    if (this.intialDate && this.endDate) {
       const differenceInTime = this.endDate.getTime() - this.intialDate.getTime();
       this.stayNights = Math.ceil(differenceInTime / (1000 * 3600 * 24));
-  
-      this.getDisponibilidad(this.intialDate, this.endDate, this.cuarto, this.stayNights, "No Folio");
+
+      this.getDisponibilidad(this.intialDate, this.endDate, this.currentHuesped.habitacion, this.stayNights, "No Folio");
     }
   
+    // Initialize form and set habitacion
     this.loadForm();
     this.formGroup.controls["habitacion"].setValue(this.currentHuesped.habitacion);
     this.formGroup.controls["habitacion"].setErrors(null);
-  
+
+    // Compare initial date with today's date
     this.todaysDateComparer(this.intialDate);
+
+    console.log("editHuesped---------------", this.editHuesped)
   }
+  
 
   // The filter function for disabling dates before 'llegada'
   salidaDateFilter = (date: Date | null): boolean => {
@@ -231,6 +248,60 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
     this.intialDateFC.setValue(newInitialDate);
     this.endDateFC.setValue(newEndDate);
   }
+
+// Function to adjust the departure date when arrival date changes
+onArrivalDateChange(): void {
+  const arrivalDate = this.llegadaDateFC.value;
+  const departureDate = this.salidaDateFC.value;
+
+  // Ensure arrivalDate is a valid JavaScript Date object
+  this.intialDate = moment(arrivalDate).toDate();
+
+  // Automatically set departure to 1 day after arrival if current departure is invalid
+  if (moment(departureDate).isSameOrBefore(arrivalDate)) {
+    const newDepartureDate = moment(arrivalDate).add(1, 'days').toDate();
+    this.salidaDateFC.setValue(newDepartureDate);
+    // Save the updated departure date as a valid Date object
+    this.endDate = newDepartureDate;
+  } else {
+    // If the departure date is valid, just update endDate
+    this.endDate = moment(departureDate).toDate();
+  }
+
+  this.resetDispo();  // Your existing logic
+}
+
+// Function to handle changes in the departure date picker
+onDepartureDateChange(): void {
+  const departureDate = this.salidaDateFC.value;
+
+  // Save the selected departure date as a valid JavaScript Date object
+  this.endDate = moment(departureDate).toDate();
+}
+
+// Ensure that the departure date cannot be before the arrival date
+adjustDepartureDate(): void {
+  const arrivalDate = this.llegadaDateFC.value;
+  const departureDate = this.salidaDateFC.value;
+
+  // If departure is before arrival, adjust it to the day after arrival
+  if (moment(departureDate).isBefore(arrivalDate)) {
+    const newDepartureDate = moment(arrivalDate).add(1, 'days').toDate();
+    this.salidaDateFC.setValue(newDepartureDate);
+  }
+}
+
+// Function to calculate the number of nights (stayNights)
+calculateStayNights(): void {
+  const arrivalDate = this.llegadaDateFC.value;
+  const departureDate = this.salidaDateFC.value;
+
+  if (arrivalDate && departureDate) {
+    // Use Moment.js to calculate the difference in days
+    const diff = moment(departureDate).diff(moment(arrivalDate), 'days');
+    this.stayNights = diff > 0 ? diff : 0;  // Ensure it's not negative
+  }
+}
 
   // Event handlers for date changes
 addEventLlegadaDate(eventType: string, event: any) {
@@ -287,7 +358,7 @@ addEventSalidaDate(eventType: string, event: any) {
       const tarifa  = this.tarifaSeleccionada.find(obj =>
         obj.Habitacion.some(item => item === habitacion.codigo));
 
-        let initialDate = DateTime.local().set({
+        let initialDate = DateTime.local().setZone(this.zona).set({
             day:this.intialDate.getDate(),
             month:this.intialDate.getMonth()+1,
             year:this.intialDate.getFullYear(), 
@@ -296,7 +367,7 @@ addEventSalidaDate(eventType: string, event: any) {
           }).toISO()
           const endDate = new Date(this.endDate);
 
-          let endDateDateTime = DateTime.local().set({
+          let endDateDateTime = DateTime.local().setZone(this.zona).set({
             day:endDate.getDate(),
             month:endDate.getMonth()+1,
             year:endDate.getFullYear(), 
@@ -639,7 +710,6 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
       this.bandera=false
       this.dropDownHabValueIndex=''
     }
-
     this.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio)
   }
 
@@ -687,8 +757,7 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
         next:(response)=>{
 
           this.ocupadasSet = new Set(response);
-          // Take out current huesped room from the no avaible rooms
-          this.ocupadasSet.delete(this.currentHuesped.numeroCuarto);
+
           // Filtrar las habitaciones disponibles
           const habitacionesDisponibles = this.roomCodesComplete.filter(habitacion => !this.ocupadasSet.has(habitacion.Numero));
 
@@ -699,11 +768,6 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
             checked: false,
             disabled: true
           }));
-          this.preAsignadasArray.map(item=>{
-            if(item.numero === this.currentHuesped.numeroCuarto){
-              item.checked = true
-            }
-          })
 
           // Paso 2: Filtrar para obtener solo un objeto único por cada 'Codigo'
           if(this.cuarto === '1'){
@@ -944,7 +1008,6 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
 
   isControlInvalidFirst(controlName: string): boolean {
     const control = this.formGroup.controls[controlName];
-    console.log(this.formGroup.controls);
     return control.invalid && (control.dirty || control.touched);
   }
 

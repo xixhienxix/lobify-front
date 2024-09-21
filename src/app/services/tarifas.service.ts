@@ -90,7 +90,6 @@ export class TarifasService {
         return responseData
      })
      )
-
    }
 
    getTarifaRack() :Observable<Tarifas[]> {

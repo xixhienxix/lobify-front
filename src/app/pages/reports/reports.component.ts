@@ -2,11 +2,11 @@ import { Component, OnInit } from "@angular/core";
 import { IndexDBCheckingService } from "src/app/services/_shared/indexdb.checking.service";
 import { CommunicationService } from "./_services/event.services";
 import { Habitacion } from "src/app/models/habitaciones.model";
-import { Huesped } from "src/app/models/huesped.model";
+import { Huesped, reservationStatusMap } from "src/app/models/huesped.model";
 import { BehaviorSubject, catchError, firstValueFrom, forkJoin, of, Subject, switchMap, takeUntil } from "rxjs";
 import { Edo_Cuenta_Service } from "src/app/services/edoCuenta.service";
 import { EditReservaComponent } from "../calendar/components/content/edit-reserva/edit-reserva.component";
-import { NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { ModalDismissReasons, NgbModal } from "@ng-bootstrap/ng-bootstrap";
 import { LogService } from "src/app/services/activity-logs.service";
 import { EstatusService } from "../calendar/_services/estatus.service";
 import { EMPTY_CUSTOMER, HuespedService } from "src/app/services/huesped.service";
@@ -15,6 +15,7 @@ import { AlertsMessageInterface } from "src/app/models/message.model";
 import { edoCuenta } from "src/app/models/edoCuenta.model";
 import { PropertiesChanged } from "src/app/models/activity-log.model";
 import { AuthService } from "src/app/modules/auth";
+import { ModificaReservaComponent } from "../calendar/components/content/edit-reserva/components/modifica/modifica.reserva.component";
 
 @Component({
     selector: 'app-reports',
@@ -23,10 +24,13 @@ import { AuthService } from "src/app/modules/auth";
   })
 export class ReportsComponent implements OnInit{
 
+    closeResult:string='';
     isLoading:boolean=false;
     _isLoading: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     promesasDisplay:Boolean = false;
     currentUser:string=''
+    currentModalRef:any;
+    modalRefEditReserva:any;
     private ngUnsubscribe = new Subject<void>();
 
 
@@ -43,13 +47,114 @@ export class ReportsComponent implements OnInit{
     }
 
     ngOnInit(): void {
-        this._indexDbService.checkIndexedDB(['reservaciones','housekeeping','codigos', 'estatus', 'tarifas', 'parametros'],true);
+        this._indexDbService.checkIndexedDB(['reservaciones','housekeeping','codigos', 'estatus', 'tarifas', 'parametros','habitaciones'],true);
         this.communicationService.editReservaEvent$.subscribe(data => {
             this.onEditRsvOpen(data);
           });
+        this.communicationService.reactivaSubject.subscribe({
+            next:(huesped:Huesped)=>{
+                this.reactivaReserva(huesped);
+            }
+        });
+        this.communicationService.toastHandlerEvent$.subscribe({
+          next:(item)=>{
+            if (item) {
+              this.currentModalRef.close()
+              this.modalRefEditReserva.close()
+            }
+          }
+        });
+
+        this.communicationService.reservaReportEvent$.subscribe({
+          next:(huesped)=>{
+            this.onEditRsvOpen(huesped);
+          }
+        })
+
+        this.communicationService.onNvaReserva$.subscribe({
+          next:(item)=>{
+            if(item){
+              this._indexDbService.checkIndexedDB(['reservaciones'],true);
+            }
+          }
+        });
     }
 
+    reactivaReserva(huesped:Huesped){
+        const ratesArrayComplete = this._indexDbService.getTarifasCodes()
+        const parametrosModel = this._indexDbService.getParametrosModel()
+        const roomCodesComplete = this._indexDbService.getHabitaciones()
+        const standardRatesArray = ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa Base');
+        const tempRatesArray = ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa De Temporada');
+        const roomCodes = Object.values(
+          this._indexDbService.getHabitaciones().reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})
+        ); 
+        
+        this.currentModalRef = this.modalService.open(ModificaReservaComponent,{ size: 'md', backdrop:'static' })  
+        this.currentModalRef.componentInstance.currentHuesped = huesped;
+        // modalRef.componentInstance.adultos = this.currentHuesped.adultos;
+        // modalRef.componentInstance.ninos = this.currentHuesped.ninos;
+        this.currentModalRef.componentInstance.estatusArray = this._indexDbService.getEstatusCodes()
+        this.currentModalRef.componentInstance.roomCodesComplete = roomCodesComplete
+        this.currentModalRef.componentInstance.roomCodes=roomCodes
+        this.currentModalRef.componentInstance.ratesArrayComplete = ratesArrayComplete
+        this.currentModalRef.componentInstance.standardRatesArray = standardRatesArray
+        this.currentModalRef.componentInstance.tempRatesArray = tempRatesArray
+        this.currentModalRef.componentInstance.editHuesped = true;
+        this.currentModalRef.componentInstance.checkIn = parametrosModel.checkIn
+        this.currentModalRef.componentInstance.checkOut=parametrosModel.checkOut
+        this.currentModalRef.componentInstance.zona=parametrosModel.zona
+        this.currentModalRef.componentInstance.reactivaReserva = true
+    
+    
+    
+        this.currentModalRef.componentInstance.honUpdateHuesped.subscribe({
+          next:async (huespedArray:any)=>{
+            
+              const pago = {
+                Folio:huespedArray.huesped.folio,
+                Forma_de_Pago:'',
+                Fecha:new Date(),
+                      Descripcion:'HOSPEDAJE',
+                      Cantidad:1,
+                      Cargo:huespedArray.huesped.pendiente,
+                      Abono:0,
+                      Total:huespedArray.huesped.pendiente,
+                      Estatus:'Activo',
+              }
+
+              const huespedData = {updatedHuesped:huespedArray.huesped,pago, oldProperties:huespedArray.beforeChanges}
+            this.communicationService.updateHuesped(huespedData);
+          }
+        });
+        
+        this.currentModalRef.result.then((result:any) => {
+            console.log(result)
+          this.closeResult = `Closed with: ${result}`;
+          }, (reason:any) => {
+              this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+          });
+      
+          return
+      }
+    
+      ///// NOT OPTIMIZED 
+    
+    //   async getCuentas(){
+    //       this._edoCuentaService.getCuentas(this.currentHuesped.folio).subscribe({
+    //         next:(value)=>{
+    //           this.currentEdoCuenta = value  
+    //           this.cdRef.detectChanges();  
+    //         },
+    //         error:()=>{
+    //         }
+    //     })
+    // }
+
     async onEditRsvOpen(huesped: any) {
+
+          const combinedStatuses = reservationStatusMap[8].concat(reservationStatusMap[4]);
+          const isReservaCancelada = combinedStatuses.includes(huesped.estatus); 
 
           const currentHuesped = huesped;
 
@@ -58,40 +163,41 @@ export class ReportsComponent implements OnInit{
           )?.Color!
     
           const estadoDeCuenta = await this.checkEdoCuentaClient(huesped.folio);
+          const rooms = this._indexDbService.getRoomCodes()
     
           const habitacion = this._indexDbService.getRoomCodes().find((item) => item.Numero === huesped.numeroCuarto);
     
-          const modalRef = this.modalService.open(EditReservaComponent, { size: 'md', backdrop: 'static' });
-          modalRef.componentInstance.codigosCargo = this._indexDbService.getCodigosCodes()
-          modalRef.componentInstance.data = huesped
-          modalRef.componentInstance.currentHuesped = currentHuesped
-          modalRef.componentInstance.houseKeepingCodes = this._indexDbService.getHouseKeepingCodes()
-          modalRef.componentInstance.currentRoom = habitacion
-          modalRef.componentInstance.promesasDisplay = false
-          modalRef.componentInstance.estatusArray = this._indexDbService.getEstatusCodes()
-          modalRef.componentInstance.colorAmaLlaves = colorAma
-          modalRef.componentInstance.ratesArrayComplete = this._indexDbService.getTarifasCodes()
-          modalRef.componentInstance.roomCodesComplete = this._indexDbService.getRoomCodes()
-          modalRef.componentInstance.checkIn = this._indexDbService.getParametrosModel().checkIn
-          modalRef.componentInstance.checkOut= this._indexDbService.getParametrosModel().checkOut
-          modalRef.componentInstance.zona= this._indexDbService.getParametrosModel().zona
-          modalRef.componentInstance.estadoDeCuenta = estadoDeCuenta
-          modalRef.componentInstance.isReservaCancelada = true
+          this.modalRefEditReserva = this.modalService.open(EditReservaComponent, { size: 'md', backdrop: 'static' });
+          this.modalRefEditReserva.componentInstance.codigosCargo = this._indexDbService.getCodigosCodes()
+          this.modalRefEditReserva.componentInstance.data = huesped
+          this.modalRefEditReserva.componentInstance.currentHuesped = currentHuesped
+          this.modalRefEditReserva.componentInstance.houseKeepingCodes = this._indexDbService.getHouseKeepingCodes()
+          this.modalRefEditReserva.componentInstance.currentRoom = habitacion
+          this.modalRefEditReserva.componentInstance.promesasDisplay = false
+          this.modalRefEditReserva.componentInstance.estatusArray = this._indexDbService.getEstatusCodes()
+          this.modalRefEditReserva.componentInstance.colorAmaLlaves = colorAma
+          this.modalRefEditReserva.componentInstance.ratesArrayComplete = this._indexDbService.getTarifasCodes()
+          this.modalRefEditReserva.componentInstance.roomCodesComplete = this._indexDbService.getRoomCodes()
+          this.modalRefEditReserva.componentInstance.checkIn = this._indexDbService.getParametrosModel().checkIn
+          this.modalRefEditReserva.componentInstance.checkOut= this._indexDbService.getParametrosModel().checkOut
+          this.modalRefEditReserva.componentInstance.zona= this._indexDbService.getParametrosModel().zona
+          this.modalRefEditReserva.componentInstance.estadoDeCuenta = estadoDeCuenta
+          this.modalRefEditReserva.componentInstance.isReservaCancelada = isReservaCancelada
 
           console.log("Ama de Llaves-----------",this._indexDbService.getHouseKeepingCodes())
     
           //DataSource Promesas
-          modalRef.componentInstance.onEstatusChange.subscribe({
+          this.modalRefEditReserva.componentInstance.onEstatusChange.subscribe({
             next: (value: any) => {
               this.onEstatusChange(value);
             }
           })
-          modalRef.componentInstance.onChangeAmaStatus.subscribe({
+          this.modalRefEditReserva.componentInstance.onChangeAmaStatus.subscribe({
             next: (value: any) => {
               this.communicationService.onChangeEstatus(value);
             }
           })
-          modalRef.componentInstance.onGuardarPromesa.subscribe({
+          this.modalRefEditReserva.componentInstance.onGuardarPromesa.subscribe({
             next: (promesa: any) => {
               const fechaPromesa = new Date(promesa.fechaPromesaPago.year, promesa.fechaPromesaPago.month - 1, promesa.fechaPromesaPago.day)
               this._isLoading.next(true);
@@ -110,7 +216,7 @@ export class ReportsComponent implements OnInit{
             }
           });
     
-          modalRef.componentInstance.onEstatusAplicado.subscribe({
+          this.modalRefEditReserva.componentInstance.onEstatusAplicado.subscribe({
             next: (value: any) => {
               this.communicationService.promptMessage('Exito', 'Movimiento agregado al Estado de cuenta del cliente');
     
@@ -126,12 +232,12 @@ export class ReportsComponent implements OnInit{
             }
           })
     
-          modalRef.componentInstance.onAlertMessage.subscribe({
+          this.modalRefEditReserva.componentInstance.onAlertMessage.subscribe({
             next: (message: AlertsMessageInterface) => {
               this.communicationService.promptMessage(message.tittle, message.message);
             }
           })
-          modalRef.componentInstance.onGetAdicionales.subscribe({
+          this.modalRefEditReserva.componentInstance.onGetAdicionales.subscribe({
             next: async (flag: boolean) => {
               const adicionales = await this._indexDbService.checkIndexedDB(['adicionales'],true);
             //   this.changingAdicionalesValue.next(adicionales)
@@ -139,7 +245,7 @@ export class ReportsComponent implements OnInit{
           })
     
           //GET PROMESAS
-          modalRef.componentInstance.onGetPromesas.subscribe({
+          this.modalRefEditReserva.componentInstance.onGetPromesas.subscribe({
             next: async (folio: string) => {
               this._promesasService.getPromesas(folio).subscribe({
                 next: (value) => {
@@ -151,7 +257,7 @@ export class ReportsComponent implements OnInit{
             }
           });
     
-          modalRef.componentInstance.onFetchReservations.subscribe({
+          this.modalRefEditReserva.componentInstance.onFetchReservations.subscribe({
             next: () => {
               this._indexDbService.checkIndexedDB(['reservaciones'],true);
             },
@@ -160,7 +266,7 @@ export class ReportsComponent implements OnInit{
             }
           });
     
-          modalRef.componentInstance.onActualizarCuenta.subscribe({
+          this.modalRefEditReserva.componentInstance.onActualizarCuenta.subscribe({
             next: () => {
                 this._indexDbService.checkIndexedDB(['reservaciones'],true);
             },
@@ -169,7 +275,7 @@ export class ReportsComponent implements OnInit{
             }
           })
     
-          modalRef.componentInstance.onAgregarPago.subscribe({
+          this.modalRefEditReserva.componentInstance.onAgregarPago.subscribe({
             next: (val: edoCuenta) => {
               this._edoCuentaService.agregarPago(val).subscribe({
                 next:()=>{
@@ -180,7 +286,7 @@ export class ReportsComponent implements OnInit{
               });
             }
           })
-          modalRef.componentInstance.honUpdateHuesped.subscribe({
+          this.modalRefEditReserva.componentInstance.honUpdateHuesped.subscribe({
             next:(value:any)=>{
               this._isLoading.next(true);
               const pago: edoCuenta = value.pago;
@@ -320,5 +426,14 @@ export class ReportsComponent implements OnInit{
         findDifferences(obj1, obj2);
         return differences;
       }
-    
+      
+      private getDismissReason(reason: any): string {
+        if (reason === ModalDismissReasons.ESC) {
+            return 'by pressing ESC';
+        } else if (reason === ModalDismissReasons.BACKDROP_CLICK) {
+            return 'by clicking on a backdrop';
+        } else {
+            return  `with: ${reason}`;
+        }
+      }
 }

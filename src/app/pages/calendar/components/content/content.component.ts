@@ -311,32 +311,36 @@ export class ContentComponent implements OnInit{
   onPopupOpen = (args: any) => {
     // Check if the 'Folio' property exists
     args.cancel = true;
+    const today = new Date(); // Get today's date
+    const startTime = new Date(args.data.StartTime); // Convert StartTime to a Date object
 
-    if (args.data.hasOwnProperty("Folio")) {
-      if (args.type === 'Editor' || args.type === 'QuickInfo') {
+    if (startTime > today) {
+      if (args.data.hasOwnProperty("Folio")) {
+        if (args.type === 'Editor' || args.type === 'QuickInfo') {
+          args.cancel = true;
+          this.honEditRsv.emit({ row: args, folio: args.data.Folio });
+        }
+      } else if (args.type === 'QuickInfo') {
         args.cancel = true;
-        this.honEditRsv.emit({ row: args, folio: args.data.Folio });
-      }
-    } else if (args.type === 'QuickInfo') {
-      args.cancel = true;
-  
-      // Get current date and filter events
-      const now = new Date();
-      const events = this.scheduleObj.getEvents();
-      const filteredEvents = events.filter(event => new Date(event.EndTime) >= now);
-      
-      // Check if there is an existing reservation on the same date and room
-      const hasOverlap = filteredEvents.some(event =>
-        event.ProjectId === args.data.ProjectId &&
-        event.TaskId === args.data.TaskId &&
-        new Date(event.EndTime).toISOString().split('T')[0] > new Date(args.data.startTime).toISOString().split('T')[0]
-      );
-  
-      if (!hasOverlap) {
-        const numeroCuarto = events.find(item => item.TaskId === args.data.TaskId)?.Numero;
-        const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
-        this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
-      }
+    
+        // Get current date and filter events
+        const now = new Date();
+        const events = this.scheduleObj.getEvents();
+        const filteredEvents = events.filter(event => new Date(event.EndTime) >= now);
+        
+        // Check if there is an existing reservation on the same date and room
+        const hasOverlap = filteredEvents.some(event =>
+          event.ProjectId === args.data.ProjectId &&
+          event.TaskId === args.data.TaskId &&
+          new Date(event.EndTime).toISOString().split('T')[0] > new Date(args.data.startTime).toISOString().split('T')[0]
+        );
+    
+        if (!hasOverlap) {
+          const numeroCuarto = events.find(item => item.TaskId === args.data.TaskId)?.Numero;
+          const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+          this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
+        }
+      }    
     }
   }
 
