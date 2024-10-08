@@ -5,6 +5,7 @@ import { Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
 import { Tarifas } from 'src/app/models/tarifas';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
+import * as keenIcons from 'src/app/_metronic/shared/keenicon/icons.json';
 
 @Component({
   selector: 'app-navbar',
@@ -13,6 +14,7 @@ import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 })
 export class NavbarComponent implements OnInit, OnDestroy {
   private unsubscribe: Subscription[] = [];
+  icons: any = keenIcons;
 
   @Input() appHeaderDefaulMenuDisplay: boolean;
   @Input() isRtl: boolean;
@@ -47,6 +49,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
       .subscribe(value=>{
         this.initializeCounter(value);
       })
+      console.log(this.icons)
+  }
+
+  getIcon(iconName: string): string {
+    return this.icons[iconName];
   }
 
   toggleTab() {

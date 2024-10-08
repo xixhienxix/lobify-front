@@ -325,28 +325,32 @@
                 </div>
                 <br>
                 <div class="form-group col-md-12" style="font-weight: bold;">
-                    <mat-checkbox #checked >¿Deseas asignar Numeración o Nombre Especiales? </mat-checkbox>
+                    <mat-checkbox (click)="clearHabsNumber(checked.checked)" #checked >¿Deseas asignar Numeración o Nombre Especiales? </mat-checkbox>
                 </div>
                 <div class="form-group col-md-12" style="font-weight: bold;">
                     <small class="col-lg-12" style="color: red;" *ngIf="nombresIguales">Los Nombres de las habitaciones no pueden ser identicos</small>
                 </div>
                 <ng-container *ngIf="checked.checked">
-                        <ng-container *ngFor="let inputForms of inputs.controls; let i = index">
-                            <div [formGroup]="inputForm" class="form-group" style="float:left; margin: 5px;">
+                    <div formArrayName="habs">
+                        <ng-container *ngFor="let user of numeroHabs.controls; let i = index">
+                            <div class="form-group" style="float:left; margin: 5px;">
                                 <input
-                                formControlName="nombreHabs"
+                                formControlName="{{i}}"
                                 placeholder="{{i+1}}.-"
                                 style="background-color: #e6e9ed;"
                                 class="form-control"
                                 type="text"
-                                [class.is-invalid]="nombresIguales">
+                                [class.is-invalid]="user.errors?.duplicate || (user.invalid && (user.dirty || user.touched))">
                             </div>
                         </ng-container>
+                        <div *ngIf="numeroHabs.errors?.duplicates" class="text-danger">
+                            There are duplicate values in the inputs.
+                        </div>
+                    </div>
                 </ng-container>
-
                 <br>
             </ng-container>
-
+<br>
             <div class="row col-lg-12">
                 <div class="form-group col-lg-12">
                     <label

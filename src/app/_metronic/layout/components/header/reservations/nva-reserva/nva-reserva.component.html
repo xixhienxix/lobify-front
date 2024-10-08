@@ -14,16 +14,23 @@
     <form [formGroup]="formGroup" class="form form-label-right" style="background-color: #e6e9ed">
 
         <!--DatePicker-->
-          <mat-form-field style="margin-right: 12px;">
-            <mat-label>Seleccion de Fechas</mat-label>
-            <mat-date-range-input [rangePicker]="picker">
-              <input [formControl]="intialDateFC" matStartDate (dateChange)="addEventIntialDate('change', $event)" placeholder="Fecha de Llegada">
-              <input [formControl]="endDateFC"  matEndDate (dateChange)="addEventEndDate('change', $event)" placeholder="Fecha de Salida">
-            </mat-date-range-input>
-            <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-date-range-picker #picker></mat-date-range-picker>
-          </mat-form-field>
+        <mat-form-field style="margin-right: 12px;">
+          <mat-label>Seleccion de Fechas</mat-label>
+          <mat-date-range-input [rangePicker]="picker" [dateFilter]="dateFilter">
+            <input [formControl]="intialDateFC"
+                   matStartDate 
+                   (dateChange)="addEventIntialDate('change', $event)" 
+                   placeholder="Fecha de Llegada">
+                   
+            <input [formControl]="endDateFC" 
+                   matEndDate 
+                   (dateChange)="addEventEndDate('change', $event)" 
+                   placeholder="Fecha de Salida">
+          </mat-date-range-input>
+          <mat-hint>MM/DD/YYYY – MM/DD/YYYY</mat-hint>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker ></mat-date-range-picker>
+        </mat-form-field>
     
 
           <label class="h1" style="padding-left: 5%;">Noches: </label>
@@ -106,6 +113,7 @@
               <label style="color:#00506a; font-weight: bold;" class="form-group col-lg-6" >Habitación </label>
               <div class="col-lg-12" style="margin-top:10px">
                 <mat-select #tipodeCuartoDropDown
+                formControlName="habitacion"
                 class="form-control form-control-lg "
                 name="habitacion"
                 placeholder="-- Seleccione Tipo de Habitación -- "

@@ -57,6 +57,9 @@
         "rates-tittle":"Rates Catalog"
 
     },
+    "RoomsComponent":{
+        "norooms":"No Rooms"
+    },
     "CalendarComponent":{
         "nva-rsv": "New Reservation",
         "nvo-bloqueo": "Nuevo Bloqueo",

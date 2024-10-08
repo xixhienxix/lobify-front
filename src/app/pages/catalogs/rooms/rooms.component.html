@@ -17,7 +17,7 @@
       <!-- begin:Table -->
         <!-- <app-inline-spinner *ngIf="blockedTabled"></app-inline-spinner> -->
         <mat-form-field>
-          <mat-label>Filter</mat-label>
+          <mat-label>Buscar</mat-label>
           <input matInput (keyup)="applyFilter($event)" placeholder="" #input>
         </mat-form-field>
         <div class="ex-container mat-elevation-z8">
@@ -73,7 +73,7 @@
 
             <tr class="mat-row" *matNoDataRow>
               <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayedColumns.length">
-                NO ROOMS
+                {{"RoomsComponent.norooms"|translate}}
               </td>
             </tr>
           </table>

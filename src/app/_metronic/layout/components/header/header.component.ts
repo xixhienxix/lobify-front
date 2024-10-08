@@ -112,8 +112,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _dashboardService: DashboardService,
     private _communicationService: CommunicationService,
-
-    private _checkInitialValues: IndexDBCheckingService
+    private _checkIndexDbService: IndexDBCheckingService
   ) {
     this.currentUser = this._authService.getUserInfo().username
     this.routingChanges();
@@ -243,11 +242,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
       }
   }
 
-  async checkRatesIndexDB(){
+  async checkRatesIndexDB(refresh:boolean=false){
     const ratesIndexDB:Tarifas[] = await this._habitacionService.readIndexDB("Rates");
 
     /** Checks if RatesArray is on IndexDb */
-    if(ratesIndexDB){
+    if(ratesIndexDB && !refresh){
       this.ratesArray = ratesIndexDB
       this.ratesArrayComplete = ratesIndexDB
       this.standardRatesArray = ratesIndexDB.filter((item)=>item.Tarifa === 'Tarifa Base');
@@ -300,6 +299,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   async openNvaReserva(){
+
+   await this.checkRatesIndexDB(true);
+
+
     const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' })  
     modalRef.componentInstance.folios = this.folios;
     modalRef.componentInstance.estatusArray = this.estatusArray

@@ -19,6 +19,8 @@ import { Codigos } from 'src/app/models/codigos.model';
 import { VisibilityRates } from 'src/app/models/visibility.model';
 import { Politicas } from 'src/app/models/politicas.model';
 import { Dias } from 'src/app/models/days.model';
+import { duplicateValuesValidator } from '../../_helpers/duplicateValuesValidator';
+import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 
 type listaAmenidades = {key:number;value:string}
 type listaCamas = {key:number;value:string;cantidad:number}
@@ -147,15 +149,10 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
     public modal:NgbActiveModal,
     public _tarifasService:TarifasService,
     public _parametrosService:ParametrosService,
-    private changeDetector: ChangeDetectorRef // Fixes Exeption of Expression already Changed
+    private changeDetector: ChangeDetectorRef, // Fixes Exeption of Expression already Changed,
+    private _checkIndexDbService: IndexDBCheckingService
+
   ) {
-
-  }
-
-  ngOnInit(): void {
-  this.getCodigos();
-  // this.checkEdicion();
-
     this.formGroup = this.fb.group({
       nombre: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
       tipo: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
@@ -165,14 +162,22 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       vista: [''],
       inventario: [1, Validators.required],
       orden:[1,Validators.required],
-      nombreHabs: this.fb.array([]),
+      habs: this.fb.array([], duplicateValuesValidator()),
       tarifaBase:[0,Validators.required],
       etiqueta:[0,Validators.required],
     })
 
-    this.inputForm = this.fb.group({
-      nombreHabs: ['',],
-    });
+    // this.inputForm = this.fb.group({
+    //   nombreHabs: ['',],
+    // });
+  }
+
+  ngOnInit(): void {
+  this.getCodigos();
+  const name = new FormControl('', Validators.required);
+  this.numeroHabs.push(name); // Add a new input
+
+  // this.checkEdicion();
 
     if(this.habitacion!=undefined){
       this.editarHab=true
@@ -188,7 +193,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
 
       //this.formGroup.controls["nombreHabs"].patchValue(this.habitacion.Tipos_Camas)
     }
-    this.inputs.push(this.inputForm);
+    //this.inputs.push(this.inputForm);
   }
 
   ngAfterViewChecked() {
@@ -202,11 +207,31 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
     }
   };
 
-  get inputs() {
-    return this.formGroup.controls["nombreHabs"] as FormArray;
+//   get inputs(): FormArray {
+//     return this.formGroup.get('nombreHabs') as FormArray;
+// }
+  get numeroHabs(): FormArray {
+    return this.formGroup.get('habs') as FormArray; // Cast to FormArray
   }
+
   get f(){
     return this.formGroup.controls;
+  }
+
+  // Method to increase quantity and update inputs
+  addInput() {
+      const name = new FormControl('', Validators.required);
+
+      this.quantityInv++; // Increase the quantity
+      this.numeroHabs.push(name); // Add a new input
+  }
+
+  // Method to decrease quantity and update inputs
+  removeInput() {
+      if (this.quantityInv > 1) {
+          this.quantityInv--; // Decrease the quantity
+          this.numeroHabs.removeAt(this.numeroHabs.length - 1); // Remove the last input
+      }
   }
 
 
@@ -272,30 +297,6 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
     });
   }
 
-  addInput(){
-    this.quantityInv++;
-    this.formGroup.controls['inventario'].patchValue(this.quantityInv)
-
-      this.inputForm = this.fb.group({
-        nombreHabs: [''],
-    });
-
-    this.inputs.push(this.inputForm);
-  }
-
-  removeInput(){
-    if(this.quantityInv>1)
-      {
-      this.quantityInv--;
-      this.inputs.removeAt(this.quantityInv-1);
-
-      }
-      else
-      {this.quantityInv}
-
-      this.formGroup.controls['inventario'].patchValue(this.quantityInv)
-  }
-
   resetForm(){
 
     this.formGroup.controls['descripcion'].patchValue('')
@@ -320,6 +321,15 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
 
   }
 
+  clearHabsNumber(checked:boolean){
+    if(!checked){
+      this.numeroHabs.patchValue(this.numeroHabs.controls.map(() => ''));
+    }else{
+      this.nombreHabs = []
+      return
+    }
+  }
+
   async onSubmit(){
     let habitacionNueva:Habitacion
     this.inicio=false
@@ -338,7 +348,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       });
       return
     }else {
-    this.isLoading=true
+    //this.isLoading=true
 
     let conteoCamas=0;
 
@@ -348,11 +358,13 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       conteoCamas=numero+conteoCamas
     }
 
-  let nombreHabs:any[]=[]
+    console.log("NombreHabs:---->>>",this.numeroHabs.value);
 
-  for(let y=0; y<this.formGroup.value.nombreHabs.length;y++){
-    if(this.formGroup.value.nombreHabs[y].nombreHabs==''){
-      nombreHabs.push({nombreHabs:this.formGroup.value.nombre.toString()+((y+1).toString())})
+  
+
+  for(let y=0; y<this.numeroHabs.value.length;y++){
+    if(this.numeroHabs.value[y] === ''){
+      this.nombreHabs.push(this.formGroup.value.nombre.toString()+((y+1).toString()))
     }
   }
 
@@ -365,7 +377,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       Tipo:this.formGroup.value.tipo,
       Adultos:this.formGroup.value.adultos,
       Ninos:this.formGroup.value.ninos,
-      Inventario:this.formGroup.value.inventario,
+      Inventario:this.quantityInv,
       Vista:this.formGroup.value.vista,
       Camas:conteoCamas,
       Tipos_Camas:this.camasFC.value,
@@ -375,16 +387,16 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       Estatus:'LIMPIA'
     }
   }else {
-    if(nombreHabs.length!=0){
+    if(this.nombreHabs.length === 0){
       habitacionNueva = {
         _id:'',
         Codigo:codigoHab,
-        Numero:nombreHabs,
+        Numero:this.numeroHabs.value,//nombreHabs
         Descripcion:this.formGroup.value.descripcion,
         Tipo:this.formGroup.value.tipo,
         Adultos:this.formGroup.value.adultos,
         Ninos:this.formGroup.value.ninos,
-        Inventario:this.formGroup.value.inventario,
+        Inventario:this.quantityInv,
         Vista:this.formGroup.value.vista,
         Camas:conteoCamas,
         Tipos_Camas:this.camasFC.value,
@@ -393,16 +405,16 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
         Tarifa:this.formGroup.value.tarifaBase,
         Estatus:'LIMPIA'
       }
-    }else{
+    } else{
       habitacionNueva = {
         _id:'',
         Codigo:codigoHab,
-        Numero:this.formGroup.value.nombreHabs,
+        Numero:this.nombreHabs,
         Descripcion:this.formGroup.value.descripcion,
         Tipo:this.formGroup.value.tipo,
         Adultos:this.formGroup.value.adultos,
         Ninos:this.formGroup.value.ninos,
-        Inventario:this.formGroup.value.inventario,
+        Inventario:this.quantityInv,
         Vista:this.formGroup.value.vista,
         Camas:conteoCamas,
         Tipos_Camas:this.camasFC.value,
@@ -449,6 +461,10 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
                 this.modal.close()
                 this.habitacionService.sendCustomFormNotification(true)
                 this.sendUpload=true
+                this._checkIndexDbService.checkIndexedDB(['habitaciones'], true);
+                this._checkIndexDbService.checkIndexedDB(['tarifas'], true)
+
+
         },
         error: () =>{
             this.isLoading=false

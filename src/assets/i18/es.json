@@ -78,6 +78,9 @@
     "DialogErros":{
         "errors.huesped.lenght": "Existen reservaciones que fueron asignadas a esta habitacion aun asi desea eliminarla?"
     },
+    "RoomsComponent":{
+        "norooms":"Sin Habitaciones"
+    },
     "RatesComponent":{
         "baseRateTabTittle": "TARIFA BASE",
         "especialRateTabTittle":"TARIFA ESPECIAL",

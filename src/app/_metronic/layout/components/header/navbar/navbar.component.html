@@ -1,106 +1,86 @@
 <!--begin::Arrivals-->
-<div class="app-navbar-item align-items-stretch" [ngClass]="itemClass">
+<div class="app-navbar-item align-items-stretch mb-3" [ngClass]="itemClass">
   <div class="d-flex align-items-center" data-kt-search-element="toggle" id="kt_header_search_toggle">
-    <div class="d-flex fw-bolder rounded-2 py-1" style="background-color:var(--light-green-background); padding: 10%;">
-      <div class="d-flex flex-column me-2">
-        <span class="fw-bold text-gray-800;" style="font-size: 2rem;">
+    <div class="d-flex fw-bolder rounded-2 py-1" style="background-color: var(--light-green-background); padding: 1rem;">
+      <div class="d-flex flex-column me-3">
+        <span class="fw-bold text-gray-800" style="font-size: 2rem;">
           {{ llegadas }}
         </span>
       </div>
-      <img src="../../../../../../assets/media//icons//movnext/arrivals.png" width="35px" height="35px">
+      <img src="../../../../../../assets/media/icons/movnext/arrivals.png" alt="Arrivals" width="35px" height="35px">
     </div>
   </div>
 </div>
 <!--end::Arrivals-->
 
 <!--begin::Departures-->
-<div class="app-navbar-item align-items-stretch" [ngClass]="itemClass" style="position: relative;">
+<div class="app-navbar-item align-items-stretch mb-3" [ngClass]="itemClass" style="position: relative;">
   <div class="d-flex align-items-center" data-kt-search-element="toggle" id="kt_header_search_toggle">
-    <div class="d-flex fw-bolder rounded-2 py-1" style="background-color:var(--light-red-background); padding: 10%;">
-      <div class="d-flex flex-column me-2">
-        <span class="fw-bold text-gray-800;" style="font-size: 2rem; cursor: pointer;" (click)="toggleTab()">
+    <div class="d-flex fw-bolder rounded-2 py-1" style="background-color: var(--light-red-background); padding: 1rem;">
+      <div class="d-flex flex-column me-3">
+        <span class="fw-bold text-gray-800" style="font-size: 2rem; cursor: pointer;" (click)="toggleTab()">
           {{ salidas }}
         </span>
       </div>
-      <img src="../../../../../../assets/media/icons/movnext/departure.png" width="35px" height="35px">
+      <img src="../../../../../../assets/media/icons/movnext/departure.png" alt="Departures" width="35px" height="35px">
     </div>
   </div>
 
   <!-- Mat-Tab below the span -->
-  <div *ngIf="tabVisible" class="mat-tab-container">
-      <app-llegadas-table></app-llegadas-table>
+  <div *ngIf="tabVisible" class="mat-tab-container mt-3">
+    <app-llegadas-table></app-llegadas-table>
   </div>
 </div>
 <!--end::Departures-->
+
 <!--begin::NoShow-->
-<div class="app-navbar-item align-items-stretch" [ngClass]="itemClass">
+<div class="app-navbar-item align-items-stretch mb-3" [ngClass]="itemClass">
   <div class="d-flex align-items-center" data-kt-search-element="toggle" id="kt_header_search_toggle">
-      <div class="d-flex fw-bolder rounded-2 py-1" style="background-color:var(--light-red-background); padding: 10%;">
-        <div class="d-flex flex-column me-2">
-            <span class="fw-bold text-gray-800;" style="font-size: 2rem;">
-                {{ noShow }}
-            </span>
-        </div>
-        <img src="../../../../../../assets/media//icons//movnext/departure.png" width="35px" height="35px">
+    <div class="d-flex fw-bolder rounded-2 py-1" style="background-color: var(--light-red-background); padding: 1rem;">
+      <div class="d-flex flex-column me-3">
+        <span class="fw-bold text-gray-800" style="font-size: 2rem;">
+          {{ noShow }}
+        </span>
       </div>
+      <!-- Use the timer icon here instead of the image -->
+      <app-keenicon style="font-size: 5rem;" name="calendar-edit" class="fs-3"></app-keenicon>
+    </div>
   </div>
 </div>
+
 <!--end::NoShow-->
-<div class="app-navbar-item align-items-stretch" [ngClass]="itemClass">
-</div>
+
 <!--begin::Activities-->
-<div class="app-navbar-item" [ngClass]="itemClass">
-  <!--begin::Drawer toggle-->
+<div class="app-navbar-item mb-3" [ngClass]="itemClass">
   <div [ngClass]="btnClass" id="kt_activities_toggle">
-    <app-keenicon name="messages" class="fs-2"></app-keenicon>
+    <app-keenicon name="messages" class="fs-3"></app-keenicon>
   </div>
-  <!--end::Drawer toggle-->
 </div>
 <!--end::Activities-->
 
 <!--begin::Notifications-->
-<div class="app-navbar-item" [ngClass]="itemClass">
-  <!--begin::Menu- wrapper-->
-  <!-- <div [ngClass]="btnClass" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent"
-    data-kt-menu-placement="bottom-end">
-    <app-keenicon name="notification-status" class="fs-2"></app-keenicon>
-  </div> -->
-  <!-- <app-notifications-inner></app-notifications-inner> -->
-  <!--end::Menu wrapper-->
+<div class="app-navbar-item mb-3" [ngClass]="itemClass">
+  <!-- Optional: Notifications content -->
 </div>
 <!--end::Notifications-->
 
 <!--begin::Chat-->
-<div class="app-navbar-item" [ngClass]="itemClass">
+<div class="app-navbar-item mb-3" [ngClass]="itemClass">
   <div [ngClass]="btnClass" class="position-relative" id="kt_drawer_chat_toggle">
-    <!-- <app-keenicon name="message-text-2" class="fs-2"></app-keenicon>
-    <span
-      class="bullet bullet-dot bg-success h-6px w-6px position-absolute translate-middle top-0 start-50 animation-blink">
-    </span> -->
+    <!-- Optional: Chat content -->
   </div>
 </div>
 <!--end::Chat-->
 
-<!--begin::Theme mode-->
-<!-- <div class="app-navbar-item" [ngClass]="itemClass">
-  <app-theme-mode-switcher [toggleBtnClass]="btnClass" toggleBtnClass="{`btn-active-light-primary btn-custom ${toolbarButtonHeightClass}`}"></app-theme-mode-switcher>
-</div> -->
-<!--end::Theme mode-->
-
 <!--begin::User menu-->
-<div class="app-navbar-item" [ngClass]="itemClass">
-  <!--begin::Menu wrapper-->
-  <!-- <div class="cursor-pointer symbol" [ngClass]="userAvatarClass" data-kt-menu-trigger="{default: 'click'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
-    <img src="./assets/media/avatars/300-3.jpg" />
-  </div>
-  <app-user-inner data-kt-menu='true'></app-user-inner> -->
-  <!--end::Menu wrapper-->
+<div class="app-navbar-item mb-3" [ngClass]="itemClass">
+  <!-- Optional: User menu content -->
 </div>
 <!--end::User menu-->
 
 <!--begin::Header menu toggle-->
 <ng-container *ngIf="appHeaderDefaulMenuDisplay">
-  <div class="app-navbar-item d-lg-none ms-2 me-n3" title="Show header menu">
+  <div class="app-navbar-item d-lg-none ms-2 me-n3 mb-3" title="Show header menu">
     <div class="btn btn-icon btn-active-color-primary w-35px h-35px" id="kt_app_header_menu_toggle">
       <app-keenicon name="element-4" class="fs-1" [ngClass]="btnIconClass"></app-keenicon>
     </div>
