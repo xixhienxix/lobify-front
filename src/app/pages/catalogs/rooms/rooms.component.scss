@@ -21,3 +21,20 @@ table {
     max-width: 100%;
     overflow: auto;
   }
+/* Add this CSS to your component stylesheet */
+.example-element-detail {
+  display: flex;
+  justify-content: center; /* Centers the expandable detail content */
+  align-items: center; /* Centers vertically, if needed */
+}
+
+.mat-table {
+  width: 100%; /* Make sure the table uses full width of its container */
+}
+
+.mat-row {
+  cursor: pointer; /* Show a pointer cursor on rows */
+}
+.mat-icon {
+  font-size: 20px; /* Adjust icon size */
+}

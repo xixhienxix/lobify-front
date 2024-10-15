@@ -10,6 +10,7 @@ import { Habitacion } from 'src/app/models/habitaciones.model';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { NewRoomComponent } from './components/new-room/new-room.component';
 import { FileUploadService } from 'src/app/services/file.upload.service';
+import { trigger, state, style, transition, animate } from '@angular/animations';
 interface roomTable {
   Codigo:string,
   Tipo:string,
@@ -20,17 +21,25 @@ interface roomTable {
   selector: 'app-rooms',
   templateUrl: './rooms.component.html',
   styleUrls: ['./rooms.component.scss'],
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({ height: '0px', minHeight: '0' })),
+      state('expanded', style({ height: '*' })),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ]),
+  ],
 })
 export class RoomsComponent implements OnInit{
 
 
     /**Table */
     dataSource = new MatTableDataSource<roomTable>();
-    displayedColumns = ["Nombre de la habitación",
+    displayedColumns = ["expandCollapse", "Nombre de la habitación",
     "Tipo de la Habitación",
     "Capacidad Max.",
-    "Inventario",
-    "Acciones"];
+    "Inventario"];
+    expandedElement: roomTable | null = null;
+
 
   /**Subscription */
   subscriptions:Subscription[]=[]
@@ -138,12 +147,50 @@ export class RoomsComponent implements OnInit{
       this.isLoading=false
   }
 
+  toggleRow(row: any) {
+    this.expandedElement = this.expandedElement === row ? null : row;
+  }
+
+  getDetailsByCodigo(codigo: string): Habitacion[] {
+    const habs: Habitacion[] = this._habitacionService.getcurrentHabitacionValue.getValue();
+      const details = habs.filter(habitacion => habitacion.Codigo === codigo);
+
+      // Format Tipos_Camas for Display
+      // details.forEach(habitacion => {
+      //   habitacion.Tipos_Camas = this.formatTiposCamas(habitacion.Tipos_Camas);
+      // });
+
+      return details;
+  }
+
+  // Gives a format count to Tipos Camas Properry on Habitacion :
+  // formatTiposCamas(tiposCamas: string[]): string[] {
+  //   const counts: { [key: string]: number } = {};
+  
+  //   // Count occurrences of each bed type
+  //   tiposCamas.forEach(bedType => {
+  //     // Remove the leading number and trim whitespace
+  //     const bedWithoutNumber = bedType.replace(/^\d+\s*/, '').trim();
+      
+  //     if (counts[bedWithoutNumber]) {
+  //       counts[bedWithoutNumber]++;
+  //     } else {
+  //       counts[bedWithoutNumber] = 1;
+  //     }
+  //   });
+  
+  //   // Construct the formatted array
+  //   return Object.entries(counts).map(([tipo, count]) => {
+  //     return `${count} ${tipo}`;
+  //   });
+  // }
+
   add(habitacion:roomTable){
-    let habitacionSeleccionada = this._habitacionService.getcurrentHabitacionValue.getValue();
-    const filter = habitacion.Codigo
-    let habs2 = habitacionSeleccionada.find( val => val.Codigo === filter);
+    // let habitacionSeleccionada = this._habitacionService.getcurrentHabitacionValue.getValue();
+    // const filter = habitacion.Codigo
+    // let habs2 = habitacionSeleccionada.find( val => val.Codigo === filter);
     const modalRef = this.modalService.open(NewRoomComponent,{ size: 'md', backdrop:'static' })
-    modalRef.componentInstance.habitacion=habs2;
+    modalRef.componentInstance.habitacion=habitacion;
     modalRef.componentInstance.editarHab=true
     modalRef.result.then((result) => {
       this.habitacionesArr=[]

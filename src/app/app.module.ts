@@ -25,6 +25,7 @@ import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
 import { AngularFireModule } from '@angular/fire/compat';
 import { AngularFireStorageModule } from '@angular/fire/compat/storage';
 import { IndexDBCheckingService } from './services/_shared/indexdb.checking.service';
+import { MatIconModule } from '@angular/material/icon';
 
 
 function appInitializer(authService: AuthService) {
@@ -79,6 +80,7 @@ export function createTranslateLoader(http: HttpClient) {
     InlineSVGModule.forRoot(),
     NgbModule,
     SweetAlert2Module.forRoot(),
+    MatIconModule
   ],
   providers: [
     {

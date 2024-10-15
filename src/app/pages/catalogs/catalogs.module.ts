@@ -24,6 +24,8 @@ import { ToastAllModule } from '@syncfusion/ej2-angular-notifications';
 import { DropDownButtonAllModule } from '@syncfusion/ej2-angular-splitbuttons';
 import { FareCalendarComponent } from './rates/fare-calendar/fare.calendar.component';
 import { TempRatesComponent } from './rates/temp-rates/temp.rates.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatIconModule } from '@angular/material/icon';
 
 
 
@@ -49,12 +51,27 @@ import { TempRatesComponent } from './rates/temp-rates/temp.rates.component';
     WidgetsModule,
     ButtonModule,
     BryntumSchedulerModule,
-    ScheduleAllModule, RecurrenceEditorAllModule,   
-    NumericTextBoxAllModule, TextBoxAllModule, DatePickerAllModule, 
-    TimePickerAllModule, DateTimePickerAllModule, CheckBoxAllModule,   
-    ToolbarAllModule, DropDownListAllModule, ContextMenuAllModule, MaskedTextBoxModule, 
-    UploaderAllModule, MultiSelectAllModule,   TreeViewModule, ButtonAllModule, 
-    DropDownButtonAllModule, SwitchAllModule,  ToastAllModule, AppBarModule,
-  ]
+    // Include other modules that you are using here
+    ScheduleAllModule, 
+    RecurrenceEditorAllModule,   
+    NumericTextBoxAllModule, 
+    TextBoxAllModule, 
+    DatePickerAllModule, 
+    TimePickerAllModule, 
+    DateTimePickerAllModule, 
+    CheckBoxAllModule,   
+    ToolbarAllModule, 
+    DropDownListAllModule, 
+    ContextMenuAllModule, 
+    MaskedTextBoxModule, 
+    UploaderAllModule, 
+    MultiSelectAllModule,   
+    TreeViewModule, 
+    ButtonAllModule, 
+    DropDownButtonAllModule, 
+    SwitchAllModule,  
+    ToastAllModule, 
+    AppBarModule,
+  ],
 })
 export class CatalogsModule { }

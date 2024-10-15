@@ -1,7 +1,7 @@
 
 <div class="card card-custom gutter-b">
     <div class="modal-content">
-        <div style="background-color: #00506a;" class="modal-header">
+        <div style="background-color:var(--deep-red-background)" class="modal-header">
           <div  *ngIf="editarHab!==true"  style="text-align: center; color: white;" class="text-center modal-title h4 col-10"
           id="example-modal-sizes-title-lg">
             Nueva Habitación
@@ -10,7 +10,7 @@
           id="example-modal-sizes-title-lg">
           Editar Habitación
         </div>
-          <button style="background-color:#fa6d7c; font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
+          <button style="background-color:var(--header-background); font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
 
         </div>
 
@@ -24,7 +24,7 @@
                         <div class="form-group col-lg-12">
                             <label style="color:#00506a; font-weight: bold;">Nombre de la Habitación</label>
                             <input
-                                [attr.attr.disabled]="editarHab"
+                                [attr.disabled]="editarHab"
                                 formControlName="nombre"
                                 style="background-color: #e6e9ed;"
                                 class="form-control"

@@ -21,62 +21,119 @@
           <input matInput (keyup)="applyFilter($event)" placeholder="" #input>
         </mat-form-field>
         <div class="ex-container mat-elevation-z8">
-          <table mat-table [dataSource]="dataSource" matSort>
-        
+          <table mat-table [dataSource]="dataSource" matSort multiTemplateDataRows>
+            <!-- Expand/Collapse Icon Column -->
+            <ng-container matColumnDef="expandCollapse">
+              <th mat-header-cell *matHeaderCellDef> </th>
+              <td mat-cell *matCellDef="let row">
+                <button mat-icon-button (click)="toggleRow(row)">
+                  <mat-icon>
+                    {{ row === expandedElement ? 'expand_less' : 'chevron_right' }}
+                  </mat-icon>
+                </button>
+              </td>
+            </ng-container>
+          
             <!-- Nombre de la habitación Column -->
             <ng-container matColumnDef="Nombre de la habitación" sticky>
               <th mat-header-cell *matHeaderCellDef mat-sort-header> Nombre de la habitación </th>
-              <td mat-cell *matCellDef="let row;"> {{row.Codigo}} </td>
+              <td mat-cell *matCellDef="let row;"> {{ row.Codigo }} </td>
             </ng-container>
-        
-            <!-- Codigo de la Habitación Column -->
+          
+            <!-- Tipo de la Habitación Column -->
             <ng-container matColumnDef="Tipo de la Habitación">
               <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo de la Habitación </th>
-              <td mat-cell *matCellDef="let row"> {{row.Tipo}} </td>
+              <td mat-cell *matCellDef="let row"> {{ row.Tipo }} </td>
             </ng-container>
-        
-            <!-- Tipo Column -->
+          
+            <!-- Capacidad Max. Column -->
             <ng-container matColumnDef="Capacidad Max.">
               <th mat-header-cell *matHeaderCellDef mat-sort-header> Capacidad Max. </th>
-              <td mat-cell *matCellDef="let row"> {{row.Adultos}} </td>
+              <td mat-cell *matCellDef="let row"> {{ row.Adultos }} </td>
             </ng-container>
-        
-            <!-- Capacidad Column -->
+          
+            <!-- Inventario Column -->
             <ng-container matColumnDef="Inventario">
               <th mat-header-cell *matHeaderCellDef mat-sort-header> Inventario </th>
-              <td mat-cell *matCellDef="let row"> {{row.Inventario}} </td>
+              <td mat-cell *matCellDef="let row"> {{ row.Inventario }} </td>
             </ng-container>
+          
+          
+            <!-- Expanded Content Column -->
+            <ng-container matColumnDef="expandedDetail">
+              <td mat-cell *matCellDef="let row" [attr.colspan]="displayedColumns.length">
+                <div class="example-element-detail" [@detailExpand]="row === expandedElement ? 'expanded' : 'collapsed'">
+                  <mat-table *ngIf="row === expandedElement" [dataSource]="getDetailsByCodigo(row.Codigo)" matSort>
+                    <!-- Only show header row if expanded -->
+                    <tr mat-header-row *matHeaderRowDef="['Numero', 'Descripcion', 'Camas', 'Adultos', 'Tipo', 'Amenidades', 'Tipos Camas', 'Acciones']"></tr>
+          
+                    <!-- Detail Columns -->
+                    <ng-container matColumnDef="Numero">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Número </th>
+                      <td mat-cell *matCellDef="let detail"> {{ detail.Numero }} </td>
+                    </ng-container>
+          
+                    <ng-container matColumnDef="Descripcion">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripción </th>
+                      <td mat-cell *matCellDef="let detail"> {{ detail.Descripcion }} </td>
+                    </ng-container>
+          
+                    <ng-container matColumnDef="Camas">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Camas </th>
+                      <td mat-cell *matCellDef="let detail"> {{ detail.Camas }} </td>
+                    </ng-container>
+          
+                    <ng-container matColumnDef="Adultos">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Adultos </th>
+                      <td mat-cell *matCellDef="let detail"> {{ detail.Adultos }} </td>
+                    </ng-container>
+          
+                    <ng-container matColumnDef="Tipo">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipo </th>
+                      <td mat-cell *matCellDef="let detail"> {{ detail.Tipo }} </td>
+                    </ng-container>
+          
+                    <ng-container matColumnDef="Amenidades">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Amenidades </th>
+                      <td mat-cell *matCellDef="let detail"> {{ detail.Amenidades.join(', ') }} </td>
+                    </ng-container>
+          
+                    <ng-container matColumnDef="Tipos Camas">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Tipos de Camas </th>
+                      <td mat-cell *matCellDef="let detail"> {{ detail.Tipos_Camas.join(', ') }} </td>
+                    </ng-container>
 
-            <!-- Acciones Column -->
-            <ng-container matColumnDef="Acciones">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header> Agregar al Inventario </th>
-              <td (click)="$event.stopPropagation()" mat-cell *matCellDef="let element; let i=index"> 
-                <a
-                title="Agregar"
-                class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm"
-                (click)="add(element)"
-                >
-                <i class="fa-solid fa-plus"></i>
-              </a> 
-              <a
-              title="Borrar"
-              class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm"
-              (click)="delete(element)"
-              >
-             <i class="fa-solid fa-trash-can"></i>
-            </a> 
-             </td>
+                    <!-- Acciones Column -->
+                    <ng-container matColumnDef="Acciones">
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Agregar al Inventario </th>
+                      <td (click)="$event.stopPropagation()" mat-cell *matCellDef="let detail; let i=index"> 
+                        <a title="Agregar" class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm" (click)="add(detail)">
+                          <i class="fa-solid fa-plus"></i>
+                        </a> 
+                        <a title="Borrar" class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm" (click)="delete(detail)">
+                          <i class="fa-solid fa-trash-can"></i>
+                        </a> 
+                      </td>
+                    </ng-container>
+          
+                    <tr mat-row *matRowDef="let detail; columns: ['Numero', 'Descripcion', 'Camas', 'Adultos', 'Tipo', 'Amenidades', 'Tipos Camas', 'Acciones'];"></tr>
+                  </mat-table>
+                </div>
+              </td>
             </ng-container>
-        
+          
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="element-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="detail-row"></tr>
+          
             <tr class="mat-row" *matNoDataRow>
-              <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayedColumns.length">
-                {{"RoomsComponent.norooms"|translate}}
+              <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+                {{"RoomsComponent.norooms" | translate}}
               </td>
             </tr>
           </table>
+          
+          
           <!-- <mat-card *ngIf="isLoading" style="display: flex; justify-content: center; align-items: center">
             <mat-progress-spinner 
               color="primary" 

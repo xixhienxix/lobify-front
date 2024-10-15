@@ -129,6 +129,14 @@ export class TarifasService {
     ))
   }
 
+  updateTarifaBase(tarifas:Tarifas){
+    return this.http.post(environment.apiUrl+'/tarifario/actualiza/tarifaBase',{tarifas}).pipe(
+      map(()=>{
+        this.sendNotification(true);
+        }
+    ))
+  }
+
   updateTarifasModifica(TarifasAnterior:any)
   {
     return this.http

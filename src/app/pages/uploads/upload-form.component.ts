@@ -26,7 +26,7 @@ export class UploadFormComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: any) {
       if(typeof changes?.triggerUpload !== 'undefined' ){
-        if(changes.triggerUpload.currentValue===true){
+        if(changes.triggerUpload.currentValue === true){
           this.upload()
         }
       }      
@@ -58,12 +58,13 @@ export class UploadFormComponent implements OnInit, OnChanges {
   upload(): void {
 
     // this.selectedFiles = new FileList;
-
-    this.currentFileUpload = new FileUpload(this.myRenamedFile);
-    this.uploadService.pushFileToStorage(this.currentFileUpload).subscribe(
-      (percentage:any) => {
-        this.percentage = Math.round(percentage);
-      }
-    );
+    if(this.myRenamedFile){
+      this.currentFileUpload = new FileUpload(this.myRenamedFile);
+      this.uploadService.pushFileToStorage(this.currentFileUpload).subscribe(
+        (percentage:any) => {
+          this.percentage = Math.round(percentage);
+        }
+      );
+    }
   }
 }

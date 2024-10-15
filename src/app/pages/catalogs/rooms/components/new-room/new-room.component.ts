@@ -191,6 +191,9 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       this.f.inventario.patchValue(this.habitacion.Inventario)
       this.f.etiqueta.patchValue(this.habitacion.Numero)
 
+      //disable Inputs
+      this.f.nombre.disable();
+
       //this.formGroup.controls["nombreHabs"].patchValue(this.habitacion.Tipos_Camas)
     }
     //this.inputs.push(this.inputForm);
@@ -201,7 +204,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
   }
 
   checkEdicion(){
-    if (this.editarHab===true){
+    if (this.editarHab === true){
       this.resultLocation.push(...this.habitacion.Amenidades);
       this.resultLocationCamas.push(...this.habitacion.Tipos_Camas);
     }
@@ -333,7 +336,8 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
   async onSubmit(){
     let habitacionNueva:Habitacion
     this.inicio=false
-    const codigoHab = this.formGroup.value.nombre.replace(' ', '_')
+
+    const codigoHab = this.formGroup.controls["nombre"].value.replace(' ', '_')
 
     if(this.formGroup.invalid || this.resultLocation.length === 0 || this.resultLocation.length === 0){
       if(this.resultLocation.length === 0 ){
@@ -361,14 +365,18 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
     console.log("NombreHabs:---->>>",this.numeroHabs.value);
 
   
-
-  for(let y=0; y<this.numeroHabs.value.length;y++){
-    if(this.numeroHabs.value[y] === ''){
-      this.nombreHabs.push(this.formGroup.value.nombre.toString()+((y+1).toString()))
+    if(!this.editarHab){
+      for(let y=0; y<this.numeroHabs.value.length;y++){
+        if(this.numeroHabs.value[y] === ''){
+          this.nombreHabs.push(this.formGroup.value.nombre.toString()+((y+1).toString()))
+        }
+      }
     }
-  }
 
-  if(this.editarHab==true){
+  
+
+  if(this.editarHab===true){
+
     habitacionNueva = {
       _id:'',
       Codigo:codigoHab,
@@ -446,35 +454,50 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
     Dias:this.options()
   }
     let promptFLag=false;
-    const request1 = this.habitacionService.postHabitacion(habitacionNueva,this.editarHab); 
-    const request3 = this._tarifasService.postTarifa(tarifa);
-    //concat(request1,request2,request3).pipe(
-    concat(request1, request3).pipe(
-      takeUntil(this.ngUnsubscribe))
-      .subscribe({
-        next: ()=>{
-          if(!promptFLag){
-            this.promptMessage('Exito','Habitación(es) Generadas con éxito')
-            promptFLag=true;
+    const request1 = this.habitacionService.postHabitacion(habitacionNueva, this.editarHab);
+    let requests = [request1];
+    
+    // Conditionally include request3 if editarHab is false
+    if (!this.editarHab) {
+      const request3 = this._tarifasService.postTarifa(tarifa).pipe(map(() => ({}))); // Cast to an object
+      requests.push(request3);
+    }
+    if(this.editarHab && this.formGroup.value.tarifaBase !== this.habitacion.Tarifa){
+      const request3 = this._tarifasService.updateTarifaBase(tarifa).pipe(map(() => ({}))); // Cast to an object
+      requests.push(request3);
+    }
+    
+    concat(...requests).pipe(
+      takeUntil(this.ngUnsubscribe)
+    ).subscribe({
+      next: () => {
+        if (!promptFLag) {
+          if(requests.length === 1){
+            this.promptMessage('Éxito', 'Habitación Actualizada con éxito');
+          }else {
+            this.promptMessage('Éxito', 'Habitación(es) Generadas con éxito');
           }
-            this.habitacionGenerada = true
-                this.modal.close()
-                this.habitacionService.sendCustomFormNotification(true)
-                this.sendUpload=true
-                this._checkIndexDbService.checkIndexedDB(['habitaciones'], true);
-                this._checkIndexDbService.checkIndexedDB(['tarifas'], true)
-
-
-        },
-        error: () =>{
-            this.isLoading=false
-            if(!promptFLag){
-              this.promptMessage('Error','No se pudo guardar la habitación intente de nuevo mas tarde');
-              promptFLag=true;
-            }
-                      
+          promptFLag = true;
         }
-      })  
+        this.habitacionGenerada = true;
+        this.modal.close();
+        this.habitacionService.sendCustomFormNotification(true);
+        this.sendUpload = true;
+        // Run checkIndexedDB with a 1 second delay
+        setTimeout(() => {
+          this._checkIndexDbService.checkIndexedDB(['habitaciones'], true);
+          this._checkIndexDbService.checkIndexedDB(['tarifas'], true);
+        }, 1000); // 1000 milliseconds = 1 second
+      },
+      error: () => {
+        this.isLoading = false;
+        if (!promptFLag) {
+          this.promptMessage('Error', 'No se pudo guardar la habitación, intente de nuevo más tarde');
+          promptFLag = true;
+        }
+      }
+    });
+    
     }
   }
 

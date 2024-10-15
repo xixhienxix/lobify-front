@@ -201,7 +201,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   updateDatePicker(newStartTime: string, newEndTime: string): void {
     const newInitialDate = new Date(newStartTime);
-    const newEndDate = new Date(new Date(newEndTime).valueOf() - 1000 * 3600 * 24);
+    const newEndDate = new Date(new Date(newEndTime));
     this.intialDateFC.setValue(newInitialDate);
     this.endDateFC.setValue(newEndDate);
   }
