@@ -371,7 +371,7 @@ export class CalendarComponent implements OnInit {
 
       const habitacion = this.roomCodesComplete.find((item) => item.Numero === data.data.Numero);
 
-      const modalRef = this.modalService.open(EditReservaComponent, { size: 'md', backdrop: 'static' });
+      const modalRef = this.modalService.open(EditReservaComponent, { size: 'md', backdrop: 'static' });  
       modalRef.componentInstance.codigosCargo = this.codigosCargo
       modalRef.componentInstance.data = data.data
       modalRef.componentInstance.houseKeepingCodes = this.houseKeepingCodes

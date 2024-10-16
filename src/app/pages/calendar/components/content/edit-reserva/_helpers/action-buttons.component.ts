@@ -98,7 +98,7 @@ import { AlertsMessageInterface } from 'src/app/models/message.model';
           </button>
           <br>
         </div>
-        <div class="form-group col-lg-12" *ngIf="isReservaCancelada">
+        <!-- <div class="form-group col-lg-12" *ngIf="isReservaCancelada">
           <button
             class="btn btn-success btn-block"
             type="submit"
@@ -107,7 +107,7 @@ import { AlertsMessageInterface } from 'src/app/models/message.model';
             Reactivar Reservación
           </button>
           <br>
-        </div>
+        </div> -->
       </div>
     </div>
   `,

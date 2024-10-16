@@ -221,39 +221,62 @@
 <form class="container" [formGroup]="secondFormGroup" (ngSubmit)="autoriza()">
   <div class="row col-md-12" style="justify-content: center;">
     <div style="margin-top: 5px" class="col-sm-4">
-      <mat-radio-button (change)="selectedRadioButton($event)" [checked]="porcentajeChecked" id="porcentaje"
-        class="example-margin">PORCENTAJE (%)</mat-radio-button>
+      <mat-radio-button 
+        (change)="selectedRadioButton($event)" 
+        [checked]="porcentajeChecked" 
+        id="porcentaje"
+        class="example-margin"
+        [disabled]="isFormDisabled">
+        PORCENTAJE (%)
+      </mat-radio-button>
     </div>
     <div style="margin-top: 5px" class="col-sm-4">
-      <mat-radio-button class="example-margin" [checked]="precioFijoChecked" id="precioFijo"
-        (change)="selectedRadioButton($event)">VALOR FIJO ($)</mat-radio-button>
+      <mat-radio-button 
+        class="example-margin" 
+        [checked]="precioFijoChecked" 
+        id="precioFijo"
+        (change)="selectedRadioButton($event)"
+        [disabled]="isFormDisabled">
+        VALOR FIJO ($)
+      </mat-radio-button>
     </div>
     <div class="col-sm-4">
-      <input [attr.disabled]="inputDisabled" type="number" class="form-control form-control-lg form-control-solid"
-        name="qtyPrecio" placeholder="Cantidad" autocomplete="off" formControlName="qtyPrecio" 
-        [class.is-invalid]="isSecondControlInvalid('qtyPrecio')" [class.is-valid]="isSecondControlValid('qtyPrecio')"
-        value="" />
+      <input 
+        type="number" 
+        class="form-control form-control-lg form-control-solid"
+        name="qtyPrecio" 
+        placeholder="Cantidad" 
+        autocomplete="off" 
+        formControlName="qtyPrecio" 
+        [class.is-invalid]="isSecondControlInvalid('qtyPrecio')" 
+        [class.is-valid]="isSecondControlValid('qtyPrecio')" />
       <small style="color: red;" *ngIf="secondFormInvalid">Capture la cantidad del descuento</small>
     </div>
   </div>
   <br>
   <div class="col-sm-12">
-    <input [attr.disabled]="inputDisabled" type="text" class="form-control form-control-lg form-control-solid"
-      name="motivoDesc" placeholder="Motivo del Descuento" autocomplete="off" formControlName="motivoDesc"
-      [class.is-invalid]="isSecondControlInvalid('motivoDesc')" [class.is-valid]="isSecondControlValid('motivoDesc')"
-      value="" />
+    <input 
+      type="text" 
+      class="form-control form-control-lg form-control-solid"
+      name="motivoDesc" 
+      placeholder="Motivo del Descuento" 
+      autocomplete="off" 
+      formControlName="motivoDesc" 
+      [class.is-invalid]="isSecondControlInvalid('motivoDesc')" 
+      [class.is-valid]="isSecondControlValid('motivoDesc')" />
   </div>
-
-
-
-
   <br>
   <div class="col-lg-12">
-    <button class="btn btn-success btn-block" type="submit">
+    <button 
+      class="btn btn-success btn-block" 
+      type="submit"
+      [disabled]="isFormDisabled">
       Aplicar o Autorizar Descuento
     </button>
   </div>
 </form>
+
+
 <br>
 <div style="background-color: #319dd7" class="modal-content sub-menu">
   <label class="h4" style="color: aliceblue; text-align: center; padding-top: 5px">

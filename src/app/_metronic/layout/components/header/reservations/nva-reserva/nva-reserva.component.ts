@@ -181,6 +181,10 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
       let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
       this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
 
+      if(this.cuarto){
+        this.formGroup.patchValue({ habitacion: this.cuarto });
+      }
+
       this.getDisponibilidad(this.intialDate, this.endDate, this.cuarto, this.stayNights, "No Folio");
     }  
   }
@@ -320,15 +324,27 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   loadForm(){
     this.formGroup = this.fb.group({
-      adultos:[{value:1, disabled:true }, Validators.required],
-      ninos:[{value:0,disabled:true}, Validators.required],
-      checkbox:[{value:false, disabled:true},Validators.required],
+      adultos: [{ value: 1, disabled: true }, Validators.required],
+      ninos: [{ value: 0, disabled: true }, Validators.required],
+      checkbox: [{ value: false, disabled: true }, Validators.required],
       nombre: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
-      email: ['', Validators.compose([Validators.email,Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"),Validators.minLength(3),Validators.maxLength(50)])],
-      telefono: ['', Validators.compose([Validators.nullValidator,Validators.pattern('[0-9]+'),Validators.minLength(10),Validators.maxLength(14)])],
-      searchTerm:['',Validators.maxLength(100)],
-      habitacion: ['', Validators.required]  // <-- Add this control
+      email: ['', Validators.compose([
+        Validators.required,  // <-- Make email required
+        Validators.email,
+        Validators.pattern("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"),
+        Validators.minLength(3),
+        Validators.maxLength(50)
+      ])],
+      telefono: ['', Validators.compose([
+        Validators.required,  // <-- Make telefono required
+        Validators.pattern('[0-9]+'),
+        Validators.minLength(10),
+        Validators.maxLength(14)
+      ])],
+      searchTerm: ['', Validators.maxLength(100)],
+      habitacion: ['', Validators.required]
     });
+    
     this.formGroup2 = this.fb.group({
       checkbox:[false,Validators.required],
     })
@@ -465,6 +481,7 @@ retriveBaseRatePrice(codigosCuarto: string, checkDay: Date, day:number=-1) {
 
   return Math.ceil(tarifaTotal);
 }
+
 checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
   const tarifaTemporada = this.tempRatesArray.find(obj => {
     const llegada = new Date(obj.Llegada);
@@ -584,7 +601,6 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
 
           // Filtrar las habitaciones disponibles
           const habitacionesDisponibles = this.roomCodesComplete.filter(habitacion => !this.ocupadasSet.has(habitacion.Numero));
-
           // Paso 1: Crear el array preAsignadasArray
           this.preAsignadasArray = habitacionesDisponibles.map(item => ({
             numero: item.Numero,

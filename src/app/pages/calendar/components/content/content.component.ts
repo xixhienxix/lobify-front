@@ -322,21 +322,41 @@ export class ContentComponent implements OnInit{
         }
       } else if (args.type === 'QuickInfo') {
         args.cancel = true;
-    
+        const groupIndex = args.data.groupIndex;
+
+        const resourceCollection = this.scheduleObj.getResourceCollections();
+        const activeCellsData = this.scheduleObj.activeCellsData;
+        const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
+        const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!)
         // Get current date and filter events
         const now = new Date();
         const events = this.scheduleObj.getEvents();
-        const filteredEvents = events.filter(event => new Date(event.EndTime) >= now);
+
+        let filteredEvents
+        if(events && events.length !== 0){
+          filteredEvents = events.filter(event => new Date(event.EndTime) >= now);
         
-        // Check if there is an existing reservation on the same date and room
-        const hasOverlap = filteredEvents.some(event =>
-          event.ProjectId === args.data.ProjectId &&
-          event.TaskId === args.data.TaskId &&
-          new Date(event.EndTime).toISOString().split('T')[0] > new Date(args.data.startTime).toISOString().split('T')[0]
-        );
-    
-        if (!hasOverlap) {
-          const numeroCuarto = events.find(item => item.TaskId === args.data.TaskId)?.Numero;
+          // Check if there is an existing reservation on the same date and room
+          const hasOverlap = filteredEvents.some(event => {
+            // Check if ProjectId and TaskId match
+            if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
+              // Now check for date overlap
+              return new Date(event.EndTime).toISOString().split('T')[0] > new Date(args.data.startTime).toISOString().split('T')[0];
+            }
+            // If ProjectId or TaskId don't match, return false
+            return false;
+          });
+
+        if(hasOverlap){
+          return
+        }else{
+          const numeroCuarto = rowData.resourceData.text
+          const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+          this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
+        }
+          
+        }else {
+          const numeroCuarto = rowData.resourceData.text
           const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
           this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
         }

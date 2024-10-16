@@ -126,6 +126,8 @@ interface StateMapping {
     formGroup:FormGroup;
     secondFormGroup:FormGroup;
     myControl = new FormControl();
+    isFormDisabled: boolean = false;  // Control whether form is disabled
+
     
     /**Loading  */
     isLoading:boolean=false
@@ -177,6 +179,8 @@ interface StateMapping {
   
       this.loadForm();
       this.getCodigosDeCargo();
+      this.checkFormStatus();
+
     }
   
     maxCantidad(){
@@ -191,6 +195,50 @@ interface StateMapping {
     actualizaHuesped(huesped:Huesped){
       this.honFetchReservations.emit(huesped);
     }    
+
+    checkFormStatus() {
+      const estatus = this.currentHuesped?.estatus;
+      const disabledStatuses = [
+        'Reserva Cancelada',
+        'Reserva Confirmada',
+        'Esperando Deposito',
+        'Deposito Realizado',
+        'Totalmente Pagada',
+        'Reserva Sin Pago'
+      ];
+  
+      // Set isFormDisabled to true if estatus matches any of the disabled statuses
+      // Set isFormDisabled to true if estatus matches any of the disabled statuses
+   // Set isFormDisabled to true if estatus matches any of the disabled statuses
+      if (disabledStatuses.includes(estatus)) {
+        this.isFormDisabled = true;
+
+        // Disable the specific form controls safely
+        const motivoDescControl = this.secondFormGroup.get('motivoDesc');
+        const qtyPrecioControl = this.secondFormGroup.get('qtyPrecio');
+
+        if (motivoDescControl) {
+          motivoDescControl.disable();
+        }
+
+        if (qtyPrecioControl) {
+          qtyPrecioControl.disable();
+        }
+      } else {
+        // Enable the controls if the status doesn't match
+        const motivoDescControl = this.secondFormGroup.get('motivoDesc');
+        const qtyPrecioControl = this.secondFormGroup.get('qtyPrecio');
+
+        if (motivoDescControl) {
+          motivoDescControl.enable();
+        }
+
+        if (qtyPrecioControl) {
+          qtyPrecioControl.enable();
+        }
+      }
+    }
+    
   
     
     loadForm(){

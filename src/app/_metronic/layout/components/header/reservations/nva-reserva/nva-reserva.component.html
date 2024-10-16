@@ -393,6 +393,7 @@
           <label class="form-label">Email</label>
           <input
             type="email"
+            required
             class="form-control form-control-lg form-control-solid"
             name="email"
             placeholder="Email"
@@ -424,12 +425,16 @@
         >
           Escriba un correo valido
         </div> -->
+        <mat-error *ngIf="nombre!.errors?.required">
+          * Obligatorio
+        </mat-error>
         </div>
 
         <div class="col-lg-6">
           <label class="form-label">Teléfono</label>
           <input
             type="tel"
+            required
             class="form-control form-control-lg form-control-solid"
             name="telefono"
             placeholder="Teléfono"
@@ -449,6 +454,9 @@
           >
             Minimo 10 numeros
           </div>
+          <mat-error *ngIf="nombre!.errors?.required">
+            * Obligatorio
+          </mat-error>
           <div
             class="invalid-feedback"
             *ngIf="controlHasError('maxlength', 'telefono')"
@@ -467,62 +475,90 @@
     </div>
 
     <div style="background-color:var(--deep-red-background);" class="modal-header">
-      <div style="text-align: center; color: white;" class="text-center modal-title h4 col-12 "
-        id="example-modal-sizes-title-lg">
-       Confirmar el Tipo de Reserva
-          <div class="form-group row">
-            <div class="form-group col-lg-6 ">
-                  <button
-                  class="btn"
-                  style="background-color:var(--walkin-btn); width: 100%;"
-                  type="submit"
-                  name="estatus"
-                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') || !noDisabledCheckIn || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                  (click)="setEstatus(1);closeModal()"
-                  >
-                    Realiza Walk-In
-                  </button>
-            </div>
-            <div class="form-group col-lg-6 ">
-                  <button
-                  class="btn"
-                  style="background-color:var(--rsv-btn); width: 100%;"
-                  type="submit"
-                  name="estatus"
-                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') ||  cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                  (click)="setEstatus(2); closeModal()"
-                  >
-                    Agrega Reserva
-                  </button>
-            </div>
-            <div class="form-group col-lg-6 ">
-                  <button
-                  class="btn"
-                  style="background-color:var(--internal-use-btn); width: 100%;"
-                  type="submit"
-                  [disabled]="preAsignadasArray.length===0||!isControlValid('nombre') ||  cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                  (click)="setEstatus(5);closeModal()"
-                  >
-  
-                    Reserva Uso Interno
-                  </button>
-            </div>
-            <div class="form-group col-lg-6">
-                  <button
-                  
-                    class="btn"
-                    style="background-color:var(--temporal-rsv-btn); width: 100%;"
-                    type="submit"
-                    value="7"
-                    [disabled]="preAsignadasArray.length===0||!isControlValid('nombre')  || cuarto==='' || preAsigCheck() || maxPeopleFlag || tarifaSeleccionadaCheck()"
-                    (click)="setEstatus(7); closeModal()"
-                    >
-                    Reserva Temporal
-                  </button>
-            </div>
+      <div style="text-align: center; color: white;" class="text-center modal-title h4 col-12" id="example-modal-sizes-title-lg">
+        Confirmar el Tipo de Reserva
+        <div class="form-group row">
+          <div class="form-group col-lg-6">
+            <button
+              class="btn"
+              style="background-color:var(--walkin-btn); width: 100%;"
+              type="submit"
+              name="estatus"
+              [disabled]="preAsignadasArray.length === 0 || 
+                          !formGroup.get('nombre')?.valid || 
+                          !formGroup.get('email')?.valid || 
+                          !formGroup.get('telefono')?.valid || 
+                          !noDisabledCheckIn ||
+                          cuarto === '' || 
+                          preAsigCheck() || 
+                          maxPeopleFlag || 
+                          tarifaSeleccionadaCheck()"
+              (click)="setEstatus(1); closeModal()"
+            >
+              Realiza Walk-In
+            </button>
+          </div>
+          <div class="form-group col-lg-6">
+            <button
+              class="btn"
+              style="background-color:var(--rsv-btn); width: 100%;"
+              type="submit"
+              name="estatus"
+              [disabled]="preAsignadasArray.length === 0 || 
+                          !formGroup.get('nombre')?.valid || 
+                          !formGroup.get('email')?.valid || 
+                          !formGroup.get('telefono')?.valid || 
+                          cuarto === '' || 
+                          preAsigCheck() || 
+                          maxPeopleFlag || 
+                          tarifaSeleccionadaCheck()"
+              (click)="setEstatus(2); closeModal()"
+            >
+              Agrega Reserva
+            </button>
+          </div>
+          <div class="form-group col-lg-6">
+            <button
+              class="btn"
+              style="background-color:var(--internal-use-btn); width: 100%;"
+              type="submit"
+              [disabled]="preAsignadasArray.length === 0 || 
+                          !formGroup.get('nombre')?.valid || 
+                          !formGroup.get('email')?.valid || 
+                          !formGroup.get('telefono')?.valid || 
+                          cuarto === '' || 
+                          preAsigCheck() || 
+                          maxPeopleFlag || 
+                          tarifaSeleccionadaCheck()"
+              (click)="setEstatus(5); closeModal()"
+            >
+              Reserva Uso Interno
+            </button>
+          </div>
+          <div class="form-group col-lg-6">
+            <button
+              class="btn"
+              style="background-color:var(--temporal-rsv-btn); width: 100%;"
+              type="submit"
+              value="7"
+              [disabled]="preAsignadasArray.length === 0 || 
+                          !formGroup.get('nombre')?.valid || 
+                          !formGroup.get('email')?.valid || 
+                          !formGroup.get('telefono')?.valid || 
+                          cuarto === '' || 
+                          preAsigCheck() || 
+                          maxPeopleFlag || 
+                          tarifaSeleccionadaCheck()"
+              (click)="setEstatus(7); closeModal()"
+            >
+              Reserva Temporal
+            </button>
           </div>
         </div>
       </div>
+    </div>
+    
+    
 
     
 

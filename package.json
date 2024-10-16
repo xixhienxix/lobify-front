@@ -4,11 +4,13 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
-    "build": "ng build --configuration production --proxy-config proxy.conf.prod.json",
+    "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
     "rtl": "webpack --config=rtl.config.js",
     "test": "ng test",
-    "lint": "ng lint"
+    "lint": "ng lint",
+    "deploy": "npm run build && firebase deploy"
+
   },
   "private": true,
   "dependencies": {

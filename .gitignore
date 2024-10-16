@@ -57,3 +57,4 @@ Thumbs.db
 proxy.conf.json
 proxy.conf.prod.json
 *.cache
+*.cache
