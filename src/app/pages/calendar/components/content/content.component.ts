@@ -1,7 +1,7 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 
 import { Component, EventEmitter,Input,  OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
-import { Internationalization } from '@syncfusion/ej2-base';
+import { Internationalization, setCulture } from '@syncfusion/ej2-base';
 import { ChangeEventArgs } from '@syncfusion/ej2-buttons';
 import {
   ScheduleComponent, DragAndDropService, TimelineViewsService, GroupModel, EventSettingsModel, ResizeService, View, TimelineMonthService, WorkHoursModel, RenderCellEventArgs, TimeScaleModel, ActionEventArgs,
@@ -27,7 +27,146 @@ import * as gregorian from '../../../../../assets/i18/culture-files/ca-gregorian
 import * as numbers from '../../../../../assets/i18/culture-files/numberingSystems.json';
 import * as timeZoneNames from '../../../../../assets/i18/culture-files/timeZoneNames.json';
 import { Bloqueo } from 'src/app/_metronic/layout/components/header/bloqueos/_models/bloqueo.model';
+import frNumberData from "@syncfusion/ej2-cldr-data/main/es-MX/numbers.json";
+import frtimeZoneData from "@syncfusion/ej2-cldr-data/main/es-MX/timeZoneNames.json";
+import frGregorian from "@syncfusion/ej2-cldr-data/main/es-MX/ca-gregorian.json";
+import frNumberingSystem from "@syncfusion/ej2-cldr-data/supplemental/numberingSystems.json";
 
+loadCldr(frNumberData, frtimeZoneData, frGregorian, frNumberingSystem);
+
+L10n.load({
+  "es-MX": {
+    "schedule": {
+      "day": "Día",
+      "week": "Semana",
+      "workWeek": "Semana laboral",
+      "month": "Mes",
+      "year": "Año",
+      "agenda": "Agenda",
+      "weekAgenda": "Agenda de la semana",
+      "workWeekAgenda": "Agenda de la semana laboral",
+      "monthAgenda": "Agenda del mes",
+      "today": "Hoy",
+      "noEvents": "No hay eventos",
+      "emptyContainer": "No hay eventos programados para este día.",
+      "allDay": "Todo el dia",
+      "start": "Inicio",
+      "end": "Fin",
+      "more": "más",
+      "close": "Cerrar",
+      "cancel": "Cancelar",
+      "noTitle": "(Sin título)",
+      "delete": "Borrar",
+      "deleteEvent": "Este evento",
+      "deleteMultipleEvent": "Eliminar Varios eventos",
+      "selectedItems": "Elementos seleccionados",
+      "deleteSeries": "Serie completa",
+      "edit": "Editar",
+      "editSeries": "Serie completa",
+      "editEvent": "Este evento",
+      "createEvent": "Crear",
+      "subject": "Asunto",
+      "addTitle": "Añadir título",
+      "moreDetails": "Más detalles",
+      "moreEvents": "Más eventos",
+      "save": "Guardar",
+      "editContent": "¿Cómo te gustaría cambiar la cita en la serie?",
+      "deleteContent": "¿Está seguro de que desea eliminar este evento?",
+      "deleteMultipleContent": "¿Estás seguro de que deseas eliminar los eventos seleccionados?",
+      "newEvent": "Nuevo evento",
+      "title": "Título",
+      "location": "Ubicación",
+      "description": "Descripción",
+      "timezone": "Zona horaria",
+      "startTimezone": "Iniciar zona horaria",
+      "endTimezone": "Fin de la zona horaria",
+      "repeat": "Repetir",
+      "saveButton": "Guardar",
+      "cancelButton": "Cancelar",
+      "deleteButton": "Eliminar",
+      "recurrence": "Repetición",
+      "wrongPattern": "El patrón de recurrencia no es válido.",
+      "seriesChangeAlert": "¿Desea cancelar los cambios realizados en instancias específicas de esta serie y volver a compararlos con toda la serie?",
+      "createError": "La duración del evento debe ser más corta que la frecuencia con la que ocurre. Acorte la duración o cambie el patrón de periodicidad en el editor de eventos de periodicidad.",
+      "sameDayAlert": "Dos ocurrencias del mismo evento no pueden ocurrir en el mismo día.",
+      "occurenceAlert": "No se puede reprogramar una aparición de la cita periódica si omite una aparición posterior de la misma cita.",
+      "editRecurrence": "Editar periodicidad",
+      "repeats": "Repite",
+      "alert": "Alerta",
+      "startEndError": "La fecha de finalización seleccionada se produce antes de la fecha de inicio.",
+      "invalidDateError": "El valor de la fecha ingresada no es válido.",
+      "blockAlert": "Los eventos no se pueden programar dentro del rango de tiempo bloqueado.",
+      "ok": "De acuerdo",
+      "of": "de",
+      "yes": "si",
+      "no": "No",
+      "occurrence": "Ocurrencia",
+      "series": "Serie",
+      "previous": "Anterior",
+      "next": "próximo",
+      "timelineDay": "Día de la línea de tiempo",
+      "timelineWeek": "Semana de la línea de tiempo",
+      "timelineWorkWeek": "Cronograma Semana Laboral",
+      "timelineMonth": "Mes de la línea de tiempo",
+      "timelineYear": "Cronología Año",
+      "editFollowingEvent": "Siguientes eventos",
+      "deleteTitle": "Eliminar evento",
+      "editTitle": "Editar evento",
+      "beginFrom": "Comenzar desde",
+      "endAt": "Fin en",
+      "expandAllDaySection": "Expandir la sección de todo el día",
+      "collapseAllDaySection": "Contraer sección de todo el día",
+      "searchTimezone": "Zona horaria de búsqueda",
+      "noRecords": "No se encontraron registros",
+      "deleteRecurrenceContent": "¿Está seguro de que desea eliminar solo este evento o la serie completa?",
+      "recurrenceDateValidation": "Algunos meses tienen menos días a la fecha seleccionada. Para estos meses la ocurrencia de los eventos será en el ultimo día del mes."
+    },
+    "recurrenceeditor": {
+      "none": "Ninguna",
+      "daily": "Diario",
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "month": "Mes",
+      "yearly": "Anual",
+      "never": "Nunca",
+      "until": "Hasta",
+      "count": "Contar",
+      "first": "Primero",
+      "second": "Segundo",
+      "third": "Tercero",
+      "fourth": "Cuarto",
+      "last": "Último",
+      "repeat": "Repetir",
+      "repeatEvery": "Repite cada",
+      "on": "Repetir en",
+      "end": "Final",
+      "onDay": "Día",
+      "days": "Día(s)",
+      "weeks": "Semana(s)",
+      "months": "Mes(es)",
+      "years": "Año(s)",
+      "every": "cada",
+      "summaryTimes": "vece(s)",
+      "summaryOn": "en",
+      "summaryUntil": "hasta",
+      "summaryRepeat": "Repite",
+      "summaryDay": "día(s)",
+      "summaryWeek": "semana(s)",
+      "summaryMonth": "mes(es)",
+      "summaryYear": "año(s)",
+      "monthWeek": "Mes Semana",
+      "monthPosition": "Posición del mes",
+      "monthExpander": "Expansor de mes",
+      "yearExpander": "Expansor de año",
+      "repeatInterval": "Intervalo de repetición"
+    },
+    "calendar": {
+      "today": "Hoy"
+    },
+  }
+});
+
+setCulture('es-MX');
 @Component({
     selector      : 'app-content',
     templateUrl   : './content.component.html',
@@ -192,7 +331,7 @@ export class ContentComponent implements OnInit{
         return colorMap[estatus] || colorMap['default'];
       };
       
-    
+      let reservasIdCounter = 1;
       dataSource.value.forEach((item: Huesped, index: number) => {
         this.reservationsArray.push(item);
           if(!reservationStatusMap[8].includes(item.estatus)){
@@ -201,12 +340,12 @@ export class ContentComponent implements OnInit{
             const salida = new Date(item.salida);
         
             const pushArray = {
-              Id: index + 1,   
+              Id: reservasIdCounter++,  
               Subject: item.nombre,
               StartTime: new Date(llegada.setHours(hours, minutes)),
               EndTime: new Date(salida.setHours(hours, minutes)),
               IsAllDay: false,
-              ProjectId: this.checkGroupId(item.habitacion),
+              ProjectId: this.checkGroupId(item.habitacion,item.numeroCuarto),
               TaskId: this.checkTaskID(item.numeroCuarto),
               Folio: item.folio,
               Codigo: item.habitacion,
@@ -219,28 +358,29 @@ export class ContentComponent implements OnInit{
       });
     
       console.log("Previo a Bloqueos: ", this.datasourceArray);
-    
+      let bloqueoIdCounter = 0;
+
       dataSource.bloqueosArray.forEach((item: any) => {
         this.bloqueosArray.push(item);
         const { hours, minutes } = getTimeDetails(item.Desde);
         const llegada = new Date(item.Desde);
         const salida = new Date(item.Hasta);
-    
-        item.Cuarto.forEach((numCuarto: string, indexCuarto: number) => {
+
+        item.Cuarto.forEach((numCuarto: string) => {
           const bloqueoObj = {
-            Id: indexCuarto + 1,
+            Id: bloqueoIdCounter++,  // Use the counter and increment it for each new bloqueoObj
             Subject: 'Bloqueo',
             StartTime: new Date(llegada.setHours(hours, minutes)),
             EndTime: new Date(salida.setHours(hours, minutes)),
             IsAllDay: true,
-            ProjectId: this.checkGroupId(item.Habitacion),
+            ProjectId: this.checkGroupId(item.Habitacion,numCuarto),
             TaskId: this.checkTaskID(numCuarto),
-            Folio: 'B-' + (indexCuarto + 1),
+            Folio: 'B-' + bloqueoIdCounter,  // Folio also uses the counter for uniqueness
             Codigo: item.Habitacion,
             Numero: numCuarto,
             CategoryColor: this.colorDict[5]
           };
-    
+
           this.datasourceArray.push(bloqueoObj);
         });
       });
@@ -257,8 +397,8 @@ export class ContentComponent implements OnInit{
     this.onRefreshingFinished.emit(true);
   }
 
-  checkGroupId(codigo:string){
-    const habitacionesPorTipo = this.roomCodesComplete.find(item=>item.Codigo === codigo);
+  checkGroupId(codigo:string,cuarto:string){
+    const habitacionesPorTipo = this.roomCodesComplete.find(item=>item.Codigo === codigo && item.Numero === cuarto );
     const foundGroupID = this.tipoHabGroupDataSource.find(item=>item.text === habitacionesPorTipo?.Tipo);
     return foundGroupID?.id
   }
@@ -314,7 +454,7 @@ export class ContentComponent implements OnInit{
     const today = new Date(); // Get today's date
     const startTime = new Date(args.data.StartTime); // Convert StartTime to a Date object
 
-    if (startTime > today) {
+    if (startTime.toDateString() >= today.toDateString()) {
       if (args.data.hasOwnProperty("Folio")) {
         if (args.type === 'Editor' || args.type === 'QuickInfo') {
           args.cancel = true;
@@ -336,16 +476,24 @@ export class ContentComponent implements OnInit{
         if(events && events.length !== 0){
           filteredEvents = events.filter(event => new Date(event.EndTime) >= now);
         
-          // Check if there is an existing reservation on the same date and room
-          const hasOverlap = filteredEvents.some(event => {
-            // Check if ProjectId and TaskId match
-            if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
-              // Now check for date overlap
-              return new Date(event.EndTime).toISOString().split('T')[0] > new Date(args.data.startTime).toISOString().split('T')[0];
-            }
-            // If ProjectId or TaskId don't match, return false
-            return false;
-          });
+        // Helper function to get only the date part of a Date object (ignore time)
+        const getDateOnly = (date: string | Date): string => {
+          return new Date(date).toISOString().split('T')[0];  // Format as YYYY-MM-DD
+        };
+
+        // Check for overlapping events (same day only, ignoring time)
+        const hasOverlap = filteredEvents.some(event => {
+          if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
+            const eventStartDate = getDateOnly(event.StartTime);
+            const eventEndDate = getDateOnly(event.EndTime);
+            const argsStartDate = getDateOnly(args.data.startTime);
+            const argsEndDate = getDateOnly(args.data.endTime);
+
+            // Check for date overlap (ignoring time)
+            return (argsStartDate <= eventEndDate && argsEndDate >= eventStartDate);
+          }
+          return false;
+        });
 
         if(hasOverlap){
           return
@@ -371,19 +519,28 @@ export class ContentComponent implements OnInit{
    * @memberof ContentComponent
    */
   onDragStart(args: DragEventArgs): void {
-    args.interval = 30;
+    if(args.data.Subject === 'Bloqueo'){
+      args.cancel = true;
+    }else{
+      args.interval = 30;    
+    }
   }
 
   onDragStop(args: DragEventArgs): void {
-    //this.onResizeReserva.emit(args.data) // <-- This data is from where the event start  and i need the data to which is moved to
-    const scheduleObj = (document.querySelector('.e-schedule') as any).ej2_instances[0];
-    const targetElement:any = args.target;
-    const rowIndex = targetElement!.parentNode!.rowIndex;
-    const resourceDetails = scheduleObj.getResourcesByIndex(rowIndex);
-    const Codigo = this.roomCodesComplete.find((item)=> item.Numero === resourceDetails.resourceData.text)?.Codigo
-    args.data.Codigo = Codigo
-    args.data.Numero = resourceDetails.resourceData.text
-    this.onResizeReserva.emit(args.data)
+      const target = args.event.target as HTMLElement;
+      if (target.classList.contains('e-header-cells')) { // Avoid the drag event to be left on header Cells
+        args.cancel = true;
+      }else{
+        //this.onResizeReserva.emit(args.data) // <-- This data is from where the event start  and i need the data to which is moved to
+        const scheduleObj = (document.querySelector('.e-schedule') as any).ej2_instances[0];
+        const targetElement:any = args.target;
+        const rowIndex = targetElement!.parentNode!.rowIndex;
+        const resourceDetails = scheduleObj.getResourcesByIndex(rowIndex);
+        const Codigo = this.roomCodesComplete.find((item)=> item.Numero === resourceDetails.resourceData.text)?.Codigo
+        args.data.Codigo = Codigo
+        args.data.Numero = resourceDetails.resourceData.text
+        this.onResizeReserva.emit(args.data)
+      }
   }
 
   onRenderCell(args: RenderCellEventArgs): void {
@@ -517,13 +674,17 @@ onStatusChange(cuarto:string, estatus:string){
   this.onChangeEstatus.emit({cuarto,estatus})
 }
 
-
 onEditRsv(event:any){
   this.honEditRsv.emit(event);
 }
 
-onResizeStop(args: ResizeEventArgs){
+onResizeStart(args: ResizeEventArgs){
+  if(args.data.Subject === 'Bloqueo'){
+    args.cancel = true
+  }
+}
 
+onResizeStop(args: ResizeEventArgs){
     this.onResizeReserva.emit(args.data)
 }
 

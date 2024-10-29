@@ -7,7 +7,6 @@ import { SharedModule } from 'src/app/_metronic/shared/shared.module';
 import { HeaderComponent } from './components/header/header.component';
 import { ContentComponent } from './components/content/content.component';
 import { FooterComponent } from './components/footer/footer.component';
-import { BryntumSchedulerModule } from '@bryntum/scheduler-angular'; 
 import { CheckBoxAllModule, ButtonAllModule, SwitchAllModule } from '@syncfusion/ej2-angular-buttons';
 import { DatePickerAllModule, TimePickerAllModule, DateTimePickerAllModule } from '@syncfusion/ej2-angular-calendars';
 import { DropDownListAllModule, MultiSelectAllModule } from '@syncfusion/ej2-angular-dropdowns';
@@ -72,7 +71,6 @@ export const MY_DATE_FORMATS = {
     MatMomentDateModule,
     CommonModule,
     SharedModule,
-    BryntumSchedulerModule,
     ReactiveFormsModule,
     MatButtonModule, 
     MatMenuModule, 

@@ -1,6 +1,6 @@
 <div class="modal-header">
     <h4 class="modal-title">{{alertHeader}}</h4>
-    <button mat-button (click)="modal.dismiss('Cross click')">
+    <button mat-button (click)="modal.close()">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
@@ -36,33 +36,6 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
-    <!-- <table mat-table [dataSource]="dataSource">
-        <ng-container matColumnDef="Tarifa">
-          <th mat-header-cell *matHeaderCellDef> Tarifa </th>
-          <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
-        </ng-container>
-    
-        <ng-container matColumnDef="$ Promedio x Noche">
-          <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-          <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights)/stayNights}} </td>
-        </ng-container>
-    
-        <ng-container matColumnDef="Total">
-          <th mat-header-cell *matHeaderCellDef> Total </th>
-          <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights)}} </td>
-        </ng-container>
-
-        <ng-container matColumnDef="Acciones">
-          <th mat-header-cell *matHeaderCellDef> Acciones </th>
-          <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element; let i = index "> 
-              <mat-radio-button [value]="element[i]" [value]="ratesTotalCalc(element,stayNights)" (change)="tarifaRadioButton(element,$event, cuarto)"></mat-radio-button>   
-          </td>
-        </ng-container>
-
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table> -->
   </div>
 
 

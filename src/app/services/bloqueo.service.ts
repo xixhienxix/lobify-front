@@ -187,8 +187,8 @@ private currentBloqueosSubject =new Subject<any>();
         _id:string,
         desde:Date,
         hasta:Date,
-        habitacion:string,
-        numCuarto:Array<string>,
+        habitacion:any,
+        numCuarto:any,
         ) {
 
           let bloqueos: Bloqueo = {

@@ -147,110 +147,107 @@
   </form>
 
   <!-- START OF TABLE -->
-  <div class="example-container mat-elevation-z8">
-  <div class="example-table-container">
-    <div class="font-weight-bold text-uppercase modal-header">Lista de Bloqueos
-      <!-- <button style="background-color: #319dd7; color: white; font-weight: bold;" class="btn" (click)="getBloqueos()"> Actualizar</button> -->
-    </div>
-<!-- Angular Material Table -->
-<mat-table style="width: 1000px; overflow-y: auto;" [dataSource]="dataSource" class="mat-elevation-z8" *ngIf="!isLoading; else loadingTemplate">
+  <!-- <div class="example-container mat-elevation-z8">
+    <div class="example-table-container">
+      <div class="font-weight-bold text-uppercase modal-header">Lista de Bloqueos
+      </div>
+    <mat-table style="width: 1000px; overflow-y: auto;" [dataSource]="dataSource" class="mat-elevation-z8" *ngIf="!isLoading; else loadingTemplate">
 
-  <!-- Habitacion Column -->
-  <ng-container matColumnDef="Habitacion">
-    <mat-header-cell *matHeaderCellDef> Habitacion </mat-header-cell>
-    <mat-cell *matCellDef="let bloqueo">
-      {{bloqueo.Habitacion}}
-    </mat-cell>
-  </ng-container>
+      <ng-container matColumnDef="Habitacion">
+        <mat-header-cell *matHeaderCellDef> Habitacion </mat-header-cell>
+        <mat-cell *matCellDef="let bloqueo">
+          {{bloqueo.Habitacion}}
+        </mat-cell>
+      </ng-container>
 
-  <!-- Mov Rooms Column -->
-  <ng-container matColumnDef="Cuarto">
-    <mat-header-cell *matHeaderCellDef> Mov Rooms </mat-header-cell>
-    <mat-cell *matCellDef="let bloqueo">
-      <div [innerHTML]="displayRooms(bloqueo)"></div>
-    </mat-cell>
-  </ng-container>
 
-  <!-- Fechas Column -->
-  <ng-container matColumnDef="Desde">
-    <mat-header-cell *matHeaderCellDef> Fechas </mat-header-cell>
-    <mat-cell *matCellDef="let bloqueo">
-      <div [innerHTML]="displayFechas(bloqueo)"></div>
-    </mat-cell>
-  </ng-container>
+      <ng-container matColumnDef="Cuarto">
+        <mat-header-cell *matHeaderCellDef> Mov Rooms </mat-header-cell>
+        <mat-cell *matCellDef="let bloqueo">
+          <div [innerHTML]="displayRooms(bloqueo)"></div>
+        </mat-cell>
+      </ng-container>
 
-  <!-- Restricciones Column -->
-  <ng-container matColumnDef="Estatus">
-    <mat-header-cell *matHeaderCellDef> Restricciones </mat-header-cell>
-    <mat-cell *matCellDef="let bloqueo">
-      <section class="example-section">
-        <ng-container *ngFor="let entry of objectEntries(bloqueo.Estatus)">
-          <mat-checkbox
-            [checked]="entry.value"
-            (change)="onCheckboxChange(bloqueo,entry.key, $event.checked)"
-            style="margin: 5px; color: #00506a; font-weight: bold;">
-            {{ entry.key }}
-          </mat-checkbox>
-        </ng-container>
-      </section>
-    </mat-cell>
-  </ng-container>
 
-  <!-- Comentarios Column -->
-  <ng-container matColumnDef="Comentarios">
-    <mat-header-cell *matHeaderCellDef> Comentarios </mat-header-cell>
-    <mat-cell *matCellDef="let bloqueo">
-      <textarea
-        style="width: 100%;"
-        [(ngModel)]="bloqueo.Comentarios">
-      </textarea>
-    </mat-cell>
-  </ng-container>
+      <ng-container matColumnDef="Desde">
+        <mat-header-cell *matHeaderCellDef> Fechas </mat-header-cell>
+        <mat-cell *matCellDef="let bloqueo">
+          <div [innerHTML]="displayFechas(bloqueo)"></div>
+        </mat-cell>
+      </ng-container>
 
-  <!-- Acciones Column -->
-  <ng-container matColumnDef="acciones">
-    <mat-header-cell *matHeaderCellDef> Acciones </mat-header-cell>
-    <mat-cell *matCellDef="let bloqueo">
-      <a
-        title="Guardar Cambios"
-        class="mx-3 btn btn-icon btn-light btn-hover-primary btn-sm"
-        (click)="edit(bloqueo._id, bloqueo.Desde, bloqueo.Hasta, bloqueo.Habitacion, bloqueo.Cuarto, bloqueo.sinLlegadas, bloqueo.sinSalidas, bloqueo.fueraDeServicio, bloqueo.Comentarios)">
-        <app-keenicon name="pencil" class=" svg-icon-md text-primary"></app-keenicon>
 
-      </a>
+      <ng-container matColumnDef="Estatus">
+        <mat-header-cell *matHeaderCellDef> Restricciones </mat-header-cell>
+        <mat-cell *matCellDef="let bloqueo">
+          <section class="example-section">
+            <ng-container *ngFor="let entry of objectEntries(bloqueo.Estatus)">
+              <mat-checkbox
+                [checked]="entry.value"
+                (change)="onCheckboxChange(bloqueo,entry.key, $event.checked)"
+                style="margin: 5px; color: #00506a; font-weight: bold;">
+                {{ entry.key }}
+              </mat-checkbox>
+            </ng-container>
+          </section>
+        </mat-cell>
+      </ng-container>
 
-      <a
-        title="Eliminar Bloqueo"
-        class="btn btn-icon btn-light btn-hover-danger btn-sm"
-        (click)="openDeleteModal(deleteID,bloqueo._id, bloqueo.Desde, bloqueo.Hasta, bloqueo.Habitacion, bloqueo.Cuarto)">
-        <app-keenicon name="trash" class=" svg-icon-md text-primary"></app-keenicon>
-      </a>
-    </mat-cell>
-  </ng-container>
 
-  <!-- Header and Row Definitions -->
-  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-  
-</mat-table>
+      <ng-container matColumnDef="Comentarios">
+        <mat-header-cell *matHeaderCellDef> Comentarios </mat-header-cell>
+        <mat-cell *matCellDef="let bloqueo">
+          <textarea
+            style="width: 100%;"
+            [(ngModel)]="bloqueo.Comentarios">
+          </textarea>
+        </mat-cell>
+      </ng-container>
+
+
+      <ng-container matColumnDef="acciones">
+        <mat-header-cell *matHeaderCellDef> Acciones </mat-header-cell>
+        <mat-cell *matCellDef="let bloqueo">
+          <a
+            title="Guardar Cambios"
+            class="mx-3 btn btn-icon btn-light btn-hover-primary btn-sm"
+            (click)="edit(bloqueo._id, bloqueo.Desde, bloqueo.Hasta, bloqueo.Habitacion, bloqueo.Cuarto, bloqueo.sinLlegadas, bloqueo.sinSalidas, bloqueo.fueraDeServicio, bloqueo.Comentarios)">
+            <app-keenicon name="pencil" class=" svg-icon-md text-primary"></app-keenicon>
+
+          </a>
+
+          <a
+            title="Eliminar Bloqueo"
+            class="btn btn-icon btn-light btn-hover-danger btn-sm"
+            (click)="openDeleteModal(deleteID,bloqueo._id, bloqueo.Desde, bloqueo.Hasta, bloqueo.Habitacion, bloqueo.Cuarto)">
+            <app-keenicon name="trash" class=" svg-icon-md text-primary"></app-keenicon>
+          </a>
+        </mat-cell>
+      </ng-container>
+
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      
+    </mat-table>
     
   </div>
   <mat-paginator [length]="resultsLength" [pageSize]="30" aria-label="Select page of GitHub search results"></mat-paginator>
 
-  </div>
+  </div> -->
 
 
 </div>
 
-<!-- Loading Spinner Template -->
-<ng-template #loadingTemplate>
-  <div class="loading-container">
-    <h3>Cargando Datos...</h3>
-    <div class="spinner-border text-primary" role="status">
-      <span class="sr-only">Cargando</span>
-    </div>
-  </div>
-</ng-template>
+    <!-- Loading Spinner Template -->
+    <ng-template #loadingTemplate>
+      <div class="loading-container">
+        <h3>Cargando Datos...</h3>
+        <div class="spinner-border text-primary" role="status">
+          <span class="sr-only">Cargando</span>
+        </div>
+      </div>
+    </ng-template>
 
 <!-- No Data Available Template -->
 <ng-template #noDataTemplate>

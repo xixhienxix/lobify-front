@@ -112,7 +112,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private _authService: AuthService,
     private _dashboardService: DashboardService,
     private _communicationService: CommunicationService,
-    private _checkIndexDbService: IndexDBCheckingService
+    private _checkIndexDbService: IndexDBCheckingService,
+    private _houseKeepingService: HouseKeepingService
   ) {
     this.currentUser = this._authService.getUserInfo().username
     this.routingChanges();
@@ -399,9 +400,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
       }
     })
     modalRef.componentInstance.honUpdateCalendar.subscribe({
-      next:(value:Bloqueo)=>{
-        console.log(value);
-        
+      next:async (value:Bloqueo)=>{
+
           this._logService.logNvoBloqueo('Created Nuevo Bloqueo',this.currentUser, value).pipe(
             catchError(error => {
               // Handle error for individual log request if needed
@@ -409,8 +409,34 @@ export class HeaderComponent implements OnInit, OnDestroy {
               return of(null); // Return a null observable to keep forkJoin working
             })
           )
-      }
+          const response = this.updateDespuesDeBloqueo(value);
+                      // Fetch all reservations after logging
+                        this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
+                        this.eventsSubject.next(this.allReservations);
+                        this._communicationService.onNvareservaSubject.next(true);
+        }
     })
+  }
+
+  async updateDespuesDeBloqueo(value: any): Promise<void> {
+    try {
+      // Fetch all reservations and trigger communication service
+      // this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
+      // this._communicationService.onNvareservaSubject.next(true);
+  
+      // Wait for all 'Cuarto' status updates to finish before proceeding
+      const updatePromises = value.Cuarto.map((item: string) =>
+        firstValueFrom(this._houseKeepingService.updateEstatus(item, 'SUCIA'))
+      );
+      
+      await Promise.all(updatePromises); // Wait until all updates are done
+  
+      // Add code here that should be executed after all updates have completed
+      console.log('All room statuses updated successfully!');
+      
+    } catch (error) {
+      console.error('Error updating reservations or status:', error);
+    }
   }
 
   processReservations() {

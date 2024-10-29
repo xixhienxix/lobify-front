@@ -42,7 +42,7 @@ export class IndexDBCheckingService {
     private houseKeepingCodesSubject = new BehaviorSubject<HouseKeeping[]>([]);
     houseKeepingCodes$ = this.houseKeepingCodesSubject.asObservable();
 
-    private bloqueosSubject = new BehaviorSubject<Bloqueo[]>([]);
+    public bloqueosSubject = new BehaviorSubject<Bloqueo[]>([]);
     bloqueos$ = this.bloqueosSubject.asObservable();
 
     private estatusSubject = new BehaviorSubject<Estatus[]>([]);
@@ -117,7 +117,7 @@ export class IndexDBCheckingService {
                 results['codes'] = await this.loadCodes(refresh);
             } else if (service === 'folios') {
                 results['folios'] = await this.loadFoliador(refresh);
-            } 
+            }
       }
       return results;
     }
@@ -157,7 +157,7 @@ export class IndexDBCheckingService {
         });
     }
 
-    async loadBloqueos(refresh: boolean): Promise<Bloqueo[]> {
+    async loadBloqueos(refresh: boolean = false): Promise<Bloqueo[]> {
         if (!refresh) {
             const bloqueosIndexDb = await this._bloqueosServvice.readIndexDB('Bloqueos');
             if (bloqueosIndexDb) {

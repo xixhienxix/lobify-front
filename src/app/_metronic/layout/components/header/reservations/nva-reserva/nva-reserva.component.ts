@@ -70,7 +70,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   styleDisponibilidad:string='background-color:#99d284;'
 
   /** Models */
-  ocupadasSet = new Set();
+  // ocupadasSet = new Set();
   mySetAvaible = new Set();
 
   @Input() ratesArray:Tarifas[]=[];
@@ -185,7 +185,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
         this.formGroup.patchValue({ habitacion: this.cuarto });
       }
 
-      this.getDisponibilidad(this.intialDate, this.endDate, this.cuarto, this.stayNights, "No Folio");
+      this.getDisponibilidad(this.intialDate, this.endDate, this.cuarto, this.stayNights, "No Folio", this.cuarto);
     }  
   }
 
@@ -591,37 +591,15 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
   //                 }
   }
 
-  getDisponibilidad(intialDate:Date,endDate:Date, habitacion:string, stayNights:number, folio:string){
+  getDisponibilidad(intialDate:Date,endDate:Date, habitacion:string, stayNights:number, folio:string, cuarto:string){
 
     this._disponibilidadService.getDisponibilidad(intialDate,endDate, habitacion, stayNights, folio)
     .subscribe({      
-        next:(response)=>{
+        next:async (response)=>{
 
-          this.ocupadasSet = new Set(response);
-
-          // Filtrar las habitaciones disponibles
-          const habitacionesDisponibles = this.roomCodesComplete.filter(habitacion => !this.ocupadasSet.has(habitacion.Numero));
-          // Paso 1: Crear el array preAsignadasArray
-          this.preAsignadasArray = habitacionesDisponibles.map(item => ({
-            numero: item.Numero,
-            codigo: item.Codigo,
-            checked: false,
-            disabled: true
-          }));
-
-          // Paso 2: Filtrar para obtener solo un objeto único por cada 'Codigo'
-          if(this.cuarto === '1'){
-            const habitacionesUnicas:any = {};
-            habitacionesDisponibles.forEach(habitacion => {
-            if (!habitacionesUnicas[habitacion.Codigo]) {
-              habitacionesUnicas[habitacion.Codigo] = habitacion;
-            }
-          });
-          const habitacionesUnicasArray = Object.values(habitacionesUnicas);
-          this.availavilityRooms = [...habitacionesUnicasArray]
-          }else{
-            this.availavilityRooms = [...habitacionesDisponibles];
-          }
+          const dispoResponse = await this._disponibilidadService.calcHabitacionesDisponibles(response,intialDate,endDate,cuarto);
+          this.preAsignadasArray = dispoResponse.preAsignadasArray
+          this.availavilityRooms = dispoResponse.avaibilityRooms
 
         },
         error:()=>{
@@ -666,7 +644,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
       this.dropDownHabValueIndex = '';
     }
     console.log({initialDate:this.intialDate,endDate:this.endDate, habitacion:habitacion, noches:this.stayNights, folio})
-    this.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio);
+    this.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio, this.cuarto);
   }
 
   revisaCapacidad(codigoCuarto:string){
@@ -716,53 +694,6 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
     return availbleRates
   }
 
-  // filterRates(){
-  //   if (this.ratesArray) {
-  //     // Filter rates based on arrival and departure dates
-  //     this.filterRatesAray = this.ratesArray.filter(val => 
-  //       new Date(val.Llegada).getTime() <= this.intialDate.getTime() &&
-  //       new Date(val.Salida).getTime() >= this.endDate.getTime()
-  //     );
-    
-  //     // Compare stay duration with minimum and maximum stay requirements
-  //     this.filterRatesAray = this.filterRatesAray.filter(rate => {
-  //       const { EstanciaMinima, EstanciaMaxima } = rate;
-  //       const maxEstancia = EstanciaMaxima === 0 ? Infinity : EstanciaMaxima;
-  //       return this.stayNights >= EstanciaMinima && this.stayNights <= maxEstancia;
-  //     });
-    
-  //     // Convert initial date to Luxon DateTime object
-  //     const fromDate = DateTime.fromJSDate(this.intialDate);
-    
-  //     // Filter out rates that do not apply on the arrival day
-  //     this.filterRatesAray = this.filterRatesAray.filter(rate => {
-  //       if (rate.Tarifa === 'Tarifa Estandar') {
-  //         return true;
-  //       }
-    
-  //       const arrivalDate = DateTime.fromJSDate(new Date(rate.Llegada));
-  //       let currentDate = fromDate;
-    
-  //       while (currentDate >= arrivalDate) {
-  //         if (currentDate.hasSame(arrivalDate, 'day')) {
-  //           const diaDeLlegada = currentDate.setLocale("es").weekdayShort;
-  //           const diaDeLlegadaMayus = diaDeLlegada!.charAt(0).toUpperCase() + diaDeLlegada!.slice(1);
-            
-  //           // Check if the arrival day is not available
-  //           const isDayAvailable = rate.Dias!.some(day => day.name === diaDeLlegadaMayus && day.checked);
-  //           if (!isDayAvailable) {
-  //             return false;
-  //           }
-  //         }
-  //         currentDate = currentDate.plus({ days: 1 });
-  //       }
-    
-  //       return true;
-  //     });
-  //   }
-    
-  // }
-
   maxPeopleCheck(habitacion:any){
     var maxPeopleFlag
     /**Revision de Maximo de Personas */
@@ -800,7 +731,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
     this.cuarto=''
     this.availavilityCodeRooms = [];
     this.availavilityRooms = [];
-    this.ocupadasSet.clear;
+    // this.ocupadasSet.clear;
     this.formGroup.patchValue({ habitacion: 0 });
   }
 
@@ -837,16 +768,6 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
 
 
   }
-
-  // getRooms(){
-  //   this.ocupadasSet.forEach((element)=>{
-  //     this.roomCodes.forEach((roomsElemts)=>{
-  //       if(roomsElemts.Numero === element){
-  //         return roomsElemts.Numero
-  //       }
-  //     })
-  //   })
-  // }
 
   /** Mat-expansioln-Pane [Acordion] */
   step = 0;

@@ -52,6 +52,7 @@
         "reports":"Reports",
         "prospects":"(CRM) Clients",
         "reservationsreports":"Reservations and Clients",
+        "bloquedreports":"Out of Service",
         "parameters":"parameters",
         "catalogo-hab":"Room's Catalog",
         "rates-tittle":"Rates Catalog"

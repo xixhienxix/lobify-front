@@ -211,7 +211,7 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
       const differenceInTime = this.endDate.getTime() - this.intialDate.getTime();
       this.stayNights = Math.ceil(differenceInTime / (1000 * 3600 * 24));
 
-      this.getDisponibilidad(this.intialDate, this.endDate, this.currentHuesped.habitacion, this.stayNights, "No Folio");
+      this.getDisponibilidad(this.intialDate, this.endDate, this.currentHuesped.habitacion, this.stayNights, "No Folio", this.cuarto);
     }
   
     // Initialize form and set habitacion
@@ -758,7 +758,7 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
       this.bandera=false
       this.dropDownHabValueIndex=''
     }
-    this.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio)
+    this.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio, this.cuarto)
   }
 
   revisaCapacidad(codigoCuarto:string){
@@ -799,37 +799,14 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
     return availbleRates
   }
 
-  getDisponibilidad(intialDate:Date,endDate:Date, habitacion:string, stayNights:number, folio:string){
+  getDisponibilidad(intialDate:Date,endDate:Date, habitacion:string, stayNights:number, folio:string, cuarto:string){
     this._disponibilidadService.getDisponibilidad(intialDate,endDate, habitacion, stayNights, folio)
     .subscribe({      
-        next:(response)=>{
+        next:async (response)=>{
 
-          this.ocupadasSet = new Set(response);
-
-          // Filtrar las habitaciones disponibles
-          const habitacionesDisponibles = this.roomCodesComplete.filter(habitacion => !this.ocupadasSet.has(habitacion.Numero));
-
-          // Paso 1: Crear el array preAsignadasArray
-          this.preAsignadasArray = habitacionesDisponibles.map(item => ({
-            numero: item.Numero,
-            codigo: item.Codigo,
-            checked: false,
-            disabled: true
-          }));
-
-          // Paso 2: Filtrar para obtener solo un objeto único por cada 'Codigo'
-          if(this.cuarto === '1'){
-            const habitacionesUnicas:any = {};
-            habitacionesDisponibles.forEach(habitacion => {
-            if (!habitacionesUnicas[habitacion.Codigo]) {
-              habitacionesUnicas[habitacion.Codigo] = habitacion;
-            }
-          });
-          const habitacionesUnicasArray = Object.values(habitacionesUnicas);
-          this.availavilityRooms = [...habitacionesUnicasArray]
-          }else{
-            this.availavilityRooms = [...habitacionesDisponibles];
-          }
+          const dispoResponse = await this._disponibilidadService.calcHabitacionesDisponibles(response,intialDate,endDate,cuarto);
+          this.preAsignadasArray = dispoResponse.preAsignadasArray
+          this.availavilityRooms = dispoResponse.avaibilityRooms
 
         },
         error:()=>{

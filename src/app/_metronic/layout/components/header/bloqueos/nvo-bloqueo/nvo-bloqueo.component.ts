@@ -82,8 +82,8 @@ export class BloqueoReservaComponent implements  OnInit
   bloqueosCompleteList:Bloqueo[]=[];
 
   checkboxState:CheckboxState = {
-    sinLlegadas: false,
-    sinSalidas: false,
+    // sinLlegadas: false,
+    // sinSalidas: false,
     fueraDeServicio: false
   };
 
@@ -407,7 +407,6 @@ habValue($event:any){
             await firstValueFrom(logRequests); // Using firstValueFrom to handle the observable
 
               this.honUpdateCalendar.emit(bloqueoPayload);
-              console.log(response);
               this.modal.close();
           }
 

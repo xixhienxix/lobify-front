@@ -36,6 +36,7 @@ import { AuthService } from 'src/app/modules/auth';
 import { PropertiesChanged } from 'src/app/models/activity-log.model';
 import { Bloqueo } from 'src/app/_metronic/layout/components/header/bloqueos/_models/bloqueo.model';
 import { BloqueoService } from 'src/app/services/bloqueo.service';
+import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 
 
 @Component({
@@ -114,7 +115,8 @@ export class CalendarComponent implements OnInit {
     private _logService: LogService,
     private _authService: AuthService,
     private _estadoDeCuenta: Edo_Cuenta_Service,
-    private _bloqueoService: BloqueoService
+    private _bloqueoService: BloqueoService,
+    private _checkIndexDb: IndexDBCheckingService
   ) {
     this.currentUser = this._authService.getUserInfo().username
   }
@@ -142,10 +144,10 @@ export class CalendarComponent implements OnInit {
 
   async getReservations() {
     this._huespedService.getAll().subscribe({
-      next: (value) => {
+      next: async (value) => {
         this.allReservations = [];
-        
-        this.changingValue.next({value, bloqueosArray:this.bloqueosArray});
+        const bloqueosArray = await this._checkIndexDb.loadBloqueos(true);
+        this.changingValue.next({value, bloqueosArray:bloqueosArray});
         this.allReservations = [...value]
       }
     });
@@ -544,42 +546,77 @@ export class CalendarComponent implements OnInit {
   }
 
   async onResizeReservation(event: Record<string, any>) {
+    let arrayToCheck = []
+    if(event.Subject === 'Bloqueo'){
+      arrayToCheck = this.bloqueosArray
+    }else{
+      arrayToCheck = this.allReservations
+    }
 
-    const dataSource = await this.roomRates(event.Codigo);
-    const tarifaEstandarArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa Base');
-    const tempRatesArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa De Temporada');
-    const huesped = this.allReservations.find(item => item.folio === event.Folio);
+    if(!this.checkValidResize(event, arrayToCheck)){
+        console.log(this.allReservations)
+        const dataSource = await this.roomRates(event.Codigo);
+        const tarifaEstandarArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa Base');
+        const tempRatesArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa De Temporada');
+        const huesped = this.allReservations.find(item => item.folio === event.Folio);
+    
+        let Difference_In_Time = event.EndTime.getTime() - event.StartTime.getTime();
+        const stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+    
+        const modalRef = this.modalService.open(WarningComponent, { size: 'md', backdrop: 'static' })
+        modalRef.componentInstance.ratesArrayComplete = dataSource
+        modalRef.componentInstance.stayNights = stayNights
+        modalRef.componentInstance.StartTime = event.StartTime
+        modalRef.componentInstance.EndTime = event.EndTime
+    
+        modalRef.componentInstance.Adultos = huesped?.adultos
+        modalRef.componentInstance.Ninos = huesped?.ninos
+    
+        modalRef.componentInstance.tarifaEstandarArray = tarifaEstandarArray
+        modalRef.componentInstance.tempRatesArray = tempRatesArray
+        modalRef.componentInstance.cuarto = event.Codigo
+        modalRef.componentInstance.folio = event.Folio
+        modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
+        modalRef.componentInstance.numeroCuarto = event.Numero
+        modalRef.componentInstance.alertHeader = "Advertencia"
+        modalRef.componentInstance.mensaje = "Al cambiarse la fecha de la reservacion es nesesario confirmar la tarifa que se utilizara para la misma. "
+        modalRef.result.then(async (result) => {
+        if (result) {
+          this.onChangedRate(result);
+        } else {
+          this.closeResult = `Closed with: ${result}`;
+        }
+        await this.getReservations();
+      }, (reason) => {
+        this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      });
+    }
+  }
 
-    let Difference_In_Time = event.EndTime.getTime() - event.StartTime.getTime();
-    const stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
-
-    const modalRef = this.modalService.open(WarningComponent, { size: 'md', backdrop: 'static' })
-    modalRef.componentInstance.ratesArrayComplete = dataSource
-    modalRef.componentInstance.stayNights = stayNights
-    modalRef.componentInstance.StartTime = event.StartTime
-    modalRef.componentInstance.EndTime = event.EndTime
-
-    modalRef.componentInstance.Adultos = huesped?.adultos
-    modalRef.componentInstance.Ninos = huesped?.ninos
-
-    modalRef.componentInstance.tarifaEstandarArray = tarifaEstandarArray
-    modalRef.componentInstance.tempRatesArray = tempRatesArray
-    modalRef.componentInstance.cuarto = event.Codigo
-    modalRef.componentInstance.folio = event.Folio
-    modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
-    modalRef.componentInstance.numeroCuarto = event.Numero
-    modalRef.componentInstance.alertHeader = "Advertencia"
-    modalRef.componentInstance.mensaje = "Al cambiarse la fecha de la reservacion es nesesario confirmar la tarifa que se utilizara para la misma. "
-    modalRef.result.then(async (result) => {
-      if (result) {
-        this.onChangedRate(result);
-      } else {
-        this.closeResult = `Closed with: ${result}`;
+  checkValidResize(searchObj: any, dataArray: (Bloqueo | Huesped)[]): any | null {
+    return dataArray.find(item => {
+      // Check for Bloqueo type
+      if ('Desde' in item && 'Hasta' in item) {
+        const startDateMatches = this.compareDates(new Date(searchObj.StartTime), new Date(item.Desde));
+        const endDateMatches = this.compareDates(new Date(searchObj.EndTime), new Date(item.Hasta));
+        return item.Habitacion === searchObj.Codigo && startDateMatches && endDateMatches;
       }
-      await this.getReservations();
-    }, (reason) => {
-      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+  
+      // Check for Huesped type
+      if ('llegada' in item && 'salida' in item) {
+        const startDateMatches = this.compareDates(new Date(searchObj.StartTime), new Date(item.llegada));
+        const endDateMatches = this.compareDates(new Date(searchObj.EndTime), new Date(item.salida));
+        return item.habitacion === searchObj.Codigo && startDateMatches && endDateMatches;
+      }
+  
+      return false;
     });
+  }
+
+  compareDates(date1: Date, date2: Date): boolean {
+    return date1.getDate() === date2.getDate() &&
+           date1.getMonth() === date2.getMonth() &&
+           date1.getFullYear() === date2.getFullYear();
   }
 
   onChangedRate(data: any) {

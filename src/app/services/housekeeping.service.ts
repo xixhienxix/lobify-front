@@ -75,7 +75,8 @@ private currentHouseKeepingSubject =new Subject<any>();
         )
   }
 
-  updateEstatus(cuarto:string,estatus:string){
-    return this.http.post<HouseKeeping[]>(environment.apiUrl + '/codigos/update/housekeeping',{cuarto,estatus});
+  updateEstatus(cuarto: string, estatus: string): Observable<HouseKeeping[]> {
+    return this.http.post<HouseKeeping[]>(`${environment.apiUrl}/codigos/update/housekeeping`, { cuarto, estatus });
   }
+  
 }

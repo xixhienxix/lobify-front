@@ -53,11 +53,13 @@ export class DeparturesComponent implements OnInit{
       salida.setHours(0, 0, 0, 0);
 
       if (salida.getTime() === today.getTime()) {
-        this.salidasDelDia.push(item);
-
+        if (item.estatus === 'Check-Out' || item.estatus === 'Huesped en Casa') {
+          this.salidasDelDia.push(item);
+        }
         if (item.estatus === 'Check-Out') {
           this.yaSeFueron.push(item);
-        }if (item.estatus === 'Huesped en Casa') {
+        }
+        if (item.estatus === 'Huesped en Casa') {
           this.porSalir.push(item);
         }
       }

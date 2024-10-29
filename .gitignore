@@ -58,3 +58,4 @@ proxy.conf.json
 proxy.conf.prod.json
 *.cache
 *.cache
+*.cache

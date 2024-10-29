@@ -7,8 +7,8 @@ export const environment = {
   appVersion: 'v8.1.8',
   USERDATA_KEY: 'authf649fc9a5f55',
   isMockEnabled: true,
-  // apiUrl:'https://us-central1-lobify-api.cloudfunctions.net/api',
-  apiUrl: 'http://localhost:5000/lobify-api/us-central1/api',
+   apiUrl:'https://us-central1-lobify-api.cloudfunctions.net/api',
+  //apiUrl: 'http://localhost:5000/lobify-api/us-central1/api',
   fireBaseStorageSecrets:{
     apiKey: "AIzaSyB3tYq0nD6m4hljK3lfkGmQtqHwm3ssCiU",
     authDomain: "movnext-api.firebaseapp.com",

@@ -14,7 +14,6 @@ import { UploadListComponent } from '../uploads/upload-list.component';
 import { SpecialRatesComponent } from './rates/special-rates/special-rates.component';
 import { ExpressRatesComponent } from './rates/express-rates/express.rates.component';
 import { ButtonAllModule, ButtonModule, CheckBoxAllModule, SwitchAllModule } from '@syncfusion/ej2-angular-buttons';
-import { BryntumSchedulerModule } from '@bryntum/scheduler-angular'; 
 import { RecurrenceEditorAllModule, ScheduleAllModule } from '@syncfusion/ej2-angular-schedule';
 import { DatePickerAllModule, TimePickerAllModule, DateTimePickerAllModule } from '@syncfusion/ej2-angular-calendars';
 import { DropDownListAllModule, MultiSelectAllModule } from '@syncfusion/ej2-angular-dropdowns';
@@ -50,7 +49,6 @@ import { MatIconModule } from '@angular/material/icon';
     SharedModule,
     WidgetsModule,
     ButtonModule,
-    BryntumSchedulerModule,
     // Include other modules that you are using here
     ScheduleAllModule, 
     RecurrenceEditorAllModule,   

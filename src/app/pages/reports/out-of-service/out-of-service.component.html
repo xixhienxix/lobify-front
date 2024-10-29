@@ -1,0 +1,120 @@
+<mat-form-field appearance="outline">
+    <mat-label>Cuarto</mat-label>
+    <input matInput [(ngModel)]="filterText" (input)="applyFilter($event)" placeholder="Filtro por Folio o Nombre">
+
+  </mat-form-field>
+
+  <button style="margin-left: 1rem;" mat-raised-button color="primary" class="btn btn-primary" (click)="resetFilters()">Reset Filtros</button>
+
+  
+  <div class="filter-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Filtra por Fecha</mat-label>
+      <!-- (dateChange)="applySpecificDateFilter($event.value) -->
+      <input matInput [matDatepicker]="specificDate" [(ngModel)]="specificDateValue">
+      <mat-datepicker-toggle matSuffix [for]="specificDate"></mat-datepicker-toggle>
+      <mat-datepicker #specificDate></mat-datepicker>
+    </mat-form-field>
+
+    <mat-table style="width: 1000px; overflow-y: auto;" [dataSource]="dataSource" class="mat-elevation-z8" *ngIf="!isLoading; else loadingTemplate">
+
+        <ng-container matColumnDef="Habitacion">
+          <mat-header-cell *matHeaderCellDef> Habitacion </mat-header-cell>
+          <mat-cell *matCellDef="let bloqueo">
+            {{bloqueo.Habitacion}}
+          </mat-cell>
+        </ng-container>
+  
+  
+        <ng-container matColumnDef="Cuarto">
+          <mat-header-cell *matHeaderCellDef> Mov Rooms </mat-header-cell>
+          <mat-cell *matCellDef="let bloqueo">
+            <div [innerHTML]="displayRooms(bloqueo)"></div>
+          </mat-cell>
+        </ng-container>
+  
+  
+        <ng-container matColumnDef="Desde">
+          <mat-header-cell *matHeaderCellDef> Fechas </mat-header-cell>
+          <mat-cell *matCellDef="let bloqueo">
+            <div [innerHTML]="displayFechas(bloqueo)"></div>
+          </mat-cell>
+        </ng-container>
+  
+  
+        <ng-container matColumnDef="Estatus">
+          <mat-header-cell *matHeaderCellDef> Restricciones </mat-header-cell>
+          <mat-cell *matCellDef="let bloqueo">
+            <section class="example-section">
+              <ng-container *ngFor="let entry of objectEntries(bloqueo.Estatus)">
+                <mat-checkbox
+                  [checked]="entry.value"
+                  (change)="onCheckboxChange(bloqueo,entry.key, $event.checked)"
+                  style="margin: 5px; color: #00506a; font-weight: bold;">
+                  {{ entry.key }}
+                </mat-checkbox>
+              </ng-container>
+            </section>
+          </mat-cell>
+        </ng-container>
+  
+  
+        <ng-container matColumnDef="Comentarios">
+          <mat-header-cell *matHeaderCellDef> Comentarios </mat-header-cell>
+          <mat-cell *matCellDef="let bloqueo">
+            <textarea
+              style="width: 100%;"
+              [(ngModel)]="bloqueo.Comentarios">
+            </textarea>
+          </mat-cell>
+        </ng-container>
+  
+  
+        <ng-container matColumnDef="acciones">
+          <mat-header-cell *matHeaderCellDef> Acciones </mat-header-cell>
+          <mat-cell *matCellDef="let bloqueo">
+            <!-- <a
+              title="Guardar Cambios"
+              class="mx-3 btn btn-icon btn-light btn-hover-primary btn-sm"
+              (click)="edit(bloqueo._id, bloqueo.Desde, bloqueo.Hasta, bloqueo.Habitacion, bloqueo.Cuarto, bloqueo.sinLlegadas, bloqueo.sinSalidas, bloqueo.fueraDeServicio, bloqueo.Comentarios)">
+              <app-keenicon name="pencil" class=" svg-icon-md text-primary"></app-keenicon>
+  
+            </a> -->
+  
+            <a
+              title="Eliminar Bloqueo"
+              class="btn btn-icon btn-light btn-hover-danger btn-sm"
+              (click)="openDeleteModal(deleteID,bloqueo._id, bloqueo.Desde, bloqueo.Hasta, bloqueo.Habitacion, bloqueo.Cuarto)">
+              <app-keenicon name="trash" class=" svg-icon-md text-primary"></app-keenicon>
+            </a>
+          </mat-cell>
+        </ng-container>
+  
+  
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+        
+      </mat-table>
+
+  <!-- Paginator -->
+<mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons></mat-paginator>
+
+<ng-template #deleteID let-modal>
+    <div class="modal-body">
+      <p>¿Estas seguro Que quieres Borrar el Bloqueo?&hellip;</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary" (click)="borrar(idDelete,desdeDelete,hastaDelete,habitacionDelete,numeroDelete);modal.close('Close click')">Borrar</button>
+      <button type="button" class="btn btn-danger" (click)="modal.close('Close click')">Cerrar</button>
+    </div>
+  </ng-template>
+
+    <!-- Loading Spinner Template -->
+    <ng-template #loadingTemplate>
+        <div class="loading-container">
+          <h3>Cargando Datos...</h3>
+          <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">Cargando</span>
+          </div>
+        </div>
+      </ng-template>

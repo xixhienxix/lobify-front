@@ -54,4 +54,91 @@ export class DisponibilidadService {
           })
           )
     }
+
+    async calcHabitacionesDisponibles(response:any,intialDate:Date,endDate:Date, cuarto:string){
+        const ocupadasSet = new Set(response);
+
+        const bloqueosArray = await this._indexDbCheck.loadBloqueos(true);
+
+        // Normalize initialDate and endDate
+        const normalizedInitialDate = this.normalizeDate(intialDate);
+        const normalizedEndDate = this.normalizeDate(endDate);
+
+        // Filter and add 'Cuarto' strings within the overlapping date range to the set
+        bloqueosArray.forEach(bloqueo => {
+          const { Desde, Hasta, Cuarto } = bloqueo;
+
+          // Convert ISO strings to Date objects
+          const desdeDate = new Date(Desde);
+          const hastaDate = new Date(Hasta);
+
+          // Normalize the dates to ignore time components
+          const normalizedDesdeDate = this.normalizeDate(desdeDate);
+          const normalizedHastaDate = this.normalizeDate(hastaDate);
+
+          // Check for overlapping conditions
+          const isOverlapping =
+            // Case 1: The arrival date (Desde) is within the provided range
+            (normalizedDesdeDate >= normalizedInitialDate && normalizedDesdeDate < normalizedEndDate) ||
+            // Case 2: The departure date (Hasta) is within the provided range
+            (normalizedHastaDate >= normalizedInitialDate && normalizedHastaDate <= normalizedEndDate) ||
+            // Case 3: The reservation completely encompasses the provided range
+            (normalizedDesdeDate < normalizedInitialDate && normalizedHastaDate > normalizedEndDate);
+
+          // If there is an overlap, add Cuarto to the set
+          if (isOverlapping) {
+            Cuarto.forEach(cuarto => {
+              ocupadasSet.add(cuarto);
+            });
+          }
+        });
+        const roomCodesComplete = await this._indexDbCheck.loadHabitaciones(true);
+        // Filtrar las habitaciones disponibles
+        const habitacionesDisponibles = roomCodesComplete.filter(habitacion => !ocupadasSet.has(habitacion.Numero));
+        // Paso 1: Crear el array preAsignadasArray
+        let preAsignadasArray
+
+        preAsignadasArray = habitacionesDisponibles.map(item => ({
+          numero: item.Numero,
+          codigo: item.Codigo,
+          checked: false,
+          disabled: true
+        }));
+
+        // Paso 2: Filtrar para obtener solo un objeto único por cada 'Codigo'
+        if(cuarto === '1'){
+          const habitacionesUnicas:any = {};
+          habitacionesDisponibles.forEach(habitacion => {
+          if (!habitacionesUnicas[habitacion.Codigo]) {
+            habitacionesUnicas[habitacion.Codigo] = habitacion;
+          }
+        });
+        const habitacionesUnicasArray = Object.values(habitacionesUnicas);
+
+        const responseObj = {
+            avaibilityRooms : [...habitacionesUnicasArray],
+            preAsignadasArray: preAsignadasArray
+        }
+        return responseObj
+        
+
+        }else{
+            const responseObj = {
+                avaibilityRooms : [...habitacionesDisponibles],
+                preAsignadasArray: preAsignadasArray
+            }
+            return responseObj 
+        }
+    }
+
+    /**
+   *Converts Date Object to 00:00 so time its equaly asigned
+   *
+   * @param {Date} date
+   * @return {*}  {Date}
+   * @memberof NvaReservaComponent
+   */
+  normalizeDate(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
 }

@@ -17,6 +17,7 @@
     width='100%' 
     cssClass='timeline-resource-grouping' 
     height='auto'
+    allowSwiping="false"
       [selectedDate]="selectedDate" 
       [group]="group" 
       [workDays]="workDays" 
@@ -30,6 +31,7 @@
       (dragStart)="onDragStart($event)"
       (dragStop)="onDragStop($event)"
       (eventRendered)="onEventRendered($event)"
+      (resizeStart)="onResizeStart($event)"
       (resizeStop)="onResizeStop($event)"
       [quickInfoOnSelectionEnd] = "true"
       >
@@ -37,19 +39,20 @@
         <div class="date-text"></div>
         <div [innerHTML]="getDateHeaderText(data.date)"></div>
       </ng-template>
+      
       <ng-template #resourceHeaderTemplate let-data let-index>
         <div style="height: 100%; display: flex; align-items: center; justify-content: start;">
           <div [matMenuTriggerFor]="menu" class="btn btn-icon btn-custom btn-icon-muted">
             <img class="thumbnail" *ngIf="isChildNode(data)" [src]="getIconClass(data.resourceData.text)" alt="{{data.resourceData.ImageName}}" style="height: 57px; width: 30px;" />
           </div>
 
-    <mat-menu #menu="matMenu">
-      <ng-container *ngFor="let estatus of estatusArray">
-        <button (click)="onStatusChange(data.resourceData.text, estatus.Descripcion)" mat-menu-item>
-          <span>{{estatus.Descripcion}}</span>
-        </button>
-      </ng-container>
-    </mat-menu>
+            <mat-menu #menu="matMenu">
+              <ng-container *ngFor="let estatus of estatusArray">
+                <button (click)="onStatusChange(data.resourceData.text, estatus.Descripcion)" mat-menu-item>
+                  <span>{{estatus.Descripcion}}</span>
+                </button>
+              </ng-container>
+            </mat-menu>
 
           {{data.resourceData.text}}
         </div>
