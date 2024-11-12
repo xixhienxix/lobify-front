@@ -10,7 +10,6 @@
     "test": "ng test",
     "lint": "ng lint",
     "deploy": "npm run build && firebase deploy"
-
   },
   "private": true,
   "dependencies": {
@@ -40,8 +39,8 @@
     "@syncfusion/ej2-angular-notifications": "^24.2.4",
     "@syncfusion/ej2-angular-schedule": "^24.2.4",
     "@syncfusion/ej2-angular-splitbuttons": "^24.2.7",
-    "@syncfusion/ej2-locale": "^26.1.35",
     "@syncfusion/ej2-cldr-data": "^26.1.35",
+    "@syncfusion/ej2-locale": "^26.1.35",
     "angular-datatables": "^16.0.0",
     "angular-in-memory-web-api": "^0.16.0",
     "animate.css": "4.1.1",

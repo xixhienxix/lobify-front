@@ -74,14 +74,31 @@ export class FooterComponent implements OnInit, OnChanges{
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    (Object.keys(this.reservationsStatus) as Array<keyof IStatusArray>).forEach(key => {
+      this.reservationsStatus[key] = [];
+    });
+    (Object.keys(this.housekeepingStatus) as Array<keyof IHouseKeepingStatusArray>).forEach(key => {
+      this.housekeepingStatus[key] = [];
+    });
+    
+    
+    const today = new Date();
+  
     if (changes.allReservations) {
       this.allReservations.forEach(item => {
-        const statusKey = this.statusMap[item.estatus];
-        if (statusKey) {
-          this.reservationsStatus[statusKey].push(item);
+        const arrivalDate = new Date(item.llegada);
+        const departureDate = new Date(item.salida);
+  
+        // Check if today's date is within the arrival and departure dates
+        if (arrivalDate <= today && today <= departureDate) {
+          const statusKey = this.statusMap[item.estatus];
+          if (statusKey) {
+            this.reservationsStatus[statusKey].push(item);
+          }
         }
       });    
     }
+  
     if (changes.houseKeepingCodes) {
       this.houseKeepingCodes.forEach(item=>{
         const statusKey = this.statusHouseKeepingMap[item.Estatus];

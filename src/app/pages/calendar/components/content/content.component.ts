@@ -210,7 +210,7 @@ export class ContentComponent implements OnInit{
   public currentView: View = 'TimelineDay';
   public allowMultiple:boolean = true;
   public group: GroupModel = {
-    resources: ['Type', 'Rooms']
+    resources: ['Type', 'Rooms'],enableCompactView: false
   };
 
   public data: DataManager = new DataManager({
@@ -610,7 +610,7 @@ onDataBound(){
       // return '../../../../../assets/media/locks/green_Lock.png'
       if(huesped.Estatus === 'LIMPIA'){
         return '../../../../../assets/media/locks/blue_Lock.png'
-      }else if(huesped.Estatus === 'REVISAR'){
+      }else if(huesped.Estatus === 'LIMPIANDO'){
         return '../../../../../assets/media/locks/yellow_Lock.png'
       }else if(huesped.Estatus === 'SUCIA'){
         return '../../../../../assets/media/locks/red_Lock.png'

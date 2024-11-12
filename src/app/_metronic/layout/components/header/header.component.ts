@@ -411,9 +411,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
           )
           const response = this.updateDespuesDeBloqueo(value);
                       // Fetch all reservations after logging
-                        this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
-                        this.eventsSubject.next(this.allReservations);
-                        this._communicationService.onNvareservaSubject.next(true);
+          this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
+          this.eventsSubject.next(this.allReservations);
+          this._communicationService.onNvareservaSubject.next(true);
         }
     })
   }
