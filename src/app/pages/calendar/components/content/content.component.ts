@@ -295,122 +295,109 @@ export class ContentComponent implements OnInit{
       }
   }
 
-  async ngOnInit(){
-    // this.scheduleObj.locale = 'es';
-
+  async ngOnInit() {
     await this.checkRoomCodesIndexDB();
-
     const parametros = await this._indexDBService.loadParametros(true);
-
-    this.changing.subscribe((dataSource: any) => { 
+  
+    this.changing.subscribe((dataSource: any) => {
       this.datasourceArray = [];
       this.reservationsArray = [];
       this.bloqueosArray = [];
-    
-      // const getTimeDetails = (dateStr: string) => {
-      //   const [hours, minutes] = dateStr.split('T')[1].split(':').map(Number);
-      //   return { hours, minutes };
-      // };
-    
+  
+      const checkInTime = this.parseTime(parametros.checkIn);
+      const checkOutTime = this.parseTime(parametros.checkOut);
+  
+      const adjustTime = (date: string, time: { hours: number; minutes: number }): Date => {
+        const adjustedDate = new Date(date);
+        adjustedDate.setHours(time.hours, time.minutes, 0, 0);
+        return adjustedDate;
+      };
+  
       const getCategoryColor = (estatus: string): string => {
         const colorMap: Record<string, string> = {
-          'Huesped en Casa': this.colorDict[0], // Assuming this is similar to 'Reserva en Casa'
-          'Reserva Sin Pago': this.colorDict[3], // Grouped under 'Reserva'
-          'Reserva Confirmada': this.colorDict[3], // Grouped under 'Reserva'
-          'Deposito Realizado': this.colorDict[3], // Grouped under 'Reserva'
-          'Esperando Deposito': this.colorDict[3], // Grouped under 'Reserva'
-          'Totalmente Pagada': this.colorDict[3], // Grouped under 'Reserva'
-          'Hizo Checkout': this.colorDict[4], // Grouped under 'Check-Out'
+          'Huesped en Casa': this.colorDict[0],
+          'Reserva Sin Pago': this.colorDict[3],
+          'Reserva Confirmada': this.colorDict[3],
+          'Deposito Realizado': this.colorDict[3],
+          'Esperando Deposito': this.colorDict[3],
+          'Totalmente Pagada': this.colorDict[3],
+          'Hizo Checkout': this.colorDict[4],
           'Uso Interno': this.colorDict[2],
-          'Bloqueo': this.colorDict[3], // Assuming similar to 'Reserva' or could have a different color
+          'Bloqueo': this.colorDict[3],
           'Reserva Temporal': this.colorDict[1],
-          'No Show': this.colorDict[4], // Grouped under 'Check-Out'
+          'No Show': this.colorDict[4],
           'Check-Out': this.colorDict[4],
           'Reserva Cancelada': this.colorDict[4],
-          'Walk-In': this.colorDict[0], // Assuming this is similar to 'Huesped en Casa'
-          'Reserva en Casa': this.colorDict[0], // Assuming this is 'Huesped en Casa'
-          'Reserva': this.colorDict[3], // Generic group for reservations
-          'default': this.colorDict[0] // Default color for any unspecified status
+          'Walk-In': this.colorDict[0],
+          'Reserva en Casa': this.colorDict[0],
+          'Reserva': this.colorDict[3],
+          default: this.colorDict[0],
         };
-      
+  
         return colorMap[estatus] || colorMap['default'];
       };
-      
+  
       let reservasIdCounter = 1;
-      dataSource.value.forEach((item: Huesped, index: number) => {
+  
+      // Process Reservations
+      dataSource.value.forEach((item: Huesped) => {
         this.reservationsArray.push(item);
-          if(!reservationStatusMap[8].includes(item.estatus)){
-            // const { hours, minutes } = getTimeDetails(item.llegada);
-            // Parse check-in and check-out times
-            const checkInTime = this.parseTime(parametros.checkIn);
-            const checkOutTime = this.parseTime(parametros.checkOut);
-
-            const llegada = new Date(item.llegada);
-            const salida = new Date(item.salida);
-
-            // Set time using UTC hours and minutes
-            llegada.setHours(checkInTime.hours, checkInTime.minutes, 0, 0);
-            salida.setHours(checkOutTime.hours, checkOutTime.minutes, 0, 0);
-        
-            const pushArray = {
-              Id: reservasIdCounter++,  
-              Subject: item.nombre,
-              StartTime: llegada,
-              EndTime: salida,
-              IsAllDay: false,
-              ProjectId: this.checkGroupId(item.habitacion,item.numeroCuarto),
-              TaskId: this.checkTaskID(item.numeroCuarto),
-              Folio: item.folio,
-              Codigo: item.habitacion,
-              Numero: item.numeroCuarto,
-              CategoryColor: getCategoryColor(item.estatus)
-            };
-        
-            this.datasourceArray.push(pushArray);
-          }
+  
+        if (!reservationStatusMap[8].includes(item.estatus)) {
+          const llegada = adjustTime(item.llegada, checkInTime);
+          const salida = adjustTime(item.salida, checkOutTime);
+  
+          this.datasourceArray.push({
+            Id: reservasIdCounter++,
+            Subject: item.nombre,
+            StartTime: llegada,
+            EndTime: salida,
+            IsAllDay: false,
+            ProjectId: this.checkGroupId(item.habitacion, item.numeroCuarto),
+            TaskId: this.checkTaskID(item.numeroCuarto),
+            Folio: item.folio,
+            Codigo: item.habitacion,
+            Numero: item.numeroCuarto,
+            CategoryColor: getCategoryColor(item.estatus),
+          });
+        }
       });
-    
+  
       console.log("Previo a Bloqueos: ", this.datasourceArray);
+  
       let bloqueoIdCounter = 0;
-
+  
+      // Process Bloqueos
       dataSource.bloqueosArray.forEach((item: any) => {
         this.bloqueosArray.push(item);
-        // const { hours, minutes } = getTimeDetails(item.llegada);
-            // Parse check-in and check-out times
-            const checkInTime = this.parseTime(parametros.checkIn);
-            const checkOutTime = this.parseTime(parametros.checkOut);
-
-            const llegada = new Date(item.llegada);
-            const salida = new Date(item.salida);
-
-            // Set time using UTC hours and minutes
-            llegada.setHours(checkInTime.hours, checkInTime.minutes, 0, 0);
-            salida.setHours(checkOutTime.hours, checkOutTime.minutes, 0, 0);
-
+  
+        const llegada = adjustTime(item.Desde, checkInTime);
+        const salida = adjustTime(item.Hasta, checkOutTime);
+  
         item.Cuarto.forEach((numCuarto: string) => {
-          const bloqueoObj = {
-            Id: bloqueoIdCounter++,  // Use the counter and increment it for each new bloqueoObj
+          this.datasourceArray.push({
+            Id: bloqueoIdCounter++,
             Subject: 'Bloqueo',
             StartTime: llegada,
             EndTime: salida,
             IsAllDay: true,
-            ProjectId: this.checkGroupId(item.Habitacion,numCuarto),
+            ProjectId: this.checkGroupId(item.Habitacion, numCuarto),
             TaskId: this.checkTaskID(numCuarto),
-            Folio: 'B-' + bloqueoIdCounter,  // Folio also uses the counter for uniqueness
+            Folio: `B-${bloqueoIdCounter}`, // Unique folio for bloqueos
             Codigo: item.Habitacion,
             Numero: numCuarto,
-            CategoryColor: this.colorDict[5]
-          };
-
-          this.datasourceArray.push(bloqueoObj);
+            CategoryColor: this.colorDict[5],
+          });
         });
       });
-    
+  
       console.log("Después de Bloqueos: ", this.datasourceArray);
-    
+  
+      // Refresh Calendar
       this.refreshCalendar(this.datasourceArray);
     });
   }
+  
 
   parseTime(time: string) {
     const [hours, minutes] = time.split(":").map(Number);
