@@ -1,9 +1,9 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnDestroy, OnInit } from "@angular/core";
 import { IndexDBCheckingService } from "src/app/services/_shared/indexdb.checking.service";
 import { CommunicationService } from "./_services/event.services";
 import { Habitacion } from "src/app/models/habitaciones.model";
 import { Huesped, reservationStatusMap } from "src/app/models/huesped.model";
-import { BehaviorSubject, catchError, firstValueFrom, forkJoin, of, Subject, switchMap, takeUntil } from "rxjs";
+import { BehaviorSubject, catchError, firstValueFrom, forkJoin, of, Subject, Subscription, switchMap, takeUntil } from "rxjs";
 import { Edo_Cuenta_Service } from "src/app/services/edoCuenta.service";
 import { EditReservaComponent } from "../calendar/components/content/edit-reserva/edit-reserva.component";
 import { ModalDismissReasons, NgbModal } from "@ng-bootstrap/ng-bootstrap";
@@ -22,7 +22,7 @@ import { ModificaReservaComponent } from "../calendar/components/content/edit-re
     templateUrl: './reports.component.html',
     styleUrls: ['./reports.component.scss']
   })
-export class ReportsComponent implements OnInit{
+export class ReportsComponent implements OnInit, OnDestroy{
 
     closeResult:string='';
     isLoading:boolean=false;
@@ -31,6 +31,8 @@ export class ReportsComponent implements OnInit{
     currentUser:string=''
     currentModalRef:any;
     modalRefEditReserva:any;
+    isModalOpen = false;
+
     private ngUnsubscribe = new Subject<void>();
 
 
@@ -48,8 +50,13 @@ export class ReportsComponent implements OnInit{
 
     ngOnInit(): void {
         this._indexDbService.checkIndexedDB(['reservaciones','housekeeping','codigos', 'estatus', 'tarifas', 'parametros','habitaciones'],true);
-        this.communicationService.editReservaEvent$.subscribe(data => {
-            this.onEditRsvOpen(data);
+        this.communicationService.editReservaEvent$.pipe(
+          takeUntil(this.ngUnsubscribe)
+        ).subscribe(data => {
+            if (!this.isModalOpen) {
+              this.isModalOpen = true;
+              this.onEditRsvOpen(data);
+            }
           });
         this.communicationService.reactivaSubject.subscribe({
             next:(huesped:Huesped)=>{
@@ -185,7 +192,7 @@ export class ReportsComponent implements OnInit{
           this.modalRefEditReserva.componentInstance.isReservaCancelada = isReservaCancelada
 
           console.log("Ama de Llaves-----------",this._indexDbService.getHouseKeepingCodes())
-    
+          this.isModalOpen = false;  // reset flag when the modal is closed
           //DataSource Promesas
           this.modalRefEditReserva.componentInstance.onEstatusChange.subscribe({
             next: (value: any) => {
@@ -435,5 +442,10 @@ export class ReportsComponent implements OnInit{
         } else {
             return  `with: ${reason}`;
         }
+      }
+
+      ngOnDestroy() {
+        this.ngUnsubscribe.next();
+        this.ngUnsubscribe.complete();
       }
 }

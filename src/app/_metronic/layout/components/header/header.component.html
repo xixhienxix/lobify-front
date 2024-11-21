@@ -20,16 +20,15 @@
     </div>
     <!--end::sidebar mobile toggle-->
     <!--begin::Mobile logo-->
-    <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
+    <!-- <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
       <a routerLink="/dashboard" class="d-lg-none">
         <img alt="Logo" src="./assets/media/logos/default-small.svg" class="h-30px" />
       </a>
-    </div>
+    </div> -->
     <!--end::Mobile logo-->
   </ng-container>
 
   <ng-container *ngIf="!appSidebarDisplay">
-    <!--begin::Logo-->
     <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0 me-lg-15">
       <a routerLink="/dashboard">
         <ng-container *ngIf="currentLayoutType === 'dark-header'">
@@ -44,7 +43,6 @@
         </ng-container>
       </a>
     </div>
-    <!--end::Logo-->
   </ng-container>
 
   <!--begin::Header wrapper-->

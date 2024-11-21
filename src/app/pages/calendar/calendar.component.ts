@@ -487,7 +487,14 @@ export class CalendarComponent implements OnInit {
             }
           });
         }
-      })
+      });
+
+      modalRef.componentInstance.onCloseMainModal.subscribe({
+        next: (val: any) => {
+          modalRef.close();
+        }
+      });
+
       modalRef.componentInstance.honUpdateHuesped.subscribe({
         next:(value:any)=>{
           this.submitLoading = true;

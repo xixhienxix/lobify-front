@@ -98,6 +98,7 @@ export class ReservationsReportsComponent implements OnInit {
     }
 
     verFolio(element:any){
+      console.log('Button Ver Folio Clicked: ', element)
         this.communicationService.emitEvent(element);
     }
   

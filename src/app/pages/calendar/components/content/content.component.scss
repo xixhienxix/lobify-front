@@ -69,3 +69,15 @@
 .thumbnail:hover {
   transform: scale(1.5);
 }
+
+// REMOVE TIMES BELOW RESERVATIONS
+
+.e-schedule .e-timeline-view .e-appointment .e-time,
+.e-schedule .e-timeline-month-view .e-appointment .e-time {
+      display: none !important;
+}
+// Center REservations
+.e-schedule .e-timeline-view .e-appointment .e-subject,
+    .e-schedule .e-timeline-month-view .e-appointment .e-subject {
+      padding-top:12px !important;
+}

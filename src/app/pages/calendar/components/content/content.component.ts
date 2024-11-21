@@ -31,6 +31,8 @@ import frNumberData from "@syncfusion/ej2-cldr-data/main/es-MX/numbers.json";
 import frtimeZoneData from "@syncfusion/ej2-cldr-data/main/es-MX/timeZoneNames.json";
 import frGregorian from "@syncfusion/ej2-cldr-data/main/es-MX/ca-gregorian.json";
 import frNumberingSystem from "@syncfusion/ej2-cldr-data/supplemental/numberingSystems.json";
+import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
+import { Parametros, PARAMETROS_DEFAULT_VALUES } from 'src/app/pages/parametros/_models/parametros';
 
 loadCldr(frNumberData, frtimeZoneData, frGregorian, frNumberingSystem);
 
@@ -180,12 +182,13 @@ export class ContentComponent implements OnInit{
   datasourceArray :Record<string, any>[]=[]
   reservationsArray:Huesped[];
   bloqueosArray:Bloqueo[];
+
   @Input() allReservations:Huesped[];
 
   closeResult:string
   public selectedDate: Date = new Date();
   todayDate = new Date();
-  public timeScale: TimeScaleModel = { enable: false, interval: 1440, slotCount: 1 };
+  public timeScale: TimeScaleModel = { enable: true, interval: 1440, slotCount: 1 };
   /**
    * Used to Set how many days displays on the Scheduler in one view
    */
@@ -204,7 +207,6 @@ export class ContentComponent implements OnInit{
 
   public datas: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
   public scheduleinterval = 7;
-
 
   public rowAutoHeight = true;
   public currentView: View = 'TimelineDay';
@@ -267,7 +269,8 @@ export class ContentComponent implements OnInit{
   constructor(
     private modalService:NgbModal,
     private activatedRoute: ActivatedRoute,
-    private _roomService: HabitacionesService
+    private _roomService: HabitacionesService,
+    private _indexDBService: IndexDBCheckingService
   ) {
     this.selectedDate = new Date(this.todayDate.getFullYear(), this.todayDate.getMonth(), this.todayDate.getDate())
     this.activatedRoute.data.subscribe((val) => {
@@ -297,15 +300,17 @@ export class ContentComponent implements OnInit{
 
     await this.checkRoomCodesIndexDB();
 
+    const parametros = await this._indexDBService.loadParametros(true);
+
     this.changing.subscribe((dataSource: any) => { 
       this.datasourceArray = [];
       this.reservationsArray = [];
       this.bloqueosArray = [];
     
-      const getTimeDetails = (dateStr: string) => {
-        const [hours, minutes] = dateStr.split('T')[1].split(':').map(Number);
-        return { hours, minutes };
-      };
+      // const getTimeDetails = (dateStr: string) => {
+      //   const [hours, minutes] = dateStr.split('T')[1].split(':').map(Number);
+      //   return { hours, minutes };
+      // };
     
       const getCategoryColor = (estatus: string): string => {
         const colorMap: Record<string, string> = {
@@ -335,15 +340,23 @@ export class ContentComponent implements OnInit{
       dataSource.value.forEach((item: Huesped, index: number) => {
         this.reservationsArray.push(item);
           if(!reservationStatusMap[8].includes(item.estatus)){
-            const { hours, minutes } = getTimeDetails(item.llegada);
+            // const { hours, minutes } = getTimeDetails(item.llegada);
+            // Parse check-in and check-out times
+            const checkInTime = this.parseTime(parametros.checkIn);
+            const checkOutTime = this.parseTime(parametros.checkOut);
+
             const llegada = new Date(item.llegada);
             const salida = new Date(item.salida);
+
+            // Set time using UTC hours and minutes
+            llegada.setHours(checkInTime.hours, checkInTime.minutes, 0, 0);
+            salida.setHours(checkOutTime.hours, checkOutTime.minutes, 0, 0);
         
             const pushArray = {
               Id: reservasIdCounter++,  
               Subject: item.nombre,
-              StartTime: new Date(llegada.setHours(hours, minutes)),
-              EndTime: new Date(salida.setHours(hours, minutes)),
+              StartTime: llegada,
+              EndTime: salida,
               IsAllDay: false,
               ProjectId: this.checkGroupId(item.habitacion,item.numeroCuarto),
               TaskId: this.checkTaskID(item.numeroCuarto),
@@ -362,16 +375,24 @@ export class ContentComponent implements OnInit{
 
       dataSource.bloqueosArray.forEach((item: any) => {
         this.bloqueosArray.push(item);
-        const { hours, minutes } = getTimeDetails(item.Desde);
-        const llegada = new Date(item.Desde);
-        const salida = new Date(item.Hasta);
+        // const { hours, minutes } = getTimeDetails(item.llegada);
+            // Parse check-in and check-out times
+            const checkInTime = this.parseTime(parametros.checkIn);
+            const checkOutTime = this.parseTime(parametros.checkOut);
+
+            const llegada = new Date(item.llegada);
+            const salida = new Date(item.salida);
+
+            // Set time using UTC hours and minutes
+            llegada.setHours(checkInTime.hours, checkInTime.minutes, 0, 0);
+            salida.setHours(checkOutTime.hours, checkOutTime.minutes, 0, 0);
 
         item.Cuarto.forEach((numCuarto: string) => {
           const bloqueoObj = {
             Id: bloqueoIdCounter++,  // Use the counter and increment it for each new bloqueoObj
             Subject: 'Bloqueo',
-            StartTime: new Date(llegada.setHours(hours, minutes)),
-            EndTime: new Date(salida.setHours(hours, minutes)),
+            StartTime: llegada,
+            EndTime: salida,
             IsAllDay: true,
             ProjectId: this.checkGroupId(item.Habitacion,numCuarto),
             TaskId: this.checkTaskID(numCuarto),
@@ -389,6 +410,11 @@ export class ContentComponent implements OnInit{
     
       this.refreshCalendar(this.datasourceArray);
     });
+  }
+
+  parseTime(time: string) {
+    const [hours, minutes] = time.split(":").map(Number);
+    return { hours, minutes };
   }
 
   refreshCalendar(datasource:Record<string, any>[]){
@@ -454,7 +480,21 @@ export class ContentComponent implements OnInit{
     const today = new Date(); // Get today's date
     const startTime = new Date(args.data.StartTime); // Convert StartTime to a Date object
 
-    if (startTime.toDateString() >= today.toDateString()) {
+    const existingEvents = this.scheduleObj.getEvents()
+    console.log(existingEvents);
+    
+    const activeCellsData = this.scheduleObj.activeCellsData;
+    const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
+    const rowData2 = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
+    
+    const numeroCuarto = rowData2.resourceData.text
+    const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+
+    console.log(cellDetails)
+    console.log(rowData2)
+
+
+    if (startTime.toDateString() <= today.toDateString()) {
       if (args.data.hasOwnProperty("Folio")) {
         if (args.type === 'Editor' || args.type === 'QuickInfo') {
           args.cancel = true;

@@ -1,3 +1,14 @@
+
+<!--begin::Header menu toggle-->
+<ng-container *ngIf="appHeaderDefaulMenuDisplay">
+  <div class="app-navbar-item d-lg-none ms-2 me-n3 mb-3" title="Show header menu">
+    <div class="btn btn-icon btn-active-color-primary w-35px h-35px" id="kt_app_header_menu_toggle">
+      <app-keenicon name="element-4" class="fs-1" [ngClass]="btnIconClass"></app-keenicon>
+    </div>
+  </div>
+</ng-container>
+<!--end::Header menu toggle-->
+
 <!--begin::Arrivals-->
 <div class="app-navbar-item align-items-stretch mb-3" [ngClass]="itemClass">
   <div class="d-flex align-items-center" data-kt-search-element="toggle" id="kt_header_search_toggle">
@@ -65,25 +76,15 @@
 <!--end::Notifications-->
 
 <!--begin::Chat-->
-<div class="app-navbar-item mb-3" [ngClass]="itemClass">
+<!-- <div class="app-navbar-item mb-3" [ngClass]="itemClass">
   <div [ngClass]="btnClass" class="position-relative" id="kt_drawer_chat_toggle">
-    <!-- Optional: Chat content -->
   </div>
-</div>
+</div> -->
 <!--end::Chat-->
 
 <!--begin::User menu-->
-<div class="app-navbar-item mb-3" [ngClass]="itemClass">
+<!-- <div class="app-navbar-item mb-3" [ngClass]="itemClass"> -->
   <!-- Optional: User menu content -->
-</div>
+<!-- </div> -->
 <!--end::User menu-->
 
-<!--begin::Header menu toggle-->
-<ng-container *ngIf="appHeaderDefaulMenuDisplay">
-  <div class="app-navbar-item d-lg-none ms-2 me-n3 mb-3" title="Show header menu">
-    <div class="btn btn-icon btn-active-color-primary w-35px h-35px" id="kt_app_header_menu_toggle">
-      <app-keenicon name="element-4" class="fs-1" [ngClass]="btnIconClass"></app-keenicon>
-    </div>
-  </div>
-</ng-container>
-<!--end::Header menu toggle-->

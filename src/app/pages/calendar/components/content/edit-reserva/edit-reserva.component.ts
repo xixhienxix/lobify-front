@@ -103,6 +103,8 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
   @Output() onActualizarCuenta: EventEmitter<any> = new EventEmitter();
   @Output() honUpdateHuesped: EventEmitter<any> = new EventEmitter();
   @Output() honRefershDashboard: EventEmitter<boolean> = new EventEmitter();
+  @Output() onCloseMainModal: EventEmitter<boolean> = new EventEmitter();
+  
   constructor(      
     public modal: NgbActiveModal,
     private modalService: NgbModal,
@@ -569,6 +571,7 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
           modalRef.componentInstance.mensaje = 'Chek-Out Realizado con Exito '
         
           this.onActualizarCuenta.emit({alojamiento_id: this.alojamiento_id, alojamientoNuevo: this.totalAlojamientoNuevo});
+          this.onCloseMainModal.emit(true);
         },
         error:(err)=>{
           if(err){

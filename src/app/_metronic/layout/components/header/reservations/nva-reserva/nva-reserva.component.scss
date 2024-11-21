@@ -73,43 +73,103 @@ tr.mat-mdc-footer-row {
   border-top: 1px solid #e0e0e0;
 }
 
-// .table-responsive {
-//   display: block;
-//   width: 100%;
-//   overflow-x: auto;
-//   .mat-table {
-//       width: 100%;
-//       max-width: 100%;
-//       margin-bottom: 1rem;
-//       display: table;
-//       border-collapse: collapse;
-//       margin: 0px;
-//   }
-//   .mat-row,
-//   .mat-header-row {
-//       display: table-row;
-//   }
-//   .mat-cell,
-//   .mat-header-cell {
-//       word-wrap: initial;
-//       display: table-cell;
-//       padding: 0px 10px;
-//       line-break: unset;
-//       width: auto;
-//       white-space: nowrap;
-//       overflow: hidden;
-//       vertical-align: middle;
-//   }
-// }
+/* Increase specificity by targeting the parent containers */
+.modal-body .form .date-picker-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
 
-// .mat-row:hover .mat-cell {
-//   border-color: currentColor;
-//   background-color: rgba(183, 183, 223, 0.966);
+  /* Mobile view styling */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 0; /* Remove bottom margin for mobile view */
+  }
+}
 
-// }
-// .mat-row .mat-cell {
-//   cursor: pointer;
-// }
+/* DatePicker styling */
+.modal-body .form .date-picker-container .date-picker {
+  flex: 1;
+  min-width: 300px;
+  max-width: 100%;
+
+  /* Center the DatePicker on mobile */
+  @media (max-width: 768px) {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+}
+
+/* Noches section styling */
+.modal-body .form .date-picker-container .noches-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  /* Center the "Noches" label and value on mobile */
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+  }
+}
+
+.modal-body .form .noches-label,
+.modal-body .form .noches-value {
+  font-weight: bold;
+  color: #00506a;
+  font-size: 2rem; /* Increase font size */
+  margin-bottom: 1rem;
+}
+
+/* Make the "Noches" value even larger for emphasis */
+.modal-body .form .noches-value {
+  font-size: 2rem; /* Larger font size for the value */
+  margin-top: 5px;
+  margin-bottom: 1.3rem;
+}
+
+
+/* Desktop styling for DatePicker and Noches section */
+.date-picker-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+
+  /* Add space between DatePicker and Noches section */
+  .date-picker {
+    margin-right: 20px; /* Adjust the space as needed */
+  }
+
+  .noches-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-left: 20px; /* Add space on the left side */
+  }
+}
+
+/* Noches label and value styling */
+.noches-label,
+.noches-value {
+  font-weight: bold;
+  color: #00506a;
+  font-size: 1.2rem;
+  padding-bottom: 4px; /* Adjust to align vertically with DatePicker */
+}
+
+/* Larger value styling for emphasis */
+.noches-value {
+  font-size: 1.4rem;
+}
+
+
 
 
 
