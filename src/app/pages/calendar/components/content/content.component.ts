@@ -34,6 +34,7 @@ import frNumberingSystem from "@syncfusion/ej2-cldr-data/supplemental/numberingS
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { Parametros, PARAMETROS_DEFAULT_VALUES } from 'src/app/pages/parametros/_models/parametros';
 
+
 loadCldr(frNumberData, frtimeZoneData, frGregorian, frNumberingSystem);
 
 L10n.load({
@@ -249,6 +250,10 @@ export class ContentComponent implements OnInit{
     //#d0aaec - Reserva Uso Temporal
     //#fac34e - Reservacion
   }
+
+  checkInTime: any
+  checkOutTime: any
+
   @Input() tipoHabGroupDataSource: Record<string, any>[]
   @Input() habitacionPorTipoDataSource: Record<string, any>[]
   @Input() changing: Subject<any[]>;
@@ -295,6 +300,12 @@ export class ContentComponent implements OnInit{
       }
   }
 
+  adjustTime (date: string, time: { hours: number; minutes: number }): Date  {
+    const adjustedDate = new Date(date);
+    adjustedDate.setHours(time.hours, time.minutes, 0, 0);
+    return adjustedDate;
+  };
+
   async ngOnInit() {
     await this.checkRoomCodesIndexDB();
     const parametros = await this._indexDBService.loadParametros(true);
@@ -304,8 +315,8 @@ export class ContentComponent implements OnInit{
       this.reservationsArray = [];
       this.bloqueosArray = [];
   
-      const checkInTime = this.parseTime(parametros.checkIn);
-      const checkOutTime = this.parseTime(parametros.checkOut);
+      this.checkInTime = this.parseTime(parametros.checkIn);
+      this.checkOutTime = this.parseTime(parametros.checkOut);
   
       const adjustTime = (date: string, time: { hours: number; minutes: number }): Date => {
         const adjustedDate = new Date(date);
@@ -344,8 +355,8 @@ export class ContentComponent implements OnInit{
         this.reservationsArray.push(item);
   
         if (!reservationStatusMap[8].includes(item.estatus)) {
-          const llegada = adjustTime(item.llegada, checkInTime);
-          const salida = adjustTime(item.salida, checkOutTime);
+          const llegada = this.adjustTime(item.llegada, this.checkInTime);
+          const salida = this.adjustTime(item.salida, this.checkOutTime);
   
           this.datasourceArray.push({
             Id: reservasIdCounter++,
@@ -371,8 +382,8 @@ export class ContentComponent implements OnInit{
       dataSource.bloqueosArray.forEach((item: any) => {
         this.bloqueosArray.push(item);
   
-        const llegada = adjustTime(item.Desde, checkInTime);
-        const salida = adjustTime(item.Hasta, checkOutTime);
+        const llegada = this.adjustTime(item.Desde, this.checkInTime);
+        const salida = this.adjustTime(item.Hasta, this.checkOutTime);
   
         item.Cuarto.forEach((numCuarto: string) => {
           this.datasourceArray.push({
@@ -462,82 +473,83 @@ export class ContentComponent implements OnInit{
    * @param args This functions is to fill the dropdown of Time that appears whenever yo create or modifiy and existing reservation
    */
   onPopupOpen = (args: any) => {
-    // Check if the 'Folio' property exists
-    args.cancel = true;
-    const today = new Date(); // Get today's date
-    const startTime = new Date(args.data.StartTime); // Convert StartTime to a Date object
-
-    const existingEvents = this.scheduleObj.getEvents()
+    args.cancel = true; // Default to cancel popup
+    const today = new Date().toDateString();
+    const startTime = new Date(args.data.StartTime).toDateString();
+  
+    const existingEvents = this.scheduleObj.getEvents();
     console.log(existingEvents);
-    
+  
     const activeCellsData = this.scheduleObj.activeCellsData;
     const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
-    const rowData2 = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
-    
-    const numeroCuarto = rowData2.resourceData.text
+    const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
+    const numeroCuarto = rowData.resourceData.text;
     const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
 
-    console.log(cellDetails)
-    console.log(rowData2)
+    // this.tipoHabGroupDataSource
+    // this.habitacionPorTipoDataSource
 
-
-    if (startTime.toDateString() <= today.toDateString()) {
-      if (args.data.hasOwnProperty("Folio")) {
-        if (args.type === 'Editor' || args.type === 'QuickInfo') {
-          args.cancel = true;
-          this.honEditRsv.emit({ row: args, folio: args.data.Folio });
-        }
-      } else if (args.type === 'QuickInfo') {
-        args.cancel = true;
-        const groupIndex = args.data.groupIndex;
-
-        const resourceCollection = this.scheduleObj.getResourceCollections();
-        const activeCellsData = this.scheduleObj.activeCellsData;
-        const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
-        const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!)
-        // Get current date and filter events
-        const now = new Date();
-        const events = this.scheduleObj.getEvents();
-
-        let filteredEvents
-        if(events && events.length !== 0){
-          filteredEvents = events.filter(event => new Date(event.EndTime) >= now);
-        
-        // Helper function to get only the date part of a Date object (ignore time)
-        const getDateOnly = (date: string | Date): string => {
-          return new Date(date).toISOString().split('T')[0];  // Format as YYYY-MM-DD
-        };
-
-        // Check for overlapping events (same day only, ignoring time)
-        const hasOverlap = filteredEvents.some(event => {
-          if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
-            const eventStartDate = getDateOnly(event.StartTime);
-            const eventEndDate = getDateOnly(event.EndTime);
-            const argsStartDate = getDateOnly(args.data.startTime);
-            const argsEndDate = getDateOnly(args.data.endTime);
-
-            // Check for date overlap (ignoring time)
-            return (argsStartDate <= eventEndDate && argsEndDate >= eventStartDate);
-          }
-          return false;
-        });
-
-        if(hasOverlap){
-          return
-        }else{
-          const numeroCuarto = rowData.resourceData.text
-          const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
-          this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
-        }
-          
-        }else {
-          const numeroCuarto = rowData.resourceData.text
-          const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
-          this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
-        }
-      }    
+    console.log(cellDetails);
+    console.log(rowData);
+  
+    if (startTime > today) return; // Block edits for future dates
+  
+    if (args.data.hasOwnProperty("Folio")) {
+      if (args.type === 'Editor' || args.type === 'QuickInfo') {
+        this.honEditRsv.emit({ row: args, folio: args.data.Folio });
+      }
+      return;
     }
+  
+    if (args.type === 'QuickInfo') {
+      const now = new Date();
+      const startTime = new Date(args.data.startTime); // Convert the startTime from args to a Date object
+
+  // Set 'now' to the start of today (midnight) for comparison
+  now.setHours(0, 0, 0, 0); // Reset the time to midnight
+
+  // Check if the start time is before today (not including today)
+  if (startTime < now) {
+    return; // Exit the function if the start time is in the past (before today)
   }
+
+
+      const filteredEvents = existingEvents.filter(event => new Date(event.EndTime) >= now);
+
+      const hasOverlap = filteredEvents.some(event => {        
+        if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
+
+          if (event.Subject === 'Bloqueo') {
+            return true; // Skip processing if the event is a 'Bloqueo'
+          }
+
+          const eventStart = new Date(event.StartTime).toISOString().split('T')[0];
+          const eventEnd = new Date(event.EndTime).toISOString().split('T')[0];
+          const argsStart = new Date(args.data.startTime).toISOString().split('T')[0];
+          const argsEnd = new Date(args.data.endTime).toISOString().split('T')[0];
+        
+          const llegadaTime = this.adjustTime(args.data.startTime, this.checkInTime);
+          const eventEndTime = new Date(event.EndTime).getTime();
+          const llegadaTimeMs = new Date(llegadaTime).getTime();
+        
+          // Allow no overlap when the event ends at the same time as the new reservation starts
+          if (eventEndTime <= llegadaTimeMs) {
+            return false;
+          }
+        
+          // Check for overlapping dates (date-only comparison)
+          return argsStart <= eventEnd && argsEnd >= eventStart;
+        }
+        
+        return false;
+      });
+  
+      if (!hasOverlap) {
+        this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
+      }
+    }
+  };
+  
 
   /**
    * This function shows how to move a reservation in an estimated time of minutes, the interval parameter determines how many in how many minutes the event will be moved when you drag it across the calendar
