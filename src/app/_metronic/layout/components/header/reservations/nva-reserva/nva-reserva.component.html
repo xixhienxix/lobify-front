@@ -123,7 +123,7 @@
                 required
                 (selectionChange)="buscaDispo($event.value)"
                 >
-                    <mat-option value="0">-- Selecciona Habitación --</mat-option>
+                    <mat-option disabled="true" value="0">-- Selecciona Habitación --</mat-option>
                     <mat-option value="1">Todos los Tipos de Cuartos</mat-option>
                     <mat-option *ngFor="let tipoCuarto of roomCodes" [value]="tipoCuarto">{{tipoCuarto.Codigo.replace("_"," ")}} </mat-option>
                 </mat-select>

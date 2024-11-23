@@ -223,69 +223,81 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   save(){
     const formData = this.formGroup.value;
     
-    // Assuming this.preAsignadasArray is defined somewhere in your component
+    // Convert the current Folio to an integer
+    let currentFolioValue = parseInt(this.currentFolio.Folio, 10);
+
+    // Loop through the filtered and checked items
     this.preAsignadasArray
       .filter(habitacion => habitacion.checked)  // Filter out only the checked items
-      .forEach(habitacion => {
+      .forEach((habitacion, index) => {
         // Your logic here, e.g.,
         const tarifa  = this.tarifaSeleccionada.find(obj =>
           obj.Habitacion.some(item => item === habitacion.codigo));
 
-          let initialDate = DateTime.local().setZone(this.zona).set({
-              day:this.intialDate.getDate(),
-              month:this.intialDate.getMonth()+1,
-              year:this.intialDate.getFullYear(), 
-              hour:parseInt(this.checkOut.split(":")[0]),
-              minute:parseInt(this.checkOut.split(":")[1])
-            }).toISO()
-            let endDate = DateTime.local().setZone(this.zona).set({
-              day:this.endDate.getDate(),
-              month:this.endDate.getMonth()+1,
-              year:this.endDate.getFullYear(), 
-              hour:parseInt(this.checkIn.split(":")[0]),
-              minute:parseInt(this.checkIn.split(":")[1])
-            }).toISO()
+        let initialDate = DateTime.local().setZone(this.zona).set({
+            day: this.intialDate.getDate(),
+            month: this.intialDate.getMonth() + 1,
+            year: this.intialDate.getFullYear(), 
+            hour: parseInt(this.checkOut.split(":")[0]),
+            minute: parseInt(this.checkOut.split(":")[1])
+          }).toISO();
 
+        let endDate = DateTime.local().setZone(this.zona).set({
+            day: this.endDate.getDate(),
+            month: this.endDate.getMonth() + 1,
+            year: this.endDate.getFullYear(), 
+            hour: parseInt(this.checkIn.split(":")[0]),
+            minute: parseInt(this.checkIn.split(":")[1])
+          }).toISO();
 
+        // Use the current value for the first iteration and increment after
+        const folio = this.currentFolio.Letra + currentFolioValue;
+
+        // Construct huesped object
         const huesped = {
-          folio:this.currentFolio.Letra + this.currentFolio.Folio,
-          adultos:this.quantity,
-          ninos:this.quantityNin,
-          nombre:formData.nombre,
+          folio: folio,  // Use the generated folio
+          adultos: this.quantity,
+          ninos: this.quantityNin,
+          nombre: formData.nombre,
           estatus: this.currentStatus,
-          llegada:initialDate ?? this.intialDate.toISOString(),
-          salida:endDate ?? this.endDate.toISOString(),
-          noches:this.stayNights,
-          tarifa:tarifa === undefined ? '' : tarifa.Tarifa,
-          porPagar:this.totalPorCuenta,
-          pendiente:this.totalPorCuenta,
-          origen:this.origenReserva,
-          habitacion:habitacion.codigo,
-          telefono:formData.telefono,
-          email:formData.email,
-          numeroDeCuarto:habitacion.numero,
-          creada:new Date().toISOString(),
-          motivo:'',
-          fechaNacimiento:'',
-          trabajaEn:'',
-          tipoDeID:'',
-          numeroDeID:'',
-          direccion:'',
-          pais:'',
-          ciudad:'',
-          codigoPostal:'',
-          lenguaje:'',
-          numeroCuarto:habitacion.numero,
-          tipoHuesped:'',
-          notas:'',
-          vip:'',
-          ID_Socio:0,
-          estatus_Ama_De_Llaves:'LIMPIA',      
-        }
-  
-         this.huespedInformation.push(huesped)        
+          llegada: initialDate ?? this.intialDate.toISOString(),
+          salida: endDate ?? this.endDate.toISOString(),
+          noches: this.stayNights,
+          tarifa: tarifa === undefined ? '' : tarifa.Tarifa,
+          porPagar: this.totalPorCuenta,
+          pendiente: this.totalPorCuenta,
+          origen: this.origenReserva,
+          habitacion: habitacion.codigo,
+          telefono: formData.telefono,
+          email: formData.email,
+          numeroDeCuarto: habitacion.numero,
+          creada: new Date().toISOString(),
+          motivo: '',
+          fechaNacimiento: '',
+          trabajaEn: '',
+          tipoDeID: '',
+          numeroDeID: '',
+          direccion: '',
+          pais: '',
+          ciudad: '',
+          codigoPostal: '',
+          lenguaje: '',
+          numeroCuarto: habitacion.numero,
+          tipoHuesped: '',
+          notas: '',
+          vip: '',
+          ID_Socio: 0,
+          estatus_Ama_De_Llaves: 'LIMPIA',      
+        };
+
+        // Push the generated huesped information to the array
+        this.huespedInformation.push(huesped);
+
+        // Increment the folio for the next iteration
+        currentFolioValue += 1;
       });
-    
+
+
     this.onNvaReserva.emit(this.huespedInformation);
     
   }
@@ -890,7 +902,6 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
 }
 
   
-
   /**
    * 
    * @returns This function disables reservation button if user has not selected any room

@@ -469,9 +469,9 @@ export class ContentComponent implements OnInit{
   }
 
   /**
-   * Event that triggers when popup add event window triggers, and lets you interact with popup
-   * @param args This functions is to fill the dropdown of Time that appears whenever yo create or modifiy and existing reservation
-   */
+  * Event that triggers when popup add event window triggers, and lets you interact with popup
+  * @param args This functions is to fill the dropdown of Time that appears whenever yo create or modifiy and existing reservation
+  */
   onPopupOpen = (args: any) => {
     args.cancel = true; // Default to cancel popup
     const today = new Date().toDateString();
@@ -480,19 +480,19 @@ export class ContentComponent implements OnInit{
     const existingEvents = this.scheduleObj.getEvents();
     console.log(existingEvents);
   
-    const activeCellsData = this.scheduleObj.activeCellsData;
-    const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
-    const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
-    const numeroCuarto = rowData.resourceData.text;
-    const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+    // const activeCellsData = this.scheduleObj.activeCellsData;
+    // const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
+    // const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
+    // const numeroCuarto = rowData.resourceData.text;
+    // const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
 
-    // this.tipoHabGroupDataSource
-    // this.habitacionPorTipoDataSource
+    // // this.tipoHabGroupDataSource
+    // // this.habitacionPorTipoDataSource
 
-    console.log(cellDetails);
-    console.log(rowData);
+    // console.log(cellDetails);
+    // console.log(rowData);
   
-    if (startTime > today) return; // Block edits for future dates
+    // if (startTime > today) return; // Block edits for future dates
   
     if (args.data.hasOwnProperty("Folio")) {
       if (args.type === 'Editor' || args.type === 'QuickInfo') {
@@ -505,14 +505,13 @@ export class ContentComponent implements OnInit{
       const now = new Date();
       const startTime = new Date(args.data.startTime); // Convert the startTime from args to a Date object
 
-  // Set 'now' to the start of today (midnight) for comparison
-  now.setHours(0, 0, 0, 0); // Reset the time to midnight
+      // Set 'now' to the start of today (midnight) for comparison
+      now.setHours(0, 0, 0, 0); // Reset the time to midnight
 
-  // Check if the start time is before today (not including today)
-  if (startTime < now) {
-    return; // Exit the function if the start time is in the past (before today)
-  }
-
+      // Check if the start time is before today (not including today)
+      if (startTime < now) {
+        return; // Exit the function if the start time is in the past (before today)
+      }
 
       const filteredEvents = existingEvents.filter(event => new Date(event.EndTime) >= now);
 
@@ -545,12 +544,22 @@ export class ContentComponent implements OnInit{
       });
   
       if (!hasOverlap) {
+            const activeCellsData = this.scheduleObj.activeCellsData;
+    const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
+    const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
+    const numeroCuarto = rowData.resourceData.text;
+    const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+
+    // this.tipoHabGroupDataSource
+    // this.habitacionPorTipoDataSource
+
+    console.log(cellDetails);
+    console.log(rowData);
         this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
       }
     }
   };
   
-
   /**
    * This function shows how to move a reservation in an estimated time of minutes, the interval parameter determines how many in how many minutes the event will be moved when you drag it across the calendar
    *

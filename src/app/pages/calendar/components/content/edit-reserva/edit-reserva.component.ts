@@ -384,42 +384,42 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
   }
 
   calculatePendiente(): number {
-    let cargos = 0;
-    let abonos = 0;
+    if (!this.currentEdoCuenta) {
+      console.log('Error: No se pudo recuperar informacion de la cuenta');
+      return 0; // Return 0 if the data is undefined
+    }
   
-    this.estadoDeCuenta.forEach((item) => {
-      if (item.Cargo) {
-        cargos += item.Cargo;
-      }
-      if (item.Abono) {
-        abonos += item.Abono;
-      }
-    });
-  
-    return cargos - abonos;
+    return this.currentEdoCuenta.reduce((acc, item) => {
+      const cargo = item?.Cargo ?? 0; // Default to 0 if Cargo is undefined
+      const abono = item?.Abono ?? 0; // Default to 0 if Abono is undefined
+      return acc + cargo - abono; // Accumulate the result
+    }, 0); // Initial value is 0
   }
-
-  calculateBalance(){
-    let cargos = 0;  
-    this.estadoDeCuenta.forEach((item) => {
-      if (item.Cargo) {
-        cargos += item.Cargo;
-      }
-    });
   
-    return cargos;
-  }
-
-  calculaPagosYPendientes(){
-    let abonos = 0;  
-    this.estadoDeCuenta.forEach((item) => {
-      if (item.Abono) {
-        abonos += item.Abono;
-      }
-    });
+  calculateBalance(): number {
+    if (!this.currentEdoCuenta) {
+      console.log('Error: No se pudo recuperar informacion de la cuenta');
+      return 0; // Return 0 if the data is undefined
+    }
   
-    return abonos;
+    return this.currentEdoCuenta.reduce((acc, item) => {
+      const cargo = item?.Cargo ?? 0; // Default to 0 if Cargo is undefined
+      return acc + cargo; // Accumulate the cargos
+    }, 0); // Initial value is 0
   }
+  
+  calculaPagosYPendientes(): number {
+    if (!this.currentEdoCuenta) {
+      console.log('Error: No se pudo recuperar informacion de la cuenta');
+      return 0; // Return 0 if the data is undefined
+    }
+  
+    return this.currentEdoCuenta.reduce((acc, item) => {
+      const abono = item?.Abono ?? 0; // Default to 0 if Abono is undefined
+      return acc + abono; // Accumulate the abonos
+    }, 0); // Initial value is 0
+  }
+  
 
   async actualizaSaldos(refresh:boolean){
     this.estadoDeCuenta=[];

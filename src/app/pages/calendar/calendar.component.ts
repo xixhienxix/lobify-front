@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, Input, OnInit, ViewChild } from '@angular
 
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
-import { BehaviorSubject, Subject, async, catchError, concat, firstValueFrom, forkJoin, of, switchMap, takeUntil } from 'rxjs';
+import { BehaviorSubject, Subject, async, catchError, concat, firstValueFrom, forkJoin, of, switchMap, takeUntil, tap } from 'rxjs';
 import { WarningComponent } from './_helpers/warning.prompt.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
@@ -298,62 +298,29 @@ export class CalendarComponent implements OnInit {
 
 
       modalRef.componentInstance.onNvaReserva.subscribe({
-        next:async (huespedArray:Huesped[])=>{
+        next: async (huespedArray: Huesped[]) => {
           this.submitLoading = true;
-          let pago: edoCuenta[] = [];
           
-          huespedArray.forEach((item) => {
-            pago.push({
-              Folio: item.folio,
-              Forma_de_Pago: '',
-              Fecha: new Date(),
-              Descripcion: 'HOSPEDAJE',
-              Cantidad: 1,
-              Cargo: item.pendiente,
-              Abono: 0,
-              Total: item.pendiente,
-              Estatus: 'Activo',
-            });
-          });
-          
-          let promptFlag = false;
-          
-          const request1 = this._huespedService.addPost(huespedArray);
-          const request2 = this._estadoDeCuenta.agregarHospedaje(pago);
-          
-          forkJoin([request1, request2])
-          .pipe(
-            takeUntil(this.ngUnsubscribe),
-            switchMap(async (values) => {
-              const logRequests = values[0].addedDocuments.map((item: Huesped) =>
-                this._logService.logNvaReserva('Created Nueva Reserva', this.currentUser, item.folio).pipe(
-                  catchError(error => {
-                    // Handle error for individual log request if needed
-                    console.error(`Failed to log reservation for folio: ${item.folio}`, error);
-                    return of(null); // Return a null observable to keep forkJoin working
-                  })
-                )
-              );
-              await firstValueFrom(forkJoin(logRequests)); // Using firstValueFrom to handle the observable
-        
-              // Fetch all reservations after logging
-              this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
-              this.eventsSubject.next(values);
-              this.promptMessage('Exito', 'Reservacion Guardada con exito');
-              this.submitLoading = false;
-            })
-          )
-          .subscribe({
-            error: () => {
-              this.isLoading = false;
-              if (!promptFlag) {
-                this.promptMessage('Error', 'No se pudo guardar la habitación intente de nuevo mas tarde');
-                promptFlag = true;
-              }
-            },
-          });
-        }
+          try {
+            console.log('Processing nueva reserva...');
+            
+            // Call the service method
+            this.allReservations = await this._huespedService.processNuevaReserva(huespedArray);
+            
+            console.log('Successfully processed nueva reserva.');
+            this.eventsSubject.next(this.allReservations);
+            this._checkIndexDb.checkIndexedDB(['folios']);
+            this.promptMessage('Exito', 'Reservacion Guardada con exito');
+          } catch (error) {
+            console.error('Error occurred while processing nueva reserva:', error);
+            this.promptMessage('Error', 'No se pudo guardar la habitación, intente de nuevo más tarde');
+          } finally {
+            this.submitLoading = false;
+          }
+        },
       })
+      
+      
   }
 
   async checkEdoCuentaClient(folio:string){

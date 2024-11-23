@@ -48,6 +48,7 @@ export class ActivityDrawerComponent implements OnInit {
       next: (logs) => {
         // Ordenar los logs por timestamp
         this.logs = logs.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        this.filterLogs();
       },
       error: (error) => {
         console.error('Failed to fetch logs from BehaviorSubject:', error);
