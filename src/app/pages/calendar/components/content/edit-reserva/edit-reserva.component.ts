@@ -385,7 +385,6 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
 
   calculatePendiente(): number {
     if (!this.currentEdoCuenta) {
-      console.log('Error: No se pudo recuperar informacion de la cuenta');
       return 0; // Return 0 if the data is undefined
     }
   
@@ -398,7 +397,6 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
   
   calculateBalance(): number {
     if (!this.currentEdoCuenta) {
-      console.log('Error: No se pudo recuperar informacion de la cuenta');
       return 0; // Return 0 if the data is undefined
     }
   
@@ -410,7 +408,6 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
   
   calculaPagosYPendientes(): number {
     if (!this.currentEdoCuenta) {
-      console.log('Error: No se pudo recuperar informacion de la cuenta');
       return 0; // Return 0 if the data is undefined
     }
   

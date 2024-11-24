@@ -9,64 +9,121 @@
 </ng-container>
 <!--end::Header menu toggle-->
 
-<!--begin::Arrivals-->
-<div class="app-navbar-item align-items-stretch mb-3" [ngClass]="itemClass">
-  <div class="d-flex align-items-center" data-kt-search-element="toggle" id="kt_header_search_toggle">
-    <div class="d-flex fw-bolder rounded-2 py-1" style="background-color: var(--light-green-background); padding: 1rem;">
-      <div class="d-flex flex-column me-3">
-        <span class="fw-bold text-gray-800" style="font-size: 2rem;">
-          {{ llegadas }}
-        </span>
-      </div>
-      <img src="../../../../../../assets/media/icons/movnext/arrivals.png" alt="Arrivals" width="35px" height="35px">
-    </div>
+<button 
+  class="btn align-items-center d-flex fw-bolder rounded-2 py-1 mb-3" 
+  [ngClass]="itemClass" 
+  id="kt_header_search_toggle" 
+  data-kt-search-element="toggle" 
+  matTooltip="Llegadas" 
+  matTooltipPosition="above"
+  (click)="navigateTo('prospects')" 
+  style="
+    width: 5rem;
+    height: 3rem;
+    margin-top: 1rem;
+    background-color: var(--light-green-background); 
+    padding: 0.5rem 1rem; 
+    max-width: 150px; /* Adjust this value to fit your design */
+    width: auto;      /* Ensure the button size is responsive */
+    text-align: center; /* Centers the content */
+  "
+>
+  <div class="d-flex flex-column me-3">
+    <span class="fw-bold text-gray-800" style="font-size: 1.5rem;">
+      {{ llegadas }}
+    </span>
   </div>
-</div>
-<!--end::Arrivals-->
+  <img 
+    src="../../../../../../assets/media/icons/movnext/check_in.png" 
+    alt="Arrivals" 
+    width="25px" 
+    height="25px"
+  >
+</button>
+
+
 
 <!--begin::Departures-->
-<div class="app-navbar-item align-items-stretch mb-3" [ngClass]="itemClass" style="position: relative;">
-  <div class="d-flex align-items-center" data-kt-search-element="toggle" id="kt_header_search_toggle">
-    <div class="d-flex fw-bolder rounded-2 py-1" style="background-color: var(--light-red-background); padding: 1rem;">
-      <div class="d-flex flex-column me-3">
-        <span class="fw-bold text-gray-800" style="font-size: 2rem; cursor: pointer;" (click)="toggleTab()">
-          {{ salidas }}
-        </span>
-      </div>
-      <img src="../../../../../../assets/media/icons/movnext/departure.png" alt="Departures" width="35px" height="35px">
-    </div>
+<!-- Departures Button -->
+<button 
+  class="btn align-items-center d-flex fw-bolder rounded-2 py-1 mb-3" 
+  [ngClass]="itemClass" 
+  id="kt_departures_button" 
+  data-kt-search-element="toggle" 
+  matTooltip="Salidas" 
+  matTooltipPosition="above"
+  (click)="toggleTab()" 
+  style="
+    background-color: var(--light-red-background); 
+    width: 5rem;
+    height: 3rem;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem; 
+    max-width: 150px; 
+    text-align: center;
+  "
+>
+  <div class="d-flex flex-column me-3">
+    <span class="fw-bold text-gray-800" style="font-size: 1.5rem;">
+      {{ salidas }}
+    </span>
   </div>
+  <img 
+    src="../../../../../../assets/media/icons/movnext/departure.png" 
+    alt="Departures" 
+    width="25px" 
+    height="25px"
+  >
+</button>
 
-  <!-- Mat-Tab below the span -->
-  <div *ngIf="tabVisible" class="mat-tab-container mt-3">
-    <app-llegadas-table></app-llegadas-table>
-  </div>
+<!-- Mat-Tab below the button -->
+<div *ngIf="tabVisible" class="mat-tab-container mt-3">
+  <app-llegadas-table></app-llegadas-table>
 </div>
+
 <!--end::Departures-->
 
 <!--begin::NoShow-->
-<div class="app-navbar-item align-items-stretch mb-3" [ngClass]="itemClass">
-  <div class="d-flex align-items-center" data-kt-search-element="toggle" id="kt_header_search_toggle">
-    <div class="d-flex fw-bolder rounded-2 py-1" style="background-color: var(--light-red-background); padding: 1rem;">
-      <div class="d-flex flex-column me-3">
-        <span class="fw-bold text-gray-800" style="font-size: 2rem;">
-          {{ noShow }}
-        </span>
-      </div>
-      <!-- Use the timer icon here instead of the image -->
-      <app-keenicon style="font-size: 5rem;" name="calendar-edit" class="fs-3"></app-keenicon>
-    </div>
+<!-- NoShow Button -->
+<button 
+  class="btn align-items-center d-flex fw-bolder rounded-2 py-1 mb-3" 
+  [ngClass]="itemClass" 
+  id="kt_no_show_button" 
+  data-kt-search-element="toggle" 
+  matTooltip="Colgados" 
+  matTooltipPosition="above"
+  style="
+    background-color: var(--light-red-background); 
+    width: 5rem;
+    height: 3rem;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem; 
+    max-width: 150px; 
+    text-align: center;
+  "
+>
+  <div class="d-flex flex-column me-3">
+    <span class="fw-bold text-gray-800" style="font-size: 1.5rem;">
+      {{ noShow }}
+    </span>
   </div>
-</div>
+  <img 
+    src="../../../../../../assets/media/icons/movnext/late_check_out.png" 
+    alt="No Show" 
+    width="25px" 
+    height="25px"
+  >
+</button>
 
 <!--end::NoShow-->
 
 <!--begin::Activities-->
-<div class="app-navbar-item mb-3" [ngClass]="itemClass">
+<div class="app-navbar-item mb-3" [ngClass]="itemClass" matTooltip="Revisar Logs" matTooltipPosition="above">
   <div [ngClass]="btnClass" id="kt_activities_toggle">
-    <app-keenicon name="messages" class="fs-3"></app-keenicon>
+    <img src="../../../../../../assets/media/icons/movnext/logs.png" alt="logs" width="35px" height="35px">
   </div>
 </div>
+
 <!--end::Activities-->
 
 <!--begin::Notifications-->

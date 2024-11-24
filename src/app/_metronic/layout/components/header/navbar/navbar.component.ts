@@ -6,6 +6,7 @@ import { Tarifas } from 'src/app/models/tarifas';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 import * as keenIcons from 'src/app/_metronic/shared/keenicon/icons.json';
+import { Route, Router } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
@@ -41,7 +42,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
   userAvatarClass: string = 'symbol-35px symbol-md-40px';
   btnIconClass: string = 'fs-2 fs-md-1';
 
-  constructor(private changeDetector: ChangeDetectorRef) {}
+  constructor(private changeDetector: ChangeDetectorRef,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.reservasSubject
@@ -50,6 +53,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
         this.initializeCounter(value);
       })
       console.log(this.icons)
+  }
+
+  navigateTo(reportType: string): void {
+    this.router.navigate([`/reports/${reportType}`]); // Add a leading slash
   }
 
   getIcon(iconName: string): string {

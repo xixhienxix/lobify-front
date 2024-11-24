@@ -1,0 +1,36 @@
+.filters-container {
+    display: flex;
+    flex-wrap: nowrap; /* Prevent wrapping to a new row */
+    gap: 1rem; /* Add spacing between elements */
+    // align-items: center; /* Vertically align items */
+   /* justify-content: space-between; /* Distribute elements with space between */
+  }
+  
+  .filter-item {
+    flex: 1; /* Allow each filter to take up equal space */
+    max-width: 250px; /* Optionally, limit the maximum width */
+  }
+  
+  button.filter-item {
+    flex: 0 0 auto; /* Prevent the button from stretching */
+    width: auto; /* Use button's default width */
+    height: 56px; /* Match Angular Material form field height */
+    display: flex;
+    align-items: center; /* Vertically align text */
+    justify-content: center; /* Horizontally align text */
+    padding: 0 16px; /* Add consistent padding */
+    box-sizing: border-box; /* Include padding in height/width calculation */
+  }
+  /* Add these styles to your component's SCSS file */
+.table-container {
+    border-top: 1px solid #ccc;  /* Top border */
+    border-left: 1px solid #ccc; /* Left border */
+    border-right: 1px solid #ccc; /* Right border */
+    border-bottom: 1px solid #ccc; /* Bottom border */
+    border-radius: 4px;           /* Optional: Rounded corners */
+  }
+  
+  /* Optional: Add a border to the pagination if you are using mat-paginator */
+  ::ng-deep .mat-paginator {
+    border-top: 1px solid #ccc;  /* Add a border to the top of the pagination */
+  }

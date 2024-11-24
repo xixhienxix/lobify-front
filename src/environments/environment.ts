@@ -8,8 +8,8 @@ export const environment = {
   USERDATA_KEY: 'authf649fc9a5f55',
   isMockEnabled: true,
   // apiUrl:'https://us-central1-lobify-api.cloudfunctions.net/api',
-  apiUrl: 'http://localhost:3500',
-  //apiUrl: 'https://milobify.com',
+  //apiUrl: 'http://localhost:3500',
+  apiUrl: 'https://milobify.com',
   fireBaseStorageSecrets:{
     apiKey: "AIzaSyB3tYq0nD6m4hljK3lfkGmQtqHwm3ssCiU",
     authDomain: "movnext-api.firebaseapp.com",
@@ -18,7 +18,6 @@ export const environment = {
     messagingSenderId: "82604568171",
     appId: "1:82604568171:web:21dafcd8a28f1767008b2e",
     databaseURL: "https://movnext-api-default-rtdb.firebaseio.com",
-
   }
 };
 

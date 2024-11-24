@@ -19,6 +19,11 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./_metronic/layout/layout.module').then((m) => m.LayoutModule),
   },
+  {
+    path: 'reports', // Ensure this points to ReportsModule
+    loadChildren: () =>
+      import('./pages/reports/reports.module').then((m) => m.ReportsModule),
+  },
   { path: '**', redirectTo: 'error/404' },
 ];
 
