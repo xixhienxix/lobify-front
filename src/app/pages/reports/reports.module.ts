@@ -4,7 +4,6 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag'
 import { TranslateModule } from '@ngx-translate/core';
-import { ProspectsComponent } from './prospects/prospects.component';
 import { ReportsComponent } from './reports.component';
 import { ReportsRoutingModule } from './reports-routing.module';
 import { RouterModule } from '@angular/router';
@@ -17,10 +16,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { SharedModule } from 'src/app/_metronic/shared/shared.module';
 import { MomentDateAdapter } from '@angular/material-moment-adapter';
-import { ReservationsReportsComponent } from './reservations/reservations.component';
 import { OutOfServiceComponent } from './out-of-service/out-of-service.component';
 import { ArrivalsComponent } from './widgets/arrivals/arrivals.component';
-import { ArrivalsReportComponent } from './arrivals/arrivals-report.component';
 import { DynamicReportComponent } from './dinamyc-reports/dynamic-report.component';
 export const MY_DATE_FORMATS = {
   parse: {
@@ -36,11 +33,8 @@ export const MY_DATE_FORMATS = {
 
 @NgModule({
   declarations: [
-    ProspectsComponent,
     ReportsComponent,
-    ReservationsReportsComponent,
     OutOfServiceComponent,
-    ArrivalsReportComponent,
     DynamicReportComponent
   ],
   imports: [

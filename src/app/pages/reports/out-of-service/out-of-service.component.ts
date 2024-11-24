@@ -78,6 +78,7 @@ export class OutOfServiceComponent implements OnInit{
 
 
     ngOnInit(): void {
+      this._checkIndexDb.checkIndexedDB(['bloqueos'])
         this._checkIndexDb.bloqueos$.subscribe({
           next: (bloqueos) => {
             this.allBloqueos = bloqueos;

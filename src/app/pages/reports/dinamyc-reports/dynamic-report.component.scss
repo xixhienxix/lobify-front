@@ -34,3 +34,38 @@
   ::ng-deep .mat-paginator {
     border-top: 1px solid #ccc;  /* Add a border to the top of the pagination */
   }
+
+
+
+/* Target the mat-form-field with appearance="outline" */
+.colored-select.mat-mdc-form-field-type-mat-select .mat-mdc-form-field-flex {
+    background-color: inherit !important; /* Apply the background color to the content area */
+    border-radius: 4px; /* Optional: add rounding to the background */
+  }
+  
+  /* Optional: Customize the background color for the select dropdown options */
+  .colored-select .mat-select-trigger {
+    background-color: transparent !important; /* Keep the background transparent for the dropdown trigger */
+  }
+  
+  /* Make sure the selected value area inherits the background color */
+  .colored-select .mat-select-value {
+    background-color: inherit !important;
+  }
+  
+  /* Optional: Ensure the outline border remains as part of the outline appearance */
+  .colored-select .mdc-notched-outline {
+    border-color: #ccc !important; /* Keep the border color but remove background */
+    background-color: transparent !important; /* Prevent the background color from applying to the border */
+  }
+  
+  /* Optional: Hide the underline if needed */
+  .colored-select .mat-form-field-underline {
+    display: none;
+  }
+  
+  /* Target the label text color if needed */
+  .colored-select .mat-form-field-label {
+    color: inherit !important; /* Ensure label color inherits from the parent */
+  }
+  

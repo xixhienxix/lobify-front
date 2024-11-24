@@ -52,7 +52,7 @@
   data-kt-search-element="toggle" 
   matTooltip="Salidas" 
   matTooltipPosition="above"
-  (click)="toggleTab()" 
+  (click)="navigateTo('salidas')" 
   style="
     background-color: var(--light-red-background); 
     width: 5rem;
@@ -83,8 +83,7 @@
 
 <!--end::Departures-->
 
-<!--begin::NoShow-->
-<!-- NoShow Button -->
+<!-- Colgados Button -->
 <button 
   class="btn align-items-center d-flex fw-bolder rounded-2 py-1 mb-3" 
   [ngClass]="itemClass" 
@@ -92,6 +91,41 @@
   data-kt-search-element="toggle" 
   matTooltip="Colgados" 
   matTooltipPosition="above"
+  (click)="navigateTo('colgados')" 
+  style="
+    background-color: var(--light-red-background); 
+    width: 5rem;
+    height: 3rem;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem; 
+    max-width: 150px; 
+    text-align: center;
+  "
+>
+  <div class="d-flex flex-column me-3">
+    <span class="fw-bold text-gray-800" style="font-size: 1.5rem;">
+      {{ colgados }}
+    </span>
+  </div>
+  <img 
+    src="../../../../../../assets/media/icons/movnext/late_check_out.png" 
+    alt="Colgados" 
+    width="25px" 
+    height="25px"
+  >
+</button>
+
+<!--end::Colgados-->
+
+<!-- NoShow Button -->
+<button 
+  class="btn align-items-center d-flex fw-bolder rounded-2 py-1 mb-3" 
+  [ngClass]="itemClass" 
+  id="kt_no_show_button" 
+  data-kt-search-element="toggle" 
+  matTooltip="NoShow" 
+  matTooltipPosition="above"
+  (click)="navigateTo('noshow')" 
   style="
     background-color: var(--light-red-background); 
     width: 5rem;
@@ -108,10 +142,10 @@
     </span>
   </div>
   <img 
-    src="../../../../../../assets/media/icons/movnext/late_check_out.png" 
+    src="../../../../../../assets/media/icons/movnext/no-show.png" 
     alt="No Show" 
-    width="25px" 
-    height="25px"
+    width="20px" 
+    height="20px"
   >
 </button>
 

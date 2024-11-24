@@ -51,6 +51,7 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
+    this.loadColors();
     await this.indexDbService.checkIndexedDB(['reservaciones'], true);
     this.allReservaciones = await this.indexDbService.loadReservaciones();
 
@@ -99,32 +100,72 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
   loadReportData(): void {
     if (this.reportType === 'prospects') {
       this.loadProspectsReport();
-    } else if (this.reportType === 'reservations') {
-      // Add reservation-specific logic here if needed.
+    } else if (this.reportType === 'salidas') {
+      this.loadSalidasReport();
+    } else if (this.reportType === 'colgados') {
+      this.loadColgadosReport();
+    } else if (this.reportType === 'noshow') {
+      this.loadNoShowReport();
     }
   }
 
+  loadNoShowReport(): void {
+
+    // Ensure reservationStatusMap values are correctly assigned
+    this.statusOptions = [...reservationStatusMap[8]];
+
+    // Filter prospects
+    this.prospectsArray = this.filterNoShow(this.allReservaciones);
+    this.filteredReservations.data = this.prospectsArray;
+
+    // Assign paginator after setting data
+    this.filteredReservations.paginator = this.paginator;
+
+  }
+
+  loadSalidasReport(): void {
+
+    // Ensure reservationStatusMap values are correctly assigned
+    this.statusOptions = [...reservationStatusMap[1]];
+
+    // Filter prospects
+    this.prospectsArray = this.filterHuespedesSalida(this.allReservaciones);
+    this.filteredReservations.data = this.prospectsArray;
+
+    // Assign paginator after setting data
+    this.filteredReservations.paginator = this.paginator;
+
+  }
+
   loadProspectsReport(): void {
-    this.loadProspectsColors();
 
     // Ensure reservationStatusMap values are correctly assigned
     this.statusOptions = [...reservationStatusMap[2]];
 
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-
-    // Filter prospects
+    // Filter prospectsfilterHuespedes
     this.prospectsArray = this.filterHuespedes(this.allReservaciones);
     this.filteredReservations.data = this.prospectsArray;
 
     // Assign paginator after setting data
     this.filteredReservations.paginator = this.paginator;
 
-    console.log(this.prospectsArray);
   }
 
-  loadProspectsColors(): void {
+  loadColgadosReport(): void {
+
+    // Ensure reservationStatusMap values are correctly assigned
+    this.statusOptions = [...reservationStatusMap[1]];
+
+    // Filter prospectsfilterHuespedes
+    this.prospectsArray = this.filterHuespedesColgados(this.allReservaciones);
+    this.filteredReservations.data = this.prospectsArray;
+
+    // Assign paginator after setting data
+    this.filteredReservations.paginator = this.paginator;
+
+  }
+
+  loadColors(): void {
     // Define color mapping
     this.colorMap = {
       'Huesped en Casa': this.colorDict[0],
@@ -147,6 +188,25 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
     };
   }
 
+  filterNoShow(huespedes: any[]): any[] {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    return huespedes.filter((huesped) => {
+      const llegadaDate = new Date(huesped.llegada);
+      const salidaDate = new Date(huesped.salida);
+
+      const isThisMonth =
+        (llegadaDate.getMonth() === currentMonth && llegadaDate.getFullYear() === currentYear) ||
+        (salidaDate.getMonth() === currentMonth && salidaDate.getFullYear() === currentYear);
+
+      const matchesEstatus = reservationStatusMap[8].includes(huesped.estatus);
+
+      return isThisMonth && matchesEstatus;
+    });
+  }
+
   filterHuespedes(huespedes: any[]): any[] {
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
@@ -165,6 +225,37 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
       return isThisMonth && matchesEstatus;
     });
   }
+
+  filterHuespedesSalida(huespedes: any[]): any[] {
+    const currentDate = DateTime.local(); // Get current local time
+    const todayDateString = currentDate.toISODate(); // Get today's date in ISO format (YYYY-MM-DD)
+  
+    return huespedes.filter((huesped) => {
+      const salidaDate = DateTime.fromISO(huesped.salida).startOf('day'); // Parse the 'salida' date and normalize to the start of the day
+  
+      const isSameDayAsToday = salidaDate.toISODate() === todayDateString; // Compare if salida is the same day as today
+  
+      const matchesEstatus = reservationStatusMap[1].includes(huesped.estatus);
+  
+      return isSameDayAsToday && matchesEstatus;
+    });
+  }
+
+  filterHuespedesColgados(huespedes: any[]): any[] {
+    const currentDate = DateTime.local(); // Get current local time
+    const todayDateString = currentDate.toISODate(); // Get today's date in ISO format (YYYY-MM-DD)
+  
+    return huespedes.filter((huesped) => {
+      const salidaDate = DateTime.fromISO(huesped.salida).startOf('day'); // Parse the 'salida' date and normalize to the start of the day
+  
+      const isSameDayAsToday = salidaDate.toISODate()! <= todayDateString; // Compare if salida is the same day as today
+  
+      const matchesEstatus = reservationStatusMap[1].includes(huesped.estatus);
+  
+      return isSameDayAsToday && matchesEstatus;
+    });
+  }
+  
 
   ngAfterViewInit(): void {
     this.filteredReservations.paginator = this.paginator;

@@ -7,6 +7,7 @@ import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 import * as keenIcons from 'src/app/_metronic/shared/keenicon/icons.json';
 import { Route, Router } from '@angular/router';
+import { DateTime } from 'luxon'
 
 @Component({
   selector: 'app-navbar',
@@ -33,6 +34,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   llegadas: number;
   salidas: number;
   noShow: number;
+  colgados: number;
   tabVisible: boolean = false;
 
   @Input() reservasSubject: BehaviorSubject<Huesped[]> = new BehaviorSubject<Huesped[]>([]);
@@ -63,45 +65,82 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return this.icons[iconName];
   }
 
-  toggleTab() {
-    this.tabVisible = !this.tabVisible;
-  }
-
   async initializeCounter(reservations:Huesped[]){
     const statusGroup2 = reservationStatusMap[2];// Reservations Groups
 
     const todayDate = new Date();
-    const llegadas = reservations.filter((item)=>{
 
-      if(statusGroup2.includes(item.estatus)){
-        const llegada = new Date(item.llegada);
+    // Llegadas Count
+    const currentDate = DateTime.local(); // Get current local time
+    const todayDateString = currentDate.toISODate(); // Get today's date in ISO format (YYYY-MM-DD)
 
-        if(llegada.setHours(0,0,0,0) === todayDate.setHours(0,0,0,0)){
-          return item
-        }
-      }
+    const currentDateMoment = new Date();
+
+    const currentMonth = currentDateMoment.getMonth();
+    const currentYear = currentDateMoment.getFullYear();
+  
+    const llegadas = reservations.filter((huesped) => {
+      const llegadaDate = new Date(huesped.llegada);
+      const salidaDate = new Date(huesped.salida);
+
+      const isThisMonth =
+        (llegadaDate.getMonth() === currentMonth && llegadaDate.getFullYear() === currentYear) ||
+        (salidaDate.getMonth() === currentMonth && salidaDate.getFullYear() === currentYear);
+
+      const matchesEstatus = reservationStatusMap[2].includes(huesped.estatus);
+
+      return isThisMonth && matchesEstatus;
     });
     this.llegadas = llegadas.length;
+    //
 
-    const salidas = reservations.filter((item)=>{
-    const salida = new Date(item.salida);
+    // Salidas Count
 
-      if(salida.setHours(0,0,0,0) === todayDate.setHours(0,0,0,0)){
-        return item
-      }
-    });
-    this.salidas = salidas.length;
-
-    const noShow = reservations.filter((item)=>{
-      const llegada = new Date(item.llegada);
+    const salidas = reservations.filter((huesped) => {
+      const salidaDate = DateTime.fromISO(huesped.salida).startOf('day'); // Parse the 'salida' date and normalize to the start of the day
   
-        if(llegada.setHours(0,0,0,0) >= todayDate.setHours(0,0,0,0)){
-          if(statusGroup2.includes(item.estatus)){
-            return item
-          }
-        }
-      });
-      this.noShow = noShow.length;
+      const isSameDayAsToday = salidaDate.toISODate() === todayDateString; // Compare if salida is the same day as today
+  
+      const matchesEstatus = reservationStatusMap[1].includes(huesped.estatus);
+  
+      return isSameDayAsToday && matchesEstatus;
+    });
+
+    this.salidas = salidas.length;
+    //
+
+    // Colgados Count
+    const colgados = reservations.filter((huesped) => {
+      const salidaDate = DateTime.fromISO(huesped.salida).startOf('day'); // Parse the 'salida' date and normalize to the start of the day
+  
+      const isSameDayAsToday = salidaDate.toISODate()! <= todayDateString; // Compare if salida is the same day as today
+  
+      const matchesEstatus = reservationStatusMap[1].includes(huesped.estatus);
+  
+      return isSameDayAsToday && matchesEstatus;
+    });
+
+    this.colgados = colgados.length;
+    //
+
+    // No Show Count
+    const noshow =  reservations.filter((huesped) => {
+      const llegadaDate = new Date(huesped.llegada);
+      const salidaDate = new Date(huesped.salida);
+
+      const isThisMonth =
+        (llegadaDate.getMonth() === currentMonth && llegadaDate.getFullYear() === currentYear) ||
+        (salidaDate.getMonth() === currentMonth && salidaDate.getFullYear() === currentYear);
+
+      const matchesEstatus = reservationStatusMap[8].includes(huesped.estatus);
+
+      return isThisMonth && matchesEstatus;
+    });
+
+    this.noShow = noshow.length;
+    //
+
+
 
     this.changeDetector.detectChanges();
 
