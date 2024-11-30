@@ -8,12 +8,14 @@
 .container {
     display: flex;
     flex-direction: column; /* Default for mobile view */
+    height: 100vh; /* Ensure the container takes full height */
 }
 
 /* Desktop view */
 @media (min-width: 768px) {
     .container {
-        flex-direction: row; /* Row layout for desktop view */
+        flex-direction: column; /* Keep a column layout for content */
+        justify-content: space-between; /* Ensure space between content and footer */
     }
 
     .content-card {
@@ -22,19 +24,15 @@
     }
 
     .footer-card {
-        flex: 1;
-        margin-left: 10px;
-        margin-top: 0; /* Remove top margin added for mobile view */
+        flex-shrink: 0; /* Prevent the footer from shrinking */
+        margin-top: 10px;
+        margin-left: 0; /* No left margin for footer */
     }
 }
 
 /* Mobile view adjustments */
 @media (max-width: 767px) {
-    .header-card, .content-card, .footer-card {
-        margin: 10px 0;
-    }
-
     .footer-card {
-        margin-top: 10px; /* Add top margin for separation on mobile view */
+        display: none; /* Hide footer on mobile */
     }
 }
