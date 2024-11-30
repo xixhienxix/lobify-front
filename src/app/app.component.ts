@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, HostListener } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 // language list
 import { ThemeModeService } from './_metronic/partials/layout/theme-mode-switcher/theme-mode.service';
@@ -21,6 +21,11 @@ import { Router } from '@angular/router';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit {
+  @HostListener('document:contextmenu', ['$event'])
+  onRightClick(event: MouseEvent) {
+    event.preventDefault(); // Prevent the default context menu
+  }
+  
 
   supportedLanguages = ['en', 'es'];
 

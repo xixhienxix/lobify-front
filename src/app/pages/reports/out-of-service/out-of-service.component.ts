@@ -139,7 +139,7 @@ export class OutOfServiceComponent implements OnInit{
                this.openMini(this.miniModal)
      
               const sb = this._bloqueoService.liberaBloqueos(_id,desdeISOString,astaISOString,habitacion,numero).subscribe((response)=>{
-                 console.log("liberaDispo response",response)
+                 console.log("liberaDispo responxse",response)
                });
               }
              else
