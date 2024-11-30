@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { Tarifas } from '../models/tarifas';
 import { LocalForageCache } from '../tools/cache/indexdb-expire';
+import { DateTime } from 'luxon';
 
 
 
@@ -80,11 +81,6 @@ export class TarifasService {
      .get<any[]>(environment.apiUrl + '/tarifario/tarifas')
      .pipe(
        map(responseData=>{
-        // responseData.forEach((item)=>{
-        //   if(item.hasOwnProperty('_id')){
-        //     delete item._id;   
-        //   }
-        // })
         this.writeIndexDB("Rates",responseData);
         this.setCurrentTarifasValue = responseData 
         return responseData
@@ -168,10 +164,12 @@ export class TarifasService {
     ninos: number,
     initialDate: Date,
     endDate: Date
-): { fecha: string; tarifaTotal: number }[] { // Adjusted return type to string for fecha
-    const results: { fecha: string; tarifaTotal: number }[] = []; // Adjusted fecha to string
+): { fecha: string; tarifaTotal: number }[] {
+    const results: { fecha: string; tarifaTotal: number }[] = [];
+    const start = DateTime.fromISO(initialDate.toISOString());
+    const end = DateTime.fromISO(endDate.toISOString()).startOf('day'); // Ensure endDate excludes its time
 
-    const applyRate = (item: any, date: Date) => {
+    const applyRate = (item: any, date: DateTime) => {
         let rate = 0;
         switch (adultos) {
             case 1:
@@ -192,28 +190,22 @@ export class TarifasService {
             tarifaTotal += item.Tarifa_N * ninos;
         }
 
-        // Translate date to 'es-MX' format
-        const formattedDate = new Intl.DateTimeFormat('es-MX', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric'
-        }).format(date);
-
+        const formattedDate = date.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE);
         results.push({ fecha: formattedDate, tarifaTotal });
     };
 
-    for (let start = new Date(initialDate); start < endDate; start.setDate(start.getDate() + 1)) {
+    for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
         let dailyTarifaTotal = 0;
         let tarifaAplicada = false;
 
         if (tarifa.Tarifa !== 'Tarifa Base' && tarifa.Estado) {
             const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
-            const day = start.getDay();
+            const day = current.weekday - 1; // Adjust for 0-based index
 
             tarifa.TarifasActivas.forEach(item => {
                 const validDay = item.Dias?.some(x => x.name === dayNames[day] && x.checked);
                 if (validDay && item.Activa) {
-                    applyRate(item, start);
+                    applyRate(item, current);
                     tarifaAplicada = true;
                 }
             });
@@ -222,26 +214,21 @@ export class TarifasService {
         if (!tarifaAplicada) {
             dailyTarifaTotal = this.retriveBaseRatePrice(
                 codigosCuarto,
-                start,
+                current.toJSDate(),
                 standardRatesArray,
                 adultos,
                 ninos,
                 tempRatesArray
             );
 
-            // Translate date to 'es-MX' format
-            const formattedDate = new Intl.DateTimeFormat('es-MX', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric'
-            }).format(start);
-
+            const formattedDate = current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE);
             results.push({ fecha: formattedDate, tarifaTotal: dailyTarifaTotal });
         }
     }
 
     return results;
 }
+
 
 
   
@@ -267,30 +254,30 @@ export class TarifasService {
       return Math.ceil(tarifaTemporada);
     }
   
-    let tarifaTotal = 0;
-    if (tarifaBase) {
-      tarifaBase.TarifasActivas.forEach(item => {
-        let rate = 0;
-        switch (adultos) {
-          case 1:
-            rate = item.Tarifa_1;
-            break;
-          case 2:
-            rate = item.Tarifa_2;
-            break;
-          case 3:
-            rate = item.Tarifa_3;
-            break;
-          default:
-            rate = item.Tarifa_3;
-        }
-        tarifaTotal += rate * adultos;
-        if (ninos !== 0) {
-          tarifaTotal += item.Tarifa_N * ninos;
-        }
-      });
-    }
-    return Math.ceil(tarifaTotal);
+    let tarifaTotal = tarifaBase?.TarifaRack;
+    //if (tarifaBase) {
+      // tarifaBase.TarifasActivas.forEach(item => {
+      //   let rate = 0;
+      //   switch (adultos) {
+      //     case 1:
+      //       rate = item.Tarifa_1;
+      //       break;
+      //     case 2:
+      //       rate = item.Tarifa_2;
+      //       break;
+      //     case 3:
+      //       rate = item.Tarifa_3;
+      //       break;
+      //     default:
+      //       rate = item.Tarifa_3;
+      //   }
+      //   tarifaTotal += rate * adultos;
+      //   if (ninos !== 0) {
+      //     tarifaTotal += item.Tarifa_N * ninos;
+      //   }
+      // });
+    //}
+    return Math.ceil(tarifaTotal ?? 0);
   }
   
   checkIfTempRateAvaible(

@@ -88,6 +88,9 @@ export class CalendarComponent implements OnInit {
   codigosCargo: Codigos[] = []
   bloqueosArray:Bloqueo[] = []
 
+  isModalOpen = false;
+
+
   changingValue: Subject<any> = new Subject();
   changingValueBloque: Subject<any> = new Subject();
   // changingPromesasValue: Subject<any> = new Subject();
@@ -275,6 +278,9 @@ export class CalendarComponent implements OnInit {
   }
 
   onNvaRsvDateRange(data:any){
+    if (this.isModalOpen) return; // Prevent opening the modal multiple times
+
+    this.isModalOpen = true;
 
       const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' })  
       modalRef.componentInstance.folios = this.folios;
@@ -318,7 +324,12 @@ export class CalendarComponent implements OnInit {
             this.submitLoading = false;
           }
         },
-      })
+      });
+              // Handle modal close
+              modalRef.result.finally(() => {
+                this.isModalOpen = false; // Reset the state when the modal is closed
+            });
+
       
       
   }
@@ -328,6 +339,10 @@ export class CalendarComponent implements OnInit {
   }
 
   async onEditRsvOpen(data: any) {
+    if (this.isModalOpen) return; // Prevent opening the modal multiple times
+
+    this.isModalOpen = true;
+
     if (data.data.hasOwnProperty("Id")) {
       const folio = data.data.Folio
       const currentHuesped = this.allReservations.find(item => item.folio === data.data.Folio)!;
@@ -516,6 +531,10 @@ export class CalendarComponent implements OnInit {
             });
         }
       });
+                    // Handle modal close
+                    modalRef.result.finally(() => {
+                      this.isModalOpen = false; // Reset the state when the modal is closed
+                  });
     }
   }
 

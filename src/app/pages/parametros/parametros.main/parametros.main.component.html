@@ -157,7 +157,23 @@
                 </mat-checkbox>
               </div>
             </div>
-            
+             <!-- MAximo numero de Inventario -->
+             <div class="form-group row">
+              <label class="col-lg-3 col-form-label text-lg-right"
+                >Máximo número de Inventario por Habiación</label
+              >
+              <div class="col-lg-9 col-xl-4">
+                <mat-form-field appearance="fill">
+                  <mat-select  formControlName="inventario" required>
+                    <mat-option *ngFor="let inventario of inventarioList" [value]="inventario">
+                      {{inventario}} 
+                    </mat-option>
+                  </mat-select>
+                  <!-- <mat-error *ngIf="animalControl.hasError('required')">Please choose an animal</mat-error>
+                  <mat-hint>{{animalControl.value?.sound}}</mat-hint> -->
+                </mat-form-field>
+              </div>
+             </div>
           
           </div>
           <!-- end::Header -->

@@ -107,10 +107,10 @@ L10n.load({
       "series": "Serie",
       "previous": "Anterior",
       "next": "próximo",
-      "timelineDay": "Día de la línea de tiempo",
-      "timelineWeek": "Semana de la línea de tiempo",
+      "timelineDay": "Por Día",
+      "timelineWeek": "Por Semana",
       "timelineWorkWeek": "Cronograma Semana Laboral",
-      "timelineMonth": "Mes de la línea de tiempo",
+      "timelineMonth": "Por Mes",
       "timelineYear": "Cronología Año",
       "editFollowingEvent": "Siguientes eventos",
       "deleteTitle": "Eliminar evento",
@@ -423,7 +423,7 @@ export class ContentComponent implements OnInit{
 
   checkGroupId(codigo:string,cuarto:string){
     const habitacionesPorTipo = this.roomCodesComplete.find(item=>item.Codigo === codigo && item.Numero === cuarto );
-    const foundGroupID = this.tipoHabGroupDataSource.find(item=>item.text === habitacionesPorTipo?.Tipo);
+    const foundGroupID = this.tipoHabGroupDataSource.find(item=>item.text === habitacionesPorTipo?.Codigo);
     return foundGroupID?.id
   }
 
@@ -436,11 +436,11 @@ export class ContentComponent implements OnInit{
     const tipoArray:Record<string, any>[] = []
     const codigoArray:Record<string, any>[] = []
 
-    const tipoCuarto = [...new Set(responseData.map(item => item.Tipo))];
+    const tipoCuarto = [...new Set(responseData.map(item => item.Codigo))]; // Define the Group property
     // const codigoCuarto = [...new Set(responseData.map(item => item.Numero))];
 
     tipoCuarto.forEach((_item,index)=>{
-      tipoArray.push({ text: tipoCuarto[index], id:index+1, color:'#' + Math.floor(Math.random()*16777215).toString(16) });
+      tipoArray.push({ text: tipoCuarto[index].replace(/_/g, " "), id:index+1, color:'#' + Math.floor(Math.random()*16777215).toString(16) });
     }) 
     // HERE THE GROUPS ARE CREATED
     this.tipoHabGroupDataSource = tipoArray;
@@ -450,7 +450,7 @@ export class ContentComponent implements OnInit{
       if(responseData.hasOwnProperty(key))
         {  
           for(let x=0; x<tipoArray.length; x++){
-            if(tipoArray[x].text === responseData[key].Tipo){
+            if(tipoArray[x].text === responseData[key].Codigo.replace(/_/g, " ")){
               if(tipoArray[x].id)
               codigoArray.push({ text: responseData[key].Numero , id:Number(key)+1, groupId: tipoArray[x].id, color: tipoArray[x].color}); 
             }
@@ -480,19 +480,6 @@ export class ContentComponent implements OnInit{
     const existingEvents = this.scheduleObj.getEvents();
     console.log(existingEvents);
   
-    // const activeCellsData = this.scheduleObj.activeCellsData;
-    // const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
-    // const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
-    // const numeroCuarto = rowData.resourceData.text;
-    // const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
-
-    // // this.tipoHabGroupDataSource
-    // // this.habitacionPorTipoDataSource
-
-    // console.log(cellDetails);
-    // console.log(rowData);
-  
-    // if (startTime > today) return; // Block edits for future dates
   
     if (args.data.hasOwnProperty("Folio")) {
       if (args.type === 'Editor' || args.type === 'QuickInfo') {
@@ -559,6 +546,13 @@ export class ContentComponent implements OnInit{
       }
     }
   };
+
+  onMovileActionBegin(args:any){
+    if (args.requestType === 'toolbarItemRendering') {
+      this.scheduleObj.element.classList.remove('e-device');
+      this.scheduleObj.isAdaptive = false;
+    }
+  }
   
   /**
    * This function shows how to move a reservation in an estimated time of minutes, the interval parameter determines how many in how many minutes the event will be moved when you drag it across the calendar

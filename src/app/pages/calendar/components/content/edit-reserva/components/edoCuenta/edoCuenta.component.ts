@@ -11,6 +11,7 @@ import { ParametrosService } from 'src/app/pages/parametros/_services/parametros
 import { Edo_Cuenta_Service } from 'src/app/services/edoCuenta.service';
 import { HuespedService } from 'src/app/services/huesped.service';
 import { TarifasService } from 'src/app/services/tarifas.service';
+import { DateTime } from 'luxon';
 
 
 @Component({
@@ -87,7 +88,7 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
 
     // Extract guest arrival date
     const [diaLlegada, mesLlegada, anoLlegada] = this.currentHuesped.llegada.split("/").map(Number);
-    let fromDate = new Date(anoLlegada, mesLlegada - 1, diaLlegada);
+    const fromDate = DateTime.fromISO(this.currentHuesped.llegada).toJSDate();
 
     // Process each item
     this.currentEdoCuenta.forEach((item) => {
@@ -147,22 +148,34 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private processHospedaje(item: any, fromDate: Date) {
-    for (let y = 0; y < this.currentHuesped.noches; y++) {
-      const fullFechaSalida = this.formatDate(new Date(this.currentHuesped.salida));
+    console.log(item,fromDate);
+    console.log('aqui');
+    // for (let y = 0; y < this.currentHuesped.noches; y++) {
+    //   const fullFechaSalida = this.formatDate(new Date(this.currentHuesped.salida));
       const tarifa = this.ratesArrayComplete.find(item=>item.Tarifa === this.currentHuesped.tarifa)!;
-      this.tarifaDelDia = this._tarifasService.ratesTotalCalc(tarifa,this.standardRatesArray,this.tempRatesArray,this.currentHuesped.habitacion,this.currentHuesped.adultos,this.currentHuesped.ninos,new Date(this.currentHuesped.llegada),new Date(this.currentHuesped.salida));
-      // const edoCuentaAlojamientoTemp = {
-      //   ...item,
-      //   Fecha: fullFechaSalida,
-      //   Cargo: item.Cargo! / this.currentHuesped.noches,
-      // };
+    //   this.tarifaDelDia = this._tarifasService.ratesTotalCalc(tarifa,this.standardRatesArray,this.tempRatesArray,this.currentHuesped.habitacion,this.currentHuesped.adultos,this.currentHuesped.ninos,new Date(this.currentHuesped.llegada),new Date(this.currentHuesped.salida));
 
-      this.impuestoSobreHospedaje = item.Total! * this._parametrosService.getCurrentParametrosValue.ish / 100;
-      // this.edoCuentaAlojamientosActivos.push(edoCuentaAlojamientoTemp);
-      this.subTotalAlojamiento = item.Cargo!.toLocaleString();
 
-      fromDate.setDate(fromDate.getDate() + 1);
-    }
+    //   this.impuestoSobreHospedaje = item.Total! * this._parametrosService.getCurrentParametrosValue.ish / 100;
+
+    //   this.subTotalAlojamiento = item.Cargo!.toLocaleString();
+
+    //   fromDate.setDate(fromDate.getDate() + 1);
+    // }
+    const dailyRates = this._tarifasService.ratesTotalCalc(
+      tarifa,
+      this.standardRatesArray,
+      this.tempRatesArray,
+      tarifa.Habitacion[0], // Assuming single room per rate
+      this.currentHuesped.adultos,
+      this.currentHuesped.ninos,
+      new Date(this.currentHuesped.llegada),
+      new Date(this.currentHuesped.salida)
+    );
+  
+    this.tarifaDelDia = dailyRates;
+    this.impuestoSobreHospedaje = item.Total! * this._parametrosService.getCurrentParametrosValue.ish / 100;
+    this.subTotalAlojamiento = item.Cargo!.toLocaleString();
   }
 
   private processServiciosExtra(item: any) {
@@ -203,8 +216,9 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private calculateTotals() {
+    const subtotalServicios = this.subTotalServiciosExtra === 0 ? 1 : this.subTotalServiciosExtra
     this.totalCalculado = this.totalCargos - this.totalAbonos;
-    this.iva = (this.subTotalServiciosExtra) * this._parametrosService.getCurrentParametrosValue.iva / 100;
+    this.iva = ((subtotalServicios + this.totalCalculado) * this._parametrosService.getCurrentParametrosValue.iva) / 100;
     this.totalimpuestos = this.iva + this.impuestoSobreHospedaje;
   }
 

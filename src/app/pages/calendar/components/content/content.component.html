@@ -35,6 +35,7 @@
       (resizeStart)="onResizeStart($event)"
       (resizeStop)="onResizeStop($event)"
       [quickInfoOnSelectionEnd] = "true"
+      (actionBegin)="onMovileActionBegin($event)"
       >
       <ng-template #dateHeaderTemplate let-data>
         <div class="date-text"></div>
