@@ -11,3 +11,14 @@
     }
   }
 }
+/* Disable the green border and checkmark for valid fields */
+.is-valid {
+  border-color: transparent !important; /* Remove green border */
+  background-image: none !important; /* Remove checkmark icon */
+}
+
+/* Optional: Customize invalid state */
+.is-invalid {
+  border-color: #dc3545 !important; /* Red border for invalid fields */
+  background-image: none !important; /* No icon for invalid fields */
+}

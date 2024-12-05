@@ -74,6 +74,10 @@
         "footer-status-recep":"Estado en Recepción",
         "footer-status-clean": "Estado de Limpieza"
     },
+    "FooterComponent":{
+        "nva-rsv": "Reservar",
+        "nvo-bloqueo": "Bloquear"
+    },
     "WidgetTable11":{
         "title":"Tipos de Habitación",
         "buttonHeader":"Agregar Nueva Habitación"

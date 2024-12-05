@@ -39,8 +39,10 @@
         </div>
         <!--end::Content wrapper-->
         <ng-container *ngIf="appFooterDisplay">
-          <app-footer class="app-footer" [ngClass]="appFooterCSSClass" id="kt_app_footer" style="background-color: var(--deep-white-background);"
-            [appFooterContainerCSSClass]="appFooterContainerCSSClass"></app-footer>
+          <app-footer 
+            class="app-footer" [ngClass]="appFooterCSSClass" id="kt_app_footer" style="background-color: var(--deep-grey-background);"
+            [appFooterContainerCSSClass]="appFooterContainerCSSClass">
+          </app-footer>
         </ng-container>
       </div>
       <!--end:::Main-->

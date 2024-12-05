@@ -25,7 +25,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
 
   // private fields
-  private unsubscribe: Subscription[] = []; // Read more: => https://brianflove.com/2016/12/11/anguar-2-unsubscribe-observables/
+  private unsubscribe: Subscription[] = []; // Read more: => 
 
   constructor(
     private fb: FormBuilder,
@@ -71,7 +71,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   submit() {
     this.hasError = false;
     const loginSubscr = this.authService
-      .login(this.f.username.value, this.f.password.value)
+      .login(this.f.username.value.trim(), this.f.password.value)
       .subscribe(() => {
         if (this.authService.getcurrentUserValue?.accessToken) {
           

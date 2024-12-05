@@ -1,33 +1,42 @@
 <ng-container *ngIf="appFooterContainerCSSClass">
-  <!--begin::Footer container-->
+  <!-- Footer container -->
   <div class="app-container" [ngClass]="appFooterContainerCSSClass">
     <ng-container *ngTemplateOutlet="footerView"></ng-container>
   </div>
-  <!--end::Footer container-->
 </ng-container>
 
 <ng-container *ngIf="!appFooterContainerCSSClass">
   <ng-container *ngTemplateOutlet="footerView"></ng-container>
 </ng-container>
 
-
-
 <ng-template #footerView>
-  <!--begin::Copyright-->
-  <div class="text-gray-900 order-2 order-md-1">
-    <span class="text-muted fw-semibold me-1">{{version.split(',')[0]}}&copy;</span>
+  <div class="footer-container">
+    <!-- Buttons Container -->
+    <div class="buttons-container">
+      <button class="btn btn-light-grey" (click)="openNvaReserva()">
+        <app-keenicon name="plus" class="svg-icon fs-2x text-grey"></app-keenicon>
+        {{ "FooterComponent.nva-rsv" | translate }}
+      </button>
+      <button class="btn btn-light-grey" (click)="openNvoBloqueo()">
+        <app-keenicon name="plus" class="svg-icon fs-2x text-grey"></app-keenicon>
+        {{ "FooterComponent.nvo-bloqueo" | translate }}
+      </button>
+      <div class="position-relative my-1">
+        <button class="btn btn-light-grey">
+          <app-keenicon name="magnifier" class="svg-icon fs-2x text-dark"></app-keenicon>          
+        </button>
+      </div>
+    </div>
+  
+
+  
+
+    <!-- Version Info (Hidden on Mobile) -->
+    <div class="version-info d-none d-md-block text-gray-900 order-2 order-md-1">
+      <span class="text-muted fw-semibold me-1">{{ version.split(',')[0] }}&copy;</span>
+    </div>
   </div>
-  <!--end::Copyright-->
-
-  <!--begin::Menu-->
-  <!-- <ul class="menu menu-gray-600 menu-hover-primary fw-semibold order-1">
-    <li class="menu-item"><a href="https://keenthemes.com/" target="_blank" class="menu-link px-2">About</a></li>
-
-    <li class="menu-item"><a href="https://devs.keenthemes.com/" target="_blank" class="menu-link px-2">Support</a></li>
-
-    <li class="menu-item"><a href="https://themeforest.net/item/metronic-responsive-admin-dashboard-template/4021469"
-        target="_blank" class="menu-link px-2">Purchase</a></li>
-  </ul> -->
-  <!--end::Menu-->
-
 </ng-template>
+<ng-container *ngIf="submitLoading">
+  <app-loader-spinner></app-loader-spinner>
+</ng-container>

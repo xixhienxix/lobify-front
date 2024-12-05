@@ -75,6 +75,10 @@
         "footer-status-recep":"Reception Status",
         "footer-status-clean": "Clean Status"
     },
+    "FooterComponent":{
+        "nva-rsv": "Reservation",
+        "nvo-bloqueo": "Out Of Service"
+    },
     "WidgetTable11":{
         "title":"Rooms Types",
         "buttonHeader":"Add New Room"

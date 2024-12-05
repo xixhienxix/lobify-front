@@ -370,6 +370,8 @@ export class ContentComponent implements OnInit{
             Codigo: item.habitacion,
             Numero: item.numeroCuarto,
             CategoryColor: getCategoryColor(item.estatus),
+            Rate:item.tarifa,
+            Saldo: item.pendiente
           });
         }
       });

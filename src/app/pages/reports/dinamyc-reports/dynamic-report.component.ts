@@ -55,7 +55,6 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
     await this.indexDbService.checkIndexedDB(['reservaciones'], true);
     this.allReservaciones = await this.indexDbService.loadReservaciones();
 
-    console.log(this.allReservaciones);
     this.filteredReservations.filterPredicate = (data: any, filter: string): boolean => {
       const parsedFilter = JSON.parse(filter); // Parse the filter string into an object
       

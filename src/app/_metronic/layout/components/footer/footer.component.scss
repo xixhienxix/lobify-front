@@ -1,0 +1,52 @@
+.footer-container {
+    display: flex;
+    flex-direction: column; /* Default for small screens */
+    align-items: center;
+    justify-content: center;
+  
+    @media (min-width: 768px) { /* Adjust the breakpoint as needed */
+      flex-direction: row; /* Align elements side by side on larger screens */
+      justify-content: space-between; /* Add space between buttons and version info */
+    }
+  }
+  
+  .buttons-container {
+    display: flex;
+    gap: 10px; /* Space between buttons */
+    width: 100%; /* Ensure buttons take full width */
+    justify-content: space-between; /* Distribute buttons evenly in available space */
+  
+    @media (min-width: 768px) {
+      flex-direction: row; /* Keep buttons side by side on larger screens */
+    }
+  }
+  
+  .btn-light-grey {
+    background-color: rgb(252, 248, 248);
+    color: black;
+    width: 100%; /* Make buttons take full width on smaller screens */
+    font-size: 1.2rem; /* Adjust the font size to make text bigger */
+    display: flex;
+    align-items: center; /* Vertically align text and icon */
+    justify-content: center; /* Center the content */
+    padding: 10px; /* Add padding for better button size */
+  
+    @media (min-width: 768px) {
+      width: auto; /* Buttons take their natural width on larger screens */
+      flex: 1; /* Allow the buttons to equally distribute available space */
+    }
+  }
+  
+  .btn-light-grey .svg-icon-md {
+    fill: black; /* Ensure icons are also in black */
+    margin-right: 8px; /* Space between icon and text */
+  }
+  
+  .version-info {
+    margin-top: 10px;
+  
+    @media (min-width: 768px) {
+      margin-top: 0; /* Remove margin on larger screens */
+    }
+  }
+  

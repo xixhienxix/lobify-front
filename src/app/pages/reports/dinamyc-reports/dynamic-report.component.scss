@@ -1,26 +1,61 @@
-.filters-container {
-    display: flex;
-    flex-wrap: nowrap; /* Prevent wrapping to a new row */
-    gap: 1rem; /* Add spacing between elements */
-    // align-items: center; /* Vertically align items */
-   /* justify-content: space-between; /* Distribute elements with space between */
+table {
+  th {
+    text-align: center; /* Center the text inside the header cells */
+    vertical-align: middle; /* Vertically align the text */
   }
-  
-  .filter-item {
-    flex: 1; /* Allow each filter to take up equal space */
-    max-width: 250px; /* Optionally, limit the maximum width */
+
+  /* Optional: Center-align all cell content */
+  td {
+    text-align: center;
+    vertical-align: middle; /* Ensure content is vertically centered */
   }
-  
-  button.filter-item {
-    flex: 0 0 auto; /* Prevent the button from stretching */
-    width: auto; /* Use button's default width */
-    height: 56px; /* Match Angular Material form field height */
-    display: flex;
-    align-items: center; /* Vertically align text */
-    justify-content: center; /* Horizontally align text */
-    padding: 0 16px; /* Add consistent padding */
-    box-sizing: border-box; /* Include padding in height/width calculation */
-  }
+}
+
+/* Container for the 'estatus' column content */
+.estatus-container {
+  display: flex;
+  justify-content: center; /* Horizontally center */
+  align-items: center; /* Vertically center */
+  height: 100%; /* Ensure it spans the full height of the cell */
+}
+
+/* Styling for the mat-form-field inside the 'estatus' column */
+.estatus-form-field {
+  display: flex; /* Enable flexbox */
+  //justify-content: center; /* Horizontally center the mat-select */
+  align-items: center; /* Vertically center the mat-select */
+  width: 100%; /* Fill the width of the cell */
+  height: 56px; /* Match Angular Material input height */
+  margin: 0; /* Remove default margins */
+  box-sizing: border-box; /* Include padding and borders in dimensions */
+}
+
+/* Target the mat-select component */
+.mat-select {
+  display: flex; /* Use flexbox for internal alignment */
+  justify-content: center; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+  text-align: center; /* Ensure text is centered */
+}
+
+/* Adjustments for the mat-select-trigger (selected value area) */
+.mat-select-trigger {
+  display: flex; /* Use flex for alignment */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  height: 100%; /* Match the height of the mat-form-field */
+}
+
+/* Styling for the dropdown options */
+.mat-option {
+  display: flex; /* Use flexbox for internal alignment */
+  justify-content: center; /* Horizontally center option text */
+  align-items: center; /* Vertically center option text */
+  text-align: center; /* Ensure text alignment */
+  height: 40px; /* Consistent height for dropdown options */
+}
+
+
   /* Add these styles to your component's SCSS file */
 .table-container {
     border-top: 1px solid #ccc;  /* Top border */
@@ -34,6 +69,21 @@
   ::ng-deep .mat-paginator {
     border-top: 1px solid #ccc;  /* Add a border to the top of the pagination */
   }
+  
+  .mat-select-trigger {
+    display: flex;
+    align-items: center; /* Vertically center content in the trigger */
+    justify-content: center; /* Optional: horizontally center */
+    height: 100%; /* Match the height of the parent */
+  }
+  
+  .mat-option {
+    display: flex;
+    align-items: center; /* Vertically center option text */
+    justify-content: center; /* Horizontally center option text */
+    height: 40px; /* Ensure consistent height for options */
+  }
+  
 
 
 
