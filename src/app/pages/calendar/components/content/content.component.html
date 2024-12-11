@@ -68,6 +68,12 @@
         </div>
       </ng-template>
 
+      <!--Inner Cell Template for data-->
+      <ng-template #cellTemplate let-data>
+        <div class="templatewrap" *ngIf="isInitialized" [innerHTML]="getDailyRates(data)"></div>
+      </ng-template>
+
+
         <e-resources>
           <e-resource 
             field='ProjectId' 
@@ -96,7 +102,6 @@
     <e-views>
       <e-view option="TimelineDay" [interval]="dayInterval"></e-view>
       <e-view option="TimelineWeek"></e-view>
-      <e-view option="TimelineWorkWeek"></e-view>
       <e-view option="TimelineMonth"></e-view>
     </e-views>
 

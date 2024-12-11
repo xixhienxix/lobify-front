@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { catchError, firstValueFrom, forkJoin, of, Subscription } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
@@ -48,6 +48,10 @@ currentUtc:string = ''
 parametrosModel:Parametros
 currentUser:string='root';
 
+// Your existing properties...
+searchQuery: string = '';  // Used to store the search query
+filteredZonaHoraria: any[] = [];
+
 constructor(
   public fb : FormBuilder,
   public modal : NgbModal,
@@ -64,6 +68,8 @@ constructor(
 
 
   async ngOnInit(): Promise<void> {
+    this.filteredZonaHoraria = this.zonaHoraria; // Initially show all timezones
+
     this.initForm();
     await this.checkParametrosIndexDB();  // Fetch parameters first
     this.setFormGroup();  // Then set form values
@@ -100,10 +106,12 @@ getTimeZones(){
   const sb = this.timezonesService.getTimeZones().subscribe({
    next: (value:any)=>{
       if(value){
-        const currentUtc = value.find((item:any)=> item.Nombre === 'America/Mexico_City')
+        const filteredRegions = value.filter((item:any) => item.Nombre.includes('America'));
+        console.log(this.parametrosModel)
+        const currentUtc = value.find((item:any)=> item.Nombre === this.parametrosModel.codigoZona)
         this.currentUtc = currentUtc.UTC+' '+currentUtc.Nombre
         this.formGroup.controls["timeZone"].patchValue(this.currentUtc);
-        this.zonaHoraria=value
+        this.zonaHoraria=filteredRegions
       }
       else 
       {this.zonaHoraria.push(DEFAULT_TIMEZONE)}
@@ -153,6 +161,7 @@ initForm(){
     tarifasCancelacion:['',Validators.required],
     autoCheckOut:[''],
     autoNoShow:[''],
+    inventario:['']
   })
 
 }
@@ -189,6 +198,8 @@ onSelectTimeZone(zona:string){
       recursiveFunc(formToInvestigate);
       return invalidControls;
     }
+
+
 
 submitParametros(){
 

@@ -6,8 +6,9 @@ import { environment } from 'src/environments/environment';
 import { Parametros } from '../_models/parametros';
 import { DivisasService } from './divisas.service';
 import { LocalForageCache } from 'src/app/tools/cache/indexdb-expire';
+import { DateTime } from 'luxon';
 
-export const timeZoneToLocaleMap = {
+export const timeZoneToLocaleMap: { [key: string]: string } = {
   // North America
   'America/New_York': 'en-US',
   'America/Los_Angeles': 'en-US',
@@ -154,6 +155,17 @@ export class ParametrosService {
           return throwError(error);
         })
       );
+  }
+
+  // Function to convert date string to the correct timezone and optionally add 1 day
+  convertToCorrectTimezone(dateString: string, addOneDay: boolean = false): Date {
+    // Parse the input date string and convert it to a Luxon DateTime object in the provided zone
+    const dateTime = DateTime.fromJSDate(new Date(dateString)).setZone('America/Mexico_City');//'America/Mexico_City'
+
+    // If addOneDay is true, add 1 day to the DateTime
+    const resultDateTime = addOneDay ? dateTime.plus({ days: 1 }) : dateTime;
+    
+    return resultDateTime.toJSDate(); // Convert Luxon DateTime to native JS Date
   }
 
 }

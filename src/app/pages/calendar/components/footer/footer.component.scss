@@ -39,9 +39,9 @@
 
 /* Mobile view */
 @media (max-width: 767px) {
-    .footer-container {
-        display: none; /* Hide footer on mobile devices */
-    }
+    // .footer-container {
+    //     // display: none; /* Hide footer on mobile devices */
+    // }
     .footer-row {
         flex-direction: column; /* Stack items in a column for mobile */
     }

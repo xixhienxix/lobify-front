@@ -33,7 +33,9 @@ import frGregorian from "@syncfusion/ej2-cldr-data/main/es-MX/ca-gregorian.json"
 import frNumberingSystem from "@syncfusion/ej2-cldr-data/supplemental/numberingSystems.json";
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { Parametros, PARAMETROS_DEFAULT_VALUES } from 'src/app/pages/parametros/_models/parametros';
-
+import { TarifasService } from 'src/app/services/tarifas.service';
+import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
+import { DateTime } from 'luxon'
 
 loadCldr(frNumberData, frtimeZoneData, frGregorian, frNumberingSystem);
 
@@ -184,6 +186,9 @@ export class ContentComponent implements OnInit{
   reservationsArray:Huesped[];
   bloqueosArray:Bloqueo[];
 
+  isInitialized = false;
+
+
   @Input() allReservations:Huesped[];
 
   closeResult:string
@@ -275,7 +280,9 @@ export class ContentComponent implements OnInit{
     private modalService:NgbModal,
     private activatedRoute: ActivatedRoute,
     private _roomService: HabitacionesService,
-    private _indexDBService: IndexDBCheckingService
+    private _indexDBService: IndexDBCheckingService,
+    private _tarifasService: TarifasService,
+    private _parametrosService: ParametrosService
   ) {
     this.selectedDate = new Date(this.todayDate.getFullYear(), this.todayDate.getMonth(), this.todayDate.getDate())
     this.activatedRoute.data.subscribe((val) => {
@@ -300,6 +307,35 @@ export class ContentComponent implements OnInit{
       }
   }
 
+  getDailyRates(event:any){
+
+    const rowData = this.getRowData(event.groupIndex);
+    const numeroCuarto = rowData.resourceData.text;
+    const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo; 
+
+    const baseRate = this.ratesArrayComplete.find(obj =>
+      obj.Habitacion.some(item => item === codigoCuarto));
+
+      if(baseRate!== undefined && codigoCuarto !== undefined ){
+        const tarifasPorDia = this._tarifasService.ratesTotalCalc(
+          baseRate,
+          this.ratesArrayComplete.filter(item => item.Tarifa === 'Tarifa Base'),
+          this.ratesArrayComplete.filter(item => item.Tarifa === 'Tarifa De Temporada'),
+          codigoCuarto, // Assuming single room per rate
+          1,
+          1,
+          this._parametrosService.convertToCorrectTimezone(event.date),
+          this._parametrosService.convertToCorrectTimezone(event.date,true)
+        );
+        const returningValue = (tarifasPorDia[0].tarifaTotal).toLocaleString('es-MX')
+        return returningValue
+      }
+      else {
+        return ' '
+      }
+
+  }
+
   adjustTime (date: string, time: { hours: number; minutes: number }): Date  {
     const adjustedDate = new Date(date);
     adjustedDate.setHours(time.hours, time.minutes, 0, 0);
@@ -308,6 +344,10 @@ export class ContentComponent implements OnInit{
 
   async ngOnInit() {
     await this.checkRoomCodesIndexDB();
+    this._indexDBService.checkIndexedDB(['tarifas'],true);
+    this.ratesArrayComplete = await this._indexDBService.loadTarifas(true);
+
+
     const parametros = await this._indexDBService.loadParametros(true);
   
     this.changing.subscribe((dataSource: any) => {
@@ -376,7 +416,6 @@ export class ContentComponent implements OnInit{
         }
       });
   
-      console.log("Previo a Bloqueos: ", this.datasourceArray);
   
       let bloqueoIdCounter = 0;
   
@@ -404,11 +443,11 @@ export class ContentComponent implements OnInit{
         });
       });
   
-      console.log("Después de Bloqueos: ", this.datasourceArray);
   
       // Refresh Calendar
       this.refreshCalendar(this.datasourceArray);
     });
+    this.isInitialized = true;
   }
   
 
@@ -480,7 +519,6 @@ export class ContentComponent implements OnInit{
     const startTime = new Date(args.data.StartTime).toDateString();
   
     const existingEvents = this.scheduleObj.getEvents();
-    console.log(existingEvents);
   
   
     if (args.data.hasOwnProperty("Folio")) {
@@ -533,7 +571,7 @@ export class ContentComponent implements OnInit{
       });
   
       if (!hasOverlap) {
-            const activeCellsData = this.scheduleObj.activeCellsData;
+          const activeCellsData = this.scheduleObj.activeCellsData;
     const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
     const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
     const numeroCuarto = rowData.resourceData.text;
@@ -542,8 +580,6 @@ export class ContentComponent implements OnInit{
     // this.tipoHabGroupDataSource
     // this.habitacionPorTipoDataSource
 
-    console.log(cellDetails);
-    console.log(rowData);
         this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
       }
     }
@@ -568,6 +604,10 @@ export class ContentComponent implements OnInit{
     }else{
       args.interval = 30;    
     }
+  }
+
+  getRowData(groupIndex:number){
+    return  this.scheduleObj.getResourcesByIndex(groupIndex!);
   }
 
   onDragStop(args: DragEventArgs): void {

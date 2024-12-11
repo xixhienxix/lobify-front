@@ -14,6 +14,7 @@ import { Foliador } from 'src/app/pages/calendar/_models/foliador.model';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { DateTime } from 'luxon'; 
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
+import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 export interface preAsig {
   numero:any,
   codigo:string,
@@ -127,6 +128,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   origenReserva:string='Recepcion';
   noDisabledCheckIn:boolean=true;
   todayDate:Date = new Date();
+  parametros:Parametros
   // closeResult: string;
 
   @Input() standardRatesArray:Tarifas[]=[]
@@ -155,6 +157,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   async ngOnInit() {
     this.loadForm();
+    this._checkIndexDbService.checkIndexedDB(['parametros'],true);
+    this.parametros = await this._checkIndexDbService.loadParametros(true);
 
     if(this.startTime !== '' && this.endTime !== ''){
       this.updateDatePicker(this.startTime,this.endTime);
@@ -436,13 +440,18 @@ ratesTotalCalc(tarifa: Tarifas, estanciaPorNoche: number, codigosCuarto = this.c
 
   if (tarifa.Tarifa !== 'Tarifa Base') {
 
-    // Check if Special Rate is valid for Date Range
-    const llegadaDate = new Date(tarifa.Llegada);
-    const salidaDate = new Date(tarifa.Salida);
+    // Convert initial and end dates to Luxon DateTime
+    const initialDateLuxon = DateTime.fromJSDate(this.intialDate, { zone: this.parametros.codigoZona });
+    const endDateLuxon = DateTime.fromJSDate(this.endDate, { zone: this.parametros.codigoZona });
+
+    // Convert tarifa dates to Luxon DateTime
+    const llegadaDate = DateTime.fromISO(tarifa.Llegada.toISOString(), { zone: this.parametros.codigoZona });
+    const salidaDate = DateTime.fromISO(tarifa.Salida.toISOString(), { zone: this.parametros.codigoZona });
+
     // Check if the initial and end dates are within the range
     const isWithinRange =
-      (this.intialDate >= llegadaDate && this.intialDate <= salidaDate) &&
-      (this.endDate >= llegadaDate && this.endDate <= salidaDate);
+      (initialDateLuxon >= llegadaDate && initialDateLuxon <= salidaDate) &&
+      (endDateLuxon >= llegadaDate && endDateLuxon <= salidaDate);
 
     if (isWithinRange) {
       if (tarifa.Estado) {
@@ -462,9 +471,10 @@ ratesTotalCalc(tarifa: Tarifas, estanciaPorNoche: number, codigosCuarto = this.c
       }
     }
   } else {
-    //for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
-      tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, new Date(this.intialDate));
-    //}
+    for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
+      tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
+    }
+    tarifaTotal = tarifaTotal/this.stayNights
   }
 
   return tarifaPromedio ? Math.ceil(tarifaTotal / this.stayNights) : tarifaTotal;
@@ -492,13 +502,24 @@ retriveBaseRatePrice(codigosCuarto: string, checkDay: Date, day:number=-1) {
 }
 
 checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
-  const tarifaTemporada = this.tempRatesArray.find(obj => {
-    const llegada = new Date(obj.Llegada);
-    const salida = new Date(obj.Salida);
+  // const tarifaTemporada = this.tempRatesArray.find(obj => {
+  //   const llegada = new Date(obj.Llegada);
+  //   const salida = new Date(obj.Salida);
   
-    // Check if Habitacion includes the specified room code and fecha is within the Llegada and Salida range
-    const isWithinRange = llegada <= fecha && fecha <= salida;
+  //   // Check if Habitacion includes the specified room code and fecha is within the Llegada and Salida range
+  //   const isWithinRange = llegada <= fecha && fecha <= salida;
       
+  //   return obj.Habitacion.includes(codigoCuarto) && isWithinRange;
+  // });
+  const fechaDate = DateTime.fromISO(fecha.toISOString(), { zone: this.parametros.codigoZona });
+  
+  const tarifaTemporada = this.tempRatesArray.find(obj => {
+    const llegada = DateTime.fromISO(obj.Llegada.toString(), { zone: this.parametros.codigoZona });
+    const salida = DateTime.fromISO(obj.Salida.toString(), { zone: this.parametros.codigoZona });
+
+    // Compare DateTime objects
+    const isWithinRange = fechaDate >= llegada && fechaDate <= salida;
+
     return obj.Habitacion.includes(codigoCuarto) && isWithinRange;
   });
   let tarifaTotal = 0;

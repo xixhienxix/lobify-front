@@ -11,25 +11,24 @@
 
 <ng-template #footerView>
   <div class="footer-container">
-    <!-- Buttons Container -->
-    <div class="buttons-container">
-      <button class="btn btn-light-grey" (click)="openNvaReserva()">
-        <app-keenicon name="plus" class="svg-icon fs-2x text-grey"></app-keenicon>
-        {{ "FooterComponent.nva-rsv" | translate }}
-      </button>
-      <button class="btn btn-light-grey" (click)="openNvoBloqueo()">
-        <app-keenicon name="plus" class="svg-icon fs-2x text-grey"></app-keenicon>
-        {{ "FooterComponent.nvo-bloqueo" | translate }}
-      </button>
-      <div class="position-relative my-1">
-        <button class="btn btn-light-grey">
-          <app-keenicon name="magnifier" class="svg-icon fs-2x text-dark"></app-keenicon>          
+    <ng-container *ngIf="isMobile">
+      <!-- Buttons Container -->
+      <div class="buttons-container" style="background-color: var(--deep-grey-background);">
+        <button class="btn btn-light-grey" (click)="openNvaReserva()">
+          <app-keenicon name="plus" class="svg-icon fs-2x text-grey"></app-keenicon>
+          {{ "FooterComponent.nva-rsv" | translate }}
         </button>
+        <button class="btn btn-light-grey" (click)="openNvoBloqueo()">
+          <app-keenicon name="plus" class="svg-icon fs-2x text-grey"></app-keenicon>
+          {{ "FooterComponent.nvo-bloqueo" | translate }}
+        </button>
+        <div class="position-relative my-1">
+          <button class="btn btn-light-grey">
+            <app-keenicon name="magnifier" class="svg-icon fs-2x text-dark"></app-keenicon>          
+          </button>
+        </div>
       </div>
-    </div>
-  
-
-  
+    </ng-container>
 
     <!-- Version Info (Hidden on Mobile) -->
     <div class="version-info d-none d-md-block text-gray-900 order-2 order-md-1">
@@ -37,6 +36,7 @@
     </div>
   </div>
 </ng-template>
+
 <ng-container *ngIf="submitLoading">
   <app-loader-spinner></app-loader-spinner>
 </ng-container>

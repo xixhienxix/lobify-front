@@ -148,8 +148,6 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private processHospedaje(item: any, fromDate: Date) {
-    console.log(item,fromDate);
-    console.log('aqui');
     // for (let y = 0; y < this.currentHuesped.noches; y++) {
     //   const fullFechaSalida = this.formatDate(new Date(this.currentHuesped.salida));
       const tarifa = this.ratesArrayComplete.find(item=>item.Tarifa === this.currentHuesped.tarifa)!;

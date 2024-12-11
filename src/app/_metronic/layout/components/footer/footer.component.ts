@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output } from '@angular/core';
 import { catchError, firstValueFrom, forkJoin, of, Subject, tap } from 'rxjs';
 import { VersionService } from 'src/app/services/version.service';
 import { BloqueoReservaComponent } from '../header/bloqueos/nvo-bloqueo/nvo-bloqueo.component';
@@ -34,6 +34,7 @@ export class FooterComponent implements OnInit{
   currentUser:string;
   submitLoading:boolean=false
   folios:Foliador[]=[]
+  isMobile: boolean = false;
 
   
   roomCodesComplete:Habitacion[]=[]
@@ -58,7 +59,16 @@ export class FooterComponent implements OnInit{
     private _folioservice: FoliosService,
 
   ) {
+    this.checkIfMobile();
     this.currentUser = this._authService.getUserInfo().username
+  }
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkIfMobile();
+  }
+
+  checkIfMobile() {
+    this.isMobile = window.innerWidth <= 768; // Adjust screen width for mobile breakpoint
   }
 
   async ngOnInit(){

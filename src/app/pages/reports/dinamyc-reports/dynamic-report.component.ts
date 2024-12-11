@@ -7,6 +7,8 @@ import { Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { DateTime } from 'luxon';
 import { CommunicationService } from '../_services/event.services';
+import { Parametros } from '../../parametros/_models/parametros';
+import { ParametrosService, timeZoneToLocaleMap } from '../../parametros/_services/parametros.service';
 
 @Component({
   selector: 'app-dynamic-report',
@@ -38,6 +40,7 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
   salidaDateValue: Date | null = null;
   selectedStatus: string | null = null;
   reportType: string = '';
+  currentParametros: Parametros
 
   allReservaciones: any[] = [];
   prospectsArray: any[] = [];
@@ -46,11 +49,15 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
 
   constructor(private route: ActivatedRoute,
     private indexDbService: IndexDBCheckingService,
-    private communicationService: CommunicationService
+    private communicationService: CommunicationService,
+    private _parametrosService: ParametrosService
 
   ) {}
 
   async ngOnInit(): Promise<void> {
+    this.indexDbService.checkIndexedDB(['parametros'],true);
+    this.currentParametros = await  this.indexDbService.loadParametros(true);
+
     this.loadColors();
     await this.indexDbService.checkIndexedDB(['reservaciones'], true);
     this.allReservaciones = await this.indexDbService.loadReservaciones();
@@ -115,7 +122,12 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
 
     // Filter prospects
     this.prospectsArray = this.filterNoShow(this.allReservaciones);
-    this.filteredReservations.data = this.prospectsArray;
+    this.filteredReservations.data = this.prospectsArray.map(reservation => {
+      reservation.llegada = this.formatDate(reservation.llegada, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
+      reservation.salida = this.formatDate(reservation.salida, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
+    
+      return reservation;
+    });;
 
     // Assign paginator after setting data
     this.filteredReservations.paginator = this.paginator;
@@ -129,7 +141,12 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
 
     // Filter prospects
     this.prospectsArray = this.filterHuespedesSalida(this.allReservaciones);
-    this.filteredReservations.data = this.prospectsArray;
+    this.filteredReservations.data = this.prospectsArray.map(reservation => {
+      reservation.llegada = this.formatDate(reservation.llegada, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
+      reservation.salida = this.formatDate(reservation.salida, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
+    
+      return reservation;
+    });;
 
     // Assign paginator after setting data
     this.filteredReservations.paginator = this.paginator;
@@ -143,7 +160,12 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
 
     // Filter prospectsfilterHuespedes
     this.prospectsArray = this.filterHuespedes(this.allReservaciones);
-    this.filteredReservations.data = this.prospectsArray;
+    this.filteredReservations.data = this.prospectsArray.map(reservation => {
+      reservation.llegada = this.formatDate(reservation.llegada, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
+      reservation.salida = this.formatDate(reservation.salida, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
+    
+      return reservation;
+    });;
 
     // Assign paginator after setting data
     this.filteredReservations.paginator = this.paginator;
@@ -157,7 +179,13 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
 
     // Filter prospectsfilterHuespedes
     this.prospectsArray = this.filterHuespedesColgados(this.allReservaciones);
-    this.filteredReservations.data = this.prospectsArray;
+    
+    this.filteredReservations.data = this.prospectsArray.map(reservation => {
+      reservation.llegada = this.formatDate(reservation.llegada, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
+      reservation.salida = this.formatDate(reservation.salida, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
+    
+      return reservation;
+    });
 
     // Assign paginator after setting data
     this.filteredReservations.paginator = this.paginator;
@@ -312,6 +340,12 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
     } else {
       this.filteredReservations.data = this.prospectsArray;
     }
+  }
+
+  formatDate(dateString: string, locale: string): string {
+    return DateTime.fromISO(dateString).setLocale(locale).toLocaleString({
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    }).replace(',', '').replace('de', 'de');
   }
 
   // applySalidaDateFilter(date: Date): void {
