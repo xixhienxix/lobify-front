@@ -12,6 +12,8 @@ import { LayoutInitService } from './core/layout-init.service';
 import { ILayout, LayoutType } from './core/configs/config';
 import { HuespedService } from 'src/app/services/huesped.service';
 import { Huesped } from 'src/app/models/huesped.model';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';  // Import properly
+
 
 @Component({
   selector: 'app-layout',
@@ -20,6 +22,7 @@ import { Huesped } from 'src/app/models/huesped.model';
 })
 export class LayoutComponent implements OnInit, OnDestroy {
   private unsubscribe: Subscription[] = [];
+  isMobile = false;
 
   // Public variables
   // page
@@ -77,7 +80,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private layout: LayoutService,
     private router: Router,
     private activatedRoute: ActivatedRoute,
-    private _huespedService: HuespedService
+    private _huespedService: HuespedService,
+    private breakpointObserver: BreakpointObserver
   ) {
     // define layout type and load layout
     this.router.events.subscribe((event) => {
@@ -101,6 +105,12 @@ export class LayoutComponent implements OnInit, OnDestroy {
       .asObservable()
       .subscribe((config) => {
         this.updateProps(config);
+      });
+
+      // Listen to the handset breakpoint (mobile)
+      this.breakpointObserver.observe([Breakpoints.Handset])  // Correct usage
+      .subscribe(result => {
+        this.isMobile = result.matches;
       });
     this.unsubscribe.push(subscr);
   }

@@ -19,6 +19,7 @@ import { ParametrosService } from 'src/app/pages/parametros/_services/parametros
 import { Tarifas } from 'src/app/models/tarifas';
 import { Foliador } from 'src/app/pages/calendar/_models/foliador.model';
 import { FoliosService } from 'src/app/pages/calendar/_services/folios.service';
+import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 
 @Component({
   selector: 'app-footer',
@@ -45,7 +46,8 @@ export class FooterComponent implements OnInit{
   ratesArrayComplete: Tarifas[] = [];
   standardRatesArray: Tarifas[] = [];
   tempRatesArray: Tarifas[] = [];
-
+  parametros:Parametros
+  
   constructor(
     private versionService: VersionService,
     private modalService: NgbModal,
@@ -71,6 +73,20 @@ export class FooterComponent implements OnInit{
     this.isMobile = window.innerWidth <= 768; // Adjust screen width for mobile breakpoint
   }
 
+  async checkParametrosIndexDB(){
+    const parametrosIndexDB:Parametros = await this._parametrosService.readIndexDB("Parametros");
+    if(parametrosIndexDB){
+      this._parametrosService.setCurrentParametrosValue = parametrosIndexDB;
+    }else {
+      this._parametrosService.getParametros().subscribe({
+        next:(item)=>{
+          this.parametros = item
+        }
+      });
+    }
+    this.parametros = parametrosIndexDB
+  }
+
   async ngOnInit(){
     this.versionService.getCurrentVersion().subscribe(version => {
       this.version = version;
@@ -80,6 +96,7 @@ export class FooterComponent implements OnInit{
     });  
     this.checkFoliadorIndexDB();
     this.initArrays();
+    this.checkParametrosIndexDB();
   }
 
   async checkFoliadorIndexDB(){
@@ -160,6 +177,7 @@ export class FooterComponent implements OnInit{
           this.allReservations = await firstValueFrom(this._huespedService.getAll(true));
           this.eventsSubject.next(this.allReservations);
           this._communicationService.onNvareservaSubject.next(true);
+
         }
     })
   }
@@ -175,11 +193,19 @@ export class FooterComponent implements OnInit{
         firstValueFrom(this._houseKeepingService.updateEstatus(item, 'SUCIA'))
       );
       
-      await Promise.all(updatePromises); // Wait until all updates are done
+      Promise.all(updatePromises)
+      .then(() => {
+      // Add code here that should be executed after all updates have completed
+      console.log('Terminadas todas las axctualizaciones de estados por Bloqueo a Sucias')
+      this._communicationService.onEstatusChangeFinished.next(true);    
+      })
+      .catch((error) => {
+        console.error("Error al Cambiar Estatus de Algun Bloqueo:", error);
+      });  
   
       // Add code here that should be executed after all updates have completed
       console.log('All room statuses updated successfully!');
-      
+
     } catch (error) {
       console.error('Error updating reservations or status:', error);
     }
@@ -191,7 +217,8 @@ export class FooterComponent implements OnInit{
     this.roomCodes = Object.values(
       this.roomCodesComplete.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})); 
 
-     const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' })  
+     const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' });
+     modalRef.componentInstance.parametros = this.parametros 
      modalRef.componentInstance.folios = this.folios;
      modalRef.componentInstance.estatusArray = this.estatusArray
      modalRef.componentInstance.checkIn = this._parametrosService.getCurrentParametrosValue.checkIn

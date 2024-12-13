@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { ModalDismissReasons } from '@ng-bootstrap/ng-bootstrap';
-// import { NvaReservaComponent } from 'src/app/pages/reservations/nva-reserva/nva-reserva.component';
 // import { CustomerService } from '../../_services/customer_service';
 
 

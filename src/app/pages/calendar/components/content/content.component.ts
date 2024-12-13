@@ -36,6 +36,7 @@ import { Parametros, PARAMETROS_DEFAULT_VALUES } from 'src/app/pages/parametros/
 import { TarifasService } from 'src/app/services/tarifas.service';
 import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
 import { DateTime } from 'luxon'
+import { CommunicationService } from 'src/app/pages/reports/_services/event.services';
 
 loadCldr(frNumberData, frtimeZoneData, frGregorian, frNumberingSystem);
 
@@ -282,7 +283,7 @@ export class ContentComponent implements OnInit{
     private _roomService: HabitacionesService,
     private _indexDBService: IndexDBCheckingService,
     private _tarifasService: TarifasService,
-    private _parametrosService: ParametrosService
+    private _parametrosService: ParametrosService,
   ) {
     this.selectedDate = new Date(this.todayDate.getFullYear(), this.todayDate.getMonth(), this.todayDate.getDate())
     this.activatedRoute.data.subscribe((val) => {
@@ -349,7 +350,7 @@ export class ContentComponent implements OnInit{
 
 
     const parametros = await this._indexDBService.loadParametros(true);
-  
+
     this.changing.subscribe((dataSource: any) => {
       this.datasourceArray = [];
       this.reservationsArray = [];

@@ -51,6 +51,9 @@ private ngUnsubscribe = new Subject<void>();
   public onNvareservaSubject = new Subject<boolean>();
   onNvaReserva$ = this.onNvareservaSubject.asObservable();
 
+  public onEstatusChangeFinished = new Subject<boolean>();
+  onEstatusChangeFinished$ = this.onEstatusChangeFinished.asObservable();
+
   emitEvent(data: any) {
     this.prospectSubject.next(data);
   }

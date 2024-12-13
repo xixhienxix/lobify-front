@@ -51,22 +51,32 @@
       </ng-template>
       
       <ng-template #resourceHeaderTemplate let-data let-index>
-        <div style="height: 100%; display: flex; align-items: center; justify-content: start;">
-          <div [matMenuTriggerFor]="menu" class="btn btn-icon btn-custom btn-icon-muted">
-            <img class="thumbnail" *ngIf="isChildNode(data)" [src]="getIconClass(data.resourceData.text)" alt="{{data.resourceData.ImageName}}" style="height: 57px; width: 30px;" />
+        <div [ngStyle]="{
+          'height': isChildNode(data) ? '100%' : null,
+          'display': 'flex',
+          'align-items': 'center',
+          'justify-content': 'start'
+        }">
+          <div [ngStyle]="{ 'display': isChildNode(data) ? 'flex' : 'none'}" [matMenuTriggerFor]="menu" class="btn btn-icon btn-custom btn-icon-muted">
+            <img class="thumbnail" 
+              *ngIf="isChildNode(data)" 
+              [src]="getIconClass(data.resourceData.text)" 
+              alt="{{data.resourceData.ImageName}}" 
+              style="height: 57px; width: 30px;" />
           </div>
-
-            <mat-menu #menu="matMenu">
-              <ng-container *ngFor="let estatus of estatusArray">
-                <button (click)="onStatusChange(data.resourceData.text, estatus.Descripcion)" mat-menu-item>
-                  <span>{{estatus.Descripcion}}</span>
-                </button>
-              </ng-container>
-            </mat-menu>
-
-          {{data.resourceData.text}}
+      
+          <mat-menu #menu="matMenu">
+            <ng-container *ngFor="let estatus of estatusArray">
+              <button (click)="onStatusChange(data.resourceData.text, estatus.Descripcion)" mat-menu-item>
+                <span>{{estatus.Descripcion}}</span>
+              </button>
+            </ng-container>
+          </mat-menu>
+      
+          <label style="margin-left: 8px;">{{data.resourceData.text}}</label>
         </div>
       </ng-template>
+      
 
       <!--Inner Cell Template for data-->
       <ng-template #cellTemplate let-data>

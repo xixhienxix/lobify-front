@@ -15,6 +15,7 @@ import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { DateTime } from 'luxon'; 
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
+import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
 export interface preAsig {
   numero:any,
   codigo:string,
@@ -45,7 +46,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     private modalService:NgbModal,
     private _disponibilidadService: DisponibilidadService,
     private changeDetector: ChangeDetectorRef,
-    private _checkIndexDbService: IndexDBCheckingService
+    private _checkIndexDbService: IndexDBCheckingService,
+    private _parametrosService: ParametrosService
   ){
 
   }
@@ -128,7 +130,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   origenReserva:string='Recepcion';
   noDisabledCheckIn:boolean=true;
   todayDate:Date = new Date();
-  parametros:Parametros
   // closeResult: string;
 
   @Input() standardRatesArray:Tarifas[]=[]
@@ -136,6 +137,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   @Input() checkOut:string
   @Input() checkIn:string
   @Input() zona:string='America/Mexico_City'
+  @Input() parametros: Parametros
 
   //On Calendar Trigger DefaultValue
   @Input() numeroCuarto:string=''
@@ -157,8 +159,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   async ngOnInit() {
     this.loadForm();
-    this._checkIndexDbService.checkIndexedDB(['parametros'],true);
-    this.parametros = await this._checkIndexDbService.loadParametros(true);
 
     if(this.startTime !== '' && this.endTime !== ''){
       this.updateDatePicker(this.startTime,this.endTime);
@@ -413,6 +413,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 }
 
 ratesTotalCalc(tarifa: Tarifas, estanciaPorNoche: number, codigosCuarto = this.cuarto, tarifaPromedio = false) {
+
   const adultos = this.quantity;
   const ninos = this.quantityNin;
   let tarifaTotal = 0;
@@ -502,15 +503,7 @@ retriveBaseRatePrice(codigosCuarto: string, checkDay: Date, day:number=-1) {
 }
 
 checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
-  // const tarifaTemporada = this.tempRatesArray.find(obj => {
-  //   const llegada = new Date(obj.Llegada);
-  //   const salida = new Date(obj.Salida);
-  
-  //   // Check if Habitacion includes the specified room code and fecha is within the Llegada and Salida range
-  //   const isWithinRange = llegada <= fecha && fecha <= salida;
-      
-  //   return obj.Habitacion.includes(codigoCuarto) && isWithinRange;
-  // });
+
   const fechaDate = DateTime.fromISO(fecha.toISOString(), { zone: this.parametros.codigoZona });
   
   const tarifaTemporada = this.tempRatesArray.find(obj => {
@@ -584,41 +577,6 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
       }
       return tarifaTotal
     }
-
-  // const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
-  // const day = fecha.getDay();
-  // const validDay = tarifaTemporada?.length > 0 &&
-  //                  tarifaTemporada[0]?.TarifasActivas?.[0]?.Dias?.some(x => x.name === dayNames[day] && x.checked) || false;
-
-  //                  if (validDay && tarifaTemporada?.[0]?.Estado) {  // Ensure tarifaTemporada exists and has Estado
-  //                   let tarifaTotal = 0;
-                  
-  //                   tarifaTemporada?.[0]?.TarifasActivas?.forEach(item => {  // Ensure TarifasActivas exists
-  //                     let rate = 0;
-  //                     switch (this.quantity) {
-  //                       case 1:
-  //                         rate = item.Tarifa_1;
-  //                         break;
-  //                       case 2:
-  //                         rate = item.Tarifa_2;
-  //                         break;
-  //                       case 3:
-  //                         rate = item.Tarifa_3;
-  //                         break;
-  //                       default:
-  //                         rate = item.Tarifa_3;
-  //                     }
-  //                     tarifaTotal += rate; // tarifaTotal += rate * this.quantity; antes se multiplicaba por adulto
-                  
-  //                     if (this.quantityNin !== 0) {
-  //                       tarifaTotal += item.Tarifa_N * this.quantityNin;
-  //                     }
-  //                   });
-                  
-  //                   return Math.ceil(tarifaTotal);
-  //                 } else {
-  //                   return 0; // Return 0 if the conditions are not met
-  //                 }
   }
 
   getDisponibilidad(intialDate:Date,endDate:Date, habitacion:string, stayNights:number, folio:string, cuarto:string){

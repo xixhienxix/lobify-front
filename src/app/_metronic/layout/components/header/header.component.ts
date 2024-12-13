@@ -198,6 +198,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.checkEstatusIndexDB();
     this.checkRoomCodesIndexDB();
     this.checkRatesIndexDB();
+    this.checkParametrosIndexDB();
 
     const subscr = this.layout.layoutConfigSubject
       .asObservable()
@@ -264,13 +265,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const parametrosIndexDB:Parametros = await this._parametrosService.readIndexDB("Parametros");
     if(parametrosIndexDB){
       this._parametrosService.setCurrentParametrosValue = parametrosIndexDB;
-      this.openNvaReserva();
     }else {
       this._parametrosService.getParametros().subscribe({
         next:(item)=>{
           this.parametrosModel = item
-
-          this.openNvaReserva();
         }
       });
     }
@@ -305,6 +303,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
 
     const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' })  
+    modalRef.componentInstance.parametros = this.parametrosModel
     modalRef.componentInstance.folios = this.folios;
     modalRef.componentInstance.estatusArray = this.estatusArray
     modalRef.componentInstance.checkIn = this._parametrosService.getCurrentParametrosValue.checkIn
@@ -396,11 +395,18 @@ export class HeaderComponent implements OnInit, OnDestroy {
         firstValueFrom(this._houseKeepingService.updateEstatus(item, 'SUCIA'))
       );
       
-      await Promise.all(updatePromises); // Wait until all updates are done
-  
+      Promise.all(updatePromises)
+      .then(() => {
       // Add code here that should be executed after all updates have completed
-      console.log('All room statuses updated successfully!');
+      console.log('Terminadas todas las axctualizaciones de estados por Bloqueo a Sucias')
+      this._communicationService.onEstatusChangeFinished.next(true);    
+      })
+      .catch((error) => {
+        console.error("Error al Cambiar Estatus de Algun Bloqueo:", error);
+      });  
       
+      console.log('All room statuses updated successfully!');
+
     } catch (error) {
       console.error('Error updating reservations or status:', error);
     }

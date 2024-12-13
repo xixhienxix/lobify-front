@@ -37,6 +37,8 @@ import { PropertiesChanged } from 'src/app/models/activity-log.model';
 import { Bloqueo } from 'src/app/_metronic/layout/components/header/bloqueos/_models/bloqueo.model';
 import { BloqueoService } from 'src/app/services/bloqueo.service';
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
+import { WebsocketService } from 'src/app/services/websocket/websocket.service';
+import { CommunicationService } from '../reports/_services/event.services';
 
 
 @Component({
@@ -87,6 +89,7 @@ export class CalendarComponent implements OnInit {
   indexDbLoaded: boolean = false
   codigosCargo: Codigos[] = []
   bloqueosArray:Bloqueo[] = []
+  receivedMessages: string[] = [];
 
   isModalOpen = false;
 
@@ -119,12 +122,15 @@ export class CalendarComponent implements OnInit {
     private _authService: AuthService,
     private _estadoDeCuenta: Edo_Cuenta_Service,
     private _bloqueoService: BloqueoService,
-    private _checkIndexDb: IndexDBCheckingService
+    private _checkIndexDb: IndexDBCheckingService,
+    private _communicationService: CommunicationService
   ) {
     this.currentUser = this._authService.getUserInfo().username
   }
 
   async ngOnInit() {
+    this._isLoading.next(true);
+
     this._huespedService.updateReservations$.subscribe({
       next: (value) => {
         if (value) {
@@ -132,6 +138,17 @@ export class CalendarComponent implements OnInit {
         }
       }
     });
+
+      
+    this._communicationService.onEstatusChangeFinished.subscribe({      
+      next:async (item)=>{
+        console.log('Bloqueo Triggered:Calendar, actualizando calendar this.getReservations()');
+        if(item){
+          this.getReservations();
+        }
+      }
+    });
+
     await this.checkFoliadorIndexDB();
     await this.checkRoomCodesIndexDB();
     await this.checkBloqueosIndexDb();
@@ -143,6 +160,8 @@ export class CalendarComponent implements OnInit {
     await this.checkCodgiosCargoIndexDB();
     await this.checkParametrosIndexDB();
     this.indexDbLoaded = true;
+    this._isLoading.next(false);
+
   }
 
   async getReservations() {
@@ -283,6 +302,7 @@ export class CalendarComponent implements OnInit {
     this.isModalOpen = true;
 
       const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' })  
+      modalRef.componentInstance.parametros = this.currentParametros
       modalRef.componentInstance.folios = this.folios;
       modalRef.componentInstance.estatusArray = this.estatusArray
       modalRef.componentInstance.checkIn = this.currentParametros.checkIn
@@ -730,6 +750,7 @@ export class CalendarComponent implements OnInit {
   }
 
   async onChangeEstatus(data: { cuarto: string; estatus: string }) {
+
     // Extract old status before making the HTTP request
     const oldStatus = this.roomCodesComplete.find(item => item.Numero === data.cuarto)?.Estatus;
   

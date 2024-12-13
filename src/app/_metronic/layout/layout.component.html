@@ -25,7 +25,9 @@
         <!-- TODO: app sidebar panel -->
       </ng-container>
       <!--begin::Main-->
-      <div class="app-main flex-column flex-row-fluid" id="kt_app_main" style="background-color: var(--deep-white-background);">
+      <div class="app-main flex-column flex-row-fluid" id="kt_app_main"   
+        [ngStyle]="{'background-color': isMobile ? 'var(--deep-grey-background)' : 'var(--light-white-background)'}">
+        ">
         <!--begin::Content wrapper-->
         <div class="d-flex flex-column flex-column-fluid">
           <ng-container *ngIf="appToolbarDisplay">

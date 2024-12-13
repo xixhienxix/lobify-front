@@ -53,14 +53,13 @@
   display: none;
 }
 
-///
+///Extra icon added on grouping header
+.timeline-resource-grouping.e-schedule .e-timeline-view .e-resource-cells.e-parent-node .e-icons.e-people {
+  display: none;
+}
 
-.timeline-resource-grouping.e-schedule:not(.e-device) .e-agenda-view .e-content-wrap table td:first-child {
-  width: 90px;
-}
-.timeline-resource-grouping.e-schedule .e-agenda-view .e-resource-column {
-  width: 100px;
-}
+
+
 .timeline-resource-grouping.e-schedule .e-timeline-view .e-resource-left-td, 
 .timeline-resource-grouping.e-schedule .e-timeline-month-view .e-resource-left-td {
   width: 100px;

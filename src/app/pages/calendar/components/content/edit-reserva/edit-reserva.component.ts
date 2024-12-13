@@ -20,7 +20,6 @@ import { edoCuenta } from 'src/app/models/edoCuenta.model';
 import { EstatusService } from '../../../_services/estatus.service';
 import { Codigos } from 'src/app/models/codigos.model';
 import { ModificaReservaComponent } from './components/modifica/modifica.reserva.component';
-import { NvaReservaComponent } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { LogService } from 'src/app/services/activity-logs.service';
 import { CommunicationService } from 'src/app/pages/reports/_services/event.services';

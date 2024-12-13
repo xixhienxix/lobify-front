@@ -9,6 +9,9 @@
   font-style: normal;
   font-display: block;
 }
+html, body {
+  touch-action: manipulation;
+}
 
 .ki-duotone {
   /* use !important to prevent issues with browser extensions that change fonts */

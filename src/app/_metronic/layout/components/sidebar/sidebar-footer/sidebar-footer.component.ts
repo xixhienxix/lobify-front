@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { AuthService } from 'src/app/modules/auth';
 
 @Component({
@@ -11,9 +12,17 @@ export class SidebarFooterComponent implements OnInit {
   itemClass: string = 'ms-1 ms-lg-3';
   nombre:string|undefined=''
 
-  constructor(public authService:AuthService) {
+  constructor(public authService:AuthService,
+    private router: Router,
+
+  ) {
     this.nombre = this.authService.getcurrentUserValue?.nombre
   }
 
   ngOnInit(): void {}
+
+  logOut() {
+    localStorage.removeItem('ACCESS_TOKEN');
+    window.location.reload()
+  }
 }
