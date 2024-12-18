@@ -1,8 +1,8 @@
-import { ChangeDetectorRef, Component, Input, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
-import { BehaviorSubject, Subject, async, catchError, concat, firstValueFrom, forkJoin, of, switchMap, takeUntil, tap } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, async, catchError, concat, firstValueFrom, forkJoin, of, switchMap, takeUntil, tap } from 'rxjs';
 import { WarningComponent } from './_helpers/warning.prompt.component';
 import { Tarifas } from 'src/app/models/tarifas';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
@@ -39,6 +39,7 @@ import { BloqueoService } from 'src/app/services/bloqueo.service';
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { WebsocketService } from 'src/app/services/websocket/websocket.service';
 import { CommunicationService } from '../reports/_services/event.services';
+import { IddleManagerService } from 'src/app/services/_helpers/iddleService/iddle.manager.service';
 
 
 @Component({
@@ -47,8 +48,9 @@ import { CommunicationService } from '../reports/_services/event.services';
   styleUrls: ['./calendar.component.scss']
 })
 
-export class CalendarComponent implements OnInit {
+export class CalendarComponent implements OnInit, OnDestroy {
   private ngUnsubscribe = new Subject<void>();
+  private idleSubscription: Subscription;
 
   submitLoading: boolean = false
   closeResult: string
@@ -123,7 +125,8 @@ export class CalendarComponent implements OnInit {
     private _estadoDeCuenta: Edo_Cuenta_Service,
     private _bloqueoService: BloqueoService,
     private _checkIndexDb: IndexDBCheckingService,
-    private _communicationService: CommunicationService
+    private _communicationService: CommunicationService,
+    private _IdleService: IddleManagerService
   ) {
     this.currentUser = this._authService.getUserInfo().username
   }
@@ -142,12 +145,21 @@ export class CalendarComponent implements OnInit {
       
     this._communicationService.onEstatusChangeFinished.subscribe({      
       next:async (item)=>{
-        console.log('Bloqueo Triggered:Calendar, actualizando calendar this.getReservations()');
+        console.log('Bloqueo Triggered:Calendar, actualiza}ndo calendar this.getReservations()');
         if(item){
-          this.getReservations();
+          await this.getReservations();
         }
       }
     });
+
+    // Subscribe to idle timer events
+    this.idleSubscription = this._IdleService.idleTrigger$.subscribe(async () => {
+      console.log('Refreshing...')
+      // await this.getReservations();
+    });
+
+    // Start the idle timer (can be called globally or from the component)
+    this._IdleService.startIdleTimer();
 
     await this.checkFoliadorIndexDB();
     await this.checkRoomCodesIndexDB();
@@ -811,6 +823,13 @@ export class CalendarComponent implements OnInit {
       return 'by clicking on a backdrop';
     } else {
       return `with: ${reason}`;
+    }
+  }
+
+  ngOnDestroy() {
+    // Unsubscribe to prevent memory leaks
+    if (this.idleSubscription) {
+      this.idleSubscription.unsubscribe();
     }
   }
 

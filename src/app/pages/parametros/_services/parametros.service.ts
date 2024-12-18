@@ -81,7 +81,9 @@ const DEFAULT_PARAMS ={
   zona:'',
   divisa:'',
   codigoZona:'',
-  tarifasCancelacion:''
+  tarifasCancelacion:'',
+  iddleTimer:5,
+  inventario:10,
 }
 
 @Injectable({

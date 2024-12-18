@@ -13,6 +13,8 @@ export interface Parametros {
     tarifasCancelacion?:string;
     autoCheckOut?:boolean;
     noShowAutoUpdated?:boolean;
+    inventario:number;
+    iddleTimer:number;
 }
 export const PARAMETROS_DEFAULT_VALUES:Parametros = {
     iva:16,
@@ -23,5 +25,7 @@ export const PARAMETROS_DEFAULT_VALUES:Parametros = {
     checkOut:'12:00',
     checkIn:'01:00',
     codigoZona:'-05:00',
+    inventario:10,
+    iddleTimer:5,
 }
 

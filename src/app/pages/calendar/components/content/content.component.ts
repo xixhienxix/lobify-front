@@ -1,6 +1,6 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 
-import { Component, EventEmitter,Input,  OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
+import { Component, EventEmitter,Input,  OnDestroy,  OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Internationalization, setCulture } from '@syncfusion/ej2-base';
 import { ChangeEventArgs } from '@syncfusion/ej2-buttons';
 import {
@@ -15,7 +15,7 @@ import { environment } from 'src/environments/environment';
 import { ActivatedRoute } from '@angular/router';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { loadCldr,L10n } from '@syncfusion/ej2-base';
-import { Subject, firstValueFrom } from 'rxjs';
+import { Subject, Subscription, firstValueFrom } from 'rxjs';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
@@ -37,6 +37,7 @@ import { TarifasService } from 'src/app/services/tarifas.service';
 import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
 import { DateTime } from 'luxon'
 import { CommunicationService } from 'src/app/pages/reports/_services/event.services';
+import { IddleManagerService } from 'src/app/services/_helpers/iddleService/iddle.manager.service';
 
 loadCldr(frNumberData, frtimeZoneData, frGregorian, frNumberingSystem);
 
@@ -188,7 +189,7 @@ export class ContentComponent implements OnInit{
   bloqueosArray:Bloqueo[];
 
   isInitialized = false;
-
+  @Input() currentParametros:Parametros
 
   @Input() allReservations:Huesped[];
 
@@ -259,6 +260,8 @@ export class ContentComponent implements OnInit{
 
   checkInTime: any
   checkOutTime: any
+
+
 
   @Input() tipoHabGroupDataSource: Record<string, any>[]
   @Input() habitacionPorTipoDataSource: Record<string, any>[]
@@ -344,6 +347,7 @@ export class ContentComponent implements OnInit{
   };
 
   async ngOnInit() {
+
     await this.checkRoomCodesIndexDB();
     this._indexDBService.checkIndexedDB(['tarifas'],true);
     this.ratesArrayComplete = await this._indexDBService.loadTarifas(true);
@@ -546,9 +550,9 @@ export class ContentComponent implements OnInit{
       const hasOverlap = filteredEvents.some(event => {        
         if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
 
-          if (event.Subject === 'Bloqueo') {
-            return true; // Skip processing if the event is a 'Bloqueo'
-          }
+          // if (event.Subject !== 'Bloqueo') {
+          //   return true; // Skip processing if the event is a 'Bloqueo'
+          // }
 
           const eventStart = new Date(event.StartTime).toISOString().split('T')[0];
           const eventEnd = new Date(event.EndTime).toISOString().split('T')[0];
@@ -558,14 +562,18 @@ export class ContentComponent implements OnInit{
           const llegadaTime = this.adjustTime(args.data.startTime, this.checkInTime);
           const eventEndTime = new Date(event.EndTime).getTime();
           const llegadaTimeMs = new Date(llegadaTime).getTime();
+
+          const checkInDate = this.setCheckInOutTimeParametros(args.data.startTime, this.currentParametros.checkIn);
+          const checkOutDate = this.setCheckInOutTimeParametros(args.data.endTime, this.currentParametros.checkOut);
         
-          // Allow no overlap when the event ends at the same time as the new reservation starts
-          if (eventEndTime <= llegadaTimeMs) {
+          // Allow no overlap when the event ends at the same time as the new reservation starts unless is Subject === Bloqueo
+          if ((eventEndTime <= llegadaTimeMs) && event.Subject !== 'Bloqueo') {
             return false;
           }
         
           // Check for overlapping dates (date-only comparison)
-          return argsStart <= eventEnd && argsEnd >= eventStart;
+          // return argsStart <= eventEnd && argsEnd >= eventStart;
+          return args.data.startTime <= event.EndTime && checkInDate >= event.StartTime
         }
         
         return false;
@@ -573,10 +581,10 @@ export class ContentComponent implements OnInit{
   
       if (!hasOverlap) {
           const activeCellsData = this.scheduleObj.activeCellsData;
-    const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
-    const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
-    const numeroCuarto = rowData.resourceData.text;
-    const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+          const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
+          const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
+          const numeroCuarto = rowData.resourceData.text;
+          const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
 
     // this.tipoHabGroupDataSource
     // this.habitacionPorTipoDataSource
@@ -585,6 +593,23 @@ export class ContentComponent implements OnInit{
       }
     }
   };
+
+  setCheckInOutTimeParametros(date:Date, time:string){
+    // Convert to Luxon DateTime
+    let luxonDate = DateTime.fromJSDate(date);
+
+    // Time string
+    const checkInTime = time;
+
+    // Extract hours and minutes from the string
+    const [hour, minute] = checkInTime.split(':').map(Number); // Converts to numbers
+
+    // Update the Luxon DateTime with the extracted time
+    luxonDate = luxonDate.set({ hour, minute, second: 0 });
+
+    // If needed, convert back to a native Date object
+    return luxonDate.toJSDate();
+  }
 
   onMovileActionBegin(args:any){
     if (args.requestType === 'toolbarItemRendering') {

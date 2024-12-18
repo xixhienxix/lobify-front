@@ -446,8 +446,8 @@ ratesTotalCalc(tarifa: Tarifas, estanciaPorNoche: number, codigosCuarto = this.c
     const endDateLuxon = DateTime.fromJSDate(this.endDate, { zone: this.parametros.codigoZona });
 
     // Convert tarifa dates to Luxon DateTime
-    const llegadaDate = DateTime.fromISO(tarifa.Llegada.toISOString(), { zone: this.parametros.codigoZona });
-    const salidaDate = DateTime.fromISO(tarifa.Salida.toISOString(), { zone: this.parametros.codigoZona });
+    const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: this.parametros.codigoZona });
+    const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: this.parametros.codigoZona });
 
     // Check if the initial and end dates are within the range
     const isWithinRange =
