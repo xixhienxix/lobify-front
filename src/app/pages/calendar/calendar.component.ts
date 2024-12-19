@@ -373,9 +373,9 @@ export class CalendarComponent implements OnInit, OnDestroy {
   async onEditRsvOpen(data: any) {
     if (this.isModalOpen) return; // Prevent opening the modal multiple times
 
-    this.isModalOpen = true;
+    if (data.data.hasOwnProperty("Id") && data.data.Subject !== 'Bloqueo') {
+      this.isModalOpen = true;
 
-    if (data.data.hasOwnProperty("Id")) {
       const folio = data.data.Folio
       const currentHuesped = this.allReservations.find(item => item.folio === data.data.Folio)!;
       this.currentFolio = data.data.Folio;

@@ -111,6 +111,7 @@ export class IddleManagerService {
         }
     
         const idleTimeMs = this.idleTimer; // Ensure it's in milliseconds
+        console.log('Idle Time:', idleTimeMs);
     
         // Start a new timeout
         this.idleTimeout = setTimeout(() => {
