@@ -86,7 +86,7 @@ export class DisponibilidadService {
             (normalizedDesdeDate < normalizedInitialDate && normalizedHastaDate > normalizedEndDate);
 
           // If there is an overlap, add Cuarto to the set
-          if (isOverlapping) {
+          if (isOverlapping && bloqueo.Completed === false) {
             Cuarto.forEach(cuarto => {
               ocupadasSet.add(cuarto);
             });

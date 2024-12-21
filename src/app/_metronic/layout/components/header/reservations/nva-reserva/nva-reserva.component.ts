@@ -47,7 +47,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     private modalService:NgbModal,
     private _disponibilidadService: DisponibilidadService,
     private changeDetector: ChangeDetectorRef,
-    private _tarifasService: TarifasService,
+    private _indexDbCheck: IndexDBCheckingService
   ){
 
   }
@@ -159,6 +159,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   async ngOnInit() {
     this.loadForm();
+    console.log('this.cuarto', this.cuarto)
 
     if(this.startTime !== '' && this.endTime !== ''){
       this.updateDatePicker(this.startTime,this.endTime);
@@ -183,6 +184,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
       this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
 
       if(this.cuarto){
+        console.log('this.cuarto', this.cuarto)
         this.formGroup.patchValue({ habitacion: this.cuarto });
       }
 
@@ -221,11 +223,13 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     }
   }
 
-  save(){
+  async save(){
     const formData = this.formGroup.value;
     
+    const foliosArray = await this._indexDbCheck.loadFoliador(true);
+    const reservasFolio = foliosArray.find(item => item.Letra === this.currentFolio.Letra)!
     // Convert the current Folio to an integer
-    let currentFolioValue = parseInt(this.currentFolio.Folio, 10);
+    let currentFolioValue = parseInt(reservasFolio.Folio, 10);
 
     // Loop through the filtered and checked items
     this.preAsignadasArray
