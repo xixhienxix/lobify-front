@@ -29,7 +29,7 @@ export class IddleManagerService {
         private _parametrosService: ParametrosService
     ){
         // Listen for user activity events
-        this.listenForUserActivity();
+        // this.listenForUserActivity();
     }
 
     private listenForUserActivity() {
@@ -80,12 +80,9 @@ export class IddleManagerService {
             const storedData = await this.checkIndexedDB(storeName, key);
 
             if (storedData && storedData.iddleTimer) {
-                // console.log('Parameters fetched from IndexedDB:', storedData);
                 this.setIdleParameters(storedData.iddleTimer, storedData.refreshTimer);
             } else {
-                // console.log('No parameters found in IndexedDB, fetching from API...');
                 const parametros = await this._parametrosService.getParametros().toPromise();
-                // console.log('Parameters fetched from API:', parametros);
                 this.setIdleParameters(parametros.iddleTimer, parametros.refreshTimer);
             }
         } catch (err) {

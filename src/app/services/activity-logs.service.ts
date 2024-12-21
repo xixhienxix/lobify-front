@@ -34,7 +34,6 @@ export class LogService {
       .get<ActivityLogs[]>(`${environment.apiUrl}/activity/log/${username}`)
       .pipe(
         map((responseData) => {
-          console.log('Response Data:', responseData); // Debug statement
           if (responseData) {
             responseData.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
             this.userLogs$.next(responseData);

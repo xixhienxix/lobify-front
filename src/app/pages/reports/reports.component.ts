@@ -136,7 +136,6 @@ export class ReportsComponent implements OnInit, OnDestroy{
         });
         
         this.currentModalRef.result.then((result:any) => {
-            console.log(result)
           this.closeResult = `Closed with: ${result}`;
           }, (reason:any) => {
               this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;

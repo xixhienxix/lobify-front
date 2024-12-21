@@ -2,7 +2,9 @@ import { Component, OnInit, ViewChild, ViewEncapsulation } from "@angular/core";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
 import { ModalDismissReasons, NgbModal } from "@ng-bootstrap/ng-bootstrap";
+import { DateTime } from "luxon";
 import { Bloqueo } from "src/app/_metronic/layout/components/header/bloqueos/_models/bloqueo.model";
+import { AlertsComponent } from "src/app/_metronic/shared/alerts/alerts.component";
 import { reservationStatusMap } from "src/app/models/huesped.model";
 import { IndexDBCheckingService } from "src/app/services/_shared/indexdb.checking.service";
 import { BloqueoService } from "src/app/services/bloqueo.service";
@@ -56,7 +58,7 @@ export class OutOfServiceComponent implements OnInit{
     bloqueosArray: Bloqueo[] = [];
     allBloqueos: Bloqueo[] = [];
     filteredBloqueos = new MatTableDataSource<Bloqueo>(this.bloqueosArray);
-    displayedColumns: string[] = ['Habitacion', 'Cuarto', 'Desde', 'Estatus', 'Comentarios', 'acciones'];
+    displayedColumns: string[] = ['Habitacion', 'Cuarto', 'Desde', 'Estatus','Completed', 'Comentarios', 'acciones'];
     dataSource = new MatTableDataSource<any>();
 
     specificDateValue: Date | null = null;  // For the specific date filter
@@ -72,6 +74,11 @@ export class OutOfServiceComponent implements OnInit{
     numeroDelete:Array<number>;
     isLoading:boolean=true
     statusBloqueo:string
+    filterTextCuarto:string
+    filterStatus:boolean
+
+    originalData: any[] = []; // To keep unfiltered data
+    dateRange = { start: null, end: null }; // Date range
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild('exito') miniModal = null;
@@ -128,26 +135,22 @@ export class OutOfServiceComponent implements OnInit{
         bloqueo[key] = checked;
       }
 
-      borrar(_id:string,desde:string,hasta:string,habitacion:Array<string>,numero:Array<number>) {
-        const desdeISOString = new Date(desde)
-        const astaISOString = new Date(hasta)
-
-        const sb = this._bloqueoService.deleteBloqueo(_id).subscribe((response)=>{
-           if(response.status==200)
-             {
-               this.statusBloqueo="Bloqueo Borrado Correctamente"
-               this.openMini(this.miniModal)
-     
-              const sb = this._bloqueoService.liberaBloqueos(_id,desdeISOString,astaISOString,habitacion,numero).subscribe((response)=>{
-                 console.log("liberaDispo responxse",response)
-               });
+      borrar(_id:string) {
+            this._bloqueoService.deleteBloqueo(_id).subscribe({
+              next:(reponse)=>{
+                if(reponse){
+                  const modalRef = this._modalService.open(AlertsComponent,{size:'sm',backdrop:'static'})
+                  modalRef.componentInstance.alertHeader = 'Exito'
+                  modalRef.componentInstance.mensaje = 'Bloqueo Liberado!'            
+                  this._checkIndexDb.loadBloqueos(true);
+                }
+              },
+              error:(err)=>{
+                const modalRef = this._modalService.open(AlertsComponent,{size:'sm',backdrop:'static'})
+                  modalRef.componentInstance.alertHeader = 'Error'
+                  modalRef.componentInstance.mensaje = 'Error al liberar Bloqueo!'         
               }
-             else
-             {
-               this.statusBloqueo="Hubo un problema al eliminar el bloqueo, Actualize la pagina y intente nuevamente"
-               this.openMini(this.miniModal)
-             }
-           })
+            })
        }
 
        openMini(exito:any) {
@@ -214,20 +217,48 @@ export class OutOfServiceComponent implements OnInit{
         }
         }
 
-    resetFilters() {
-        // Reset form inputs
-        this.filterText = '';
-        this.specificDateValue = null;
-        this.llegadaDateValue = null;
-        this.salidaDateValue = null;
-        this.selectedStatus = null;
-      
-        // Reset filtered data
-        this.filteredBloqueos.filter = ''; // Clear the text filter
-        this.filteredBloqueos.data = this.bloqueosArray; // Reset the data source
-      
-        // Reset the paginator
-        this.paginator.pageIndex = 0;
-        this.paginator.pageSize = 10;
-      }
+        resetFilters() {
+          this.filterText = '';
+          this.dateRange = { start: null, end: null };
+          this.dataSource.data = [...this.allBloqueos];
+        }
+
+        applyFilters() {
+          const filterText = this.filterText.toLowerCase();
+          const { start } = this.dateRange;
+          const filterTextCuarto = (this.filterTextCuarto || '').toLowerCase(); // Ensure filterTextCuarto is a string
+          
+          this.dataSource.data = this.allBloqueos.filter((item) => {
+            // Convert Habitacion to lowercase and check if it matches the filter text
+            const matchesHabitacion = this.filterText ? item.Habitacion.toLowerCase().includes(filterText) : true;
+        
+            // Parse the item's Desde and Hasta fields
+            const itemStartDate = new Date(item.Desde);
+            const itemEndDate = new Date(item.Hasta);
+        
+            // Check if the start date falls within the Desde and Hasta range (inclusive)
+            const rangeStart = start ? new Date(start) : null;
+            
+            // matchesDateRange will check if 'start' falls within 'Desde' and 'Hasta'
+            const matchesDateRange = !rangeStart || (itemStartDate <= rangeStart && itemEndDate >= rangeStart);
+        
+            // Check if Cuarto filter matches
+            const matchesCuarto = this.filterTextCuarto ? item.Cuarto.some((cuarto) =>
+              cuarto.toString().toLowerCase().includes(filterTextCuarto)
+            ) : true;
+        
+            if(this.filterStatus === undefined){
+              // Return true if all filters match
+              return matchesHabitacion && matchesDateRange && matchesCuarto;
+            }else {
+              // Check if Status Matches
+              const matchesStatus = this.filterStatus === null || item.Completed === this.filterStatus;
+                      
+              // Return true if all filters match
+              return matchesHabitacion && matchesDateRange && matchesCuarto && matchesStatus;
+            }
+            
+          });
+        }
+         
 }

@@ -54,7 +54,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
       .subscribe(value=>{
         this.initializeCounter(value);
       })
-      console.log(this.icons)
   }
 
   navigateTo(reportType: string): void {

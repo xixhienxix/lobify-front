@@ -38,6 +38,7 @@ import { ParametrosService } from 'src/app/pages/parametros/_services/parametros
 import { DateTime } from 'luxon'
 import { CommunicationService } from 'src/app/pages/reports/_services/event.services';
 import { IddleManagerService } from 'src/app/services/_helpers/iddleService/iddle.manager.service';
+import { BloqueoService } from 'src/app/services/bloqueo.service';
 
 loadCldr(frNumberData, frtimeZoneData, frGregorian, frNumberingSystem);
 
@@ -273,9 +274,11 @@ export class ContentComponent implements OnInit{
 
   @Output() onResizeReserva: EventEmitter<Record<string, any>> = new EventEmitter();
   @Output() honEditRsv: EventEmitter<any> = new EventEmitter();
+  @Output() honDeleteBloqueo: EventEmitter<any> = new EventEmitter();
   @Output() onChangeEstatus: EventEmitter<any> = new EventEmitter();
   @Output() onRefreshingFinished: EventEmitter<boolean> = new EventEmitter();
   @Output() honNvaRsvDateRange: EventEmitter<any> = new EventEmitter();
+  @Output() honRefreshCalendar: EventEmitter<boolean> = new EventEmitter();
 
   @ViewChild("scheduleObj") public scheduleObj: ScheduleComponent;
 
@@ -287,6 +290,7 @@ export class ContentComponent implements OnInit{
     private _indexDBService: IndexDBCheckingService,
     private _tarifasService: TarifasService,
     private _parametrosService: ParametrosService,
+    private _bloqueosService: BloqueoService
   ) {
     this.selectedDate = new Date(this.todayDate.getFullYear(), this.todayDate.getMonth(), this.todayDate.getDate())
     this.activatedRoute.data.subscribe((val) => {
@@ -311,33 +315,39 @@ export class ContentComponent implements OnInit{
       }
   }
 
-  getDailyRates(event:any){
+  getDailyRates(event:any, codigoPorParametro?:string){
 
     const rowData = this.getRowData(event.groupIndex);
     const numeroCuarto = rowData.resourceData.text;
     const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo; 
 
     const baseRate = this.ratesArrayComplete.find(obj =>
-      obj.Habitacion.some(item => item === codigoCuarto));
+      obj.Habitacion.some((item) => 
+        {
+          if(!codigoCuarto){
+            return item === codigoPorParametro
+          }else {
+            return item === codigoCuarto
+          }
+        }));
 
-      if(baseRate!== undefined && codigoCuarto !== undefined ){
+      if(baseRate!== undefined && ((codigoCuarto !== undefined) || (codigoPorParametro !== undefined)) ){
         const tarifasPorDia = this._tarifasService.ratesTotalCalc(
           baseRate,
           this.ratesArrayComplete.filter(item => item.Tarifa === 'Tarifa Base'),
           this.ratesArrayComplete.filter(item => item.Tarifa === 'Tarifa De Temporada'),
-          codigoCuarto, // Assuming single room per rate
+          codigoCuarto !== undefined ? codigoCuarto : codigoPorParametro, // Assuming single room per rate
           1,
-          1,
+          0,
           this._parametrosService.convertToCorrectTimezone(event.date),
           this._parametrosService.convertToCorrectTimezone(event.date,true)
         );
-        const returningValue = (tarifasPorDia[0].tarifaTotal).toLocaleString('es-MX')
+        const returningValue = (tarifasPorDia[0].tarifaTotal).toLocaleString('es-MX',{ style: 'currency', currency: 'MXN' })
         return returningValue
       }
       else {
         return ' '
       }
-
   }
 
   adjustTime (date: string, time: { hours: number; minutes: number }): Date  {
@@ -352,16 +362,22 @@ export class ContentComponent implements OnInit{
     this._indexDBService.checkIndexedDB(['tarifas'],true);
     this.ratesArrayComplete = await this._indexDBService.loadTarifas(true);
 
-
-    const parametros = await this._indexDBService.loadParametros(true);
+    this._bloqueosService.getBloqueoResponse.subscribe({
+      next:(value)=>{
+        if(value){
+          this.honRefreshCalendar.next(true);
+        }
+      }
+    })
+    // this.currentParametros = await this._indexDBService.loadParametros(true);
 
     this.changing.subscribe((dataSource: any) => {
       this.datasourceArray = [];
       this.reservationsArray = [];
       this.bloqueosArray = [];
   
-      this.checkInTime = this.parseTime(parametros.checkIn);
-      this.checkOutTime = this.parseTime(parametros.checkOut);
+      this.checkInTime = this.parseTime(this.currentParametros.checkIn);
+      this.checkOutTime = this.parseTime(this.currentParametros.checkOut);
   
       const adjustTime = (date: string, time: { hours: number; minutes: number }): Date => {
         const adjustedDate = new Date(date);
@@ -431,23 +447,25 @@ export class ContentComponent implements OnInit{
         const llegada = this.adjustTime(item.Desde, this.checkInTime);
         const salida = this.adjustTime(item.Hasta, this.checkOutTime);
   
-        item.Cuarto.forEach((numCuarto: string) => {
-          this.datasourceArray.push({
-            Id: bloqueoIdCounter++,
-            Subject: 'Bloqueo',
-            StartTime: llegada,
-            EndTime: salida,
-            IsAllDay: true,
-            ProjectId: this.checkGroupId(item.Habitacion, numCuarto),
-            TaskId: this.checkTaskID(numCuarto),
-            Folio: `B-${bloqueoIdCounter}`, // Unique folio for bloqueos
-            Codigo: item.Habitacion,
-            Numero: numCuarto,
-            CategoryColor: this.colorDict[5],
+        if(item.Completed !== true){
+          item.Cuarto.forEach((numCuarto: string) => {
+            this.datasourceArray.push({
+              _id: item._id,
+              Id: bloqueoIdCounter++,
+              Subject: 'Bloqueo',
+              StartTime: llegada,
+              EndTime: salida,
+              IsAllDay: true,
+              ProjectId: this.checkGroupId(item.Habitacion, numCuarto),
+              TaskId: this.checkTaskID(numCuarto),
+              Folio: `B-${bloqueoIdCounter}`, // Unique folio for bloqueos
+              Codigo: item.Habitacion,
+              Numero: numCuarto,
+              CategoryColor: this.colorDict[5],
+            });
           });
-        });
+        }
       });
-  
   
       // Refresh Calendar
       this.refreshCalendar(this.datasourceArray);
@@ -462,9 +480,10 @@ export class ContentComponent implements OnInit{
   }
 
   refreshCalendar(datasource:Record<string, any>[]){
-    this.scheduleObj.eventSettings.dataSource = [...datasource]
-    this.scheduleObj.refresh();
-    this.onRefreshingFinished.emit(true);
+      this.scheduleObj.eventSettings.dataSource = [...datasource]
+      this.scheduleObj.refresh();
+      this.onRefreshingFinished.emit(true);
+    
   }
 
   checkGroupId(codigo:string,cuarto:string){
@@ -526,11 +545,15 @@ export class ContentComponent implements OnInit{
     const existingEvents = this.scheduleObj.getEvents();
   
   
-    if (args.data.hasOwnProperty("Folio")) {
+    if (args.data.hasOwnProperty("Folio") && args.data.Subject !== 'Bloqueo') {
       if (args.type === 'Editor' || args.type === 'QuickInfo') {
         this.honEditRsv.emit({ row: args, folio: args.data.Folio });
       }
       return;
+    }
+    if(args.data.Subject === 'Bloqueo'){
+      this.honDeleteBloqueo.emit({ row: args, folio: args.data.Folio });
+      return
     }
   
     if (args.type === 'QuickInfo') {
@@ -553,11 +576,6 @@ export class ContentComponent implements OnInit{
           // if (event.Subject !== 'Bloqueo') {
           //   return true; // Skip processing if the event is a 'Bloqueo'
           // }
-
-          const eventStart = new Date(event.StartTime).toISOString().split('T')[0];
-          const eventEnd = new Date(event.EndTime).toISOString().split('T')[0];
-          const argsStart = new Date(args.data.startTime).toISOString().split('T')[0];
-          const argsEnd = new Date(args.data.endTime).toISOString().split('T')[0];
         
           const llegadaTime = this.adjustTime(args.data.startTime, this.checkInTime);
           const eventEndTime = new Date(event.EndTime).getTime();
@@ -638,19 +656,28 @@ export class ContentComponent implements OnInit{
 
   onDragStop(args: DragEventArgs): void {
       const target = args.event.target as HTMLElement;
-      if (target.classList.contains('e-header-cells')) { // Avoid the drag event to be left on header Cells
-        args.cancel = true;
-      }else{
-        //this.onResizeReserva.emit(args.data) // <-- This data is from where the event start  and i need the data to which is moved to
-        const scheduleObj = (document.querySelector('.e-schedule') as any).ej2_instances[0];
-        const targetElement:any = args.target;
-        const rowIndex = targetElement!.parentNode!.rowIndex;
-        const resourceDetails = scheduleObj.getResourcesByIndex(rowIndex);
-        const Codigo = this.roomCodesComplete.find((item)=> item.Numero === resourceDetails.resourceData.text)?.Codigo
-        args.data.Codigo = Codigo
-        args.data.Numero = resourceDetails.resourceData.text
-        this.onResizeReserva.emit(args.data)
+
+
+      const existingEvents = this.scheduleObj.getEvents();
+
+      const overlapping = this.findOverlappingObjects(args.data,existingEvents)
+
+      if(overlapping.length === 0){
+        if (target.classList.contains('e-header-cells')) { // Avoid the drag event to be left on header Cells
+          args.cancel = true;
+        } else{
+          //this.onResizeReserva.emit(args.data) // <-- This data is from where the event start  and i need the data to which is moved to
+          const scheduleObj = (document.querySelector('.e-schedule') as any).ej2_instances[0];
+          const targetElement:any = args.target;
+          const rowIndex = targetElement!.parentNode!.rowIndex;
+          const resourceDetails = scheduleObj.getResourcesByIndex(rowIndex);
+          const Codigo = this.roomCodesComplete.find((item)=> item.Numero === resourceDetails.resourceData.text)?.Codigo
+          args.data.Codigo = Codigo
+          args.data.Numero = resourceDetails.resourceData.text
+          this.onResizeReserva.emit(args.data)
+        }
       }
+  args.cancel = true;
   }
 
   onRenderCell(args: RenderCellEventArgs): void {
@@ -670,11 +697,32 @@ export class ContentComponent implements OnInit{
   }
 }
 
-isChildNode(data: any): boolean {
-  return data.resourceData.ClassName !== "e-parent-node";
-}
+  findOverlappingObjects( target: Record<string, any>, objects: Record<string, any>): Record<string, any> {
+    const checkInDate = this.setCheckInOutTimeParametros(target.StartTime, this.currentParametros.checkIn);
+    const checkOutDate = this.setCheckInOutTimeParametros(target.EndTime, this.currentParametros.checkOut);
+    
+    // const targetStart = target.StartTime;
+    // const targetEnd = target.EndTime;
 
-onDataBound(){
+    return objects.filter((obj:Record<string, any>) => {
+      // Avoid returning the same object as the target
+      if (obj.Id === target.Id) {
+        return false;
+      }
+
+      // Check for overlap
+      const objStart = obj.StartTime;
+      const objEnd = obj.EndTime;
+
+      return checkInDate <= objEnd && checkOutDate >= objStart;
+    });
+  }
+
+  isChildNode(data: any): boolean {
+    return data.resourceData.ClassName !== "e-parent-node";
+  }
+
+  onDataBound(){
 
   const workCells = document.querySelectorAll(".e-work-cells.e-resource-group-cells");
   workCells.forEach((cell, index) => {
@@ -684,7 +732,8 @@ onDataBound(){
       const endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 1); // add one day
       const events = this.scheduleObj.getEvents(startDate, endDate);
-      const cellProjectId = this.scheduleObj.getResourcesByIndex(Number(cell.getAttribute("data-group-index"))).groupData!.ProjectId;        
+      const cellProjectId = this.scheduleObj.getResourcesByIndex(Number(cell.getAttribute("data-group-index"))).groupData!.ProjectId; 
+      const groupIndex = Number(cell.getAttribute("data-group-index"));       
       //Header of avaibility
         events.forEach(event => {
             if (event.ProjectId === cellProjectId) {
@@ -694,17 +743,25 @@ onDataBound(){
         const totalChildResources = this.habitacionPorTipoDataSource.filter(category => category.groupId === cellProjectId).length;
         const emptyChildResources = totalChildResources - projectEvents.length;
         (cell as HTMLElement).innerText = emptyChildResources.toString();
-  });
+
         //Code Block for Rates on grouping column
         // this.ratesArrayComplete.map((item) => {
         //   if(item.Tarifa === 'Tarifa De Temporada'){
-        //     return item.ta
+        //     return item.TarifaRack
         //   }
         // });
-        // const newElement = document.createElement('div');
-        // newElement.innerText = this.fareValue.toString();
-        // newElement.style.marginTop = '10px';
-        // (cell as HTMLElement).appendChild(newElement);
+        const eventObj = {
+          groupIndex:groupIndex,
+          date: DateTime.fromMillis(timestamp, { zone: this.currentParametros.codigoZona }).toISO()
+
+        }
+        const resourses = this.scheduleObj.getResourcesByIndex(groupIndex);
+        const fareValue = this.getDailyRates(eventObj,resourses.resourceData.text);
+        const newElement = document.createElement('div');
+        newElement.innerText = fareValue
+        newElement.style.marginTop = '10px';
+        (cell as HTMLElement).appendChild(newElement);
+  });
   }
 
   getIconClass(text: string) {

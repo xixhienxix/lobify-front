@@ -40,6 +40,8 @@ import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checkin
 import { WebsocketService } from 'src/app/services/websocket/websocket.service';
 import { CommunicationService } from '../reports/_services/event.services';
 import { IddleManagerService } from 'src/app/services/_helpers/iddleService/iddle.manager.service';
+import { ActivatedRoute } from '@angular/router';
+import { DateHelperService } from './_services/data.service';
 
 
 @Component({
@@ -119,16 +121,19 @@ export class CalendarComponent implements OnInit, OnDestroy {
     private _codigosCargoService: CodigosService,
     private _edoCuentaService: Edo_Cuenta_Service,
     private _folioservice: FoliosService,
-    private _parametrosService:ParametrosService,
     private _logService: LogService,
     private _authService: AuthService,
     private _estadoDeCuenta: Edo_Cuenta_Service,
     private _bloqueoService: BloqueoService,
     private _checkIndexDb: IndexDBCheckingService,
     private _communicationService: CommunicationService,
-    private _IdleService: IddleManagerService
+    private _IdleService: IddleManagerService,
+    private route: ActivatedRoute,
+    private _dateHelpers: DateHelperService
   ) {
     this.currentUser = this._authService.getUserInfo().username
+    this.currentParametros = this.route.snapshot.data['data2'];
+    this.roomCodesComplete = this.route.snapshot.data['roomCodes'];
   }
 
   async ngOnInit() {
@@ -153,13 +158,13 @@ export class CalendarComponent implements OnInit, OnDestroy {
     });
 
     // Subscribe to idle timer events
-    this.idleSubscription = this._IdleService.idleTrigger$.subscribe(async () => {
-      console.log('Refreshing...')
-      // await this.getReservations();
-    });
+    // this.idleSubscription = this._IdleService.idleTrigger$.subscribe(async () => {
+    //   console.log('Refreshing...')
+    //   // await this.getReservations();
+    // });
 
-    // Start the idle timer (can be called globally or from the component)
-    this._IdleService.startIdleTimer();
+    // // Start the idle timer (can be called globally or from the component)
+    // this._IdleService.startIdleTimer();
 
     await this.checkFoliadorIndexDB();
     await this.checkRoomCodesIndexDB();
@@ -170,7 +175,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
     await this.checkRatesIndexDB();
     await this.checkReservationsIndexDB();
     await this.checkCodgiosCargoIndexDB();
-    await this.checkParametrosIndexDB();
+    // await this.checkParametrosIndexDB();
     this.indexDbLoaded = true;
     this._isLoading.next(false);
 
@@ -287,19 +292,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
       return await firstValueFrom(this._adicionalService.getAdicionales());
     }
   }
-
-  async checkParametrosIndexDB(){
-    const parametrosIndexDB:Parametros = await this._parametrosService.readIndexDB("Parametros");
-    if(parametrosIndexDB){
-      this.currentParametros = parametrosIndexDB
-      this._parametrosService.setCurrentParametrosValue = parametrosIndexDB;
-    }else {
-      this.currentParametros = await firstValueFrom(this._parametrosService.getParametros());
-      this._parametrosService.getParametros().subscribe();
-    }
-  }
   
-
   onEditRsv(data: any){
     const currentHuesped = this.allReservations.find(item => item.folio === data.folio)!;
 
@@ -307,6 +300,37 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
     this.onEditRsvOpen(data.row);
   }
+
+  onDeleteBloqueo(data: any){
+    if (this.isModalOpen) return; // Prevent opening the modal multiple times
+
+    this.isModalOpen = true;
+
+    const modalRef = this.modalService.open(AlertsComponent, {size:'sm', backdrop:'static'})
+    modalRef.componentInstance.alertHeader = 'Advertencia'
+    modalRef.componentInstance.mensaje= 'Desea Finalizar el Bloqueo?'  
+
+    modalRef.result.then(async (result) => {
+      if (result) {
+          this._bloqueoService.deleteBloqueo(data.row.data._id).subscribe({
+            next:(response)=>{
+              console.log(response);
+            },
+            error:(err)=>{
+              console.log(err);
+            }
+          })
+      } else {
+        this.closeResult = `Closed with: ${result}`;
+      }
+    });
+                    // Handle modal close
+                    modalRef.result.finally(() => {
+                      this.isModalOpen = false; // Reset the state when the modal is closed
+                  });
+
+      return  
+    }
 
   onNvaRsvDateRange(data:any){
     if (this.isModalOpen) return; // Prevent opening the modal multiple times
@@ -364,6 +388,12 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
       
       
+  }
+
+  refreshCalendarData(value:boolean){
+    if(value){
+      this.getReservations();
+    }
   }
 
   async checkEdoCuentaClient(folio:string){
@@ -579,7 +609,6 @@ export class CalendarComponent implements OnInit, OnDestroy {
     }
 
     if(!this.checkValidResize(event, arrayToCheck)){
-        console.log(this.allReservations)
         const dataSource = await this.roomRates(event.Codigo);
         const tarifaEstandarArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa Base');
         const tempRatesArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa De Temporada');

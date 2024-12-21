@@ -7,9 +7,6 @@ import { Bloqueo, BloqueosState } from '../_metronic/layout/components/header/bl
 import { ParametrosService } from '../pages/parametros/_services/parametros.service';
 import { LocalForageCache } from '../tools/cache/indexdb-expire';
 import { SortDirection } from '@angular/material/sort';
-
-
-
 @Injectable({
   providedIn: 'root'
 })
@@ -22,6 +19,7 @@ export class BloqueoService  {
 
 private currentBloqueos$=new BehaviorSubject<Bloqueo[]>([]);
 private currentBloqueosSubject =new Subject<any>();
+private bloqueoResponseSubject = new Subject<any>();
 
     constructor(private http: HttpClient) { }
 
@@ -49,6 +47,14 @@ private currentBloqueosSubject =new Subject<any>();
   
     set setcurrentBloqueosValue(habitacion: any) {
       this.currentBloqueos$.next(habitacion);
+    }
+
+    set setBloqueoResponse(value:boolean){
+      this.bloqueoResponseSubject.next(value);
+    }
+
+    get getBloqueoResponse(){
+      return this.bloqueoResponseSubject.asObservable();
     }
 
     async sendCustomFormNotification(_nuevoDatoAgregado:boolean){
@@ -95,6 +101,7 @@ private currentBloqueosSubject =new Subject<any>();
         Hasta: hasta,
         bloqueoState: checkboxState,
         Comentarios: comentarios,
+        Completed:false
       };
     
       return this.http.post<{ message: string }>(`${environment.apiUrl}/post/bloqueos`, bloqueoPayload).pipe(
@@ -122,7 +129,6 @@ private currentBloqueosSubject =new Subject<any>();
       .pipe(
         map(responseData=>{
 
-          console.log("MAP",responseData)
           return responseData
         })
       ))
@@ -133,7 +139,6 @@ private currentBloqueosSubject =new Subject<any>();
         .pipe(
           map(responseData=>{
 
-            console.log("MAP",responseData)
             return responseData
           })
         ))
@@ -158,6 +163,7 @@ private currentBloqueosSubject =new Subject<any>();
                                 Hasta:hasta,
                                 bloqueoState:bloqueosState,
                                 Comentarios:comentarios.trim(),
+                                Completed:false
                                 };
 
    return this.http.post<Bloqueo>(environment.apiUrl+"/actualiza/bloqueos", {bloqueos},{observe:'response'})
@@ -166,8 +172,12 @@ private currentBloqueosSubject =new Subject<any>();
 
 
   deleteBloqueo(id:any) {
-   return this.http.delete(environment.apiUrl + "/reportes/borrar-bloqueo/"+id,{observe:'response'})
-
+    return this.http.put(environment.apiUrl + "/reportes/borrar-bloqueo/"+id,{observe:'response'})
+            .pipe(
+              map(responseData =>{
+                this.setBloqueoResponse = true;
+                return responseData
+            }))
   }
 
 
@@ -203,6 +213,7 @@ private currentBloqueosSubject =new Subject<any>();
                                       fueraDeServicio:false
                                     },
                                     Comentarios:'',
+                                    Completed:false
                                     };
 
       return this.http.post<Bloqueo>(environment.apiUrl+"/libera/bloqueos", {bloqueos})

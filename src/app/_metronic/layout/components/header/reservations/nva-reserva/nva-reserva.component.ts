@@ -631,7 +631,6 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
       this.bandera = false;
       this.dropDownHabValueIndex = '';
     }
-    console.log({initialDate:this.intialDate,endDate:this.endDate, habitacion:habitacion, noches:this.stayNights, folio})
     this.getDisponibilidad(this.intialDate,this.endDate, habitacion, this.stayNights, folio, this.cuarto);
   }
 
@@ -932,7 +931,6 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
         });
       }
       recursiveFunc(formToInvestigate);
-      console.log(invalidControls);
       return invalidControls;
     }
 

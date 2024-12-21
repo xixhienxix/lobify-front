@@ -222,7 +222,6 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
     // Compare initial date with today's date
     this.todaysDateComparer(this.intialDate);
 
-    console.log("editHuesped---------------", this.editHuesped)
   }
   
 

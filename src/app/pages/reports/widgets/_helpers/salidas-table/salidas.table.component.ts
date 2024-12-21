@@ -66,6 +66,5 @@ export class SalidasTableComponent implements OnInit {
   onButtonClick(event: Event): void {
     event.stopPropagation(); // Prevents the click event from propagating to the panel header
     // Additional button click logic here
-    console.log("Hola")
   }
 }

@@ -164,8 +164,8 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       orden:[1,Validators.required],
       habs: this.fb.array([], duplicateValuesValidator()),
       tarifaBase:[0,Validators.required],
-      etiqueta:[0,Validators.required],
-    })
+      etiqueta:[{value: 0, disabled: true },Validators.required],
+    });
 
     // this.inputForm = this.fb.group({
     //   nombreHabs: ['',],
@@ -362,9 +362,6 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       conteoCamas=numero+conteoCamas
     }
 
-    console.log("NombreHabs:---->>>",this.numeroHabs.value);
-
-  
     if(!this.editarHab){
       for(let y=0; y<this.numeroHabs.value.length;y++){
         if(this.numeroHabs.value[y] === ''){

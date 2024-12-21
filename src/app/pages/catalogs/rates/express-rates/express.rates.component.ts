@@ -129,7 +129,6 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
 
   tarifasActivasInitialize(){
     this.politicas.update((item:any)=>{
-      console.log(item);
       return item
     });
 

@@ -1,0 +1,12 @@
+table {
+    th {
+      text-align: center; /* Center the text inside the header cells */
+      vertical-align: middle; /* Vertically align the text */
+    }
+  
+    /* Optional: Center-align all cell content */
+    td {
+      text-align: center;
+      vertical-align: middle; /* Ensure content is vertically centered */
+    }
+  }

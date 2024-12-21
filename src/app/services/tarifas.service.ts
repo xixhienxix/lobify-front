@@ -100,7 +100,6 @@ export class TarifasService {
    }
 
   postTarifa(tarifa:Tarifas){
-    console.log("tarifaBAe Add New :", tarifa)
     return this.http.post(environment.apiUrl+'/tarifas/agregar',{tarifa}).pipe(
       map(()=>{
         this.sendNotification(true);
@@ -253,31 +252,33 @@ export class TarifasService {
     if (tarifaTemporada !== 0) {
       return Math.ceil(tarifaTemporada);
     }
-  
-    let tarifaTotal = tarifaBase?.TarifaRack;
-    //if (tarifaBase) {
-      // tarifaBase.TarifasActivas.forEach(item => {
-      //   let rate = 0;
-      //   switch (adultos) {
-      //     case 1:
-      //       rate = item.Tarifa_1;
-      //       break;
-      //     case 2:
-      //       rate = item.Tarifa_2;
-      //       break;
-      //     case 3:
-      //       rate = item.Tarifa_3;
-      //       break;
-      //     default:
-      //       rate = item.Tarifa_3;
-      //   }
-      //   tarifaTotal += rate * adultos;
-      //   if (ninos !== 0) {
-      //     tarifaTotal += item.Tarifa_N * ninos;
-      //   }
-      // });
-    //}
-    return Math.ceil(tarifaTotal ?? 0);
+    let tarifaTotal:number=0
+    if(tarifaBase?.TarifasActivas.length !== 0){
+        tarifaBase?.TarifasActivas.forEach((item)=>{
+            let rate = 0;
+            switch (adultos) {
+              case 1:
+                rate = item.Tarifa_1;
+                break;
+              case 2:
+                rate = item.Tarifa_2;
+                break;
+              case 3:
+                rate = item.Tarifa_3;
+                break;
+              default:
+                rate = item.Tarifa_3;
+            }
+              tarifaTotal += rate * adultos;
+            if (ninos !== 0) {
+              tarifaTotal += item.Tarifa_N * ninos;
+            }
+      });
+    }else{
+      tarifaTotal = tarifaBase?.TarifaRack!;
+    }
+
+    return Math.ceil(tarifaTotal! ?? 0);
   }
   
   checkIfTempRateAvaible(

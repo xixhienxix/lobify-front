@@ -1,20 +1,8 @@
 <div class="control-section">
   <div class="col-lg-12 content-wrapper">
-    <!-- <mat-select
-      class="form-control form-control-lg "
-      placeholder="-- Choose DayInterval to display -- "
-      [(value)]='scheduleinterval'
-      (change)="onChange($event)"
-      >
-    <mat-option value="0">-- Choose DayInterval to display --</mat-option>
-        <mat-option *ngFor="let tipoCuarto of datas" [value]="tipoCuarto">{{tipoCuarto}} </mat-option>
-    </mat-select> -->
-    <!-- <ejs-dropdownlist  id="scheduleview" [dataSource]='datas' [(value)]='scheduleinterval'(change)="onChange($event)" >
-    </ejs-dropdownlist> Changes the number of days displayed on View-->
-    <!-- enableAdaptiveUI='true' use this on ejs-schedule for mobile resize -->
     <ejs-schedule 
     #scheduleObj 
-    width='100%' 
+    width='100%'
     cssClass='timeline-resource-grouping' 
     height='100%'
     allowSwiping="false"
@@ -77,11 +65,10 @@
         </div>
       </ng-template>
       
-
-      <!--Inner Cell Template for data-->
-      <ng-template #cellTemplate let-data>
+<!-- Rates on Cells instead of header
+       <ng-template #cellTemplate let-data>
         <div class="templatewrap" *ngIf="isInitialized" [innerHTML]="getDailyRates(data)"></div>
-      </ng-template>
+      </ng-template> -->
 
 
         <e-resources>

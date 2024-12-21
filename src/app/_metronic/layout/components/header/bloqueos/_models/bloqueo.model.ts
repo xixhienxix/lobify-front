@@ -9,6 +9,7 @@ export interface Bloqueo
   bloqueoState: BloqueosState;
   Comentarios:string;
   hotel?:string;
+  Completed:boolean
 }
 
 export interface BloqueosState {

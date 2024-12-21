@@ -155,40 +155,11 @@ export class RoomsComponent implements OnInit{
     const habs: Habitacion[] = this._habitacionService.getcurrentHabitacionValue.getValue();
       const details = habs.filter(habitacion => habitacion.Codigo === codigo);
 
-      // Format Tipos_Camas for Display
-      // details.forEach(habitacion => {
-      //   habitacion.Tipos_Camas = this.formatTiposCamas(habitacion.Tipos_Camas);
-      // });
-
       return details;
   }
 
-  // Gives a format count to Tipos Camas Properry on Habitacion :
-  // formatTiposCamas(tiposCamas: string[]): string[] {
-  //   const counts: { [key: string]: number } = {};
-  
-  //   // Count occurrences of each bed type
-  //   tiposCamas.forEach(bedType => {
-  //     // Remove the leading number and trim whitespace
-  //     const bedWithoutNumber = bedType.replace(/^\d+\s*/, '').trim();
-      
-  //     if (counts[bedWithoutNumber]) {
-  //       counts[bedWithoutNumber]++;
-  //     } else {
-  //       counts[bedWithoutNumber] = 1;
-  //     }
-  //   });
-  
-  //   // Construct the formatted array
-  //   return Object.entries(counts).map(([tipo, count]) => {
-  //     return `${count} ${tipo}`;
-  //   });
-  // }
-
   add(habitacion:roomTable){
-    // let habitacionSeleccionada = this._habitacionService.getcurrentHabitacionValue.getValue();
-    // const filter = habitacion.Codigo
-    // let habs2 = habitacionSeleccionada.find( val => val.Codigo === filter);
+
     const modalRef = this.modalService.open(NewRoomComponent,{ size: 'md', backdrop:'static' })
     modalRef.componentInstance.habitacion=habitacion;
     modalRef.componentInstance.editarHab=true

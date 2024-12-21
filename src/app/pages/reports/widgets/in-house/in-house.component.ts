@@ -42,8 +42,7 @@ export class InHouseComponent implements OnInit{
       next:(roomSource)=>{
         this.inventario = [...roomSource]
         this.avaibleRooms = Math.max(0, roomSource.length - (this.huespedEnCasa.length + this.porLlegar.length));
-        console.log("Huespede En Casa", this.huespedEnCasa)
-        console.log("porLlegar En Casa", this.porLlegar)
+
         this.cdr.detectChanges(); // Manually trigger change detction if needed
       }
     })

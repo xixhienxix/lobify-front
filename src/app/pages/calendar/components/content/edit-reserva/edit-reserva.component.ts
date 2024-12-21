@@ -148,7 +148,6 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
 
     this._edoCuentaService.subject.subscribe({
       next:(val)=>{
-        console.log("val");
         this.getCuentas();
       }
     })
@@ -360,7 +359,6 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     })
     
     modalRef.result.then((result) => {
-        console.log(result)
       this.closeResult = `Closed with: ${result}`;
       }, (reason) => {
           this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;

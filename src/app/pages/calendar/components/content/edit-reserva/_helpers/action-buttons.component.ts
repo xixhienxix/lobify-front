@@ -146,7 +146,6 @@ export class ReservationActionsComponent {
 
     if ([12, 11, 4].includes(estatus)) {
       const edoFiltrado = this.currentEdoCuenta.filter(result => result.Abono! > 1);
-      console.log(edoFiltrado);
     
       if (edoFiltrado.length > 0) {
         const totalCargos = edoFiltrado.reduce((sum, item) => sum + item.Cargo!, 0);

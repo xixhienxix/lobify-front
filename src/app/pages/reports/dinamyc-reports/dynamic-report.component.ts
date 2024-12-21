@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -15,7 +15,7 @@ import { ParametrosService, timeZoneToLocaleMap } from '../../parametros/_servic
   templateUrl: './dynamic-report.component.html',
   styleUrls: ['./dynamic-report.component.scss']
 })
-export class DynamicReportComponent implements OnInit, AfterViewInit {
+export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy {
   colorDict = {
     0: '#99d284',
     1: '#fab3db',
@@ -105,60 +105,23 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
 
   loadReportData(): void {
     if (this.reportType === 'prospects') {
-      this.loadProspectsReport();
+      this.statusOptions = [...reservationStatusMap[2]];
+      this.loadReport();
     } else if (this.reportType === 'salidas') {
-      this.loadSalidasReport();
+      this.statusOptions = [...reservationStatusMap[1]];
+      this.loadReport();
     } else if (this.reportType === 'colgados') {
-      this.loadColgadosReport();
+      this.statusOptions = [...reservationStatusMap[1]];
+      this.loadReport();
     } else if (this.reportType === 'noshow') {
-      this.loadNoShowReport();
+      this.statusOptions = [...reservationStatusMap[8]];
+      this.loadReport();
     }
   }
 
-  loadNoShowReport(): void {
-
-    // Ensure reservationStatusMap values are correctly assigned
-    this.statusOptions = [...reservationStatusMap[8]];
+  loadReport(): void {
 
     // Filter prospects
-    this.prospectsArray = this.filterNoShow(this.allReservaciones);
-    this.filteredReservations.data = this.prospectsArray.map(reservation => {
-      reservation.llegada = this.formatDate(reservation.llegada, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
-      reservation.salida = this.formatDate(reservation.salida, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
-    
-      return reservation;
-    });;
-
-    // Assign paginator after setting data
-    this.filteredReservations.paginator = this.paginator;
-
-  }
-
-  loadSalidasReport(): void {
-
-    // Ensure reservationStatusMap values are correctly assigned
-    this.statusOptions = [...reservationStatusMap[1]];
-
-    // Filter prospects
-    this.prospectsArray = this.filterHuespedesSalida(this.allReservaciones);
-    this.filteredReservations.data = this.prospectsArray.map(reservation => {
-      reservation.llegada = this.formatDate(reservation.llegada, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
-      reservation.salida = this.formatDate(reservation.salida, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
-    
-      return reservation;
-    });;
-
-    // Assign paginator after setting data
-    this.filteredReservations.paginator = this.paginator;
-
-  }
-
-  loadProspectsReport(): void {
-
-    // Ensure reservationStatusMap values are correctly assigned
-    this.statusOptions = [...reservationStatusMap[2]];
-
-    // Filter prospectsfilterHuespedes
     this.prospectsArray = this.filterHuespedes(this.allReservaciones);
     this.filteredReservations.data = this.prospectsArray.map(reservation => {
       reservation.llegada = this.formatDate(reservation.llegada, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
@@ -172,25 +135,6 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
 
   }
 
-  loadColgadosReport(): void {
-
-    // Ensure reservationStatusMap values are correctly assigned
-    this.statusOptions = [...reservationStatusMap[1]];
-
-    // Filter prospectsfilterHuespedes
-    this.prospectsArray = this.filterHuespedesColgados(this.allReservaciones);
-    
-    this.filteredReservations.data = this.prospectsArray.map(reservation => {
-      reservation.llegada = this.formatDate(reservation.llegada, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
-      reservation.salida = this.formatDate(reservation.salida, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
-    
-      return reservation;
-    });
-
-    // Assign paginator after setting data
-    this.filteredReservations.paginator = this.paginator;
-
-  }
 
   loadColors(): void {
     // Define color mapping
@@ -235,20 +179,25 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
   }
 
   filterHuespedes(huespedes: any[]): any[] {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-
+    // Get the current date and time in the specified time zone
+    const currentDate = DateTime.now().setZone(this.currentParametros.zona);
+  
+    // Extract the month and year (Luxon months are 1-based, so we'll use that)
+    const currentMonth = currentDate.month; // Luxon's `month` is 1-based (January = 1, December = 12)
+    const currentYear = currentDate.year;
+  
     return huespedes.filter((huesped) => {
-      const llegadaDate = new Date(huesped.llegada);
-      const salidaDate = new Date(huesped.salida);
-
+      // Parse the llegada and salida dates using Luxon
+      const llegadaDate = DateTime.fromISO(huesped.llegada).setZone(this.currentParametros.zona);
+      const salidaDate = DateTime.fromISO(huesped.salida).setZone(this.currentParametros.zona);
+  
+      // Adjust the comparison to be 1-based for Luxon and 0-based for JavaScript Date object months
       const isThisMonth =
-        (llegadaDate.getMonth() === currentMonth && llegadaDate.getFullYear() === currentYear) ||
-        (salidaDate.getMonth() === currentMonth && salidaDate.getFullYear() === currentYear);
-
+        (llegadaDate.month === currentMonth && llegadaDate.year === currentYear) ||
+        (salidaDate.month === currentMonth && salidaDate.year === currentYear);
+  
       const matchesEstatus = reservationStatusMap[2].includes(huesped.estatus);
-
+  
       return isThisMonth && matchesEstatus;
     });
   }
@@ -348,25 +297,6 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
     }).replace(',', '').replace('de', 'de');
   }
 
-  // applySalidaDateFilter(date: Date): void {
-  //   if (date) {
-  //     this.filteredReservations.data = this.prospectsArray.filter((reservation) =>
-  //       new Date(reservation.salida).toDateString() === new Date(date).toDateString()
-  //     );
-  //   } else {
-  //     this.filteredReservations.data = this.prospectsArray;
-  //   }
-  // }
-
-  // applyStatusFilter(status: string): void {
-  //   if (status) {
-  //     this.filteredReservations.data = this.prospectsArray.filter(
-  //       (reservation) => reservation.estatus === status
-  //     );
-  //   } else {
-  //     this.filteredReservations.data = this.prospectsArray;
-  //   }
-  // }
 
   applyStatusFilter(status: string): void {
     if (status) {
@@ -375,21 +305,7 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
       this.applyFilter({ estatus: '' });  // Clear the status filter when no status is selected
     }
   }
-  
 
-  // resetFilters(): void {
-  //   this.filterText = '';
-  //   this.filterDateValue = null;
-  //   this.llegadaDateValue = null;
-  //   this.salidaDateValue = null;
-  //   this.selectedStatus = null;
-
-  //   this.filteredReservations.filter = '';
-  //   this.filteredReservations.data = this.prospectsArray;
-
-  //   this.paginator.pageIndex = 0;
-  //   this.paginator.pageSize = 10;
-  // }
   resetFilters(): void {
     this.filterText = '';
     this.filterDateValue = null;
@@ -404,6 +320,11 @@ export class DynamicReportComponent implements OnInit, AfterViewInit {
   emitAction(element: any): void {
     this.communicationService.emitEvent(element);
   }
+
+  ngOnDestroy(){
+  this.filteredReservations.data = []  
+  }
+
 }
 
 

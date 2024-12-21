@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { interval, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
@@ -8,7 +8,7 @@ import { take } from 'rxjs/operators';
   templateUrl: './alerts.component.html',
   styleUrls: ['./alerts.component.scss']
 })
-export class AlertsComponent implements OnInit {
+export class AlertsComponent implements OnInit, AfterContentInit, OnDestroy {
   mensaje:string;
   mensaje1:string;
   mensaje2:string;
@@ -26,7 +26,6 @@ export class AlertsComponent implements OnInit {
      }
 
     ngAfterContentInit(){
-      console.log(this.mensajeExtra)
       if(this.mensajeExtra==true){
         this.mensajeExtra=true
       }
@@ -40,7 +39,6 @@ export class AlertsComponent implements OnInit {
       const sb = timer.subscribe(x => 
         {
           this.countdown=this.interval-x
-          console.log(this.interval-x)
           if(this.countdown==1){this.modal.close()}
         })
 

@@ -430,7 +430,6 @@ export class DashboardComponent implements OnInit {
             // Compare normalized dates
             return itemDate.getTime() === todayDate.getTime() && item.Abono !== 0 && item.Cargo === 0;
           });
-          console.log(saldoDelDia)
       },
       error:()=>{
       }

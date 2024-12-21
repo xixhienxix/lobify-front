@@ -9,6 +9,8 @@
             [changing]="changingValue"
             [estatusArray]="houseKeepingCodes"
             [currentParametros]="currentParametros"
+            (honRefreshCalendar)="refreshCalendarData($event)"
+            (honDeleteBloqueo)="onDeleteBloqueo($event)"
             (honEditRsv)="onEditRsv($event)"
             (onResizeReserva)="onResizeReservation($event)" 
             (onChangedRate)="onChangedRate($event)" 

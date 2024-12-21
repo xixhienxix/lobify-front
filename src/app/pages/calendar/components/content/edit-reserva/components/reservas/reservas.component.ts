@@ -127,7 +127,6 @@ export class ReservasComponent implements OnInit {
 
     this.adicionalSubject.subscribe({
         next:(val)=>{
-            console.log(val);
             this.adicionalArray = [...val]
         },
         error:(error)=>{

@@ -437,7 +437,6 @@ interface StateMapping {
     }  
   
     onChangeQtyNva(qty:number){
-      console.log(qty);
       // if(qty<=0)
       // {
       //   this.formGroup.controls['nuevaCantidad'].setValue(1);

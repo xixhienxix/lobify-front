@@ -395,6 +395,7 @@ habValue($event:any){
               Hasta:this.endDate,
               bloqueoState:this.checkboxState,
               Comentarios:this.bloqueoFormGroup.controls['comentarios'].value,
+              Completed:false,
               };
               const logRequests = this._logsService.logPostBloqueos('Bloqueo Created', this.currentUser, bloqueoPayload).pipe(
                 catchError(error => {

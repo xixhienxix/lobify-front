@@ -147,7 +147,6 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
             ((llegada <= todayEnd && salida >= todayStart));
     });
 
-    console.log('Filtered Reservations:', reservacionesDelDia);
 
 
     this.adr = reservacionesDelDia.reduce((total, item) => {
@@ -198,7 +197,6 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
         (llegada <= todayEnd && salida >= todayStart);
     });
   
-    console.log('Filtered Reservations for RevPAR:', reservacionesDelDia);
   
     // Calculate total revenue from the filtered reservations
     const totalRevenue = reservacionesDelDia.reduce((total, item) => {

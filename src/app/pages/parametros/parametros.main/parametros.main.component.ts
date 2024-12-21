@@ -110,7 +110,6 @@ getTimeZones(){
    next: (value:any)=>{
       if(value){
         const filteredRegions = value.filter((item:any) => item.Nombre.includes('America'));
-        console.log(this.parametrosModel)
         const currentUtc = value.find((item:any)=> item.Nombre === this.parametrosModel.codigoZona)
         this.currentUtc = currentUtc.UTC+' '+currentUtc.Nombre
         this.formGroup.controls["timeZone"].patchValue(this.currentUtc);

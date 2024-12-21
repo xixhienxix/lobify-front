@@ -44,7 +44,6 @@ export class WarningComponent implements OnInit, OnDestroy {
           const sb = timer.subscribe(x => 
             {
               this.countdown=this.interval-x
-              console.log(this.interval-x)
               if(this.countdown==1){this.modal.close()}
             })
             

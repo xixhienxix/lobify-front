@@ -364,43 +364,7 @@
                     [class.is-valid]="isControlValid('orden')">
                 </div>
             </div>
-            <div class="row col-lg-12">
-                <div *ngIf="editarHab !== true"
-                     class="form-group col-lg-12">
-                    <label
-                        style="color:#00506a; font-weight: bold;">Tarifa Base Aplicable
-                    </label>
-                    <span
-                     class="fa fa-question-circle"
-                     ngbTooltip="Tarifa base aplicable a todas las habitaciones asignadas a este tipo de habitaciòn"
-                     >
-                    </span>
-                    <input
-                    type="number"
-                        formControlName="tarifaBase"
-                        style="background-color: #e6e9ed;"
-                        class="form-control"
-                        >
-                </div>
-            </div>
-            <div class="row col-lg-12">
-                <div *ngIf="editarHab === true"
-                     class="form-group col-lg-12">
-                    <label
-                        style="color:#00506a; font-weight: bold;">Tarifa Base Aplicable
-                    </label>
-                    <span
-                    class="fa fa-question-circle"
-                    ngbTooltip="Tarifa base aplicable a la habitaciòn"
-                    >
-                   </span>
-                    <input
-                        formControlName="tarifaBase"
-                        style="background-color: #e6e9ed;"
-                        class="form-control"
-                        >
-                </div>
-            </div>
+
                 <br>
                 <ng-container>
                 <div class="row col-lg-12">
