@@ -315,12 +315,12 @@
 <div class="container">
     <div class="row ">
         <div style="text-align: left;" class="col-sm-10">
-            <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Alojamiento
+            <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Alojamiento sin Impuestos
             </label>
         </div>
 
         <div style="text-align: center;" class="col-sm-2">
-            <label  class="control-label">$ {{subTotalAlojamiento}}
+            <label  class="control-label">$ {{subtotalAlojamientoSinISH}}
             </label>
         </div>
     </div>
@@ -348,15 +348,26 @@
     </div>
     <div class="row ">
         <div style="text-align: left;" class="col-sm-10">
-            <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de Impuestos
+            <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de IVA
             </label>
         </div>
 
         <div style="text-align: center;" class="col-sm-2">
-            <label  class="control-label">$ {{totalimpuestos}}
+            <label  class="control-label">$ {{iva}}
             </label>
         </div>
     </div>
+    <div class="row ">
+      <div style="text-align: left;" class="col-sm-10">
+          <label style="font-weight:bold; color: black;" class="control-label"> Subtotal de ISH
+          </label>
+      </div>
+
+      <div style="text-align: center;" class="col-sm-2">
+          <label  class="control-label">$ {{impuestoSobreHospedaje}}
+          </label>
+      </div>
+  </div>
 </div>
 <br>
 <div style="background-color: #0083b2" class="modal-content sub-menu">

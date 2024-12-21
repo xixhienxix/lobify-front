@@ -16,6 +16,7 @@ import { DateTime } from 'luxon';
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
+import { TarifasService } from 'src/app/services/tarifas.service';
 export interface preAsig {
   numero:any,
   codigo:string,
@@ -46,8 +47,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     private modalService:NgbModal,
     private _disponibilidadService: DisponibilidadService,
     private changeDetector: ChangeDetectorRef,
-    private _checkIndexDbService: IndexDBCheckingService,
-    private _parametrosService: ParametrosService
+    private _tarifasService: TarifasService,
   ){
 
   }
@@ -413,7 +413,6 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 }
 
 ratesTotalCalc(tarifa: Tarifas, estanciaPorNoche: number, codigosCuarto = this.cuarto, tarifaPromedio = false) {
-
   const adultos = this.quantity;
   const ninos = this.quantityNin;
   let tarifaTotal = 0;
@@ -482,6 +481,7 @@ ratesTotalCalc(tarifa: Tarifas, estanciaPorNoche: number, codigosCuarto = this.c
 }
 
 retriveBaseRatePrice(codigosCuarto: string, checkDay: Date, day:number=-1) {
+  const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
 
   const tarifaBase = this.standardRatesArray.find(obj => obj.Habitacion.includes(codigosCuarto));
   const tarifaTemporada = this.checkIfTempRateAvaible(codigosCuarto, checkDay, day);
@@ -490,12 +490,51 @@ retriveBaseRatePrice(codigosCuarto: string, checkDay: Date, day:number=-1) {
     return Math.ceil(tarifaTemporada);
   }
 
+  const applyRate = (item: any) => {
+    let rate = 0;
+    switch (this.quantity) {
+      case 1:
+        rate = item.Tarifa_1;
+        break;
+      case 2:
+        rate = item.Tarifa_2;
+        break;
+      case 3:
+        rate = item.Tarifa_3;
+        break;
+      default:
+        rate = item.Tarifa_3;
+    }
+    tarifaTotal += rate; //     tarifaTotal += rate * adultos; antes se multiplicaba por adulto
+    if (this.quantityNin !== 0) {
+      tarifaTotal += item.Tarifa_N * this.quantityNin;
+    }
+  };
 
   let tarifaTotal = 0;
 
   for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
     if (tarifaBase) {
-      tarifaTotal += tarifaBase?.TarifaRack ?? 0;
+      if(tarifaBase.TarifasActivas.length > 0){
+        if(!tarifaBase.TarifasActivas[0].Activa){
+          return tarifaTotal += tarifaBase?.TarifaRack ?? 0;
+        } else {
+          tarifaBase.TarifasActivas.forEach(item => {
+            const dayInside = start.getDay();
+            const validDay = item.Dias?.some(x => x.name === dayNames[dayInside] && x.checked);
+      
+            // Apply the rate if valid, otherwise apply the base rate
+            if (validDay && item.Activa) {
+              applyRate(item);
+            } else{
+              const baseRate = this.ratesArrayComplete.find(item2 => item2.Tarifa === 'Tarifa Base');
+              tarifaTotal += baseRate?.TarifaRack ?? 0;          
+            }
+          });
+        }
+      } else {
+        tarifaTotal += tarifaBase?.TarifaRack ?? 0;
+      }
     }
   }
 
@@ -546,6 +585,9 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
       for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
         // Check if tarifaTemporada is defined and has TarifasActivas
         if (tarifaTemporada && tarifaTemporada.TarifasActivas && tarifaTemporada.TarifasActivas.length > 0) {
+          if(!tarifaTemporada.TarifasActivas[0].Activa){
+            return 0
+          }
           tarifaTemporada.TarifasActivas.forEach(item => {
             const dayInside = start.getDay();
             const validDay = item.Dias?.some(x => x.name === dayNames[dayInside] && x.checked);

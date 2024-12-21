@@ -6,11 +6,7 @@ import { environment } from 'src/environments/environment';
 import { Tarifas } from '../models/tarifas';
 import { LocalForageCache } from '../tools/cache/indexdb-expire';
 import { DateTime } from 'luxon';
-
-
-
-
-
+import { ParametrosService } from '../pages/parametros/_services/parametros.service';
 @Injectable({
   providedIn: 'root'
 })
@@ -29,7 +25,9 @@ export class TarifasService {
 
   private subject =new Subject<any>();
 
-  constructor(private http: HttpClient) {
+  constructor(private http: HttpClient,
+    private _parametrosService: ParametrosService
+  ) {
     this.TarifasUpdate$=this.currentTarifas$.asObservable();
   }
 
@@ -162,8 +160,10 @@ export class TarifasService {
     adultos: number,
     ninos: number,
     initialDate: Date,
-    endDate: Date
+    endDate: Date,
 ): { fecha: string; tarifaTotal: number }[] {
+
+    
     const results: { fecha: string; tarifaTotal: number }[] = [];
     const start = DateTime.fromISO(initialDate.toISOString());
     const end = DateTime.fromISO(endDate.toISOString()).startOf('day'); // Ensure endDate excludes its time
@@ -217,7 +217,7 @@ export class TarifasService {
                 standardRatesArray,
                 adultos,
                 ninos,
-                tempRatesArray
+                tempRatesArray,
             );
 
             const formattedDate = current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE);
@@ -238,7 +238,7 @@ export class TarifasService {
     standardRatesArray: Tarifas[], 
     adultos: number, 
     ninos: number, 
-    tempRatesArray: Tarifas[]
+    tempRatesArray: Tarifas[],
   ): number {
     const tarifaBase = standardRatesArray.find(obj => obj.Habitacion.includes(codigosCuarto));
     const tarifaTemporada = this.checkIfTempRateAvaible(
@@ -246,7 +246,7 @@ export class TarifasService {
       checkDay, 
       tempRatesArray, 
       adultos, 
-      ninos
+      ninos,
     );
   
     if (tarifaTemporada !== 0) {
@@ -286,9 +286,21 @@ export class TarifasService {
     fecha: Date, 
     tempRatesArray: Tarifas[], 
     adultos: number, 
-    ninos: number
+    ninos: number,
   ): number {
-    const tarifaTemporada = tempRatesArray.find(obj => obj.Habitacion.includes(codigoCuarto));
+    const fechaDate = DateTime.fromISO(fecha.toISOString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
+
+    // const tarifaTemporada = tempRatesArray.find(obj => obj.Habitacion.includes(codigoCuarto));
+    const tarifaTemporada = tempRatesArray.find(obj => {
+      const llegada = DateTime.fromISO(obj.Llegada.toString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
+      const salida = DateTime.fromISO(obj.Salida.toString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
+  
+      // Compare DateTime objects
+      const isWithinRange = fechaDate >= llegada && fechaDate <= salida;
+  
+      return obj.Habitacion.includes(codigoCuarto) && isWithinRange;
+    });
+    
     if (!tarifaTemporada) return 0;
   
     const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];

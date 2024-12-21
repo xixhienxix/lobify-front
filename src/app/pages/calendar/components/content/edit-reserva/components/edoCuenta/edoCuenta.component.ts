@@ -37,7 +37,8 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
   totalCalculado = 0;
   totalimpuestos = 0;
   impuestoSobreHospedaje = 0;
-  subTotalAlojamiento = '';
+  subTotalAlojamiento:number = 0;
+  subtotalAlojamientoSinISH:number = 0;
   subscription: any[] = [];
   tarifaDelDia:any[]=[]
 
@@ -150,7 +151,10 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
   private processHospedaje(item: any, fromDate: Date) {
     // for (let y = 0; y < this.currentHuesped.noches; y++) {
     //   const fullFechaSalida = this.formatDate(new Date(this.currentHuesped.salida));
-      const tarifa = this.ratesArrayComplete.find(item=>item.Tarifa === this.currentHuesped.tarifa)!;
+    const tarifa = this.ratesArrayComplete.find(item => 
+      item.Tarifa === this.currentHuesped.tarifa &&
+      item.Habitacion.some(room => room.trim().toLowerCase() === this.currentHuesped.habitacion.toLowerCase())
+    )!;
     //   this.tarifaDelDia = this._tarifasService.ratesTotalCalc(tarifa,this.standardRatesArray,this.tempRatesArray,this.currentHuesped.habitacion,this.currentHuesped.adultos,this.currentHuesped.ninos,new Date(this.currentHuesped.llegada),new Date(this.currentHuesped.salida));
 
 
@@ -174,6 +178,7 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
     this.tarifaDelDia = dailyRates;
     this.impuestoSobreHospedaje = item.Total! * this._parametrosService.getCurrentParametrosValue.ish / 100;
     this.subTotalAlojamiento = item.Cargo!.toLocaleString();
+    this.subtotalAlojamientoSinISH = item.Total - this.impuestoSobreHospedaje
   }
 
   private processServiciosExtra(item: any) {
@@ -214,9 +219,13 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private calculateTotals() {
-    const subtotalServicios = this.subTotalServiciosExtra === 0 ? 1 : this.subTotalServiciosExtra
     this.totalCalculado = this.totalCargos - this.totalAbonos;
-    this.iva = ((subtotalServicios + this.totalCalculado) * this._parametrosService.getCurrentParametrosValue.iva) / 100;
+    const subtotal = this.subTotalServiciosExtra
+    this.iva = (subtotal === 0) ? 0 : (subtotal * this._parametrosService.getCurrentParametrosValue.iva) / 100;
+    // if(subtotal === 0){
+    //   this.iva = 0
+    // }
+    // this.iva = ((subtotal === 0 ? 1 : subtotal) * this._parametrosService.getCurrentParametrosValue.iva) / 100;
     this.totalimpuestos = this.iva + this.impuestoSobreHospedaje;
   }
 

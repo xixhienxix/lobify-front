@@ -340,7 +340,7 @@ export class ContentComponent implements OnInit{
           1,
           0,
           this._parametrosService.convertToCorrectTimezone(event.date),
-          this._parametrosService.convertToCorrectTimezone(event.date,true)
+          this._parametrosService.convertToCorrectTimezone(event.date,true),
         );
         const returningValue = (tarifasPorDia[0].tarifaTotal).toLocaleString('es-MX',{ style: 'currency', currency: 'MXN' })
         return returningValue
