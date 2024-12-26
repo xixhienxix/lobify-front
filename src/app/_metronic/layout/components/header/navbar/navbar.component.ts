@@ -8,6 +8,8 @@ import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 import * as keenIcons from 'src/app/_metronic/shared/keenicon/icons.json';
 import { Route, Router } from '@angular/router';
 import { DateTime } from 'luxon'
+import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
+import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 
 @Component({
   selector: 'app-navbar',
@@ -45,10 +47,12 @@ export class NavbarComponent implements OnInit, OnDestroy {
   btnIconClass: string = 'fs-2 fs-md-1';
 
   constructor(private changeDetector: ChangeDetectorRef,
-    private router: Router
+    private router: Router,
+    private _indexDbChecker: IndexDBCheckingService
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    this.parametrosModel = await this._indexDbChecker.loadParametros();
     this.reservasSubject
       .asObservable()
       .subscribe(value=>{
@@ -64,86 +68,56 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return this.icons[iconName];
   }
 
-  async initializeCounter(reservations:Huesped[]){
-    const statusGroup2 = reservationStatusMap[2];// Reservations Groups
+  async initializeCounter(reservations: Huesped[]) {
+    const currentDate = DateTime.local().setZone(this.parametrosModel.codigoZona); // Get current local time
+    const todayDateString = currentDate.toISODate(); // Today's date in ISO format (YYYY-MM-DD)
+    const { day: currentDay, month: currentMonth, year: currentYear } = currentDate; // Destructure day, month, and year
+  
+    const isThisMonth = (date: string): boolean => {
+      const parsedDate = DateTime.fromISO(date);
+      return parsedDate.month === currentMonth && parsedDate.year === currentYear;
+    };
 
-    const todayDate = new Date();
-
+    const isToday = (date: string): boolean => {
+      const parsedDate = DateTime.fromISO(date);
+      return parsedDate.hasSame(currentDate, 'day'); // Check if the date is the same day
+    };
+  
+    const filterByStatus = (huesped: Huesped, statusIndex: number): boolean => {
+      return reservationStatusMap[statusIndex].includes(huesped.estatus);
+    };
+  
     // Llegadas Count
-    const currentDate = DateTime.local(); // Get current local time
-    const todayDateString = currentDate.toISODate(); // Get today's date in ISO format (YYYY-MM-DD)
-
-    const currentDateMoment = new Date();
-
-    const currentMonth = currentDateMoment.getMonth();
-    const currentYear = currentDateMoment.getFullYear();
+    this.llegadas = reservations.filter(
+      (huesped) =>
+        (isToday(huesped.llegada)) &&
+        filterByStatus(huesped, 2)
+    ).length;
   
-    const llegadas = reservations.filter((huesped) => {
-      const llegadaDate = new Date(huesped.llegada);
-      const salidaDate = new Date(huesped.salida);
-
-      const isThisMonth =
-        (llegadaDate.getMonth() === currentMonth && llegadaDate.getFullYear() === currentYear) ||
-        (salidaDate.getMonth() === currentMonth && salidaDate.getFullYear() === currentYear);
-
-      const matchesEstatus = reservationStatusMap[2].includes(huesped.estatus);
-
-      return isThisMonth && matchesEstatus;
-    });
-    this.llegadas = llegadas.length;
-    //
-
     // Salidas Count
-
-    const salidas = reservations.filter((huesped) => {
-      const salidaDate = DateTime.fromISO(huesped.salida).startOf('day'); // Parse the 'salida' date and normalize to the start of the day
+    this.salidas = reservations.filter(
+      (huesped) =>
+        isToday(huesped.salida) &&
+        filterByStatus(huesped, 1)
+    ).length;
   
-      const isSameDayAsToday = salidaDate.toISODate() === todayDateString; // Compare if salida is the same day as today
-  
-      const matchesEstatus = reservationStatusMap[1].includes(huesped.estatus);
-  
-      return isSameDayAsToday && matchesEstatus;
-    });
-
-    this.salidas = salidas.length;
-    //
-
     // Colgados Count
-    const colgados = reservations.filter((huesped) => {
-      const salidaDate = DateTime.fromISO(huesped.salida).startOf('day'); // Parse the 'salida' date and normalize to the start of the day
+    this.colgados = reservations.filter(
+      (huesped) =>
+        DateTime.fromISO(huesped.salida).toISODate()! <= todayDateString! &&
+        filterByStatus(huesped, 1)
+    ).length;
   
-      const isSameDayAsToday = salidaDate.toISODate()! <= todayDateString; // Compare if salida is the same day as today
-  
-      const matchesEstatus = reservationStatusMap[1].includes(huesped.estatus);
-  
-      return isSameDayAsToday && matchesEstatus;
-    });
-
-    this.colgados = colgados.length;
-    //
-
     // No Show Count
-    const noshow =  reservations.filter((huesped) => {
-      const llegadaDate = new Date(huesped.llegada);
-      const salidaDate = new Date(huesped.salida);
-
-      const isThisMonth =
-        (llegadaDate.getMonth() === currentMonth && llegadaDate.getFullYear() === currentYear) ||
-        (salidaDate.getMonth() === currentMonth && salidaDate.getFullYear() === currentYear);
-
-      const matchesEstatus = reservationStatusMap[8].includes(huesped.estatus);
-
-      return isThisMonth && matchesEstatus;
-    });
-
-    this.noShow = noshow.length;
-    //
-
-
-
+    this.noShow = reservations.filter(
+      (huesped) =>
+        filterByStatus(huesped, 8)
+    ).length;
+  
+    // Trigger change detection
     this.changeDetector.detectChanges();
-
   }
+  
 
   ngOnDestroy() {
     this.unsubscribe.forEach((sb) => sb.unsubscribe());

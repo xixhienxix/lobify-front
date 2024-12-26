@@ -196,11 +196,13 @@ export class ReportsComponent implements OnInit, OnDestroy{
           this.modalRefEditReserva.componentInstance.onEstatusChange.subscribe({
             next: (value: any) => {
               this.onEstatusChange(value);
+              this.communicationService.onReportsResponse.next('Status Updated');
             }
           })
           this.modalRefEditReserva.componentInstance.onChangeAmaStatus.subscribe({
             next: (value: any) => {
               this.communicationService.onChangeEstatus(value);
+              this.communicationService.onReportsResponse.next('Ama Status Updated');
             }
           })
           this.modalRefEditReserva.componentInstance.onGuardarPromesa.subscribe({
@@ -275,6 +277,7 @@ export class ReportsComponent implements OnInit, OnDestroy{
           this.modalRefEditReserva.componentInstance.onActualizarCuenta.subscribe({
             next: () => {
                 this._indexDbService.checkIndexedDB(['reservaciones'],true);
+                this.communicationService.onReportsResponse.next('CheckOut Updated');
             },
             error: () => {
               this.communicationService.promptMessage('Error', 'No se pudo actualizar el estado de cuenta del cliente');

@@ -1,47 +1,58 @@
 <div class="filters-container">
-    <!-- Text Filter -->
-    <!-- Text Filter -->
-    <mat-form-field class="filter-item" appearance="outline">
-        <mat-label>Folio or Nombre</mat-label>
-        <input
+
+  <!-- <mat-form-field class="filter-item" appearance="outline">
+    <mat-label>Folio</mat-label>
+    <input
+      matInput
+      [(ngModel)]="filterFolio"
+      (input)="applyFilter({ folio: filterText })"
+      placeholder="Filtro por Folio"
+    />
+  </mat-form-field> -->
+
+  <!-- Text Filter: Folio or Nombre -->
+  <mat-form-field class="filter-item" appearance="outline">
+      <mat-label>Nombre</mat-label>
+      <input
         matInput
         [(ngModel)]="filterText"
-        (input)="applyFilter({ nombre: filterText, folio: filterText })"
-        placeholder="Filtro por Folio o Nombre"
-        />
-    </mat-form-field>
-  
-    <!-- Date Filter -->
-    <mat-form-field class="filter-item" appearance="outline">
-        <mat-label>Filtra por Fecha</mat-label>
-        <input
+        (input)="applyFilter({ nombre: filterText })"
+        placeholder="Filtro por Nombre"
+      />
+  </mat-form-field>
+
+  <!-- Date Filter -->
+  <mat-form-field class="filter-item" appearance="outline">
+      <mat-label>Filtra por Fecha</mat-label>
+      <input
         matInput
         [matDatepicker]="filterDate"
         [(ngModel)]="filterDateValue"
         (dateChange)="applyDateFilter($event)"
-        />
-        <mat-datepicker-toggle matSuffix [for]="filterDate"></mat-datepicker-toggle>
-        <mat-datepicker #filterDate></mat-datepicker>
-    </mat-form-field>
-  
-    <!-- Status Filter -->
-    <mat-form-field class="filter-item" appearance="outline">
-        <mat-label>Filtra por Estatus</mat-label>
-        <mat-select
-            [(ngModel)]="selectedStatus"
-            (selectionChange)="applyStatusFilter($event.value)"
-        >
-            <mat-option *ngFor="let status of statusOptions" [value]="status">
-                {{ status }}
-            </mat-option>
-        </mat-select>
-    </mat-form-field>
-  
-    <!-- Reset Filters Button -->
-    <button class="filter-item" mat-raised-button color="primary" (click)="resetFilters()">
-        Reset Filtros
-    </button>
+      />
+      <mat-datepicker-toggle matSuffix [for]="filterDate"></mat-datepicker-toggle>
+      <mat-datepicker #filterDate></mat-datepicker>
+  </mat-form-field>
+
+  <!-- Status Filter -->
+  <mat-form-field class="filter-item" appearance="outline">
+      <mat-label>Filtra por Estatus</mat-label>
+      <mat-select
+          [(ngModel)]="selectedStatus"
+          (selectionChange)="applyStatusFilter($event.value)"
+      >
+          <mat-option *ngFor="let status of statusOptions" [value]="status">
+              {{ status }}
+          </mat-option>
+      </mat-select>
+  </mat-form-field>
+
+  <!-- Reset Filters Button -->
+  <button class="filter-item" mat-raised-button color="primary" (click)="resetFilters()">
+      Reset Filtros
+  </button>
 </div>
+
 
   
   
@@ -58,30 +69,41 @@
         <td mat-cell *matCellDef="let element">
           <div class="estatus-container">
             <mat-form-field appearance="outline" class="estatus-form-field" [ngClass]="{'colored-select': true}">
-              <mat-select [(value)]="element.estatus" [ngStyle]="{'background-color': getColor(element.estatus)}">
+              <mat-select [(value)]="element.estatus" [ngStyle]="{'background-color': getColor(element.estatus)}" 
+                (selectionChange)="onStatusChange(element)">
                 <mat-option *ngFor="let status of statusOptions" [value]="status" [ngStyle]="{'background-color': getColor(status)}">
                   {{ status }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
           </div>
+          <!-- Button to reset the value to default -->
         </td>
       </ng-container>
+      
+      
   
       <!-- Default Column Template -->
-      <ng-template #defaultColumn>
-        <ng-container [matColumnDef]="column">
-          <th mat-header-cell *matHeaderCellDef> {{ column | titlecase }} </th>
-          <td mat-cell *matCellDef="let element">
-            <ng-container *ngIf="column === 'acciones'">
-              <button (click)="emitAction(element)" class="btn btn-primary">Ver Folio</button>
+    <!-- Default Column Template -->
+    <ng-template #defaultColumn>
+      <ng-container [matColumnDef]="column">
+        <th mat-header-cell *matHeaderCellDef> {{ column | titlecase }} </th>
+        <td mat-cell *matCellDef="let element">
+          <ng-container *ngIf="column === 'acciones'">
+            <button (click)="emitAction(element)" class="btn btn-primary">Ver Folio</button>
+          </ng-container>
+          <ng-container *ngIf="column !== 'acciones'">
+            <!-- Format the llegadas and salidas date fields -->
+            <ng-container *ngIf="column === 'llegada' || column === 'salida'">
+              {{ formatDate(element[column], 'en') }} <!-- Replace 'en' with your dynamic language parameter -->
             </ng-container>
-            <ng-container *ngIf="column !== 'acciones'">
+            <ng-container *ngIf="column !== 'llegada' && column !== 'salida'">
               {{ element[column] }}
             </ng-container>
-          </td>
-        </ng-container>
-      </ng-template>
+          </ng-container>
+        </td>
+      </ng-container>
+    </ng-template>
     </ng-container>
   
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
+/* eslint-disable @angular-eslint/no-output-on-prefix */
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, AfterViewInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,6 +10,8 @@ import { DateTime } from 'luxon';
 import { CommunicationService } from '../_services/event.services';
 import { Parametros } from '../../parametros/_models/parametros';
 import { ParametrosService, timeZoneToLocaleMap } from '../../parametros/_services/parametros.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 
 @Component({
   selector: 'app-dynamic-report',
@@ -30,11 +33,11 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
   @Input() dataArray: any[] = [];
   @Input() statusOptions: string[] = [];
 
-  // eslint-disable-next-line @angular-eslint/no-output-on-prefix
   @Output() onActionClick = new EventEmitter<any>();
 
   filteredReservations = new MatTableDataSource<any>([]);
   filterText: string = '';
+  filterFolio: string = '';
   filterDateValue: Date | null = null;
   llegadaDateValue: Date | null = null;
   salidaDateValue: Date | null = null;
@@ -45,16 +48,20 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
   allReservaciones: any[] = [];
   prospectsArray: any[] = [];
 
+  // Store initial values for each row
+  initialStatuses: { [key: string]: string } = {};
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(private route: ActivatedRoute,
     private indexDbService: IndexDBCheckingService,
     private communicationService: CommunicationService,
-    private _parametrosService: ParametrosService
-
-  ) {}
+    private cdRef: ChangeDetectorRef,
+    private _modalService: NgbModal
+    ) {}
 
   async ngOnInit(): Promise<void> {
+
     this.indexDbService.checkIndexedDB(['parametros'],true);
     this.currentParametros = await  this.indexDbService.loadParametros(true);
 
@@ -62,6 +69,7 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
     await this.indexDbService.checkIndexedDB(['reservaciones'], true);
     this.allReservaciones = await this.indexDbService.loadReservaciones();
 
+    // Filters
     this.filteredReservations.filterPredicate = (data: any, filter: string): boolean => {
       const parsedFilter = JSON.parse(filter); // Parse the filter string into an object
       
@@ -79,7 +87,13 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
       return nameMatches && folioMatches && estatusMatches && habitacionMatches && llegadaMatches;
     };
     
-    
+    this.communicationService.onReportsUpdated$.subscribe({
+      next:(reportType)=>{
+        if(reportType){
+        this.loadReportData();
+        }
+      }
+    });
 
     this.route.params.subscribe((params) => {
       this.reportType = params['reportType'];
@@ -104,37 +118,118 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   loadReportData(): void {
-    if (this.reportType === 'prospects') {
-      this.statusOptions = [...reservationStatusMap[2]];
-      this.loadReport();
-    } else if (this.reportType === 'salidas') {
-      this.statusOptions = [...reservationStatusMap[1]];
-      this.loadReport();
-    } else if (this.reportType === 'colgados') {
-      this.statusOptions = [...reservationStatusMap[1]];
-      this.loadReport();
-    } else if (this.reportType === 'noshow') {
-      this.statusOptions = [...reservationStatusMap[8]];
+    this.filteredReservations.data = []
+    this.filteredReservations.paginator = null
+
+    const statusMap: { [key: string]: number } = {
+      'prospects': 2,
+      'salidas': 1,
+      'colgados': 1,
+      'noshow': 8,
+      'llegadas':2,
+      'inhouse': 1
+    };
+    
+    const statusKey = statusMap[this.reportType];
+    if (statusKey !== undefined) {
+      this.statusOptions = [...reservationStatusMap[statusKey]];
       this.loadReport();
     }
   }
 
   loadReport(): void {
-
     // Filter prospects
-    this.prospectsArray = this.filterHuespedes(this.allReservaciones);
-    this.filteredReservations.data = this.prospectsArray.map(reservation => {
-      reservation.llegada = this.formatDate(reservation.llegada, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
-      reservation.salida = this.formatDate(reservation.salida, timeZoneToLocaleMap[this.currentParametros.codigoZona]);
-    
-      return reservation;
-    });;
-
-    // Assign paginator after setting data
+    this.prospectsArray = this.filterHuespedes(this.allReservaciones,this.reportType);
+    this.filteredReservations.data = this.prospectsArray
     this.filteredReservations.paginator = this.paginator;
-
+    this.filteredReservations.data.forEach(element => {
+      this.setInitialStatus(element); // Store the initial status value for each element
+    });
   }
 
+  filterHuespedes(huespedes: any[], reportType:string): any[] {
+    const currentDate = DateTime.local().setZone(this.currentParametros.codigoZona); // Get current local time
+    const todayDateString = currentDate.toISODate(); // Today's date in ISO format (YYYY-MM-DD)
+
+    const filterByStatus = (huesped: Huesped): boolean => {
+      return this.statusOptions.includes(huesped.estatus);
+    };
+
+    if (reportType === 'colgados') {
+      return huespedes.filter(huesped => {
+        if (!huesped.salida || !todayDateString) {
+          return false; // Skip if either salida or todayDateString is null/undefined
+        }
+        
+        const parsedSalida = DateTime.fromISO(huesped.salida);
+        if (!parsedSalida.isValid) {
+          return false; // Skip if the parsed salida date is invalid
+        }
+        
+        const statusMatches = filterByStatus(huesped);
+        return parsedSalida.toISODate() <= todayDateString && statusMatches;
+      });
+    } else if(reportType === 'salidas') { 
+      //        (isThisMonth(huesped.llegada) || isThisMonth(huesped.salida)) &&
+      //filterByStatus(huesped, 8)
+      return huespedes.filter(huesped => {
+        if (!huesped.salida || !todayDateString || !huesped.llegada) {
+          return false; // Skip if either salida or todayDateString is null/undefined
+        }
+        
+        const salidasMatches = this.isToday(huesped.salida);
+
+        const statusMatches = filterByStatus(huesped);
+        return salidasMatches && statusMatches;
+      });
+    } else if(reportType === 'prospects') {
+      return huespedes.filter(huespedes=>filterByStatus(huespedes));
+    } else if(reportType === 'llegadas') { 
+      //        (isThisMonth(huesped.llegada) || isThisMonth(huesped.salida)) &&
+      //filterByStatus(huesped, 8)
+      return huespedes.filter(huesped => {
+        if (!huesped.llegada || !todayDateString) {
+          return false; // Skip if either salida or todayDateString is null/undefined
+        }
+        
+        const llegadaMatches = this.isToday(huesped.llegada);
+
+        const statusMatches = filterByStatus(huesped);
+        return llegadaMatches && statusMatches;
+      });
+    }else if(reportType === 'noshow') {
+      return huespedes.filter(huesped => {
+        const statusMatches = filterByStatus(huesped);
+        return statusMatches
+      });
+    } else if(reportType === 'inhouse') {
+      return huespedes.filter(huesped => {
+        const statusMatches = filterByStatus(huesped);
+        return statusMatches
+      });
+    }
+    return []
+  }
+
+  onStatusChange(element:any){
+    if(element){
+      const modalRef = this._modalService.open(AlertsComponent, {size:'sm', backdrop:'static'})
+      modalRef.componentInstance.alertHeader = 'Advertencia';
+      modalRef.componentInstance.mensaje = 'Esta seguro que desea actualizar el estatus del húesped?';
+
+      modalRef.result.then((result) => {
+        if (result === 'Aceptar') {
+          this.updateEstatusHuesped(element);        
+        } else {
+          this.resetStatus(element);
+        }
+      });
+    }
+  }
+
+  updateEstatusHuesped(huesped:Huesped){
+    this.communicationService.onChangeEstatusHuesped(huesped);       
+  }
 
   loadColors(): void {
     // Define color mapping
@@ -159,80 +254,6 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
     };
   }
 
-  filterNoShow(huespedes: any[]): any[] {
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-
-    return huespedes.filter((huesped) => {
-      const llegadaDate = new Date(huesped.llegada);
-      const salidaDate = new Date(huesped.salida);
-
-      const isThisMonth =
-        (llegadaDate.getMonth() === currentMonth && llegadaDate.getFullYear() === currentYear) ||
-        (salidaDate.getMonth() === currentMonth && salidaDate.getFullYear() === currentYear);
-
-      const matchesEstatus = reservationStatusMap[8].includes(huesped.estatus);
-
-      return isThisMonth && matchesEstatus;
-    });
-  }
-
-  filterHuespedes(huespedes: any[]): any[] {
-    // Get the current date and time in the specified time zone
-    const currentDate = DateTime.now().setZone(this.currentParametros.zona);
-  
-    // Extract the month and year (Luxon months are 1-based, so we'll use that)
-    const currentMonth = currentDate.month; // Luxon's `month` is 1-based (January = 1, December = 12)
-    const currentYear = currentDate.year;
-  
-    return huespedes.filter((huesped) => {
-      // Parse the llegada and salida dates using Luxon
-      const llegadaDate = DateTime.fromISO(huesped.llegada).setZone(this.currentParametros.zona);
-      const salidaDate = DateTime.fromISO(huesped.salida).setZone(this.currentParametros.zona);
-  
-      // Adjust the comparison to be 1-based for Luxon and 0-based for JavaScript Date object months
-      const isThisMonth =
-        (llegadaDate.month === currentMonth && llegadaDate.year === currentYear) ||
-        (salidaDate.month === currentMonth && salidaDate.year === currentYear);
-  
-      const matchesEstatus = reservationStatusMap[2].includes(huesped.estatus);
-  
-      return isThisMonth && matchesEstatus;
-    });
-  }
-
-  filterHuespedesSalida(huespedes: any[]): any[] {
-    const currentDate = DateTime.local(); // Get current local time
-    const todayDateString = currentDate.toISODate(); // Get today's date in ISO format (YYYY-MM-DD)
-  
-    return huespedes.filter((huesped) => {
-      const salidaDate = DateTime.fromISO(huesped.salida).startOf('day'); // Parse the 'salida' date and normalize to the start of the day
-  
-      const isSameDayAsToday = salidaDate.toISODate() === todayDateString; // Compare if salida is the same day as today
-  
-      const matchesEstatus = reservationStatusMap[1].includes(huesped.estatus);
-  
-      return isSameDayAsToday && matchesEstatus;
-    });
-  }
-
-  filterHuespedesColgados(huespedes: any[]): any[] {
-    const currentDate = DateTime.local(); // Get current local time
-    const todayDateString = currentDate.toISODate(); // Get today's date in ISO format (YYYY-MM-DD)
-  
-    return huespedes.filter((huesped) => {
-      const salidaDate = DateTime.fromISO(huesped.salida).startOf('day'); // Parse the 'salida' date and normalize to the start of the day
-  
-      const isSameDayAsToday = salidaDate.toISODate()! <= todayDateString; // Compare if salida is the same day as today
-  
-      const matchesEstatus = reservationStatusMap[1].includes(huesped.estatus);
-  
-      return isSameDayAsToday && matchesEstatus;
-    });
-  }
-  
-
   ngAfterViewInit(): void {
     this.filteredReservations.paginator = this.paginator;
   }
@@ -247,54 +268,57 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
   }
   
   applyFilter(filters: { nombre?: string; folio?: string; estatus?: string; habitacion?: string; llegada?: string; salida?: string }): void {
-    this.filteredReservations.data = this.prospectsArray.filter((reservation) => {
-      // Match 'nombre' with the filter text
-      const nombreMatches = filters.nombre ? reservation.nombre.toLowerCase().includes(filters.nombre.toLowerCase()) : true;
-      
-      // Match 'folio' with the filter text
-      const folioMatches = filters.folio ? reservation.folio.toLowerCase().includes(filters.folio.toLowerCase()) : true;
-      
-      // Status Filter
-      const estatusMatches = filters.estatus ? reservation.estatus === filters.estatus : true;
-      
-      // Date Filters: Compare only the date part of 'llegada' (ignoring time)
-      const llegadaMatches = filters.llegada ? reservation.llegada.split('T')[0] === filters.llegada : true;
-      
-      // Habitacion Filter
-      const habitacionMatches = filters.habitacion ? reservation.habitacion === filters.habitacion : true;
-      
-      // Combine all conditions: 
-      // Ensure that each filter must match
-      return (nombreMatches || folioMatches) && estatusMatches && habitacionMatches && llegadaMatches;
-    });
-  }
+    console.log('filtros:', filters);
   
+    // Start with the full array as the initial data
+    let filteredData = this.prospectsArray;
   
+    // Apply each filter progressively, making sure that each filter respects the others
   
-  applySpecificDateFilter(date: Date): void {
-    if (date) {
-      this.filteredReservations.data = this.prospectsArray.filter((reservation) =>
-        new Date(reservation.creada).toDateString() === new Date(date).toDateString()
+    // Apply 'nombre' filter if present
+    if (filters.nombre) {
+      filteredData = filteredData.filter((reservation) =>
+        reservation.nombre.toLowerCase().includes(filters.nombre!.toLowerCase())
       );
-    } else {
-      this.filteredReservations.data = this.prospectsArray;
     }
-  }
-
-  applyLlegadaDateFilter(date: Date): void {
-    if (date) {
-      this.filteredReservations.data = this.prospectsArray.filter((reservation) =>
-        new Date(reservation.llegada).toDateString() === new Date(date).toDateString()
+  
+    // Apply 'llegada' filter if present (Date comparison ignoring time)
+    if (filters.llegada) {
+      filteredData = filteredData.filter((reservation) =>
+        DateTime.fromISO(reservation.llegada).toISODate() === DateTime.fromISO(filters.llegada!).toISODate()
       );
-    } else {
-      this.filteredReservations.data = this.prospectsArray;
     }
+  
+    // Apply 'estatus' filter if present
+    if (filters.estatus) {
+      filteredData = filteredData.filter((reservation) =>
+        reservation.estatus === filters.estatus
+      );
+    }
+  
+    // Apply 'habitacion' filter if present
+    if (filters.habitacion) {
+      filteredData = filteredData.filter((reservation) =>
+        reservation.habitacion === filters.habitacion
+      );
+    }
+  
+    // If no matches were found after applying all filters, log that the data is empty
+    if (filteredData.length === 0) {
+      console.log('No data found after applying all filters');
+    } else {
+      console.log('Filtered data:', filteredData);
+    }
+  
+    // Update the filtered reservations data
+    this.filteredReservations.data = filteredData;
   }
-
-  formatDate(dateString: string, locale: string): string {
-    return DateTime.fromISO(dateString).setLocale(locale).toLocaleString({
+  
+  
+  formatDate(dateString: string, language: string = 'en'): string {
+    return DateTime.fromISO(dateString).setLocale(timeZoneToLocaleMap[this.currentParametros.codigoZona]).toLocaleString({
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
-    }).replace(',', '').replace('de', 'de');
+    }).replace(',', '').replace('de', 'de');;
   }
 
 
@@ -307,11 +331,29 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
   }
 
   resetFilters(): void {
-    this.filterText = '';
-    this.filterDateValue = null;
-    this.selectedStatus = '';
-    this.applyFilter({ nombre: '', folio: '', estatus: '', habitacion: '' }); // Reset all filters
+    this.filterText = ''; // Reset the filter text
+    this.filterFolio = ''; // Reset the filter text
+    this.filterDateValue = null; // Reset the date filter
+    this.selectedStatus = ''; // Reset the status filter
+    
+    // Reset the filtered data to show all prospects
+    this.filteredReservations.data = this.prospectsArray;
   }
+  
+
+  isThisMonth = (date: string): boolean => {
+    const currentDate = DateTime.local().setZone(this.currentParametros.codigoZona);
+    const { day, month, year } = currentDate
+    const parsedDate = DateTime.fromISO(date);
+    return parsedDate.month === month && parsedDate.year === year;
+  };
+
+  isToday = (date: string): boolean => {
+    const currentDate = DateTime.local().setZone(this.currentParametros.codigoZona);
+    const { day, month, year } = currentDate
+    const parsedDate = DateTime.fromISO(date);
+    return parsedDate.hasSame(currentDate, 'day'); // Check if the date is the same day
+  };
 
   getColor(status: string): string {
     return this.colorMap[status] || this.colorMap['default'];
@@ -319,6 +361,22 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
 
   emitAction(element: any): void {
     this.communicationService.emitEvent(element);
+  }
+
+    // Function to store the initial value when the data is loaded
+  setInitialStatus(element: any): void {
+    if (!this.initialStatuses[element._id]) {  // Assuming each element has a unique 'id'
+      this.initialStatuses[element._id] = element.estatus;
+    }
+  }
+
+  // Function to reset to the initial status
+  resetStatus(element: any): void {
+    const initialStatus = this.initialStatuses[element._id];
+    if (initialStatus) {
+      element.estatus = initialStatus; // Reset to initial value
+      this.cdRef.detectChanges(); // Trigger change detection manually
+    }
   }
 
   ngOnDestroy(){

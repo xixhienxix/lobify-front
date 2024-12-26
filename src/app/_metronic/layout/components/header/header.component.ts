@@ -1,5 +1,5 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { NavigationCancel, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, NavigationCancel, NavigationEnd, Router } from '@angular/router';
 import { BehaviorSubject, catchError, concat, concatMap, firstValueFrom, forkJoin, of, Subject, Subscription, switchMap, takeUntil } from 'rxjs';
 import { LayoutService } from '../../core/layout.service';
 import { MenuComponent } from '../../../kt/components';
@@ -113,7 +113,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     private _dashboardService: DashboardService,
     private _communicationService: CommunicationService,
     private _checkIndexDbService: IndexDBCheckingService,
-    private _houseKeepingService: HouseKeepingService
+    private _houseKeepingService: HouseKeepingService,
+    private activatedRoute:ActivatedRoute
   ) {
     this.currentUser = this._authService.getUserInfo().username
     this.routingChanges();

@@ -54,6 +54,9 @@ private ngUnsubscribe = new Subject<void>();
   public onEstatusChangeFinished = new Subject<boolean>();
   onEstatusChangeFinished$ = this.onEstatusChangeFinished.asObservable();
 
+  public onReportsResponse = new Subject<string>();
+  onReportsUpdated$ = this.onReportsResponse.asObservable();
+
   emitEvent(data: any) {
     this.prospectSubject.next(data);
   }
@@ -86,6 +89,30 @@ private ngUnsubscribe = new Subject<void>();
       console.error('Error updating room status:', error);
       // Optionally log the error
     }
+  }
+
+  onChangeEstatusHuesped(huesped:Huesped){
+    this._huespedService.updateEstatusHuesped(huesped).subscribe({
+      next:(value)=>{
+        const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+        modalRef.componentInstance.alertHeader='EXITO'
+        modalRef.componentInstance.mensaje = 'Estatus Actualizado '
+      },
+      error:(err)=>{
+        if(err){
+          const modalRef=this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+          modalRef.componentInstance.alertHeader='ERROR'
+          modalRef.componentInstance.mensaje = 'No se pudo actualizar el estatus'
+        
+            setTimeout(() => {
+              modalRef.close('Close click');
+            },4000)
+              }
+      },
+      complete:()=>{
+        this.onReportsResponse.next('actualizado');
+      }
+    });
   }
 
   updateHuesped(value:any){

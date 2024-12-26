@@ -497,6 +497,14 @@ export class ContentComponent implements OnInit{
     return foundTaskID?.id
   }
 
+  getNumeroByTaskID(taskID: string) {
+    // Find the task by its ID
+    const task = this.habitacionPorTipoDataSource.find(item => item.id === taskID);
+  
+    // If found, return the `numero` (text property)
+    return task ? task.text : null;
+  }
+
   createRack(responseData:Habitacion[]){
     const tipoArray:Record<string, any>[] = []
     const codigoArray:Record<string, any>[] = []
@@ -539,11 +547,8 @@ export class ContentComponent implements OnInit{
   */
   onPopupOpen = (args: any) => {
     args.cancel = true; // Default to cancel popup
-    const today = new Date().toDateString();
-    const startTime = new Date(args.data.StartTime).toDateString();
   
     const existingEvents = this.scheduleObj.getEvents();
-  
   
     if (args.data.hasOwnProperty("Folio") && args.data.Subject !== 'Bloqueo') {
       if (args.type === 'Editor' || args.type === 'QuickInfo') {
@@ -656,13 +661,12 @@ export class ContentComponent implements OnInit{
 
   onDragStop(args: DragEventArgs): void {
       const target = args.event.target as HTMLElement;
-
-
       const existingEvents = this.scheduleObj.getEvents();
 
+      const bloqueosOverlap = this.findOverlappingObjects(args.data, this.bloqueosArray)
       const overlapping = this.findOverlappingObjects(args.data,existingEvents)
 
-      if(overlapping.length === 0){
+      if(overlapping.length === 0 && bloqueosOverlap.length === 0){
         if (target.classList.contains('e-header-cells')) { // Avoid the drag event to be left on header Cells
           args.cancel = true;
         } else{
@@ -700,21 +704,41 @@ export class ContentComponent implements OnInit{
   findOverlappingObjects( target: Record<string, any>, objects: Record<string, any>): Record<string, any> {
     const checkInDate = this.setCheckInOutTimeParametros(target.StartTime, this.currentParametros.checkIn);
     const checkOutDate = this.setCheckInOutTimeParametros(target.EndTime, this.currentParametros.checkOut);
-    
-    // const targetStart = target.StartTime;
-    // const targetEnd = target.EndTime;
 
+  
     return objects.filter((obj:Record<string, any>) => {
       // Avoid returning the same object as the target
-      if (obj.Id === target.Id) {
-        return false;
+
+      if(obj.hasOwnProperty("_id")){
+        const numCuarto = this.getNumeroByTaskID(target.TaskId)
+
+        const desde = new Date(obj.Desde);
+        const hasta = new Date(obj.Hasta);
+        const start = new Date(checkInDate);
+        const end = new Date(checkOutDate);
+        let sameRoom
+        if(obj.hasOwnProperty("Cuarto")){
+          sameRoom = obj.Cuarto.some((item:string) => {
+                return item === numCuarto
+            });
+        }
+        // Check for overlap
+        return (
+          ((desde <= end && desde >= start) || // Desde falls within the range
+          (hasta <= end && hasta >= start) || // Hasta falls within the range
+          (desde <= start && hasta >= end)) && sameRoom   // The range is fully enclosed by Desde and Hasta
+        );
+      }else {
+        if (obj.Id === target.Id) {
+          return false;
+        }
+        // Check for overlap
+        const objStart = obj.StartTime;
+        const objEnd = obj.EndTime;
+  
+        return checkInDate <= objEnd && checkOutDate >= objStart;
       }
 
-      // Check for overlap
-      const objStart = obj.StartTime;
-      const objEnd = obj.EndTime;
-
-      return checkInDate <= objEnd && checkOutDate >= objStart;
     });
   }
 

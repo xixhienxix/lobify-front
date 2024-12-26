@@ -123,7 +123,7 @@ export class IndexDBCheckingService {
     }
 
     // Helper function to load and manage Parametros data
-    async loadParametros(refresh: boolean): Promise<Parametros> {
+    async loadParametros(refresh: boolean = false): Promise<Parametros> {
         if (!refresh) {
             const parametrosIndexDB = await this._parametrosService.readIndexDB('Parametros');
             if (parametrosIndexDB) {

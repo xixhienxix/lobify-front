@@ -1,6 +1,7 @@
-import { NgModule } from '@angular/core';
+import { inject, NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { AuthGuard } from './modules/auth/services/auth.guard';
+import { ParametrosService } from './pages/parametros/_services/parametros.service';
 
 export const routes: Routes = [
   {
