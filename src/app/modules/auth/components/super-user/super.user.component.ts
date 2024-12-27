@@ -36,16 +36,13 @@ export class SuperUserComponent implements OnInit, OnDestroy {
 
   onSubmit(){
     this.isLoading=true
-    const sb = this.authService.autoriza(this.getAutorizaForm.usuario.value,this.getAutorizaForm.password.value).subscribe(
-      (value:any)=>{
-
-
-        
+    const sb = this.authService.autoriza(this.getAutorizaForm.usuario.value,this.getAutorizaForm.password.value).subscribe({      
+      next:(value:any) =>{
             this.passBack(value.id);
             this.isLoading=false
 
       },
-      (error)=>{
+      error:(error)=>{
         if (error)
         {
           const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
@@ -53,8 +50,8 @@ export class SuperUserComponent implements OnInit, OnDestroy {
           modalRef.componentInstance.mensaje='Ocurrio un Error intente de nuevo mas tarde'
         }
       }
-      )
-      this.subscription.push(sb);
+    })
+    this.subscription.push(sb);
   }
 
   close(){

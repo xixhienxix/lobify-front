@@ -18,6 +18,7 @@ export const DEFAULT_LOG = {
 }
 export interface PropertiesChanged {
     folio:string;
+    llegada:string;
     salida:string;
     adultos:number;
     ninos:number;

@@ -150,7 +150,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
       
     this._communicationService.onEstatusChangeFinished.subscribe({      
       next:async (item)=>{
-        console.log('Bloqueo Triggered:Calendar, actualiza}ndo calendar this.getReservations()');
+        console.log('Bloqueo Triggered:Calendar, actualizando calendar this.getReservations()');
         if(item){
           await this.getReservations();
         }
@@ -311,10 +311,14 @@ export class CalendarComponent implements OnInit, OnDestroy {
     modalRef.componentInstance.mensaje= 'Desea Finalizar el Bloqueo?'  
 
     modalRef.result.then(async (result) => {
-      if (result) {
+      if (result === 'Aceptar') {
           this._bloqueoService.deleteBloqueo(data.row.data._id).subscribe({
             next:(response)=>{
-              console.log(response);
+              const data2 = {
+                cuarto:data.row.data.Numero,
+                estatus:'SUCIA'
+              }
+              this.onChangeEstatus(data2);
             },
             error:(err)=>{
               console.log(err);
@@ -419,6 +423,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
 
       const modalRef = this.modalService.open(EditReservaComponent, { size: 'md', backdrop: 'static' });  
       modalRef.componentInstance.codigosCargo = this.codigosCargo
+      modalRef.componentInstance.parametros = this.currentParametros
       modalRef.componentInstance.data = data.data
       modalRef.componentInstance.houseKeepingCodes = this.houseKeepingCodes
       modalRef.componentInstance.currentRoom = habitacion
@@ -583,6 +588,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
                 this.eventsSubject.next(values);
                 this.promptMessage('Exito', 'Reservacion Guardada con exito');
                 this.submitLoading = false;
+                modalRef.close();
               })
             )
             .subscribe({
@@ -735,7 +741,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
       ninos: propertiesChanged.ninos,
       nombre: propertiesChanged.nombre,
       estatus: currentHuesped.estatus, // Example default value
-      llegada: currentHuesped.llegada, // Placeholder value, you can replace it with actual data if available
+      llegada: propertiesChanged.llegada, // Placeholder value, you can replace it with actual data if available
       salida: propertiesChanged.salida,
       noches: propertiesChanged.noches,
       tarifa: propertiesChanged.tarifa,

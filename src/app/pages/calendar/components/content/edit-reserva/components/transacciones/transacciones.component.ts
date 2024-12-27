@@ -147,9 +147,9 @@ interface StateMapping {
       { id: 'abonosRadio', label: 'Abonos', checked: 'abonosChecked' },
       { id: 'cargosRadio', label: 'Cargos', checked: 'cargosChecked' },
       { id: 'descuentosRadio', label: 'Descuentos', checked: 'descuentosChecked' },
-      { id: 'cancelados', label: 'Cancelaciones y Devoluciones', checked: 'canceladosChecked' },
       { id: 'todos', label: 'Todos', checked: 'todosChecked' },
-
+      { id: 'cancelados', label: 'Cancelaciones', checked: 'canceladosChecked' },
+      { id: 'activos', label: 'Activos', checked: 'activosChecked'},
     ];
 
     @Input() currentHuesped:Huesped;
@@ -464,18 +464,16 @@ interface StateMapping {
         });
      const sb = modalRef.componentInstance.passEntry.subscribe((receivedEntry:any) => {
   
-            if(receivedEntry.id==3)
+            if(receivedEntry === 3)
             {
-              this.fechaCancelado=DateTime.now()
+              this.fechaCancelado = DateTime.now()
               
-                    if(edo_cuenta.Forma_De_Pago=='No Aplica')
-                    {
-                      edo_cuenta.Estatus='Devolucion'
-                    }
-                    else
-                    {
+                    // if(edo_cuenta.Forma_de_Pago=='No Aplica'){
+                    //   edo_cuenta.Estatus='Devolucion'
+                    // }
+                    // else{
                       edo_cuenta.Estatus='Cancelado'
-                    }
+                    //}
   
                     this._edoCuentaService.updateRow(edo_cuenta._id,edo_cuenta.Estatus,new Date(),receivedEntry.username).subscribe(
                       (value)=>{
@@ -555,6 +553,11 @@ interface StateMapping {
   
     selectedTable(event: MatRadioChange): void {
       const idMapping: { [key: string]: StateMapping } = {
+        activos: {
+          data: this.listaEstadosCuenta.edoCuentaActivos,
+          total: this.totalActivos,
+          checkedState: 'activosChecked'
+        },
         todos: {
           data: this.listaEstadosCuenta.estadoDeCuenta,
           total: this.totalVigente,
@@ -564,11 +567,6 @@ interface StateMapping {
           data: this.listaEstadosCuenta.edoCuentaCancelados,
           total: this.totalCancelados,
           checkedState: 'canceladosChecked'
-        },
-        activos: {
-          data: this.listaEstadosCuenta.edoCuentaActivos,
-          total: this.totalActivos,
-          checkedState: 'activosChecked'
         },
         devoluciones: {
           data: this.listaEstadosCuenta.edoCuentaDevoluciones,

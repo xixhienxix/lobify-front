@@ -180,7 +180,6 @@ private bloqueoResponseSubject = new Subject<any>();
             }))
   }
 
-
   getBloqueos() :Observable<Bloqueo[]> {
    return this.http
     .get<Bloqueo[]>(environment.apiUrl + '/reportes/bloqueos')

@@ -213,7 +213,8 @@ export class AuthService implements OnDestroy {
         return of(undefined);
       }),
       finalize(() => this.isLoadingSubject.next(false))
-    );   }
+    );   
+  }
 
   ngOnDestroy() {
     this.unsubscribe.forEach((sb) => sb.unsubscribe());

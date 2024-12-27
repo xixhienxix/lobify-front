@@ -23,6 +23,7 @@ import { ModificaReservaComponent } from './components/modifica/modifica.reserva
 import { Tarifas } from 'src/app/models/tarifas';
 import { LogService } from 'src/app/services/activity-logs.service';
 import { CommunicationService } from 'src/app/pages/reports/_services/event.services';
+import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 
 @Component({
   selector: 'app-edit-reserva',
@@ -84,6 +85,7 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
   @Input() checkIn:string
   @Input() zona:string
   @Input() estadoDeCuenta:edoCuenta[]
+  @Input() parametros:Parametros
   
 
   @Output() onAgregarPago: EventEmitter<edoCuenta> = new EventEmitter();
@@ -324,8 +326,7 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
 
     const modalRef = this.modalService.open(ModificaReservaComponent,{ size: 'lg', backdrop:'static' })  
     modalRef.componentInstance.currentHuesped = this.currentHuesped;
-    // modalRef.componentInstance.adultos = this.currentHuesped.adultos;
-    // modalRef.componentInstance.ninos = this.currentHuesped.ninos;
+    modalRef.componentInstance.parametros = this.parametros
     modalRef.componentInstance.estatusArray = this.estatusArray
     modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
     modalRef.componentInstance.roomCodes=roomCodes
@@ -354,7 +355,7 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
                   Estatus:'Activo',
           }
         this.honUpdateHuesped.emit({updatedHuesped:huespedArray.huesped,pago, oldProperties:huespedArray.beforeChanges})
-
+        modalRef.close();
       }
     })
     

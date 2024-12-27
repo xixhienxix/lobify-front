@@ -15,8 +15,7 @@ import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { DateTime } from 'luxon'; 
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
-import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
-import { TarifasService } from 'src/app/services/tarifas.service';
+
 export interface preAsig {
   numero:any,
   codigo:string,

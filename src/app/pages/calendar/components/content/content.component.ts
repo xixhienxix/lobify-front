@@ -418,7 +418,7 @@ export class ContentComponent implements OnInit{
         if (!reservationStatusMap[8].includes(item.estatus)) {
           const llegada = this.adjustTime(item.llegada, this.checkInTime);
           const salida = this.adjustTime(item.salida, this.checkOutTime);
-  
+
           this.datasourceArray.push({
             Id: reservasIdCounter++,
             Subject: item.nombre,
@@ -860,7 +860,6 @@ onEventRendered(args: EventRenderedArgs): void {
   }
 }
 
-
 onStatusChange(cuarto:string, estatus:string){
   this.onChangeEstatus.emit({cuarto,estatus})
 }
@@ -893,8 +892,6 @@ promptMessage(header:string,message:string){
     },4000)
     return
 }
-
-
 
 private getDismissReason(reason: any): string {
   if (reason === ModalDismissReasons.ESC) {

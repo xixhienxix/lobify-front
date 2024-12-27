@@ -285,12 +285,10 @@
 </div>
 
 <br>
-<div class="row col-md-12" style="justify-content: center;">
-
-  <div class="row">
+<div class="row col-md-12 d-flex justify-content-center">
+  <div class="d-flex flex-wrap" style="gap: 10px;">
     <div *ngFor="let radioButton of radioButtons"
-      [ngClass]="{'col-sm-4': radioButton.id !== 'cancelados' && radioButton.id !== 'descuentosRadio', 'col-sm-6': radioButton.id === 'cancelados' || radioButton.id === 'descuentosRadio'}"
-      style="margin-top: 5px">
+      [ngClass]="{'col-sm-4': radioButton.id !== 'cancelados' && radioButton.id !== 'descuentosRadio', 'col-sm-6': radioButton.id === 'cancelados' || radioButton.id === 'descuentosRadio'}">
       <mat-radio-button class="example-margin" [id]="radioButton.id" [checked]="radioButton.checked"
         (change)="selectedTable($event)">
         {{radioButton.label}}
@@ -298,6 +296,7 @@
     </div>
   </div>
 </div>
+
 
 
 <div class="row col-md-12 container" style="justify-content: center;">
