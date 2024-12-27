@@ -5,7 +5,7 @@ import { catchError, firstValueFrom, of, Subscription } from "rxjs";
 import { Historico } from "src/app/models/historico.model";
 import { DetalleComponent } from "./components/detalle.component";
 import { Edo_Cuenta_Service } from "src/app/services/edoCuenta.service";
-import { Huesped } from "src/app/models/huesped.model";
+import { Huesped, reservationStatusMap } from "src/app/models/huesped.model";
 import { AlertsComponent } from "src/app/_metronic/shared/alerts/alerts.component";
 import { AlertsMessageInterface } from "src/app/models/message.model";
 import { edoCuenta } from "src/app/models/edoCuenta.model";
@@ -19,6 +19,7 @@ import { AjustesComponent } from "./components/ajustes/ajustes.component";
 import { MatRadioChange } from "@angular/material/radio";
 import { AuthService } from "src/app/modules/auth";
 import { LogService } from "src/app/services/activity-logs.service";
+import { EstatusService } from "src/app/pages/calendar/_services/estatus.service";
 interface IEstadoCuenta {
   estadoDeCuenta:edoCuenta[],
   edoCuentaActivos:edoCuenta[],
@@ -135,6 +136,7 @@ interface StateMapping {
     submitted:boolean=false
     submittedAbono:boolean=false
     secondFormInvalid:boolean=false
+    agregarServicioValido:boolean=true
   
     /**MAT TABLE */
     dataSource = new MatTableDataSource<edoCuenta>();
@@ -161,9 +163,10 @@ interface StateMapping {
     @Output() honAddPayment: EventEmitter<edoCuenta> = new EventEmitter();
     @Output() honRefreshEdoCuenta: EventEmitter<boolean> = new EventEmitter();
     @Output() honActualizaSaldo: EventEmitter<boolean> = new EventEmitter();
+
     constructor(    
       public modalService: NgbModal,
-      private _codigoDeCargoService: CodigosService,
+      private _estatusService: EstatusService,
       private _edoCuentaService: Edo_Cuenta_Service,
       private fb : FormBuilder,
       private _authService: AuthService,
@@ -175,7 +178,9 @@ interface StateMapping {
       if(this.currentHuesped.estatus === 'Reserva Cancelada' || this.currentHuesped.estatus === 'No Show' || this.currentHuesped.estatus === 'Check-Out'){
         this.inputDisabled=true
       }
-
+      if(reservationStatusMap[2].includes(this.currentHuesped.estatus)){
+        this.inputDisabled = true;
+      }
   
       this.loadForm();
       this.getCodigosDeCargo();
@@ -242,7 +247,8 @@ interface StateMapping {
   
     
     loadForm(){
-  
+      const isInitialDeposit = reservationStatusMap[2].includes(this.currentHuesped.estatus);
+
       this.formGroup= this.fb.group({
         concepto : ['',Validators.required],
         cantidad : [ {value:'', disabled:true}, Validators.required],
@@ -250,22 +256,22 @@ interface StateMapping {
       })
   
       this.nuevosConceptosFormGroup = this.fb.group({
-        nuevoConcepto:['',Validators.required],
+        nuevoConcepto:[{value:'', disabled: this.inputDisabled },Validators.required],
         nuevoPrecio:['',Validators.required],
         nuevaCantidad :[this.quantity,Validators.required]
-      })
-  
-      this.abonoFormGroup= this.fb.group({
-        conceptoManual : ['',Validators.required],
-        cantidadAbono : ['',Validators.required],
-        formaDePagoAbono : ['',Validators.required],
-        notaAbono : [''],
       })
   
       this.secondFormGroup=this.fb.group({
         qtyPrecio:['',Validators.required],
         motivoDesc:['']
       },)
+
+      this.abonoFormGroup = this.fb.group({
+        conceptoManual: [{ value: isInitialDeposit ? 'Deposito Inicial' : '', disabled: isInitialDeposit }, Validators.required],
+        cantidadAbono: ['', Validators.required],
+        formaDePagoAbono: ['', Validators.required],
+        notaAbono: [''],
+      });
     }
   
     /**Useful Getter */
@@ -372,45 +378,11 @@ interface StateMapping {
       }
       this.onChangeQtyNva(this.quantityNva)
     }
-
-    // addPayment(tipo:string){
-    //   let pago:edoCuenta
-    //   if(tipo === 'Cargo'){
-    //     pago = {
-    //       id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
-    //             Folio:this.currentHuesped.folio,
-    //             Fecha:new Date(),
-    //             Fecha_Cancelado:'',
-    //             Referencia:'',
-    //             Descripcion:this.codigoDeCargo.Descripcion,
-    //             Forma_de_Pago:'No Aplica',
-    //             Cantidad:this.quantity,
-    //             Cargo:this.codigoDeCargo.Precio! * this.quantity,
-    //             Abono:0,
-    //             Estatus:'Activo'
-    //           };
-    //     this.honAddPayment.emit(pago);
-    //   }else if(tipo === 'Abono' ){
-    //     pago = {
-    //       id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
-    //       Folio:this.currentHuesped.folio,
-    //       Fecha:new Date(),
-    //       Fecha_Cancelado:'',
-    //       Referencia:this.abonoFormGroup.controls["notaAbono"].value,
-    //       Descripcion:this.abonoFormGroup.controls["conceptoManual"].value,
-    //       Forma_de_Pago:this.abonoFormGroup.controls["formaDePagoAbono"].value,
-    //       Cantidad:1,
-    //       Cargo:0,
-    //       Abono:this.abonoFormGroup.controls["cantidadAbono"].value,
-    //       Estatus:'Activo'
-    //     };
-    //     this.honAddPayment.emit(pago);
-    //   }      
-    // }
   
     selectedValue(value:Codigos){
       this.quantity = 1;
       this.selectedService = false; // Enable buttons when a value is selected
+      this.agregarServicioValido=false;
 
      this.nuevosConceptos=false
       this.codigoDeCargo={
@@ -699,6 +671,19 @@ interface StateMapping {
           })
         );
         await firstValueFrom(logRequests);
+
+        if(this.abonoFormGroup.controls["conceptoManual"].value=== 'Deposito Inicial'){
+          try {
+            await firstValueFrom(
+              this._estatusService.actualizaEstatus('Reserva Confirmada', this.currentHuesped.folio, this.currentHuesped)
+            );
+            console.log('Estatus updated successfully.');
+            // You can handle any success-related logic here if needed.
+          } catch (error) {
+            console.error('Failed to update estatus:', error);
+            // Handle the error, like showing a toast notification or alerting the user.
+          }
+        }
     
         // Show success modal
         const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });

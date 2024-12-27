@@ -169,6 +169,16 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
   }
 
   async ngOnInit() {
+
+    this._estatusService.updatedStatus$.subscribe({
+      next:(item)=>{
+        if(item){
+          this.formGroup.patchValue({
+            estatus: 'Reserva Confirmada'
+          });        }
+      }
+    })
+
     // Initialize the form with empty strings or default values
     this.initializeForm();
 

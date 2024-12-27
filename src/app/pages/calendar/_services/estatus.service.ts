@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable, map } from "rxjs";
+import { BehaviorSubject, Observable, Subject, map } from "rxjs";
 import { environment } from "src/environments/environment";
 import { Estatus } from "../_models/estatus.model";
 import { LocalForageCache } from "src/app/tools/cache/indexdb-expire";
@@ -24,7 +24,9 @@ export class EstatusService {
     }
     private currentEstatus$=new BehaviorSubject<Estatus[]>([]);
 
-
+    private updatedStatus = new Subject<boolean>();
+    updatedStatus$ = this.updatedStatus.asObservable();  
+    
     get getcurrentEstatusValue(){
         return this.currentEstatus$;
       }
@@ -72,5 +74,9 @@ export class EstatusService {
 
     actualizaEstatus(estatus:string,folio:string,huesped:Huesped){  
       return this.http.post(environment.apiUrl+"/actualiza/estatus/reserva",{estatus:estatus,folio:folio,huesped:huesped})
+        .pipe(
+          map(item=>{
+            this.updatedStatus.next(true);
+      }))
     }
 }
