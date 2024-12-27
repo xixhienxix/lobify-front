@@ -38,12 +38,12 @@ export class LlegadasTableComponent implements OnInit {
   private modalSubscription: Subscription;
 
   @Input() dataSource: Huesped[] = [];
-  houseKeepingCodes: HouseKeeping[] = [];
-  codigosCargo: Codigos[] = [];
-  estatusArray: Estatus[] = [];
-  ratesArrayComplete: Tarifas[] = [];
-  roomCodesComplete: any[] = [];
-  parametrosModel: Parametros;
+  @Input() houseKeepingCodes: HouseKeeping[] = [];
+  @Input() codigosCargo: Codigos[] = [];
+  @Input() estatusArray: Estatus[] = [];
+  @Input() ratesArrayComplete: Tarifas[] = [];
+  @Input() roomCodesComplete: any[] = [];
+  @Input() parametrosModel: Parametros;
 
   @Output() onAgregarPago: EventEmitter<edoCuenta> = new EventEmitter();
   @Output() onOpenEnviarReservacion: EventEmitter<boolean> = new EventEmitter();
@@ -97,9 +97,23 @@ export class LlegadasTableComponent implements OnInit {
 
      event.stopPropagation(); // Prevents the click event from propagating to the panel header
 
-       let colorAma = this.houseKeepingCodes.find(item =>
+      if (!this.houseKeepingCodes || this.houseKeepingCodes.length === 0) {
+        await this._checkIndexDBInitialValues.checkIndexedDB(['housekeeping'], true);
+        this.houseKeepingCodes = await this._checkIndexDBInitialValues.loadHouseKeepingCodes(true);
+      }
+             let colorAma = this.houseKeepingCodes.find(item =>
         item.Descripcion == reserva.estatus_Ama_De_Llaves!.toUpperCase()
       )?.Color!
+
+      if (!this.roomCodesComplete || this.roomCodesComplete.length === 0) {
+        await this._checkIndexDBInitialValues.checkIndexedDB(['habitaciones'], true);
+        this.ratesArrayComplete = await this._checkIndexDBInitialValues.loadTarifas(true);
+      }
+
+      if(!this.estatusArray || this.estatusArray.length === 0){
+        await this._checkIndexDBInitialValues.checkIndexedDB(['estatus'], true);
+        this.estatusArray = await this._checkIndexDBInitialValues.loadEstatus(true);
+      }
 
       const estadoDeCuenta = await this.checkEdoCuentaClient(reserva.folio);
 

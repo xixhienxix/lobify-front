@@ -1,6 +1,7 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
+import { combineLatest, firstValueFrom } from 'rxjs';
 import { Codigos } from 'src/app/models/codigos.model';
 import { edoCuenta } from 'src/app/models/edoCuenta.model';
 import { Huesped } from 'src/app/models/huesped.model';
@@ -8,6 +9,9 @@ import { Tarifas } from 'src/app/models/tarifas';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { HouseKeeping } from 'src/app/pages/calendar/_models/housekeeping.model';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
+import { EditReservasModalService } from 'src/app/services/_shared/edit.rsv.open.modal';
+import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
+import { Edo_Cuenta_Service } from 'src/app/services/edoCuenta.service';
 
 export interface Reservation {
   reserva: number;
@@ -50,9 +54,30 @@ export class SalidasTableComponent implements OnInit {
   @Output() onFetchReservations: EventEmitter<Huesped> = new EventEmitter();
   @Output() onActualizarCuenta: EventEmitter<any> = new EventEmitter();
 
-  constructor() {}
+  constructor( private _checkIndexDBInitialValues: IndexDBCheckingService,
+              private _edoCuentaService:Edo_Cuenta_Service,
+              private _editReservasModal: EditReservasModalService,
 
-  ngOnInit(): void {}
+  ) {}
+
+  ngOnInit() {
+
+    combineLatest([
+      this._checkIndexDBInitialValues.estatus$,
+      this._checkIndexDBInitialValues.codigos$,
+      this._checkIndexDBInitialValues.tarifas$,
+      this._checkIndexDBInitialValues.habitaciones$,
+      this._checkIndexDBInitialValues.parametros$,
+      this._checkIndexDBInitialValues.houseKeepingCodes$
+    ]).subscribe(([estatus, codigos, tarifas, habitaciones, parametros, ama]) => {
+      this.estatusArray = estatus ?? [];  // Handle 'estatus'
+      this.codigosCargo = codigos ?? [];  // Handle 'codigos'
+      this.ratesArrayComplete = tarifas ?? [];  // Handle 'tarifas'
+      this.roomCodesComplete = habitaciones ?? [];  // Handle 'habitaciones'
+      this.parametrosModel = parametros;  // Handle 'parametros'
+      this.houseKeepingCodes = ama ?? [];  // Handle 'houseKeepingCodes'
+    });
+  }
 
   formatISODateToCustom(dateString: string): string {
     const date = new Date(dateString);
@@ -63,8 +88,50 @@ export class SalidasTableComponent implements OnInit {
     return `${day} ${month} ${year}`;
   }
 
-  onButtonClick(event: Event): void {
+  async onButtonClick(event: Event,reserva:Huesped): Promise<void> {
     event.stopPropagation(); // Prevents the click event from propagating to the panel header
-    // Additional button click logic here
+
+    if (!this.houseKeepingCodes || this.houseKeepingCodes.length === 0) {
+      await this._checkIndexDBInitialValues.checkIndexedDB(['housekeeping'], true);
+      this.houseKeepingCodes = await this._checkIndexDBInitialValues.loadHouseKeepingCodes(true);
+    }
+    let colorAma = this.houseKeepingCodes.find(item =>
+      item.Descripcion == reserva.estatus_Ama_De_Llaves!.toUpperCase()
+    )?.Color!
+
+    if (!this.roomCodesComplete || this.roomCodesComplete.length === 0) {
+      await this._checkIndexDBInitialValues.checkIndexedDB(['habitaciones'], true);
+      this.ratesArrayComplete = await this._checkIndexDBInitialValues.loadTarifas(true);
+    }
+
+    if(!this.estatusArray || this.estatusArray.length === 0){
+      await this._checkIndexDBInitialValues.checkIndexedDB(['estatus'], true);
+      this.estatusArray = await this._checkIndexDBInitialValues.loadEstatus(true);
+    }
+
+    const estadoDeCuenta = await this.checkEdoCuentaClient(reserva.folio);
+
+    const habitacion = this.roomCodesComplete.find(item=>item.Numero === reserva.numeroCuarto)
+    
+    const modalRef = this._editReservasModal.openEditReservaModal(  
+          reserva,
+          this.codigosCargo,
+          reserva,
+          this.houseKeepingCodes,
+          habitacion!,
+          this.estatusArray,
+          colorAma,
+          this.ratesArrayComplete,
+          this.roomCodesComplete,
+          this.parametrosModel.checkIn,
+          this.parametrosModel.checkOut,
+          this.parametrosModel.zona,
+          estadoDeCuenta,
+          false
+    )
+  }
+
+  async checkEdoCuentaClient(folio:string){
+    return await firstValueFrom(this._edoCuentaService.getCuentas(folio));
   }
 }

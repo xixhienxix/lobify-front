@@ -1,7 +1,7 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { firstValueFrom } from 'rxjs';
+import { combineLatest, firstValueFrom } from 'rxjs';
 import { Codigos } from 'src/app/models/codigos.model';
 import { edoCuenta } from 'src/app/models/edoCuenta.model';
 import { Huesped } from 'src/app/models/huesped.model';
@@ -10,6 +10,7 @@ import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { HouseKeeping } from 'src/app/pages/calendar/_models/housekeeping.model';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 import { EditReservasModalService } from 'src/app/services/_shared/edit.rsv.open.modal';
+import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { Edo_Cuenta_Service } from 'src/app/services/edoCuenta.service';
 
 export interface Reservation {
@@ -31,6 +32,7 @@ const ELEMENT_DATA: Reservation[] = [
 })
 export class EnCasaTableComponent implements OnInit {
   displayedColumns: string[] = ['reserva', 'huesped', 'acciones'];
+
 
   @Input() dataSource: Huesped[] = [];
   @Input() houseKeepingCodes: HouseKeeping[] = [];
@@ -54,16 +56,51 @@ export class EnCasaTableComponent implements OnInit {
   @Output() onActualizarCuenta: EventEmitter<any> = new EventEmitter();
   
   constructor(private _edoCuentaService:Edo_Cuenta_Service,
-    private _editReservasModal:EditReservasModalService
+    private _editReservasModal:EditReservasModalService,
+    private _checkIndexDbInitialValues: IndexDBCheckingService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit() {
+
+    combineLatest([
+      this._checkIndexDbInitialValues.estatus$,
+      this._checkIndexDbInitialValues.codigos$,
+      this._checkIndexDbInitialValues.tarifas$,
+      this._checkIndexDbInitialValues.habitaciones$,
+      this._checkIndexDbInitialValues.parametros$,
+      this._checkIndexDbInitialValues.houseKeepingCodes$
+    ]).subscribe(([estatus, codigos, tarifas, habitaciones, parametros, ama]) => {
+      this.estatusArray = estatus ?? [];  // Handle 'estatus'
+      this.codigosCargo = codigos ?? [];  // Handle 'codigos'
+      this.ratesArrayComplete = tarifas ?? [];  // Handle 'tarifas'
+      this.roomCodesComplete = habitaciones ?? [];  // Handle 'habitaciones'
+      this.parametrosModel = parametros;  // Handle 'parametros'
+      this.houseKeepingCodes = ama ?? [];  // Handle 'houseKeepingCodes'
+    });
+  }
+
+  
 
     async onButtonClick(event: Event,reserva:Huesped): Promise<void> {
 
      event.stopPropagation(); // Prevents the click event from propagating to the panel header
 
-       let colorAma = this.houseKeepingCodes.find(item =>
+     if (!this.houseKeepingCodes || this.houseKeepingCodes.length === 0) {
+      await this._checkIndexDbInitialValues.checkIndexedDB(['housekeeping'], true);
+      this.houseKeepingCodes = await this._checkIndexDbInitialValues.loadHouseKeepingCodes(true);
+    }
+
+    if (!this.roomCodesComplete || this.roomCodesComplete.length === 0) {
+      await this._checkIndexDbInitialValues.checkIndexedDB(['habitaciones'], true);
+      this.ratesArrayComplete = await this._checkIndexDbInitialValues.loadTarifas(true);
+    }
+
+    if(!this.estatusArray || this.estatusArray.length === 0){
+      await this._checkIndexDbInitialValues.checkIndexedDB(['estatus'], true);
+      this.estatusArray = await this._checkIndexDbInitialValues.loadEstatus(true);
+    }
+    
+      let colorAma = this.houseKeepingCodes.find(item =>
         item.Descripcion == reserva.estatus_Ama_De_Llaves!.toUpperCase()
       )?.Color!
 

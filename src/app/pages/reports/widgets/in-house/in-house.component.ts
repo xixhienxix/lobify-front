@@ -21,9 +21,18 @@ export class InHouseComponent implements OnInit{
   porLlegar:Huesped[]=[];
   avaibleRooms:number=0;
 
-  @Input() allReservations: Huesped[];
   @Input() changing: Subject<Huesped[]>;
+
+  @Input() color: string = '';
+  @Input() allReservations: Huesped[] = [];
+  @Input() houseKeepingCodes: HouseKeeping[] = [];
+  @Input() codigosCargo: Codigos[] = [];
+  @Input() estatusArray: Estatus[] = [];
+  @Input() ratesArrayComplete: Tarifas[] = [];
+  @Input() roomCodesComplete: Habitacion[] = [];
+  @Input() parametrosModel: Parametros;
   @Input() changingValueRooms: Subject<Habitacion[]>;
+
 
  
 

@@ -631,7 +631,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
     
         modalRef.componentInstance.Adultos = huesped?.adultos
         modalRef.componentInstance.Ninos = huesped?.ninos
-    
+        modalRef.componentInstance.parametros = this.currentParametros
         modalRef.componentInstance.tarifaEstandarArray = tarifaEstandarArray
         modalRef.componentInstance.tempRatesArray = tempRatesArray
         modalRef.componentInstance.cuarto = event.Codigo

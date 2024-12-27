@@ -20,7 +20,7 @@ export class EditReservasModalService {
     private outputSubject = new Subject<any>();
 
     // Open the EditReservaComponent modal and return a reference
-    openEditReservaModal(
+    async openEditReservaModal(
                         currentHuesped:Huesped,
                         codigosCargo: Codigos[], 
                         data:any, 
@@ -35,7 +35,7 @@ export class EditReservasModalService {
                         zona:string,
                         estadoDeCuenta:edoCuenta[],
                         promesasDisplay:boolean=true,
-                    ): NgbModalRef {
+                    ): Promise<NgbModalRef> {
       const modalRef = this.modalService.open(EditReservaComponent, {
         size: 'md',
         backdrop: 'static',
@@ -56,7 +56,6 @@ export class EditReservasModalService {
       modalRef.componentInstance.checkOut = checkOut
       modalRef.componentInstance.zona = zona
       modalRef.componentInstance.estadoDeCuenta = estadoDeCuenta
-
       // Subscribe to modal outputs and emit them to outputSubject
       this.subscribeToModalOutputs(modalRef);
 

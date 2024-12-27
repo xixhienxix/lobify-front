@@ -12,6 +12,7 @@ import { Edo_Cuenta_Service } from 'src/app/services/edoCuenta.service';
 import { HuespedService } from 'src/app/services/huesped.service';
 import { TarifasService } from 'src/app/services/tarifas.service';
 import { DateTime } from 'luxon';
+import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 
 
 @Component({
@@ -58,7 +59,8 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
     public i18n: NgbDatepickerI18n,
     public divisasService: DivisasService,
     private _tarifasService: TarifasService,
-    private _parametrosService: ParametrosService
+    private _parametrosService: ParametrosService,
+    private _dbCheckingService: IndexDBCheckingService
     
   ) {
     const sb = this._edoCuentaService.getNotification().subscribe(data => {
@@ -148,9 +150,13 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
     }
   }
 
-  private processHospedaje(item: any, fromDate: Date) {
-    // for (let y = 0; y < this.currentHuesped.noches; y++) {
-    //   const fullFechaSalida = this.formatDate(new Date(this.currentHuesped.salida));
+  private async processHospedaje(item: any, fromDate: Date) {
+
+    if (!this.ratesArrayComplete || this.ratesArrayComplete.length === 0) {
+      await this._dbCheckingService.checkIndexedDB(['tarifas'], true);
+      this.ratesArrayComplete = await this._dbCheckingService.loadTarifas(true);
+  }
+
     const tarifa = this.ratesArrayComplete.find(item => 
       item.Tarifa === this.currentHuesped.tarifa &&
       item.Habitacion.some(room => room.trim().toLowerCase() === this.currentHuesped.habitacion.toLowerCase())

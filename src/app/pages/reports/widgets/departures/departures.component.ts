@@ -19,9 +19,16 @@ export class DeparturesComponent implements OnInit{
   yaSeFueron: Huesped[] = [];
   porSalir: Huesped[] = [];
 
-  @Input() allReservations: Huesped[];
   @Input() changing: Subject<Huesped[]>;
-  @Input() changingValueRooms: Subject<Habitacion[]>;
+
+  @Input() color: string = '';
+  @Input() allReservations: Huesped[] = [];
+  @Input() houseKeepingCodes: HouseKeeping[] = [];
+  @Input() codigosCargo: Codigos[] = [];
+  @Input() estatusArray: Estatus[] = [];
+  @Input() ratesArrayComplete: Tarifas[] = [];
+  @Input() roomCodesComplete: Habitacion[] = [];
+  @Input() parametrosModel: Parametros;
 
 
   constructor(private translateService : TranslateService,

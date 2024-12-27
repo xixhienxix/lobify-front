@@ -69,13 +69,46 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
   porPagar:number=0;
   pendiente:number=0;
 
-  @Input() currentHuesped:Huesped;
+  private _currentHuesped!: Huesped;
+  private _currentRoom!: Habitacion;
+
+  // @Input()
+  // set currentHuesped(value: Huesped) {
+  //   this._currentHuesped = value;
+  //   if (this.formGroup) {
+  //     this.formGroup.patchValue({
+  //       estatus: this._currentHuesped.estatus || '',
+  //     });
+  //     this.cdr.detectChanges();  // Manually trigger change detection after patching the value
+  //   }
+  // }
+  
+  // @Input()
+  // set currentRoom(value: Habitacion) {
+  //   this._currentRoom = value;
+  //   if (this.formGroup) {
+  //     this.formGroup.patchValue({
+  //       ama: this._currentRoom.Estatus || '',
+  //     });
+  //     this.cdr.detectChanges();  // Manually trigger change detection after patching the value
+  //   }
+  // }
+
+  // get currentHuesped(): Huesped {
+  //   return this._currentHuesped;
+  // }
+
+  // get currentRoom(): Habitacion {
+  //   return this._currentRoom;
+  // }
+
+  @Input() currentRoom: Habitacion;
+  @Input() currentHuesped: Huesped;
   @Input() promesasDisplay:boolean=false;
   @Input() houseKeepingCodes:HouseKeeping[]=[]
   @Input() estatusArray:Estatus[]=[];
   @Input() data:any;
   @Input() llegahoy:boolean=false;
-  @Input() currentRoom:Habitacion;
   @Input() codigosCargo:Codigos[]
   @Input() folio:string
   @Input() ratesArrayComplete:Tarifas[]=[]
@@ -115,15 +148,17 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     private _estatusService: EstatusService,
     private cdRef: ChangeDetectorRef,
     private _logService: LogService,
-    private _communicationService: CommunicationService
+    private _communicationService: CommunicationService,
+    private cdr: ChangeDetectorRef
   ){
     this._huespedService.currentHuesped$.subscribe({
-      next:(reserva:Huesped)=>{
-        this.currentHuesped = reserva
-        this.porPagar = reserva.porPagar!
-        this.pendiente = reserva.pendiente!
-      }
-    })
+      next: (reserva: Huesped) => {
+        this.currentHuesped = reserva;
+        this.porPagar = reserva.porPagar!;
+        this.pendiente = reserva.pendiente!;
+        this.initializeForm(); // Reinitialize the form when currentHuesped changes
+      },
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -133,14 +168,9 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     }
   }
 
-  async ngOnInit(){
-    this.formGroup = this.fb.group({
-      estatus : [this.currentHuesped.estatus],
-      ama:[this.currentRoom.Estatus]
-    });
-    // if(this.currentHuesped.estatus === 'Reserva Cancelada' || 'No Show'){
-    //   this.isReservaCancelada=true;
-    // }
+  async ngOnInit() {
+    // Initialize the form with empty strings or default values
+    this.initializeForm();
 
     this.adicionalSubject.subscribe({
       next:(value:Adicional[])=>{
@@ -168,6 +198,20 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
       this.tempRatesArray = this.ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa De Temporada');
     }
 
+  }
+
+  initializeForm(): void {
+    if(this.currentRoom && this.currentHuesped){
+      this.formGroup = this.fb.group({
+        estatus: [this.currentHuesped.estatus], // Default empty value
+        ama: [this.currentRoom.Estatus],     // Default empty value
+      }); 
+    }else{
+      this.formGroup = this.fb.group({
+        estatus: [''], // Default empty value
+        ama: [''],     // Default empty value
+      });
+    }
   }
 
   //OPTIMIZED FUNCTIONS
@@ -387,6 +431,9 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     }
   
     return this.currentEdoCuenta.reduce((acc, item) => {
+      if (item?.Estatus === 'Cancelado') {
+        return acc; // Skip this item
+      }
       const cargo = item?.Cargo ?? 0; // Default to 0 if Cargo is undefined
       const abono = item?.Abono ?? 0; // Default to 0 if Abono is undefined
       return acc + cargo - abono; // Accumulate the result
@@ -399,6 +446,9 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     }
   
     return this.currentEdoCuenta.reduce((acc, item) => {
+      if (item?.Estatus === 'Cancelado') {
+        return acc; // Skip this item
+      }
       const cargo = item?.Cargo ?? 0; // Default to 0 if Cargo is undefined
       return acc + cargo; // Accumulate the cargos
     }, 0); // Initial value is 0
@@ -410,6 +460,9 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     }
   
     return this.currentEdoCuenta.reduce((acc, item) => {
+      if (item?.Estatus === 'Cancelado') {
+        return acc; // Skip this item
+      }
       const abono = item?.Abono ?? 0; // Default to 0 if Abono is undefined
       return acc + abono; // Accumulate the abonos
     }, 0); // Initial value is 0

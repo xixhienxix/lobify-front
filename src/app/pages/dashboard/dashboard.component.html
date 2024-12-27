@@ -3,6 +3,18 @@
 <div class="row gy-5 g-xl-8">
     <div class="col-xl-4">
         <app-arrivals 
+          [parametrosModel]="parametrosModel"
+          [roomCodesComplete]="roomCodesComplete"
+          [estatusArray]="estatusArray"
+          [ratesArrayComplete]="ratesArrayComplete"
+          [houseKeepingCodes]="houseKeepingCodes"
+          [codigosCargo]="codigosCargo"
+          [allReservations]="allReservations"
+          [changing]="changingValue"
+        ></app-arrivals>
+    </div>
+    <div class="col-xl-4">
+      <app-departures
         [parametrosModel]="parametrosModel"
         [roomCodesComplete]="roomCodesComplete"
         [estatusArray]="estatusArray"
@@ -11,18 +23,16 @@
         [codigosCargo]="codigosCargo"
         [allReservations]="allReservations"
         [changing]="changingValue"
-        [allReservations]="allReservations"
-        ></app-arrivals>
-    </div>
-    <div class="col-xl-4">
-      <app-departures
-      [allReservations]="allReservations"
-      [changing]="changingValue"
-      [allReservations]="allReservations"
       ></app-departures>
     </div>
     <div class="col-xl-4">
       <app-in-house
+        [parametrosModel]="parametrosModel"
+        [roomCodesComplete]="roomCodesComplete"
+        [estatusArray]="estatusArray"
+        [ratesArrayComplete]="ratesArrayComplete"
+        [houseKeepingCodes]="houseKeepingCodes"
+        [codigosCargo]="codigosCargo"
         [allReservations]="allReservations"
         [changing]="changingValue"
         [changingValueRooms]="changingValueRooms"
