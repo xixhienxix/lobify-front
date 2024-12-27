@@ -88,9 +88,12 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
     };
     
     this.communicationService.onReportsUpdated$.subscribe({
-      next:(reportType)=>{
+      next:async (reportType)=>{
         if(reportType){
-        this.loadReportData();
+          await this.indexDbService.checkIndexedDB(['reservaciones'], true);
+          this.allReservaciones = await this.indexDbService.loadReservaciones(true);
+          console.log('allReservations:', this.allReservaciones)
+          this.loadReportData();
         }
       }
     });

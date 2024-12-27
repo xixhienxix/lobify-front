@@ -3,7 +3,7 @@ import { IndexDBCheckingService } from "src/app/services/_shared/indexdb.checkin
 import { CommunicationService } from "./_services/event.services";
 import { Habitacion } from "src/app/models/habitaciones.model";
 import { Huesped, reservationStatusMap } from "src/app/models/huesped.model";
-import { BehaviorSubject, catchError, firstValueFrom, forkJoin, of, Subject, Subscription, switchMap, takeUntil } from "rxjs";
+import { BehaviorSubject, catchError, debounceTime, firstValueFrom, forkJoin, of, Subject, Subscription, switchMap, takeUntil } from "rxjs";
 import { Edo_Cuenta_Service } from "src/app/services/edoCuenta.service";
 import { EditReservaComponent } from "../calendar/components/content/edit-reserva/edit-reserva.component";
 import { ModalDismissReasons, NgbModal } from "@ng-bootstrap/ng-bootstrap";
@@ -32,6 +32,8 @@ export class ReportsComponent implements OnInit, OnDestroy{
     currentModalRef:any;
     modalRefEditReserva:any;
     isModalOpen = false;
+    private modalLock = false; // Lock to prevent multiple clicks
+
 
     private ngUnsubscribe = new Subject<void>();
 
@@ -43,7 +45,8 @@ export class ReportsComponent implements OnInit, OnDestroy{
         private modalService: NgbModal,
         private _huespedService: HuespedService,
         private _promesasService: PromesaService,
-        private _authService: AuthService
+        private _authService: AuthService,
+        private _checkIndexDb: IndexDBCheckingService
     ){
         this.currentUser = this._authService.getUserInfo().username
     }
@@ -58,7 +61,11 @@ export class ReportsComponent implements OnInit, OnDestroy{
               this.onEditRsvOpen(data);
             }
           });
-        this.communicationService.reactivaSubject.subscribe({
+        this.communicationService.reactivaSubject
+        .pipe(
+          debounceTime(300), // Wait 300ms to prevent multiple triggers
+          takeUntil(this.ngUnsubscribe) // Unsubscribe on component destroy
+        ).subscribe({
             next:(huesped:Huesped)=>{
                 this.reactivaReserva(huesped);
             }
@@ -66,7 +73,9 @@ export class ReportsComponent implements OnInit, OnDestroy{
         this.communicationService.toastHandlerEvent$.subscribe({
           next:(item)=>{
             if (item) {
-              this.currentModalRef.close()
+              if(this.currentModalRef){
+                this.currentModalRef.close()
+              }
               this.modalRefEditReserva.close()
             }
           }
@@ -87,10 +96,18 @@ export class ReportsComponent implements OnInit, OnDestroy{
         });
     }
 
-    reactivaReserva(huesped:Huesped){
-        const ratesArrayComplete = this._indexDbService.getTarifasCodes()
-        const parametrosModel = this._indexDbService.getParametrosModel()
-        const roomCodesComplete = this._indexDbService.getHabitaciones()
+    async reactivaReserva(huesped:Huesped){
+        // Prevent opening multiple modals using a lock
+        if (this.modalLock) {
+          console.warn("Modal is in the process of opening. Please wait.");
+          return;
+        }
+        
+        this.modalLock = true; // Lock the modal-opening process
+        try {
+        const ratesArrayComplete = await this._checkIndexDb.loadTarifas(true);
+        const parametrosModel = await this._checkIndexDb.loadParametros(true);
+        const roomCodesComplete = await this._checkIndexDb.loadHabitaciones(true);
         const standardRatesArray = ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa Base');
         const tempRatesArray = ratesArrayComplete.filter((item)=>item.Tarifa === 'Tarifa De Temporada');
         const roomCodes = Object.values(
@@ -101,6 +118,7 @@ export class ReportsComponent implements OnInit, OnDestroy{
         this.currentModalRef.componentInstance.currentHuesped = huesped;
         // modalRef.componentInstance.adultos = this.currentHuesped.adultos;
         // modalRef.componentInstance.ninos = this.currentHuesped.ninos;
+        this.currentModalRef.componentInstance.parametros = parametrosModel
         this.currentModalRef.componentInstance.estatusArray = this._indexDbService.getEstatusCodes()
         this.currentModalRef.componentInstance.roomCodesComplete = roomCodesComplete
         this.currentModalRef.componentInstance.roomCodes=roomCodes
@@ -132,14 +150,26 @@ export class ReportsComponent implements OnInit, OnDestroy{
 
               const huespedData = {updatedHuesped:huespedArray.huesped,pago, oldProperties:huespedArray.beforeChanges}
             this.communicationService.updateHuesped(huespedData);
+            this.communicationService.onReportsResponse.next('Actualizar');
           }
         });
         
-        this.currentModalRef.result.then((result:any) => {
-          this.closeResult = `Closed with: ${result}`;
-          }, (reason:any) => {
-              this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+        // Reset modal reference on close or dismiss
+        this.currentModalRef.result
+          .then((result: any) => {
+            this.closeResult = `Closed with: ${result}`;
+          })
+          .catch((reason: any) => {
+            this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+          })
+          .finally(() => {
+            this.currentModalRef = null; // Reset the modal reference
           });
+      } catch (error) {
+        console.error("Error opening modal:", error);
+      } finally {
+        this.modalLock = false; // Unlock after modal is opened/dismissed
+      }
       
           return
       }
