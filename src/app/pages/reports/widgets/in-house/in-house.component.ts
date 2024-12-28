@@ -8,7 +8,7 @@ import { Tarifas } from 'src/app/models/tarifas';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { HouseKeeping } from 'src/app/pages/calendar/_models/housekeeping.model';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
-
+import { DateTime } from 'luxon'
 @Component({
   selector: 'app-in-house',
   templateUrl: './in-house.component.html',
@@ -16,7 +16,7 @@ import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 })
 export class InHouseComponent implements OnInit{
   huespedEnCasa: Huesped[] = [];
-  inventario: Habitacion[] = [];
+  inventario: number = 0;
   disponibles: Huesped[] = [];
   porLlegar:Huesped[]=[];
   avaibleRooms:number=0;
@@ -33,9 +33,6 @@ export class InHouseComponent implements OnInit{
   @Input() parametrosModel: Parametros;
   @Input() changingValueRooms: Subject<Habitacion[]>;
 
-
- 
-
   constructor(private cdr: ChangeDetectorRef){
 
   }
@@ -49,8 +46,24 @@ export class InHouseComponent implements OnInit{
     });
     this.changingValueRooms.subscribe({
       next:(roomSource)=>{
-        this.inventario = [...roomSource]
-        this.avaibleRooms = Math.max(0, roomSource.length - (this.huespedEnCasa.length + this.porLlegar.length));
+        const filterByStatus = (huesped: Huesped, statusIndex: number): boolean => {
+          return reservationStatusMap[statusIndex].includes(huesped.estatus);
+        };
+
+        const currentDate = DateTime.local().setZone(this.parametrosModel.codigoZona); // Get current local time
+        const todayDateString = currentDate.toISODate(); // Today's date in ISO format (YYYY-MM-DD)
+
+        this.inventario = roomSource.length
+        console.log('huespedEnCasa',this.huespedEnCasa.length);
+        console.log('porLlegar', this.porLlegar.length);
+
+        const colgados = this.allReservations.filter(
+          (huesped) =>
+            DateTime.fromISO(huesped.salida).toISODate()! <= todayDateString! &&
+            filterByStatus(huesped, 1)
+        ).length;
+
+        this.avaibleRooms = Math.max(0, roomSource.length - (((this.huespedEnCasa.length) - colgados) + this.porLlegar.length));
 
         this.cdr.detectChanges(); // Manually trigger change detction if needed
       }
@@ -62,12 +75,14 @@ export class InHouseComponent implements OnInit{
     today.setHours(0, 0, 0, 0);
 
     this.huespedEnCasa = [];
-    this.inventario = [];
     this.disponibles = [];
 
     this.allReservations.forEach(item => {
+      
       const llegada = new Date(item.llegada);
+      const salida = DateTime.fromISO(item.salida).setZone(this.parametrosModel.codigoZona);
       llegada.setHours(0, 0, 0, 0);
+
 
         if (reservationStatusMap[1].includes(item.estatus)) {
           this.huespedEnCasa.push(item);
