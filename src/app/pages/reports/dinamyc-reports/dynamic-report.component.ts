@@ -132,12 +132,20 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
       'colgados': 1,
       'noshow': 8,
       'llegadas':2,
-      'inhouse': 1
+      'inhouse': 1,
+      'clientes': 3
     };
     
     const statusKey = statusMap[this.reportType];
     if (statusKey !== undefined) {
-      this.statusOptions = [...reservationStatusMap[statusKey]];
+      if (this.reportType === 'clientes') {
+        this.statusOptions = [
+          ...reservationStatusMap[8],
+          ...reservationStatusMap[4]
+        ];
+      }else {
+        this.statusOptions = [...reservationStatusMap[statusKey]];
+      }
       this.loadReport();
     }
   }
@@ -208,6 +216,11 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
         return statusMatches
       });
     } else if(reportType === 'inhouse') {
+      return huespedes.filter(huesped => {
+        const statusMatches = filterByStatus(huesped);
+        return statusMatches
+      });
+    } else if (reportType === 'clientes') {
       return huespedes.filter(huesped => {
         const statusMatches = filterByStatus(huesped);
         return statusMatches

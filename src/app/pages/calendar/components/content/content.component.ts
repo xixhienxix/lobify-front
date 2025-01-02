@@ -342,7 +342,8 @@ export class ContentComponent implements OnInit{
           this._parametrosService.convertToCorrectTimezone(event.date),
           this._parametrosService.convertToCorrectTimezone(event.date,true),
         );
-        const returningValue = (tarifasPorDia[0].tarifaTotal).toLocaleString('es-MX',{ style: 'currency', currency: 'MXN' })
+        const returningValue = (tarifasPorDia[0].tarifaTotal).toLocaleString('es-MX',{ style: 'currency', currency: 'MXN',minimumFractionDigits: 0,
+          maximumFractionDigits: 0, })
         return returningValue
       }
       else {
@@ -663,10 +664,138 @@ export class ContentComponent implements OnInit{
       const target = args.event.target as HTMLElement;
       const existingEvents = this.scheduleObj.getEvents();
 
-      const bloqueosOverlap = this.findOverlappingObjects(args.data, this.bloqueosArray)
-      const overlapping = this.findOverlappingObjects(args.data,existingEvents)
+      const reservas = [
+        // {
+        //   _id: "677424f0606ef6ff807133bd",
+        //   Id: 24,
+        //   Subject: "Bloqueo",
+        //   StartTime: "2024-12-31T21:00:00.000Z",
+        //   EndTime: "2025-01-01T18:00:00.000Z",
+        //   IsAllDay: true,
+        //   ProjectId: 2,
+        //   TaskId: 4,
+        //   Folio: "B-25",
+        //   Codigo: "Bingo",
+        //   Numero: "202",
+        //   CategoryColor: "#808080",
+        //   Guid: "6932b58a-563b-86d1-7b0d-9886f8799500",
+        // },
+        // {
+        //   _id: "6774254e606ef6ff80713414",
+        //   Id: 25,
+        //   Subject: "Bloqueo",
+        //   StartTime: "2024-12-31T21:00:00.000Z",
+        //   EndTime: "2025-01-01T18:00:00.000Z",
+        //   IsAllDay: true,
+        //   ProjectId: 1,
+        //   TaskId: 1,
+        //   Folio: "B-26",
+        //   Codigo: "Bluey",
+        //   Numero: "101",
+        //   CategoryColor: "#808080",
+        //   Guid: "5b248faa-c28a-b7ef-9897-22bd9b5993fd",
+        // },
+        // {
+        //   Id: 18,
+        //   Subject: "Evan Martinez",
+        //   StartTime: "2025-01-01T21:00:00.000Z",
+        //   EndTime: "2025-01-04T18:00:00.000Z",
+        //   IsAllDay: false,
+        //   ProjectId: 1,
+        //   TaskId: 2,
+        //   Folio: "R1072",
+        //   Codigo: "Bluey",
+        //   Numero: "102",
+        //   CategoryColor: "#fac34e",
+        //   Rate: "Tarifa Base",
+        //   Saldo: 19500,
+        //   Guid: "3809cea1-577a-ba4b-3873-acb2c0cbb7ec",
+        // },
+        // {
+        //   _id: "6776ceb0ad2e5817a4c66ec2",
+        //   Id: 26,
+        //   Subject: "Bloqueo",
+        //   StartTime: "2025-01-02T21:00:00.000Z",
+        //   EndTime: "2025-01-03T18:00:00.000Z",
+        //   IsAllDay: true,
+        //   ProjectId: 1,
+        //   TaskId: 1,
+        //   Folio: "B-27",
+        //   Codigo: "Bluey",
+        //   Numero: "101",
+        //   CategoryColor: "#808080",
+        //   Guid: "88c751a8-26a9-bdcf-7b0d-4d88878aa2ab",
+        // },
+        
+        // {
+        //   Id: 19,
+        //   Subject: "Frank Previo al Bloqueo OK",
+        //   StartTime: "2025-01-03T21:00:00.000Z",
+        //   EndTime: "2025-01-06T18:00:00.000Z",
+        //   IsAllDay: false,
+        //   ProjectId: 2,
+        //   TaskId: 4,
+        //   Folio: "R1073",
+        //   Codigo: "Bingo",
+        //   Numero: "202",
+        //   CategoryColor: "#fac34e",
+        //   Rate: "Tarifa Base",
+        //   Saldo: 12000,
+        //   Guid: "c89e2aae-7a59-9a45-084d-25a9f6289b62",
+        // },
+        {
+          Id: 20,
+          Subject: "Yugi",
+          StartTime: "2025-01-03T21:00:00.000Z",
+          EndTime: "2025-01-04T18:00:00.000Z",
+          IsAllDay: false,
+          ProjectId: 2,
+          TaskId: 3,
+          Folio: "R1074",
+          Codigo: "Bingo",
+          Numero: "201",
+          CategoryColor: "#fac34e",
+          Rate: "Tarifa Base",
+          Saldo: 4000,
+          Guid: "2b3333b3-eb4a-9aeb-7a9a-5ba4c0498d40",
+        },
+        {
+          Id: 21,
+          Subject: "Hector Gomez",
+          StartTime: "2025-01-03T21:00:00.000Z",
+          EndTime: "2025-01-04T18:00:00.000Z",
+          IsAllDay: false,
+          ProjectId: 3,
+          TaskId: 6,
+          Folio: "R1075",
+          Codigo: "Presidencial",
+          Numero: "VIPIS",
+          CategoryColor: "#fac34e",
+          Rate: "Tarifa Base",
+          Saldo: 11000,
+          Guid: "098d77bf-7aab-afa0-5aea-76952f498890",
+        }
+        // {
+        //   _id: "6776d7dcad2e5817a4c66fdc",
+        //   Id: 27,
+        //   Subject: "Bloqueo",
+        //   StartTime: "2025-01-03T21:00:00.000Z",
+        //   EndTime: "2025-01-04T18:00:00.000Z",
+        //   IsAllDay: true,
+        //   ProjectId: 2,
+        //   TaskId: 5,
+        //   Folio: "B-28",
+        //   Codigo: "Bingo",
+        //   Numero: "203",
+        //   CategoryColor: "#808080",
+        //   Guid: "6af295a4-793b-859b-7b5f-b1aa6008ad07",
+        // }
+      ]
 
-      if(overlapping.length === 0 && bloqueosOverlap.length === 0){
+      //const bloqueosOverlap = this.findOverlappingObjects(args.data, bloqueos)//this.bloqueosArray
+      const overlapping = this.findOverlappingObjects(args.data,reservas); // existingEvents
+
+      if(overlapping.length === 0 ){
         if (target.classList.contains('e-header-cells')) { // Avoid the drag event to be left on header Cells
           args.cancel = true;
         } else{
@@ -701,40 +830,66 @@ export class ContentComponent implements OnInit{
   }
 }
 
-  findOverlappingObjects(
-    target: Record<string, any>,
-    objects: Record<string, any>[]
-  ): Record<string, any>[] {
-    const checkInDate = this.setCheckInOutTimeParametros(target.StartTime, this.currentParametros.checkIn);
-    const checkOutDate = this.setCheckInOutTimeParametros(target.EndTime, this.currentParametros.checkOut);
+findOverlappingObjects(
+  target: Record<string, any>,
+  objects: Record<string, any>[],
+): Record<string, any>[] {
+  const checkInDate = new Date(this.setCheckInOutTimeParametros(target.StartTime, this.currentParametros.checkIn));
+  const checkOutDate = new Date(this.setCheckInOutTimeParametros(target.EndTime, this.currentParametros.checkOut));
 
-    return objects.filter((obj: Record<string, any>) => {
-      // Avoid returning the same object as the target
-      if (obj.Id === target.Id) {
-        return false;
-      }
+  // Utility function to strip time and leave only the date part
+  const stripTime = (date: Date): Date => {
+    const strippedDate = new Date(date);
+    strippedDate.setHours(0, 0, 0, 0);
+    return strippedDate;
+  };
 
-      const numCuarto = this.getNumeroByTaskID(target.TaskId)
+  return objects.filter((obj: Record<string, any>) => {
+    // Avoid returning the same object as the target
+    if (obj.Id === target.Id) {
+      return false;
+    }
 
-      const start = new Date(checkInDate);
-      const end = new Date(checkOutDate);
+    const numCuarto = this.getNumeroByTaskID(target.TaskId);
+    
+    // Make sure to parse the object's start and end times
+    const objStart = new Date(obj.StartTime);
+    const objEnd = new Date(obj.EndTime);
 
-      const objStart = new Date(obj.StartTime);
-      const objEnd = new Date(obj.EndTime);
+    let dateOverlap;
 
-      const dateOverlap =
-        (objStart <= end && objStart >= start) || // Start time falls within the range
-        (objEnd <= end && objEnd >= start) || // End time falls within the range
-        (objStart <= start && objEnd >= end); // The range is fully enclosed
+    if (obj.Folio.startsWith('B')) {
 
-      // Match the room numbers
-      const roomMatch = obj.Numero === numCuarto;
+      // Strip the time part from dates for comparison
+      const checkInDateStripped = stripTime(checkInDate);
+      const checkOutDateStripped = stripTime(checkOutDate);
+      const objStartStripped = stripTime(objStart);
+      const objEndStripped = stripTime(objEnd);
 
-      // Return true only if both conditions are satisfied
-      return dateOverlap && roomMatch;
-    });
-  }
+      // Logic for overlapping with boundary handling (without time)
+      dateOverlap =
+        (checkInDateStripped.getTime() === objStartStripped.getTime()) || // Check if checkInDate is the same as objStartStripped
+        (checkInDateStripped.getTime() === objEndStripped.getTime()) || // Check if checkInDate is the same as objEndStripped
+        (checkInDateStripped >= objStartStripped && checkInDateStripped <= objEndStripped) || // Check if checkInDate is between objStartStripped and objEndStripped
+        (checkOutDateStripped >= objStartStripped && checkOutDateStripped <= objEndStripped) || // Check if checkOutDate is between objStartStripped and objEndStripped
+        (checkInDateStripped <= objStartStripped && checkOutDateStripped >= objEndStripped) || // Check if target range fully encompasses the object range
+        (checkInDateStripped <= objEndStripped && checkOutDateStripped >= objStartStripped); // Check if any part of the target range overlaps the object range
+    } else {
 
+      // Check for overlapping dates considering both date and time
+      dateOverlap =
+        (objStart <= checkOutDate && objStart >= checkInDate) || // Start time falls within the range
+        (objEnd <= checkOutDate && objEnd >= checkInDate) || // End time falls within the range
+        (objStart <= checkInDate && objEnd >= checkOutDate); // The range is fully enclosed
+    }
+
+    // Match the room numbers
+    const roomMatch = obj.Numero === numCuarto // Checking if room number matches
+
+    // Return true only if both date overlap and room match conditions are satisfied
+    return dateOverlap && roomMatch;
+  });
+}
 
   isChildNode(data: any): boolean {
     return data.resourceData.ClassName !== "e-parent-node";

@@ -59,7 +59,8 @@
         "bloquedreports":"Out of Service",
         "parameters":"parameters",
         "catalogo-hab":"Room's Catalog",
-        "rates-tittle":"Rates Catalog"
+        "rates-tittle":"Rates Catalog",
+        "lista-clientes":"Client List"
 
     },
     "RoomsComponent":{

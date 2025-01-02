@@ -61,7 +61,8 @@
         "parameters":"Parametros",
         "bloquedreports":"Fuera de Servicio",
         "catalogo-hab":"Catalogo de Habitaciones",
-        "rates-tittle":"Tarifario"
+        "rates-tittle":"Tarifario",
+        "lista-clientes":"Lista de Clientes"
 
     },
     "CalendarComponent":{
