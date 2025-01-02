@@ -12,6 +12,7 @@ import { Parametros } from '../../parametros/_models/parametros';
 import { ParametrosService, timeZoneToLocaleMap } from '../../parametros/_services/parametros.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
+import { EstatusService } from '../../calendar/_services/estatus.service';
 
 @Component({
   selector: 'app-dynamic-report',
@@ -57,7 +58,8 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
     private indexDbService: IndexDBCheckingService,
     private communicationService: CommunicationService,
     private cdRef: ChangeDetectorRef,
-    private _modalService: NgbModal
+    private _modalService: NgbModal,
+    private _estatusService: EstatusService
     ) {}
 
   async ngOnInit(): Promise<void> {
@@ -92,7 +94,7 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
         if(reportType){
           await this.indexDbService.checkIndexedDB(['reservaciones'], true);
           this.allReservaciones = await this.indexDbService.loadReservaciones(true);
-          console.log('allReservations:', this.allReservaciones)
+
           this.loadReportData();
         }
       }

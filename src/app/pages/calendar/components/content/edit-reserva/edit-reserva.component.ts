@@ -174,8 +174,9 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
       next:(item)=>{
         if(item){
           this.formGroup.patchValue({
-            estatus: 'Reserva Confirmada'
-          });        }
+            estatus: item
+          });        
+        }
       }
     })
 

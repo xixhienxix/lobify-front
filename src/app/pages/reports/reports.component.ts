@@ -46,7 +46,9 @@ export class ReportsComponent implements OnInit, OnDestroy{
         private _huespedService: HuespedService,
         private _promesasService: PromesaService,
         private _authService: AuthService,
-        private _checkIndexDb: IndexDBCheckingService
+        private _checkIndexDb: IndexDBCheckingService,
+        private _estatus_Service: EstatusService,
+        private _comunicationService: CommunicationService
     ){
         this.currentUser = this._authService.getUserInfo().username
     }
@@ -232,7 +234,6 @@ export class ReportsComponent implements OnInit, OnDestroy{
           this.modalRefEditReserva.componentInstance.onChangeAmaStatus.subscribe({
             next: (value: any) => {
               this.communicationService.onChangeEstatus(value);
-              this.communicationService.onReportsResponse.next('Ama Status Updated');
             }
           })
           this.modalRefEditReserva.componentInstance.onGuardarPromesa.subscribe({
@@ -389,10 +390,11 @@ export class ReportsComponent implements OnInit, OnDestroy{
 
       onEstatusChange(data: any) {
         data.huesped.estatus = data.estatus;
-        this._huespedService.updateEstatusHuesped(data.huesped).subscribe({
+        this._estatus_Service.actualizaEstatus(data.huesped.estatus, data.huesped.folio, data.huesped).subscribe({
           next: () => {
             this._indexDbService.checkIndexedDB(['reservaciones'],true)
             if (data.checkout === true) {
+              this._comunicationService.onReportsResponse.next('Report Type');
               this.communicationService.promptMessage('Exito', 'Checkout Realizado con exito')
             }
           }

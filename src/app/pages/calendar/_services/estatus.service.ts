@@ -24,7 +24,7 @@ export class EstatusService {
     }
     private currentEstatus$=new BehaviorSubject<Estatus[]>([]);
 
-    private updatedStatus = new Subject<boolean>();
+     updatedStatus = new Subject<string>();
     updatedStatus$ = this.updatedStatus.asObservable();  
     
     get getcurrentEstatusValue(){
@@ -76,7 +76,7 @@ export class EstatusService {
       return this.http.post(environment.apiUrl+"/actualiza/estatus/reserva",{estatus:estatus,folio:folio,huesped:huesped})
         .pipe(
           map(item=>{
-            this.updatedStatus.next(true);
+            this.updatedStatus.next(estatus);
       }))
     }
 }

@@ -701,46 +701,40 @@ export class ContentComponent implements OnInit{
   }
 }
 
-  findOverlappingObjects( target: Record<string, any>, objects: Record<string, any>): Record<string, any> {
+  findOverlappingObjects(
+    target: Record<string, any>,
+    objects: Record<string, any>[]
+  ): Record<string, any>[] {
     const checkInDate = this.setCheckInOutTimeParametros(target.StartTime, this.currentParametros.checkIn);
     const checkOutDate = this.setCheckInOutTimeParametros(target.EndTime, this.currentParametros.checkOut);
 
-  
-    return objects.filter((obj:Record<string, any>) => {
+    return objects.filter((obj: Record<string, any>) => {
       // Avoid returning the same object as the target
-
-      if(obj.hasOwnProperty("_id")){
-        const numCuarto = this.getNumeroByTaskID(target.TaskId)
-
-        const desde = new Date(obj.Desde);
-        const hasta = new Date(obj.Hasta);
-        const start = new Date(checkInDate);
-        const end = new Date(checkOutDate);
-        let sameRoom
-        if(obj.hasOwnProperty("Cuarto")){
-          sameRoom = obj.Cuarto.some((item:string) => {
-                return item === numCuarto
-            });
-        }
-        // Check for overlap
-        return (
-          ((desde <= end && desde >= start) || // Desde falls within the range
-          (hasta <= end && hasta >= start) || // Hasta falls within the range
-          (desde <= start && hasta >= end)) && sameRoom   // The range is fully enclosed by Desde and Hasta
-        );
-      }else {
-        if (obj.Id === target.Id) {
-          return false;
-        }
-        // Check for overlap
-        const objStart = obj.StartTime;
-        const objEnd = obj.EndTime;
-  
-        return checkInDate <= objEnd && checkOutDate >= objStart;
+      if (obj.Id === target.Id) {
+        return false;
       }
 
+      const numCuarto = this.getNumeroByTaskID(target.TaskId)
+
+      const start = new Date(checkInDate);
+      const end = new Date(checkOutDate);
+
+      const objStart = new Date(obj.StartTime);
+      const objEnd = new Date(obj.EndTime);
+
+      const dateOverlap =
+        (objStart <= end && objStart >= start) || // Start time falls within the range
+        (objEnd <= end && objEnd >= start) || // End time falls within the range
+        (objStart <= start && objEnd >= end); // The range is fully enclosed
+
+      // Match the room numbers
+      const roomMatch = obj.Numero === numCuarto;
+
+      // Return true only if both conditions are satisfied
+      return dateOverlap && roomMatch;
     });
   }
+
 
   isChildNode(data: any): boolean {
     return data.resourceData.ClassName !== "e-parent-node";

@@ -571,6 +571,9 @@ export class DashboardComponent implements OnInit {
   }
 
   onEstatusChange(data: any) {
+    if(data.estatus === 4){
+      data.estatus = 'Check-Out'
+    }
     data.huesped.estatus = data.estatus;
     this._huespedService.updateEstatusHuesped(data.huesped).subscribe({
       next: () => {
@@ -579,6 +582,7 @@ export class DashboardComponent implements OnInit {
         if (data.checkout === true) {
           this.promptMessage('Exito', 'Checkout Realizado con exito')
         }
+        this._estatusService.updatedStatus.next('Check-Out');
       }
     })
   }
