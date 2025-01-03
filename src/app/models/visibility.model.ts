@@ -3,3 +3,8 @@ export interface VisibilityRates {
     value:boolean,
     subTask?:VisibilityRates[]
 }
+
+export const DEFAULT_VISIBILITY_RATES: VisibilityRates = {
+    name:'',
+    value:true,
+}

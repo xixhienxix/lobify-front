@@ -228,10 +228,6 @@ export class TarifasService {
     return results;
 }
 
-
-
-  
-
   retriveBaseRatePrice(
     codigosCuarto: string, 
     checkDay: Date, 
@@ -336,5 +332,113 @@ export class TarifasService {
     return 0;
   }
   
+  ratesTotalCalcSelected(
+    tarifa: Tarifas,
+    adultos: number,
+    ninos: number,
+    initialDate: Date,
+    endDate: Date,
+): { fecha: string; tarifaTotal: number }[] {
+
+    const results: { fecha: string; tarifaTotal: number }[] = [];
+    const start = DateTime.fromISO(initialDate.toISOString());
+    const end = DateTime.fromISO(endDate.toISOString()).startOf('day'); // Ensure endDate excludes its time
+
+    const applyRate = (item: any, date: DateTime) => {
+        let rate = 0;
+        switch (adultos) {
+            case 1:
+                rate = item.Tarifa_1;
+                break;
+            case 2:
+                rate = item.Tarifa_2;
+                break;
+            case 3:
+                rate = item.Tarifa_3;
+                break;
+            default:
+                rate = item.Tarifa_3;
+        }
+
+        let tarifaTotal = rate * adultos;
+        if (ninos !== 0) {
+            tarifaTotal += item.Tarifa_N * ninos;
+        }
+
+        const formattedDate = date.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE);
+        results.push({ fecha: formattedDate, tarifaTotal });
+    };
+
+    for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
+        let dailyTarifaTotal = 0;
+        let tarifaAplicada = false;
+
+        if (tarifa.Tarifa !== 'Tarifa Base' && tarifa.Estado) {
+            const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
+            const day = current.weekday - 1; // Adjust for 0-based index
+
+            tarifa.TarifasActivas.forEach(item => {
+                const validDay = item.Dias?.some(x => x.name === dayNames[day] && x.checked);
+                if (validDay && item.Activa) {
+                    applyRate(item, current);
+                    tarifaAplicada = true;
+                }
+            });
+        }
+
+        if (!tarifaAplicada) {
+            // Call to base rate function if no active rates were applied
+            dailyTarifaTotal = this.retriveBaseRatePriceSeleccionado(
+                tarifa,
+                adultos,
+                ninos,
+            );
+
+            const formattedDate = current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE);
+            results.push({ fecha: formattedDate, tarifaTotal: dailyTarifaTotal });
+        }
+    }
+
+    // Return results after the loop
+    return results;
+}
+
+retriveBaseRatePriceSeleccionado(
+    tarifaBase: Tarifas,
+    adultos: number, 
+    ninos: number,
+): number {
+
+    let tarifaTotal = 0;
+    if (tarifaBase?.TarifasActivas.length !== 0) {
+        tarifaBase?.TarifasActivas.forEach((item) => {
+            let rate = 0;
+            switch (adultos) {
+                case 1:
+                    rate = item.Tarifa_1;
+                    break;
+                case 2:
+                    rate = item.Tarifa_2;
+                    break;
+                case 3:
+                    rate = item.Tarifa_3;
+                    break;
+                default:
+                    rate = item.Tarifa_3;
+            }
+
+            tarifaTotal += rate * adultos;
+
+            if (ninos !== 0) {
+                tarifaTotal += item.Tarifa_N * ninos;
+            }
+        });
+    } else {
+        tarifaTotal = tarifaBase?.TarifaRack ?? 0;
+    }
+
+    return Math.ceil(tarifaTotal ?? 0);
+}
+
 
 }

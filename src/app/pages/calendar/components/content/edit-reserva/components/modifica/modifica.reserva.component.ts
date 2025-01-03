@@ -4,7 +4,7 @@ import { DateTime } from 'luxon';
 import { ModalDismissReasons, NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { DisponibilidadService } from 'src/app/services/disponibilidad.service';
-import { DEFAULT_HUESPED, Huesped } from 'src/app/models/huesped.model';
+import { Huesped } from 'src/app/models/huesped.model';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
 import { preAsig } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
@@ -131,7 +131,7 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   @Input() editHuesped:boolean=false;
   @Input() standardRatesArray:Tarifas[]=[]
   @Input() tempRatesArray:Tarifas[]=[]
-  @Input() currentHuesped:Huesped=DEFAULT_HUESPED
+  @Input() currentHuesped:Huesped
   @Output() honUpdateHuesped: EventEmitter<any> = new EventEmitter();
   get inputs() {
     return this.formGroup.controls["nombreHabs"] as FormArray;
@@ -192,7 +192,7 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   
     // Select the appropriate rate
     this.ratesArrayComplete.forEach(item => {
-      if (item.Tarifa === this.currentHuesped.tarifa && item.Habitacion.includes(this.currentHuesped.habitacion)) {
+      if (item.Tarifa === this.currentHuesped.tarifa.Tarifa && item.Habitacion.includes(this.currentHuesped.habitacion)) {
         this.tarifaRadioButton(this.currentHuesped.porPagar!, item, true, this.currentHuesped.habitacion!);
       }
     });
@@ -356,8 +356,23 @@ addEventSalidaDate(eventType: string, event: any) {
     this.preAsignadasArray
     .filter(habitacion => habitacion.checked)  // Filter out only the checked items
     .forEach(habitacion => {
-      const tarifa  = this.tarifaSeleccionada.find(obj =>
-        obj.Habitacion.some(item => item === habitacion.codigo));
+
+    // Find the first matching tarifa in `tarifaSeleccionada`
+    const tarifa = this.tarifaSeleccionada.find(obj => 
+      obj.Habitacion.includes(habitacion.codigo)
+    );
+
+    // Use the found `tarifa` to search in `ratesArrayComplete`
+    const tarifaSeleccionada = tarifa 
+      ? this.ratesArrayComplete.find(obj => 
+          obj.Tarifa === tarifa.Tarifa && obj.Habitacion.includes(habitacion.codigo)
+        )
+      : undefined;
+
+    if (!tarifaSeleccionada) {
+      this.promptMessage('Error', 'No se pudo guardar la reservacion intente con otra tarifa');
+      return;
+    }
 
         let initialDateTime = DateTime.local().setZone(this.zona).set({
             day:this.intialDate.getDate(),
@@ -387,7 +402,7 @@ addEventSalidaDate(eventType: string, event: any) {
             llegada:initialDateTime ?? this.intialDate.toISOString(),
             salida:endDateDateTime ?? this.endDate._d.toISOString(),
             noches:this.stayNights,
-            tarifa:tarifa === undefined ? 'Tarifa Base' : tarifa.Tarifa,
+            tarifa:tarifaSeleccionada,
             porPagar:this.totalPorCuenta === 0 ? this.currentHuesped.porPagar! : this.totalPorCuenta,
             pendiente:this.totalPorCuenta === 0 ? this.currentHuesped.porPagar! : this.totalPorCuenta,
             habitacion:habitacion.codigo,

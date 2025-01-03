@@ -682,9 +682,18 @@ export class CalendarComponent implements OnInit, OnDestroy {
   onChangedRate(data: any) {
 
     this._huespedService.updateReservaResize(data).subscribe({
-      next: async (data) => {
-        await this.getReservations();
-        this.promptMessage('Exito', 'Reservacion actualizada con exito');
+      next: async (resultData) => {
+          this._edoCuentaService.actualizaSaldo(data.folio,data.totalSeleccionado).subscribe({
+            next:async (value)=>{
+              if(value){
+                await this.getReservations();
+                this.promptMessage('Exito', 'Reservacion actualizada con exito');
+              }
+            },
+            error:(err)=>{
+              this.promptMessage('Error', 'No se pudo actualizar la nueva fecha vuelva intentarlo')
+            }
+          })
       },
       error: () => {
         this.promptMessage('Error', 'No se pudo actualizar la nueva fecha vuelva intentarlo')

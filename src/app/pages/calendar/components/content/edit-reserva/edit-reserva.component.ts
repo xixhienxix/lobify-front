@@ -1,7 +1,7 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewEncapsulation } from '@angular/core';
 import { ModalDismissReasons, NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
-import { DEFAULT_HUESPED, Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
+import { Huesped } from 'src/app/models/huesped.model';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { HuespedService } from 'src/app/services/huesped.service';
 import { Subject, Subscription, catchError, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';

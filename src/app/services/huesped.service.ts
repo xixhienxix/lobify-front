@@ -1,11 +1,12 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, Subject, catchError, firstValueFrom, forkJoin, map, of } from "rxjs";
-import { DEFAULT_HUESPED, Huesped } from "../models/huesped.model";
+import { Huesped } from "../models/huesped.model";
 import { environment } from "src/environments/environment";
 import { LocalForageCache } from "../tools/cache/indexdb-expire";
 import { Edo_Cuenta_Service } from "./edoCuenta.service";
 import { LogService } from "./activity-logs.service";
+import { DEFAULT_TARIFAS } from "../models/tarifas";
 export const EMPTY_CUSTOMER: Huesped = {
   folio:'',
   adultos:1,
@@ -17,7 +18,7 @@ export const EMPTY_CUSTOMER: Huesped = {
   llegada:'',
   salida:'',
   noches: 1,
-  tarifa:'',
+  tarifa:DEFAULT_TARIFAS,
   porPagar: 500,
   pendiente:500,
   origen: 'Online',

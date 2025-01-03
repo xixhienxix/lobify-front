@@ -1,3 +1,5 @@
+import { Tarifas } from "./tarifas";
+
 export interface Historico {
 
     _id?: string;
@@ -10,7 +12,7 @@ export interface Historico {
     llegada: string;
     salida: string;
     noches: number;
-    tarifa:string;
+    tarifa:Tarifas;
     porPagar?: number;
     pendiente?: number;
     origen: string;

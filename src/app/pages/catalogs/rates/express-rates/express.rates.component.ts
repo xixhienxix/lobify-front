@@ -270,7 +270,7 @@ export class ExpressRatesComponent implements OnInit, AfterViewInit{
           Salida:this.tarifatoModify.Salida,
           Plan:'Ninguno',
           Adultos:this.tarifatoModify.Adultos,
-          TarifaRack:this.tarifatoModify.TarifaRack,
+          TarifaRack:this.preciosFormGroup.controls.tarifaBase.value,
           Ninos:this.tarifatoModify.Ninos,
           Dias:this.tarifatoModify.Dias,
           Politicas: this.politicas(),

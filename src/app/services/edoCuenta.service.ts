@@ -121,8 +121,8 @@ getNotification(){
       
   }
 
-  actualizaSaldo(_id:string,monto:number){
-    return this.http.put<edoCuenta>(environment.apiUrl+'/edo_cuenta/alojamiento',{_id,monto})
+  actualizaSaldo(folio:string,monto:number){
+    return this.http.put<edoCuenta>(environment.apiUrl+'/edo_cuenta/alojamiento',{folio,monto})
   }
 
 }

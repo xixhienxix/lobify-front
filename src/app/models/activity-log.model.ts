@@ -1,3 +1,5 @@
+import { Tarifas } from "./tarifas";
+
 export interface ActivityLogs{
     folio?:string;
     timestamp: string; 
@@ -22,7 +24,7 @@ export interface PropertiesChanged {
     salida:string;
     adultos:number;
     ninos:number;
-    tarifa:string;
+    tarifa:Tarifas;
     habitacion:string;
     nombre:string;
     email:string;

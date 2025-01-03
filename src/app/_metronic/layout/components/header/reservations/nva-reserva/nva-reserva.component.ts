@@ -234,9 +234,23 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     this.preAsignadasArray
       .filter(habitacion => habitacion.checked)  // Filter out only the checked items
       .forEach((habitacion, index) => {
-        // Your logic here, e.g.,
-        const tarifa  = this.tarifaSeleccionada.find(obj =>
-          obj.Habitacion.some(item => item === habitacion.codigo));
+
+        // Find the first matching tarifa in `tarifaSeleccionada`
+        const tarifa = this.tarifaSeleccionada.find(obj => 
+          obj.Habitacion.includes(habitacion.codigo)
+        );
+
+        // Use the found `tarifa` to search in `ratesArrayComplete`
+        const tarifaSeleccionada = tarifa 
+          ? this.ratesArrayComplete.find(obj => 
+              obj.Tarifa === tarifa.Tarifa && obj.Habitacion.includes(habitacion.codigo)
+            )
+          : undefined;
+
+        if (!tarifaSeleccionada) {
+          this.promptMessage('Error', 'No se pudo guardar la reservacion intente con otra tarifa');
+          return;
+        }
 
         let initialDate = DateTime.local().setZone(this.zona).set({
             day: this.intialDate.getDate(),
@@ -267,7 +281,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
           llegada: initialDate ?? this.intialDate.toISOString(),
           salida: endDate ?? this.endDate.toISOString(),
           noches: this.stayNights,
-          tarifa: tarifa === undefined ? '' : tarifa.Tarifa,
+          tarifa: tarifaSeleccionada,
           porPagar: this.totalPorCuenta,
           pendiente: this.totalPorCuenta,
           origen: this.origenReserva,

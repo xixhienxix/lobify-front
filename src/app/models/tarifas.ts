@@ -1,5 +1,5 @@
 import { Politicas } from "./politicas.model";
-import { VisibilityRates } from "./visibility.model";
+import { DEFAULT_VISIBILITY_RATES, VisibilityRates } from "./visibility.model";
 export interface TarifasDisponibles {
     Activa:boolean,
         Descripcion:string,
@@ -67,4 +67,22 @@ export interface TarifasRadioButton {
     Descuento?:number,
     checked:boolean
 
+}
+
+export const DEFAULT_TARIFAS: Tarifas = {
+    Tarifa:'',
+    Habitacion:[],
+    Llegada:new Date(),
+    Salida:new Date(),
+    Plan:'',
+    Politicas:[],
+    EstanciaMinima:0,
+    EstanciaMaxima:0,
+    TarifaRack:0,
+    Estado:true,
+    Adultos:1,
+    Ninos:1,
+    TarifasActivas:[],
+    Visibilidad:DEFAULT_VISIBILITY_RATES,
+    Cancelacion:[],
 }

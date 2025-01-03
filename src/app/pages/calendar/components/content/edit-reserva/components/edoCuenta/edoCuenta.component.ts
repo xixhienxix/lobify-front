@@ -13,6 +13,7 @@ import { HuespedService } from 'src/app/services/huesped.service';
 import { TarifasService } from 'src/app/services/tarifas.service';
 import { DateTime } from 'luxon';
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
+import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 
 
 @Component({
@@ -44,6 +45,7 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
   tarifaDelDia:any[]=[]
 
   @Input() currentHuesped:Huesped
+  @Input() currentParametros:Parametros
   @Input() currentEdoCuenta:edoCuenta[]=[]
   @Input() standardRatesArray:Tarifas[]=[]
   @Input() tempRatesArray:Tarifas[]=[]
@@ -152,29 +154,32 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
 
   private async processHospedaje(item: any, fromDate: Date) {
 
-    if (!this.ratesArrayComplete || this.ratesArrayComplete.length === 0) {
-      await this._dbCheckingService.checkIndexedDB(['tarifas'], true);
-      this.ratesArrayComplete = await this._dbCheckingService.loadTarifas(true);
-  }
+    // await this._dbCheckingService.checkIndexedDB(['tarifas'], true);
+    // const ratesArrayComplete = await this._dbCheckingService.loadTarifas(true);
+  
 
-    const tarifa = this.ratesArrayComplete.find(item => 
-      item.Tarifa === this.currentHuesped.tarifa &&
-      item.Habitacion.some(room => room.trim().toLowerCase() === this.currentHuesped.habitacion.toLowerCase())
-    )!;
-    //   this.tarifaDelDia = this._tarifasService.ratesTotalCalc(tarifa,this.standardRatesArray,this.tempRatesArray,this.currentHuesped.habitacion,this.currentHuesped.adultos,this.currentHuesped.ninos,new Date(this.currentHuesped.llegada),new Date(this.currentHuesped.salida));
+    // const tarifa = ratesArrayComplete.find(item => 
+    //   item.Tarifa === this.currentHuesped.tarifa.Tarifa &&
+    //   item.Habitacion.some(room => room.trim().toLowerCase() === this.currentHuesped.habitacion.toLowerCase())
+    // )!;
 
+    // const standarRate = this.standardRatesArray.filter(obj =>
+    //   obj.Habitacion.includes(this.currentHuesped.habitacion)
+    // );
 
-    //   this.impuestoSobreHospedaje = item.Total! * this._parametrosService.getCurrentParametrosValue.ish / 100;
-
-    //   this.subTotalAlojamiento = item.Cargo!.toLocaleString();
-
-    //   fromDate.setDate(fromDate.getDate() + 1);
-    // }
-    const dailyRates = this._tarifasService.ratesTotalCalc(
-      tarifa,
-      this.standardRatesArray,
-      this.tempRatesArray,
-      tarifa.Habitacion[0], // Assuming single room per rate
+    // // Filter the `standardRatesArray`
+    // const tempRate = this.tempRatesArray.filter(obj =>
+    //   obj.Habitacion.includes(this.currentHuesped.habitacion) &&
+    //   this.isDateInRange(
+    //     this.currentHuesped.llegada, 
+    //     this.currentHuesped.salida, 
+    //     obj.Llegada, 
+    //     obj.Salida
+    //   )
+    // );
+    
+    const dailyRates = this._tarifasService.ratesTotalCalcSelected(
+      this.currentHuesped.tarifa,
       this.currentHuesped.adultos,
       this.currentHuesped.ninos,
       new Date(this.currentHuesped.llegada),
@@ -253,4 +258,22 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
       return `with: ${reason}`;
     }
   }
+
+// Helper function to check the date range
+isDateInRange(currentLlegada: string, currentSalida: string, tarifaLlegada: Date, tarifaSalida: Date): boolean {
+  // Convert currentLlegada and currentSalida from ISO strings to DateTime objects
+  const currentLlegadaDate = DateTime.fromISO(currentLlegada, { zone: 'America/Mexico_City' });
+  const currentSalidaDate = DateTime.fromISO(currentSalida, { zone: 'America/Mexico_City' });
+
+  // Convert tarifaLlegada and tarifaSalida from Date objects to DateTime objects
+  const tarifaLlegadaDate = DateTime.fromJSDate(tarifaLlegada).setZone('America/Mexico_City');
+  const tarifaSalidaDate = DateTime.fromJSDate(tarifaSalida).setZone('America/Mexico_City');
+
+  // Implement the date range conditions:
+  return (
+    (tarifaLlegadaDate <= currentSalidaDate && tarifaSalidaDate >= currentLlegadaDate) ||  // Start time falls within the range
+    (tarifaSalidaDate <= currentSalidaDate && tarifaSalidaDate >= currentSalidaDate) ||  // End time falls within the range
+    (tarifaLlegadaDate <= currentLlegadaDate && tarifaSalidaDate >= currentSalidaDate)    // The range is fully enclosed
+  );
+}
 }

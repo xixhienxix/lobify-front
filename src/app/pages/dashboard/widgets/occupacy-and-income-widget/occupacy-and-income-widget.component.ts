@@ -150,7 +150,7 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
 
 
     this.adr = reservacionesDelDia.reduce((total, item) => {
-      const tarifa = this.ratesArrayComplete.find(tarifa => tarifa.Tarifa === item.tarifa);
+      const tarifa = this.ratesArrayComplete.find(tarifa => tarifa.Tarifa === item.tarifa.Tarifa);
 
       if (tarifa) {
         const totalDelDia = this._tarifasService.ratesTotalCalc(
@@ -200,7 +200,7 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
   
     // Calculate total revenue from the filtered reservations
     const totalRevenue = reservacionesDelDia.reduce((total, item) => {
-      const tarifa = this.ratesArrayComplete.find(tarifa => tarifa.Tarifa === item.tarifa);
+      const tarifa = this.ratesArrayComplete.find(tarifa => tarifa.Tarifa === item.tarifa.Tarifa);
   
       if (tarifa) {
         const totalDelDia = this._tarifasService.ratesTotalCalc(
