@@ -11,11 +11,22 @@ import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { NewRoomComponent } from './components/new-room/new-room.component';
 import { FileUploadService } from 'src/app/services/file.upload.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { ParametrosService } from '../../parametros/_services/parametros.service';
 interface roomTable {
   Codigo:string,
   Tipo:string,
   Adultos:number,
   Inventario:number
+}
+export interface RowDetails {
+
+Adultos:number,
+Codigo:string,
+Estatus:string,
+Inventario:number,
+Tipo:string,
+Amenidades?:string[],
+Tipos_Cama?:string[]
 }
 @Component({
   selector: 'app-rooms',
@@ -37,7 +48,8 @@ export class RoomsComponent implements OnInit{
     displayedColumns = ["expandCollapse", "Nombre de la habitación",
     "Tipo de la Habitación",
     "Capacidad Max.",
-    "Inventario"];
+    "Inventario",
+  "Acciones"];
     expandedElement: roomTable | null = null;
 
 
@@ -46,7 +58,7 @@ export class RoomsComponent implements OnInit{
   habitacionesporCodigo:Habitacion[]=[]
   habitacionesArr:any[]=[]
   private ngUnsubscribe = new Subject<void>();
-
+  dataSourceBS:Habitacion[]=[];
 
     //Filters
     paginator: PaginatorState;
@@ -98,7 +110,6 @@ export class RoomsComponent implements OnInit{
 
   async getHabitaciones(refreshTable:boolean){
 
-    let dataSourceBS
     if(refreshTable){
       this.getAllRoomsEndPoint();
     }
@@ -107,8 +118,8 @@ export class RoomsComponent implements OnInit{
     if(roomsCodesIndexDB){
       if(roomsCodesIndexDB.length !== 0){
         this._habitacionService.setcurrentHabitacionValue = roomsCodesIndexDB
-        dataSourceBS = this._habitacionService.getcurrentHabitacionValue.getValue()
-        this.buildDataSource(dataSourceBS);
+        this.dataSourceBS = this._habitacionService.getcurrentHabitacionValue.getValue()
+        this.buildDataSource(this.dataSourceBS);
       }else{
         this.getAllRoomsEndPoint();
       }
@@ -119,13 +130,12 @@ export class RoomsComponent implements OnInit{
   }
 
   getAllRoomsEndPoint(){
-    let dataSourceBS
 
     this._habitacionService.getAll().pipe(
       takeUntil(this.ngUnsubscribe)).subscribe({
         next:()=>{
-          dataSourceBS = this._habitacionService.getcurrentHabitacionValue.getValue()
-          this.buildDataSource(dataSourceBS);
+          this.dataSourceBS = this._habitacionService.getcurrentHabitacionValue.getValue()
+          this.buildDataSource(this.dataSourceBS);
       }
     });
   }
@@ -202,15 +212,19 @@ export class RoomsComponent implements OnInit{
     modalRef.componentInstance.edicion=false
   }
 
-  edit(habitacion:Habitacion){
-    const imagen = this.fileList.filter((c:any)=>c.name.split('.')[0] == habitacion.Codigo)
+  edit(row:RowDetails){
+    const imagen = this.getRoomImg(row.Codigo);
+
+    const habitacionCompleta = this.dataSourceBS.filter(item=>item.Codigo === row.Codigo)[0]
+
     const modalRef=this.modalService.open(NewRoomComponent,{ size: 'lg', backdrop:'static' })
-    modalRef.componentInstance.habitacion=habitacion
+    modalRef.componentInstance.habitacion=habitacionCompleta
     modalRef.componentInstance.edicion=true
     modalRef.componentInstance.imagen=imagen[0].url
+
     modalRef.result.then((result)=>{
       this.habitacionesArr=[]
-      //this.getHabitaciones(false);
+
       this.closeResult = `Closed with: ${result}`;
     }, (reason) => {
         this.fileList=[]
@@ -218,6 +232,10 @@ export class RoomsComponent implements OnInit{
         this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
 
+  }
+
+  getRoomImg(codigoHab:string){
+    return this.fileList.filter((c:any)=>c.name.split('.')[0] == codigoHab);
   }
 
   promptMessage(header:string,message:string){

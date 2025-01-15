@@ -1,4 +1,4 @@
-import {  AfterViewChecked, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild, ViewEncapsulation, signal } from '@angular/core';
+import {  AfterViewChecked, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild, ViewEncapsulation, signal } from '@angular/core';
 import { FormGroup, FormControl, FormBuilder, Validators, FormArray} from '@angular/forms';
 import { MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
@@ -47,7 +47,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
   @ViewChild('matOption') public matOption: MatOption;
   /**Modal */
   closeResult:string
-  habitacion:Habitacion;
+  @Input() habitacion:Habitacion;
 
   /**FormControl */
   formGroup:FormGroup
@@ -95,10 +95,10 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
 
 
   //VALORES DEFAULT
-  quantity:number=1;
-  quantityExtra:number=0;
+  adultos:number=0;
+  ninos:number=0;
   quantityInv:number=1;
-  quantityExtraInv:number=0;
+  personas:number=1;
 
   //File Upload
   sendUpload: boolean;
@@ -148,17 +148,18 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
     public router : Router,
     public modal:NgbActiveModal,
     public _tarifasService:TarifasService,
-    public _parametrosService:ParametrosService,
     private changeDetector: ChangeDetectorRef, // Fixes Exeption of Expression already Changed,
-    private _checkIndexDbService: IndexDBCheckingService
-
+    private _checkIndexDbService: IndexDBCheckingService,
+    private _parametrosService: ParametrosService
   ) {
+    console.log('maxInv', this._parametrosService.getCurrentParametrosValue.maxPersonas);
     this.formGroup = this.fb.group({
       nombre: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
       tipo: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(100)])],
       descripcion: ['', Validators.compose([Validators.required, Validators.minLength(3), Validators.maxLength(1000)])],
-      adultos: [1, Validators.compose([Validators.required,Validators.min(1)])],
-      ninos: [0, Validators.required],
+      personas: [1, [Validators.required, Validators.min(1)]],
+      adultos: [1, [Validators.required, Validators.min(1), Validators.max(this._parametrosService.getCurrentParametrosValue.maxPersonas)]],
+      ninos: [0, [Validators.required, Validators.min(0), Validators.max(this._parametrosService.getCurrentParametrosValue.maxPersonas - 1)]],
       vista: [''],
       inventario: [1, Validators.required],
       orden:[1,Validators.required],
@@ -185,6 +186,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       this.f.tipo.patchValue(this.habitacion.Tipo)
       this.f.descripcion.patchValue(this.habitacion.Descripcion)
       this.f.adultos.patchValue(this.habitacion.Adultos)
+      this.f.personas.patchValue(this.habitacion.Adultos+ this.habitacion.Ninos)
       this.f.ninos.patchValue(this.habitacion.Ninos)
       this.f.vista.patchValue(this.habitacion.Vista)
       this.f.tarifaBase.patchValue(this.habitacion.Tarifa)
@@ -193,6 +195,10 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
 
       //disable Inputs
       this.f.nombre.disable();
+
+      this.adultos = this.habitacion.Adultos;
+      this.ninos = this.habitacion.Ninos;
+      this.personas = this.habitacion.Adultos + this.habitacion.Ninos
 
       //this.formGroup.controls["nombreHabs"].patchValue(this.habitacion.Tipos_Camas)
     }
@@ -221,18 +227,18 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
     return this.formGroup.controls;
   }
 
-  // Method to increase quantity and update inputs
+  // Method to increase  and update inputs
   addInput() {
       const name = new FormControl('', Validators.required);
 
-      this.quantityInv++; // Increase the quantity
+      this.quantityInv++; // Increase the 
       this.numeroHabs.push(name); // Add a new input
   }
 
-  // Method to decrease quantity and update inputs
+  // Method to decrease  and update inputs
   removeInput() {
       if (this.quantityInv > 1) {
-          this.quantityInv--; // Decrease the quantity
+          this.quantityInv--; // Decrease the 
           this.numeroHabs.removeAt(this.numeroHabs.length - 1); // Remove the last input
       }
   }
@@ -308,10 +314,8 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
     this.formGroup.controls['vista'].patchValue('')
     this.formGroup.controls['orden'].patchValue('')
 
-    this.quantity=1
-    this.quantityExtra=0
-    this.formGroup.controls['adultos'].patchValue(this.quantity)
-    this.formGroup.controls['ninos'].patchValue(this.quantity)
+    this.formGroup.controls['adultos'].patchValue(this.adultos)
+    this.formGroup.controls['ninos'].patchValue(this.ninos)
 
     this.amenidadesArr=[]
     this.resultLocation=[]
@@ -380,6 +384,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
       Numero:this.formGroup.value.etiqueta,
       Descripcion:this.formGroup.value.descripcion,
       Tipo:this.formGroup.value.tipo,
+      Personas:this.formGroup.value.personas,
       Adultos:this.formGroup.value.adultos,
       Ninos:this.formGroup.value.ninos,
       Inventario:this.quantityInv,
@@ -399,6 +404,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
         Numero:this.numeroHabs.value,//nombreHabs
         Descripcion:this.formGroup.value.descripcion,
         Tipo:this.formGroup.value.tipo,
+        Personas:this.formGroup.value.personas,
         Adultos:this.formGroup.value.adultos,
         Ninos:this.formGroup.value.ninos,
         Inventario:this.quantityInv,
@@ -417,6 +423,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
         Numero:this.nombreHabs,
         Descripcion:this.formGroup.value.descripcion,
         Tipo:this.formGroup.value.tipo,
+        Personas:this.formGroup.value.personas,
         Adultos:this.formGroup.value.adultos,
         Ninos:this.formGroup.value.ninos,
         Inventario:this.quantityInv,
@@ -506,6 +513,7 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
             invalid.push(name);
         }
     }
+    console.log('Invalid Controls', invalid);
     return invalid;
 }
 
@@ -545,46 +553,66 @@ export class NewRoomComponent implements OnInit, OnDestroy, AfterViewChecked{
         return invalidCtrl || invalidParent;
     }
 
-    plus()
-    {
-        this.quantity++;
-        this.formGroup.controls['adultos'].patchValue(this.quantity)
-        //this.formGroup.controls['ninos'].updateValueAndValidity();
-    }
-    minus()
-    {
-      if(this.quantity>1)
-      {
-      this.quantity--;
-      this.formGroup.controls['adultos'].patchValue(this.quantity)
-
+    plus(field: 'personas' | 'adultos' | 'ninos'): void {
+      if (field === 'personas') {
+        this.personas++;
+        this.adultos++;
+      } else if (field === 'adultos') {
+        if ((this.adultos + this.ninos) < this.personas ) {
+          this.adultos++;
+        } else if (this.adultos < this.personas){
+          this.adultos++;
+          this.ninos--;
+        }
+      } else if (field === 'ninos') {
+        if ((this.adultos + this.ninos) < this.personas) {
+          this.ninos++;
+        } else if( this.ninos < this.personas && this.adultos > 1 ){
+          this.ninos++;
+          this.adultos--;
+        }
       }
-      else
-      this.quantity
-      this.formGroup.controls['adultos'].patchValue(this.quantity)
-
+      this.updateControls();
     }
-
-    plusExtra()
-    {
-        this.quantityExtra++;
-        this.formGroup.controls['ninos'].patchValue(this.quantityExtra)
-
-    }
-    minusExtra()
-    {
-      if(this.quantityExtra>0)
-      {
-      this.quantityExtra--;
-      this.formGroup.controls['ninos'].patchValue(this.quantityExtra)
-
+  
+    minus(field: 'personas' | 'adultos' | 'ninos'): void {
+      if (field === 'personas') {
+        if (this.personas > 1) {
+          this.personas--;
+          if(this.adultos === 1 && this.ninos > 0 ){
+            this.ninos--;
+          }
+          if(this.adultos > 1){
+            this.adultos--;
+          } 
+        }
+      } else if (field === 'adultos') {
+        if (this.adultos > 1) {
+          this.adultos--;
+        } if(this.adultos < this.personas && (this.ninos + this.adultos) < this.personas){
+          this.ninos++
+        }
+      } else if (field === 'ninos') {
+        if (this.ninos > 0) {
+          this.ninos--;
+          this.adultos++
+        }
       }
-      else
-      this.quantityExtra
-      this.formGroup.controls['ninos'].patchValue(this.quantityExtra)
-
-
+      this.updateControls();
     }
+    
+    updateControls():void {
+      const currentAdultosValue = this.formGroup.get('adultos')?.value || 0; // Get the current value
+      this.formGroup.get('adultos')?.setValue(this.adultos);      // Update the value
+
+      const currentPersonasValue = this.formGroup.get('personas')?.value || 0; // Get the current value
+      this.formGroup.get('personas')?.setValue(this.personas);      // Update the value
+
+      const currentNinosValue = this.formGroup.get('ninos')?.value || 0; // Get the current value
+      this.formGroup.get('ninos')?.setValue(this.ninos);      // Update the value
+    }
+    
+    
 
     private getDismissReason(reason: any): string {
       if (reason === ModalDismissReasons.ESC) {

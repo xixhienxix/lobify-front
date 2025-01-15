@@ -54,7 +54,7 @@
                               </div>
                         </div>
                     </div>
-                    <div *ngIf="editarHab === true" class="row col-lg-12">
+                    <div *ngIf="editarHab !== true" class="row col-lg-12">
                         <div class="form-group col-lg-12">
                             <label style="color:#00506a; font-weight: bold;">Nombre/Número de la Habitación</label>
                             <input
@@ -140,11 +140,62 @@
                     </div>
                 </div>
                 <div class="row col-lg-12">
-                    <div class="form-group col-lg-6">
+
+                    <div class="form-group col-lg-4">
+                        <label style="color:#00506a; font-weight: bold;" class="form-label">Total de Personas</label>
+                            <div class="input-group">
+                                <div class="input-group-append">
+                                    <button style="background-color: transparent;border-right: 
+                                                    2px solid #e6e9ed; border-left: 2px solid #dadcdf; 
+                                                    border-top : 2px solid #dadcdf; 
+                                                    border-bottom: 2px solid #dadcdf;" 
+                                            class="btn btn-secondary" 
+                                            (click)="minus('personas')" 
+                                            type="button" 
+                                            ng-click="countVal=countVal+1">
+                                        <i class="fa fa-minus">
+                                        </i>
+                                    </button>
+                                </div>
+                                <input
+                                    style=" background-color: #e6e9ed; 
+                                            border-top: 2px solid #dadcdf; 
+                                            border-bottom: 2px solid #dadcdf;  
+                                            border-left: 2px solid #e6e9ed;"
+                                    class="text-center input-group form-control form-control-lg form-control-solid"
+                                    placeholder=""
+                                    [attr.disabled]="true"
+                                    [value]="personas"
+                                    min="1"
+                                    formControlName="personas"
+                                >
+                                <div class="input-group-append">
+                                    <button style=" border-right: 2px solid #dadcdf; 
+                                                    border-top: 2px solid #dadcdf; 
+                                                    border-bottom: 2px solid #dadcdf; 
+                                                    background-color: transparent;" 
+                                            class="btn btn-secondary" 
+                                            (click)="plus('personas')" 
+                                            type="button">
+                                        <i class="fa fa-plus">
+                                        </i>
+                                    </button>
+                                </div>
+                            </div>
+                    </div>
+
+                    <div class="form-group col-lg-4">
                         <label style="color:#00506a; font-weight: bold;" class="form-label">Cantidad de Adultos</label>
                             <div class="input-group">
                                 <div class="input-group-append">
-                                    <button style="background-color: transparent;border-right: 2px solid #e6e9ed; border-left: 2px solid #dadcdf; border-top : 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;" class="btn btn-secondary" (click)="minus()" type="button" ng-click="countVal=countVal+1">
+                                    <button style=" background-color: transparent;border-right: 2px solid #e6e9ed; 
+                                                    border-left: 2px solid #dadcdf; 
+                                                    border-top : 2px solid #dadcdf; 
+                                                    border-bottom: 2px solid #dadcdf;" 
+                                                    class="btn btn-secondary" 
+                                                    (click)="minus('adultos')" 
+                                                    type="button" 
+                                                    ng-click="countVal=countVal+1">
                                         <i class="fa fa-minus">
                                         </i>
                                     </button>
@@ -154,12 +205,12 @@
                                 class="text-center input-group form-control form-control-lg form-control-solid"
                                 placeholder=""
                                 [attr.disabled]="true"
-                                [value]="quantity"
+                                [value]="adultos"
                                 min="1"
                                 formControlName="adultos"
                                 >
                                 <div class="input-group-append">
-                                    <button style="border-right: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf; background-color: transparent;" class="btn btn-secondary" (click)="plus()" type="button">
+                                    <button style="border-right: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf; background-color: transparent;" class="btn btn-secondary" (click)="plus('adultos')" type="button">
                                         <i class="fa fa-plus">
                                         </i>
                                     </button>
@@ -167,11 +218,18 @@
                             </div>
                     </div>
 
-                    <div class="form-group col-lg-6">
+                    <div class="form-group col-lg-4">
                         <label style="color:#00506a; font-weight: bold;" class="form-label">Cantidad de Niños</label>
                             <div class="input-group">
                                 <div class="input-group-append">
-                                    <button style="background-color: transparent; border-left: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;" class="btn btn-secondary" (click)="minusExtra()" type="button">
+                                    <button style=" background-color: transparent; 
+                                                    border-left: 2px solid #dadcdf; 
+                                                    border-top: 2px solid #dadcdf; 
+                                                    border-top: 2px solid #dadcdf; 
+                                                    border-bottom: 2px solid #dadcdf;" 
+                                            class="btn btn-secondary" 
+                                            (click)="minus('ninos')" 
+                                            type="button">
                                         <i class="fa fa-minus">
                                         </i>
                                     </button>
@@ -180,11 +238,11 @@
                                 style="background-color: #e6e9ed; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf; border-left: 2px solid #e6e9ed;"
                                 [attr.disabled]="true"
                                 class="text-center input-group form-control form-control-lg form-control-solid" placeholder=""
-                                [value]="quantityExtra"
+                                [value]="ninos"
                                 formControlName="ninos"
                                 >
                                 <div class="input-group-append">
-                                    <button style="background-color: transparent; border-right: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;" class="btn btn-secondary" (click)="plusExtra()" type="button">
+                                    <button style="background-color: transparent; border-right: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;" class="btn btn-secondary" (click)="plus('ninos')" type="button">
                                         <i class="fa fa-plus">
                                         </i>
                                     </button>

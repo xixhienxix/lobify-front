@@ -45,6 +45,7 @@ const DEFAULT_PARAMS ={
   tarifasCancelacion:'',
   iddleTimer:5,
   inventario:10,
+  maxPersonas:10
 }
 
 @Injectable({

@@ -140,7 +140,7 @@
 
 <ng-container *ngIf="rsvFromCalendar">
     <ng-container *ngFor="let codigosCuarto of availavilityCodeRooms; ">
-      <div *ngIf="codigosCuarto.Codigo === cuarto" style="font-weight:bold; color: rgba(128, 128, 128, 0.623);" class=" modal-header"><h2 style="color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2> (Cap. Max.: {{codigosCuarto.Adultos}})</div>
+      <div *ngIf="codigosCuarto.Codigo === cuarto" style="font-weight:bold; color: rgba(128, 128, 128, 0.623);" class=" modal-header"><h2 style="color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2> (Cap. Max.: {{codigosCuarto.Personas}})</div>
     </ng-container>
 
     <table mat-table [dataSource]="roomRates(cuarto)">
@@ -222,7 +222,7 @@
                     <!-- CUANDO ES UN SOLO TIPO DE CUARTO EN CONSULTA -->
                     <ng-container *ngIf="cuarto !== '1' || checkAvaibility(cuarto)" >
                       <ng-container *ngFor="let codigosCuarto of availavilityCodeRooms; ">
-                        <div *ngIf="codigosCuarto.Codigo === cuarto" style="font-weight:bold; color: rgba(128, 128, 128, 0.623);" class=" modal-header"><h2 style="color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2> (Cap. Max.: {{codigosCuarto.Adultos}})</div>
+                        <div *ngIf="codigosCuarto.Codigo === cuarto" style="font-weight:bold; color: rgba(128, 128, 128, 0.623);" class=" modal-header"><h2 style="color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2> (Cap. Max.: {{codigosCuarto.Personas}})</div>
                       </ng-container>
 
                       <table mat-table [dataSource]="roomRates(cuarto)">
@@ -281,8 +281,8 @@
                       <ng-container *ngFor="let codigosCuarto of availavilityRooms; ">
                         <div style="color: black" [ngStyle]="{'background-color': revisaCapacidad(codigosCuarto.Codigo) ? '#fa6d7c' : '#99d284' }" class=" modal-header"><h2 style="font-weight: bold; color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2>                           
                           <small style="margin-left: 5%; margin-right: 5%; font-weight: bold; font: bold;" *ngIf="revisaCapacidad(codigosCuarto.Codigo)">
-                            <div [innerHTML]="mensajeAdultos+mensajeNinos"></div>
-                          </small> (Cap. Max.: {{codigosCuarto.Adultos}})
+                            <div [innerHTML]="mensajeCapacidad"></div>
+                          </small> (Cap. Max.: {{codigosCuarto.Personas}})
                         </div>
   
                               <table mat-table [dataSource]="roomRates(codigosCuarto.Codigo)">                        

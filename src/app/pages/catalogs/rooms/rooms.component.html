@@ -57,7 +57,16 @@
               <th mat-header-cell *matHeaderCellDef mat-sort-header> Inventario </th>
               <td mat-cell *matCellDef="let row"> {{ row.Inventario }} </td>
             </ng-container>
-          
+
+            <!--Acciones-->
+            <ng-container matColumnDef="Acciones">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header> Editar </th>
+              <td mat-cell *matCellDef="let row"> 
+                <a title="Editar" class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm" (click)="edit(row)">
+                  <i class="fa-solid fa-pencil"></i>
+                </a> 
+              </td>
+            </ng-container>
           
             <!-- Expanded Content Column -->
             <ng-container matColumnDef="expandedDetail">
@@ -105,11 +114,8 @@
 
                     <!-- Acciones Column -->
                     <ng-container matColumnDef="Acciones">
-                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Agregar al Inventario </th>
+                      <th mat-header-cell *matHeaderCellDef mat-sort-header> Acciones </th>
                       <td (click)="$event.stopPropagation()" mat-cell *matCellDef="let detail; let i=index"> 
-                        <a title="Editar" class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm" (click)="add(detail)">
-                          <i class="fa-solid fa-pencil"></i>
-                        </a> 
                         <a title="Borrar" class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm" (click)="delete(detail)">
                           <i class="fa-solid fa-trash-can"></i>
                         </a> 

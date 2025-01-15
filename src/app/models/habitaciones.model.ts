@@ -6,6 +6,7 @@ export interface Habitacion
   Numero:string[],
   Tipo:string,
   Descripcion:string,
+  Personas:number,
   Adultos:number;
   Ninos:number;
   Inventario:number,

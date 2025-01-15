@@ -302,7 +302,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
    await this.checkRatesIndexDB(true);
 
-
     const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' })  
     modalRef.componentInstance.parametros = this.parametrosModel
     modalRef.componentInstance.folios = this.folios;

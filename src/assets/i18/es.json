@@ -111,10 +111,10 @@
         "visibleBooking": "BOOKING",
         "visibleOTAS": "CHANNEL MANAGER OTA's",
         "extraRateName": "NOMBRE DE SU TARIFA VARIANTE",
-        "newRatesQuestion":"¿ AGREGAR OTRA TARFIA ?"
+        "newRatesQuestion":"¿ AGREGAR OTRA TARIFA ?"
     },
     "SpecialRatesComponent":{
-        "SpecialRateTabTittle": "NUEVA TARFIA ESPECIAL",
+        "SpecialRateTabTittle": "NUEVA TARIFA ESPECIAL",
         "ActiveRate":"TARIFA ACTIVA",
         "InactiveRate":"TARIFA INACTIVA",
         "RateName": "NOMBRE VISIBLE PARA LA NUEVA TARIFA" ,
@@ -136,7 +136,7 @@
         "tarifaEspecialQuestion": "¿ QUISIERAS OFRECER UNA SEGUNDA TARIFA ?"
     },
     "TempRatesComponent":{
-        "TempSpecialRateTabTittle": "NUEVA TARFIA TEMPORADA",
+        "TempSpecialRateTabTittle": "TARIFA BASE DE TEMPORADA",
         "TempActiveRate":"TARIFA ACTIVA",
         "TempInactiveRate":"TARIFA INACTIVA",
         "TempRateName": "NOMBRE VISIBLE PARA LA NUEVA TARIFA" ,
