@@ -614,6 +614,10 @@ export class CalendarComponent implements OnInit, OnDestroy {
       arrayToCheck = this.allReservations
     }
 
+    if(event.Codigo === undefined){
+      return;
+    }
+
     if(!this.checkValidResize(event, arrayToCheck)){
         const dataSource = await this.roomRates(event.Codigo);
         const tarifaEstandarArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa Base');

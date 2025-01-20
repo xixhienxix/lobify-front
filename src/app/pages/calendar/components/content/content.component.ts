@@ -679,7 +679,11 @@ export class ContentComponent implements OnInit{
           const Codigo = this.roomCodesComplete.find((item)=> item.Numero === resourceDetails.resourceData.text)?.Codigo
           args.data.Codigo = Codigo
           args.data.Numero = resourceDetails.resourceData.text
-          this.onResizeReserva.emit(args.data)
+          if(args.data.Codigo !== undefined || args.data.Numero !== undefined){
+            this.onResizeReserva.emit(args.data);
+          }else{
+            args.cancel = true;
+          }
         }
       }
   args.cancel = true;
