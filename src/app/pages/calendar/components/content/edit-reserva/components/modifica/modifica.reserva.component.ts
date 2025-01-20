@@ -138,6 +138,9 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   /** Subscription */
 
   async ngOnInit() {
+    console.log('editHuesped', this.editHuesped);
+    console.log('reactiva:', this.reactivaReserva);
+
     const today = new Date();
     let llegadaDate: Date;
     let salidaDate: Date;
@@ -839,7 +842,10 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
     this._disponibilidadService.getDisponibilidad(intialDate,endDate, habitacion, stayNights, folio)
     .subscribe({      
         next:async (response)=>{
-
+          const index = response.indexOf(this.currentHuesped.numeroCuarto);
+          if(index !== -1){ response.splice(index, 1) }
+          
+          console.log('currentHuesped:', this.currentHuesped)
           const dispoResponse = await this._disponibilidadService.calcHabitacionesDisponibles(response,intialDate,endDate,cuarto);
           this.preAsignadasArray = dispoResponse.preAsignadasArray
           this.availavilityRooms = dispoResponse.avaibilityRooms
