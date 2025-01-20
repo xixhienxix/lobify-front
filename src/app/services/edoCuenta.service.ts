@@ -49,13 +49,19 @@ getNotification(){
               ) {
                }
 
-    agregarPago(edoCuenta:edoCuenta){
-       return this.http.post<edoCuenta>(environment.apiUrl+'/edo_cuenta/pagos',{edoCuenta}).pipe(
-        map((data=>{
-          this.sendNotification(true);
-          }
-      )));
-    }
+               agregarPago(edoCuenta: edoCuenta) {
+                return this.http
+                  .post<{ message: string; data: edoCuenta }>(
+                    `${environment.apiUrl}/edo_cuenta/pagos`,
+                    { edoCuenta }
+                  )
+                  .pipe(
+                    map((response) => {
+                      this.sendNotification(true);
+                      return response; // Ensure the response is returned
+                    })
+                  );
+              }
 
     agregarHospedaje(edoCuenta:edoCuenta[]){
       return this.http.post<edoCuenta>(environment.apiUrl+'/edo_cuenta/hospedaje',{edoCuenta}).pipe(
@@ -123,6 +129,10 @@ getNotification(){
 
   actualizaSaldo(folio:string,monto:number){
     return this.http.put<edoCuenta>(environment.apiUrl+'/edo_cuenta/alojamiento',{folio,monto})
+  }
+
+  actualizaTotales(folio:string){
+    return this.http.post<edoCuenta>(environment.apiUrl+'/edo_cuenta/totales',{folio})
   }
 
 }

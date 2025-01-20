@@ -661,7 +661,12 @@ interface StateMapping {
     
       try {
         // Submit the payment
-        await firstValueFrom(this._edoCuentaService.agregarPago(pago));
+        await firstValueFrom(this._edoCuentaService.agregarPago(pago)).then(
+          async (response)=>{
+            if(response && response.message === 'Added')
+              await firstValueFrom(this._edoCuentaService.actualizaTotales(this.currentHuesped.folio))
+          }
+        );
         
         // Log the payment
         const logRequests = this._logsService.logPagos('Movimiento Añadido', this.currentUser, pago).pipe(

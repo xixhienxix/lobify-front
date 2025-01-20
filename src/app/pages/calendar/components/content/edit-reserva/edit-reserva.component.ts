@@ -170,6 +170,8 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
 
   async ngOnInit() {
 
+    await firstValueFrom(this._edoCuentaService.actualizaTotales(this.currentHuesped.folio));
+
     this._estatusService.updatedStatus$.subscribe({
       next:(item)=>{
         if(item){
