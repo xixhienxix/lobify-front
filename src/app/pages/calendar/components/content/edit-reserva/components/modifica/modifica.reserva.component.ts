@@ -47,8 +47,7 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   accordionDisplay="";
   bandera:boolean=false;
   closeResult:string;
-  mensajeAdultos:string=''
-  mensajeNinos:string=''
+  mensajeCapacidad:string='';
   totalPorCuenta:number=0;
 
   /** Current Values */
@@ -802,17 +801,19 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
     );
 
     if(hab){
-      if(hab.Adultos < this.quantity || hab?.Ninos<this.quantityNin){
-        if(this.quantity > hab.Adultos ){
-          this.mensajeAdultos='El número de Adultos seleccionado exede la cantidad maxima de personas permitida para ste tipo de habitacion'+ '<br>';
-        }
-        if(this.quantityNin > hab?.Ninos){
-          this.mensajeNinos='El número de Niños seleccionado exede la cantidad maxima de personas permitida para ste tipo de habitacion'
-        }
+      if(hab.Personas < (this.quantity + this.quantityNin)){
+        this.mensajeCapacidad = `Este Tipo de Habitación solo permite cualquier combinación entre ${hab.Adultos} Adultos y/o ${hab.Ninos} Niños. Pero, su Capacidad Máxima es para ${hab.Personas} Personas.`;
+        // if(this.quantity > hab.Adultos ){
+        //   this.mensajeAdultos='El número de Adultos seleccionado exede la cantidad maxima de personas permitida para ste tipo de habitacion'+ '<br>';
+        // }
+        // if(this.quantityNin > hab?.Ninos){
+        //   this.mensajeNinos='El número de Niños seleccionado exede la cantidad maxima de personas permitida para ste tipo de habitacion'
+        // }
         return true;
       }else{
-        this.mensajeAdultos='';
-        this.mensajeNinos=''
+        this.mensajeCapacidad = '';
+        // this.mensajeAdultos='';
+        // this.mensajeNinos=''
         return false
       }
     }

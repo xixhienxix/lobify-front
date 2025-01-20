@@ -201,9 +201,6 @@
                     <mat-panel-title>
                       DISPONIBILIDAD
                     </mat-panel-title>
-                    <mat-panel-description *ngIf="maxPeopleFlag">
-                      <small> <label  style="font-weight:bold">El numero personas seleccionado exede la cantidad maxima permitida para este tipo de habitacion</label></small>
-                    </mat-panel-description> 
                   </mat-expansion-panel-header>
                   <!-- [FIN] HEADER DEL ACCORDION DE DISPONIBILIDAD -->
                   <mat-expansion-panel-header *ngIf="checkAvaibility(cuarto)" [ngStyle]="{'background-color': revisaCapacidad(cuarto) ? '#fa6d7c' : '#99d284' }">
@@ -278,14 +275,14 @@
                     <!-- CUANDO SE CONSULTAN TODOS LOS TIPOS DE CUARTO -->
                     <ng-container *ngIf="cuarto === '1'">
                       <!--CUANDO SE SELECCIONARON TODOS LOS CUARTOS-->
-                      <ng-container *ngFor="let codigosCuarto of availavilityRooms; ">
-                        <div style="color: black" [ngStyle]="{'background-color': revisaCapacidad(codigosCuarto.Codigo) ? '#fa6d7c' : '#99d284' }" class=" modal-header"><h2 style="font-weight: bold; color: black">{{codigosCuarto.Codigo.replace("_"," ").toUpperCase()}}</h2>                           
-                          <small style="margin-left: 5%; margin-right: 5%; font-weight: bold; font: bold;" *ngIf="revisaCapacidad(codigosCuarto.Codigo)">
+                      <ng-container *ngFor="let roomCode of availavilityRooms; ">
+                        <div style="color: black" [ngStyle]="{'background-color': revisaCapacidad(roomCode.Codigo) ? '#fa6d7c' : '#99d284' }" class=" modal-header"><h2 style="font-weight: bold; color: black">{{roomCode.Codigo.replace("_"," ").toUpperCase()}}</h2>                           
+                          <small style="margin-left: 5%; margin-right: 5%; font-weight: bold; font: bold;" *ngIf="revisaCapacidad(roomCode.Codigo)">
                             <div [innerHTML]="mensajeCapacidad"></div>
-                          </small> (Cap. Max.: {{codigosCuarto.Personas}})
+                          </small> (Cap. Max.: {{roomCode.Personas}})
                         </div>
   
-                              <table mat-table [dataSource]="roomRates(codigosCuarto.Codigo)">                        
+                              <table mat-table [dataSource]="roomRates(roomCode.Codigo)">                        
                                 <ng-container matColumnDef="Tarifa">
                                   <th mat-header-cell *matHeaderCellDef> Tarifa </th>
                                   <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
@@ -293,19 +290,19 @@
                             
                                 <ng-container matColumnDef="$ Promedio x Noche">
                                   <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-                                  <td mat-cell *matCellDef="let element">{{ratesTotalCalc(element,stayNights,codigosCuarto.Codigo,true) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td><!--{{ratesTotalCalc(element,stayNights)/stayNights}}-->
+                                  <td mat-cell *matCellDef="let element">{{ratesTotalCalc(element,stayNights,roomCode.Codigo,true) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td><!--{{ratesTotalCalc(element,stayNights)/stayNights}}-->
                                 </ng-container>
                             
                                 <ng-container matColumnDef="Total">
                                   <th mat-header-cell *matHeaderCellDef> Total </th>
-                                  <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights,codigosCuarto.Codigo) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td><!--{{ratesTotalCalc(element,stayNights)}}-->
+                                  <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights,roomCode.Codigo) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td><!--{{ratesTotalCalc(element,stayNights)}}-->
                                 </ng-container>
                       
                                 <ng-container matColumnDef="Acciones">
                                   <th mat-header-cell *matHeaderCellDef> Acciones </th>
                                   <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element; let i = index"> 
                                       <mat-radio-group [name]="cuarto" >
-                                        <mat-radio-button [disabled]="revisaCapacidad(codigosCuarto.Codigo)" [value]="element" [name]="i" (change)="tarifaRadioButton(ratesTotalCalc(element,stayNights,codigosCuarto.Codigo),element, $event, codigosCuarto.Codigo)"></mat-radio-button>
+                                        <mat-radio-button [disabled]="revisaCapacidad(roomCode.Codigo)" [value]="element" [name]="i" (change)="tarifaRadioButton(ratesTotalCalc(element,stayNights,roomCode.Codigo),element, $event, roomCode.Codigo)"></mat-radio-button>
                                     </mat-radio-group>                                  
                                   </td>
                                 </ng-container>
@@ -318,7 +315,7 @@
                                   height: 60px;">
                                     <h4 style="margin-top: 10px;"> Habitación: </h4>
                                   <ng-container *ngFor="let habitacion of preAsignadasArray">
-                                    <ng-container *ngIf="habitacion.codigo === codigosCuarto.Codigo">
+                                    <ng-container *ngIf="habitacion.codigo === roomCode.Codigo">
                                         <mat-checkbox [disabled]="habitacion.disabled || revisaCapacidad(habitacion.codigo)" formControlName="checkbox" #checked [checked]="habitacion.checked" (change)="preAsignar(habitacion.numero,habitacion.codigo,checked.checked, habitacion.disabled)"><label style="font-weight: bold; margin-right: 7%">{{ habitacion.numero }}</label></mat-checkbox> &nbsp; 
                                     </ng-container>
                                   </ng-container>

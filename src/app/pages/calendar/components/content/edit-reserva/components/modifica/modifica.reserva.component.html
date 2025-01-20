@@ -248,7 +248,9 @@
                       DISPONIBILIDAD
                     </mat-panel-title>
                     <mat-panel-description *ngIf="maxPeopleFlag">
-                      <small> <label  style="font-weight:bold">El numero personas seleccionado exede la cantidad maxima permitida para este tipo de habitacion</label></small>
+                      <small> <label  style="font-weight:bold">
+                        {{ mensajeCapacidad }}
+                      </label></small>
                     </mat-panel-description> 
                   </mat-expansion-panel-header>
                   <!-- [FIN] HEADER DEL ACCORDION DE DISPONIBILIDAD -->

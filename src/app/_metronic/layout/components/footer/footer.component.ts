@@ -213,9 +213,20 @@ export class FooterComponent implements OnInit{
 
   async openNvaReserva(){
 
+    const roomCodesComplete = await this._checkIndexDbService.checkIndexedDB(['habitaciones'],true);
+
+    if(roomCodesComplete && roomCodesComplete.hasOwnProperty('habitaciones')){
+      this.roomCodes = roomCodesComplete.habitaciones
+    }
+
+
     // await this.checkRatesIndexDB(true);
-    this.roomCodes = Object.values(
-      this.roomCodesComplete.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})); 
+    const roomCodes = Object.values(
+      this.roomCodes.reduce((acc, obj) => ({ ...acc, [obj.Codigo]: obj }), {})); 
+
+      console.log('this.roomCodesComplete',this.roomCodesComplete),
+      console.log('this.roomCodes',this.roomCodes)
+      
 
      const modalRef = this.modalService.open(NvaReservaComponent,{ size: 'lg', backdrop:'static' });
      modalRef.componentInstance.parametros = this.parametros 
@@ -224,8 +235,8 @@ export class FooterComponent implements OnInit{
      modalRef.componentInstance.checkIn = this._parametrosService.getCurrentParametrosValue.checkIn
      modalRef.componentInstance.checkOut=this._parametrosService.getCurrentParametrosValue.checkOut
      modalRef.componentInstance.zona=this._parametrosService.getCurrentParametrosValue.zona
-     modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
-     modalRef.componentInstance.roomCodes=this.roomCodes
+     modalRef.componentInstance.roomCodesComplete = roomCodesComplete.habitaciones
+     modalRef.componentInstance.roomCodes=roomCodes
      modalRef.componentInstance.ratesArrayComplete = this.ratesArrayComplete
      modalRef.componentInstance.standardRatesArray = this.standardRatesArray
      modalRef.componentInstance.tempRatesArray = this.tempRatesArray

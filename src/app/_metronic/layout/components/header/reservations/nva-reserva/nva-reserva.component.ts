@@ -695,7 +695,7 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
     const hab = this.roomCodesComplete.find(item=>
       item.Codigo === codigoCuarto
     );
-
+   
     if(hab){
       if(hab.Personas < (this.quantity + this.quantityNin)){
         this.mensajeCapacidad = `Este Tipo de Habitación solo permite cualquier combinación entre ${hab.Adultos} Adultos y/o ${hab.Ninos} Niños. Pero, su Capacidad Máxima es para ${hab.Personas} Personas.`;
