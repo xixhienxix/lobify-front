@@ -83,7 +83,7 @@
   <ng-container matColumnDef="Completed">
     <mat-header-cell *matHeaderCellDef> Completado </mat-header-cell>
     <mat-cell *matCellDef="let bloqueo" class="centered-cell">
-      {{bloqueo.Completed}}
+      {{bloqueo.Completed ? 'Finalizado' : 'Activo'}}
     </mat-cell>
   </ng-container>
 
@@ -117,7 +117,7 @@
 
 <ng-template #deleteID let-modal>
     <div class="modal-body">
-      <p>¿Estas seguro Que quieres Borrar el Bloqueo?&hellip;</p>
+      <p>¿Estas seguro Que quieres Finalizar el Bloqueo?&hellip;</p>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn btn-primary" (click)="borrar(idDelete);modal.close('Close click')">Borrar</button>

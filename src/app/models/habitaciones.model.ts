@@ -21,3 +21,21 @@ export interface Habitacion
   Color?:string;
   Estatus:string;
 }
+export const DEFAULT_HAB = {
+  _id:'',
+  Codigo:'',
+  Numero:[],
+  Tipo:'',
+  Descripcion:'',
+  Personas:1,
+  Adultos:1,
+  Ninos:0,
+  Inventario:1,
+  Vista:'',
+  Camas:1,
+  Tipos_Camas:[],
+  Amenidades:[],
+  Orden:1,
+  Tarifa:0,
+  Estatus:'LIMPIA'
+}

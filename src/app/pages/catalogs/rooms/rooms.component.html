@@ -55,7 +55,10 @@
             <!-- Inventario Column -->
             <ng-container matColumnDef="Inventario">
               <th mat-header-cell *matHeaderCellDef mat-sort-header> Inventario </th>
-              <td mat-cell *matCellDef="let row"> {{ row.Inventario }} </td>
+              <td mat-cell *matCellDef="let row">
+                <!-- Calculate and display the count inline -->
+                {{ getInventarioCount(row) }}
+              </td>            
             </ng-container>
 
             <!--Acciones-->
@@ -64,6 +67,9 @@
               <td mat-cell *matCellDef="let row"> 
                 <a title="Editar" class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm" (click)="edit(row)">
                   <i class="fa-solid fa-pencil"></i>
+                </a> 
+                <a title="Agregar" class="mx-3 btn btn-icon btn-light btn-hover-success btn-sm" (click)="add(row)">
+                  <i class="fa-solid fa-plus"></i>
                 </a> 
               </td>
             </ng-container>

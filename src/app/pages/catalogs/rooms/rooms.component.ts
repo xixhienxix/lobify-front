@@ -12,6 +12,7 @@ import { NewRoomComponent } from './components/new-room/new-room.component';
 import { FileUploadService } from 'src/app/services/file.upload.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 import { ParametrosService } from '../../parametros/_services/parametros.service';
+import { AddRoomComponent } from './components/more-rooms/more-rooms.component';
 interface roomTable {
   Codigo:string,
   Tipo:string,
@@ -170,45 +171,89 @@ export class RoomsComponent implements OnInit{
 
   add(habitacion:roomTable){
 
-    const modalRef = this.modalService.open(NewRoomComponent,{ size: 'md', backdrop:'static' })
+    const modalRef = this.modalService.open(AddRoomComponent,{ size: 'md', backdrop:'static' })
     modalRef.componentInstance.habitacion=habitacion;
     modalRef.componentInstance.editarHab=true
+    modalRef.componentInstance.codigoCuarto = habitacion.Codigo
+    modalRef.componentInstance.cuartosArray = this.dataSourceBS
+
+    modalRef.componentInstance.honAddedRooms.subscribe({
+      next:(responseMessage:string)=>{
+        const alertsModalRef = this.modalService.open(AlertsComponent, {size:'sm', backdrop:'static'})
+        alertsModalRef.componentInstance.alertHeader = 'Exito'
+        alertsModalRef.componentInstance.mensaje = 'Habitaciones agregadas al inventario'
+        
+        alertsModalRef.result.then((result)=> {
+          this.getHabitaciones(true);
+          this.closeResult = `Closed with: ${result}`;
+
+        }, (reason) => {
+          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+        })
+        setTimeout(() => {
+          modalRef.close('Close click');
+        },4000)
+        return
+      }
+    })
+
     modalRef.result.then((result) => {
+      console.log('Received nombreHabs:', result);
       this.habitacionesArr=[]
+      this.habitacionesArr = result;
+
       this.closeResult = `Closed with: ${result}`;
       }, (reason) => {
           this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
       });  
   }
 
-  
+  getInventarioCount(row:Habitacion): number {
+    return this.dataSourceBS.filter(item => item.Codigo === row.Codigo).length;
+  }
 
-  delete(habitacion:any){
-    this.isLoading=true
-    this._habitacionService.deleteHabitacion(habitacion.Codigo).subscribe({
-      next:async (data)=>{
-        if(data!=0 && data!= null)
-          {
-            this.promptMessage('Error','Aun existen huespedes asignados a este codigo de cuarto, cambie el tipo de cuarto de los huespedes y vuelva a intentarlo')
+  delete(habitacion:any){   
+    const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
+    modalRef.componentInstance.alertHeader = 'Advertencia'
+    modalRef.componentInstance.mensaje='Estas seguro que deseas eliminar la habitación?'          
+    modalRef.result.then((result) => {
+      this.isLoading=true
+
+      if(result=='Aceptar')        {
+        this._habitacionService.deleteHabitacion(habitacion.Codigo, habitacion.Numero).subscribe({
+          next:async (data)=>{
+            if(data!=0 && data!= null)
+              {
+                this.promptMessage('Error','Aun existen huespedes asignados a este codigo de cuarto, cambie el tipo de cuarto de los huespedes y vuelva a intentarlo')
+              }
+            else {
+              this.isLoading=false
+              this.getHabitaciones(true);
+              this.promptMessage('Exito','Habitacion eliminada con exito' )
+            }
+          },
+          error:()=>{
+            this.isLoading=false
+            this.promptMessage('Error','No se pudo eliminar la habitacion intente de nuevo')
+    
+          },
+          complete:()=>{
+            this.isLoading=false
           }
-        else {
-          this._habitacionService.sendCustomFormNotification(true);
-          this.promptMessage('Exito','Habitacion eliminada con exito' )
-        }
-      },
-      error:()=>{
-        this.isLoading=false
-        this.promptMessage('Error','No se pudo eliminar la habitacion intente de nuevo')
-
-      },
-      complete:()=>{
+        })
+      } else if(result === 'Close click') {
         this.isLoading=false
       }
-    })
+
+      this.closeResult = `Closed with: ${result}`;
+      }, (reason) => {
+          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+      });
   }
 
   altaDehabitacion(){
     const modalRef=this.modalService.open(NewRoomComponent,{ size: 'lg', backdrop:'static' })
+    modalRef.componentInstance.editarHab=false
     modalRef.componentInstance.edicion=false
   }
 

@@ -74,8 +74,9 @@ export class OutOfServiceComponent implements OnInit{
     numeroDelete:Array<number>;
     isLoading:boolean=true
     statusBloqueo:string
-    filterTextCuarto:string
-    filterStatus:boolean
+    filterTextCuarto:string | null = null;
+    filterStatus:boolean | null = null;
+
 
     originalData: any[] = []; // To keep unfiltered data
     dateRange = { start: null, end: null }; // Date range
@@ -221,6 +222,8 @@ export class OutOfServiceComponent implements OnInit{
           this.filterText = '';
           this.dateRange = { start: null, end: null };
           this.dataSource.data = [...this.allBloqueos];
+          this.filterTextCuarto = null;
+          this.filterStatus = null;
         }
 
         applyFilters() {
@@ -252,10 +255,13 @@ export class OutOfServiceComponent implements OnInit{
               return matchesHabitacion && matchesDateRange && matchesCuarto;
             }else {
               // Check if Status Matches
-              const matchesStatus = this.filterStatus === null || item.Completed === this.filterStatus;
-                      
-              // Return true if all filters match
-              return matchesHabitacion && matchesDateRange && matchesCuarto && matchesStatus;
+              const matchesStatus =
+              this.filterStatus === null ||
+              (this.filterStatus === true && item.Completed === true) || 
+              (this.filterStatus === false && (item.Completed === false || item.Completed === undefined));
+                    
+            // Return true if all filters match
+            return matchesHabitacion && matchesDateRange && matchesCuarto && matchesStatus;
             }
             
           });

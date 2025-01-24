@@ -1,0 +1,57 @@
+<form [formGroup]="roomForm" class="col-md-12">
+    <div class="col-md-12">
+        <label style="color:#00506a; font-weight: bold;">Generar Habitaciones (Inventario)</label>
+        <p>¿Cuantas habitaciones deseas generar?</p>
+    </div>
+    <br>
+    <div class="input-group">
+        <div class="input-group-append">
+            <button style="background-color: transparent;border-right: 2px solid #e6e9ed; border-left: 2px solid #dadcdf; border-top : 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;" class="btn btn-secondary" (click)="removeInput()" type="button">
+                <i class="fa fa-minus">
+                </i>
+            </button>
+        </div>
+            <input
+            style="background-color: #e6e9ed; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;  border-left: 2px solid #e6e9ed;"
+            class="text-center input-group form-control form-control-lg form-control-solid"
+            placeholder=""
+            [attr.disabled]="true"
+            formControlName="inventario"
+            [value]="quantityInv"
+            >
+
+        <div class="input-group-append">
+            <button style="border-right: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf; background-color: transparent;" class="btn btn-secondary" (click)="addInput()" type="button">
+                <i class="fa fa-plus">
+                </i>
+            </button>
+        </div>
+    </div>
+    <br>
+    <div class="form-group col-md-12" style="font-weight: bold;">
+        <mat-checkbox (click)="clearHabsNumber(checked.checked)" #checked >¿Deseas asignar Numeración o Nombre Especiales? </mat-checkbox>
+    </div>
+    <div class="form-group col-md-12" style="font-weight: bold;">
+        <small class="col-lg-12" style="color: red;" *ngIf="nombresIguales">Los Nombres de las habitaciones no pueden ser identicos</small>
+    </div>
+    <ng-container *ngIf="checked.checked">
+        <div formArrayName="habs">
+            <ng-container *ngFor="let user of numeroHabs.controls; let i = index">
+                <div class="form-group" style="float:left; margin: 5px;">
+                    <input
+                    formControlName="{{i}}"
+                    placeholder="{{i+1}}.-"
+                    style="background-color: #e6e9ed;"
+                    class="form-control"
+                    type="text"
+                    [class.is-invalid]="user.errors?.duplicate || (user.invalid && (user.dirty || user.touched))">
+                </div>
+            </ng-container>
+            <div *ngIf="numeroHabs.errors?.duplicates" class="text-danger">
+                There are duplicate values in the inputs.
+            </div>
+        </div>
+    </ng-container>
+    <br>
+</form>
+

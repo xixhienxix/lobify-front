@@ -8,7 +8,7 @@ import { Subject, Subscription, concat, filter, map, takeUntil } from 'rxjs';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { Adicional } from 'src/app/models/adicional.model';
 import { Disponibilidad } from 'src/app/models/disponibilidad.model';
-import { Habitacion } from 'src/app/models/habitaciones.model';
+import { DEFAULT_HAB, Habitacion } from 'src/app/models/habitaciones.model';
 import { HabitacionesService } from 'src/app/services/habitaciones.service';
 import { DateTime } from 'luxon'
 import { CodigosService } from 'src/app/services/codigos.service';

@@ -25,12 +25,15 @@ import { FareCalendarComponent } from './rates/fare-calendar/fare.calendar.compo
 import { TempRatesComponent } from './rates/temp-rates/temp.rates.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatIconModule } from '@angular/material/icon';
+import { AddRoomComponent } from './rooms/components/more-rooms/more-rooms.component';
+import { RoomGeneratorComponent } from './rooms/_helpers/room-generator/room-generator.component';
 
 
 
 @NgModule({
   declarations: [
     CatalogsComponent,
+    AddRoomComponent,
     RoomsComponent,
     NewRoomComponent,
     UploadFormComponent,
@@ -41,7 +44,8 @@ import { MatIconModule } from '@angular/material/icon';
     SpecialRatesComponent,
     ExpressRatesComponent,
     FareCalendarComponent,
-    TempRatesComponent
+    TempRatesComponent,
+    RoomGeneratorComponent
   ],
   imports: [
     CommonModule,

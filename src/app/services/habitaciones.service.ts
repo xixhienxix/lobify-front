@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Inject, Injectable, OnDestroy, inject } from '@angular/core';
 import { BehaviorSubject, Observable, Subject, catchError, map } from 'rxjs';
 import { Habitacion } from '../models/habitaciones.model';
@@ -121,15 +121,28 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
     )
    }
 
+   addRooms(habitacionesArr:any, codigoCuarto:string){
+    return this.http.post(environment.apiUrl+'/habitaciones/agregar',{habitacionesArr,codigoCuarto}).pipe(
+      map(result => {
+          return (result);  
+       }),
+      catchError((err) => {
+        return err;
+      }));
+   }
+
 
 
    searchRoom(habitacion:Habitacion){
     return this.http.post<Habitacion[]>(environment.apiUrl+'/habitacion/buscar',{habitacion})
   }
 
-  deleteHabitacion(codigo:string){
-    return this.http
-    .delete(environment.apiUrl+'/habitacion/delete/'+codigo)
+  deleteHabitacion(codigo: string, numero: string) {
+    const params = new HttpParams()
+      .set('codigo', codigo)
+      .set('numero', numero);
+  
+    return this.http.delete(environment.apiUrl + '/habitacion/delete', { params });
   }
 
   saveUrlToMongo(downloadURL:string,fileUploadName:string){
