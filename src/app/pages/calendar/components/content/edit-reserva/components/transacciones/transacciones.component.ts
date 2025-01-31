@@ -752,8 +752,7 @@ interface StateMapping {
   
     aplicaDescuento(autoriza:string){
       
-      if(this.secondFormGroup.invalid)
-      {
+      if(this.secondFormGroup.invalid){
         this.secondFormInvalid=true
         return;
       }else{this.secondFormGroup.valid}{this.secondFormInvalid=false}

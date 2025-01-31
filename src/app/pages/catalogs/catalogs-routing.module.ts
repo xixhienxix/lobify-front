@@ -3,6 +3,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { CatalogsComponent } from './catalogs.component';
 import { RoomsComponent } from './rooms/rooms.component';
 import { RatesComponent } from './rates/rates.component';
+import { PromoComponent } from './promos/promo.component';
 
 
 
@@ -20,6 +21,10 @@ const routes: Routes = [
       {
         path: 'rates',
         component: RatesComponent,
+      },
+      {
+        path: 'promos',
+        component: PromoComponent,
       },
       { path: '', redirectTo: 'rooms', pathMatch: 'full' },
       { path: '**', redirectTo: 'rooms', pathMatch: 'full' },

@@ -1,0 +1,193 @@
+    <form [formGroup]="formGroup">
+      <div class="row modal-body">
+          <div class="col-lg-12">
+            <mat-radio-group formControlName="estado">
+              <mat-radio-button *ngFor="let option of promoOptions" [value]="option.value">
+                {{ option.label }}
+              </mat-radio-button>
+            </mat-radio-group>
+          </div>
+  
+          <div *ngFor="let field of promoFields" class="row modal-body promofield">
+            <!-- Render all fields when tabIndex is 0, 1, or 2 -->
+            <div class="col-lg-12" *ngIf="tabIndex !== 3 || (tabIndex === 3 && field.id === 'name')">
+              <label *ngIf="field.id !== 'desc'" class="form-label" style="font-weight: bold;">
+                {{ field.label | translate }}
+              </label>
+              <input
+                [ngClass]="{
+                  'is-invalid': formGroup.get(field.formControlName)?.invalid && formGroup.get(field.formControlName)?.touched
+                }"
+                *ngIf="!field.isTextarea"
+                [id]="field.id"
+                [name]="field.name"
+                class="form-control"
+                [formControlName]="field.formControlName"
+              />
+              <div *ngIf="formGroup.get(field.formControlName)?.invalid && formGroup.get(field.formControlName)?.touched" class="invalid-feedback">
+                <span *ngIf="formGroup.get(field.formControlName)?.hasError('required')">This field is required</span>
+              </div>
+            </div>
+          </div>
+          
+          <ng-container *ngIf="tabIndex === 3">
+            <div class="row modal-body justify-content-center">
+              <div class="col-lg-3 d-flex align-items-center justify-content-end">
+                <label style="font-weight: bold;" class="form-label">{{ "PromosComponent.stay" | translate }}</label>
+              </div>
+              <div class="col-lg-3 d-flex align-items-center justify-content-center">
+                <input class="form-control" type="number" min="1" formControlName="stay" name="stay">
+              </div>
+              <div class="col-lg-3 d-flex align-items-center justify-content-start">
+                <label style="font-weight: bold;" class="form-label">{{ "PromosComponent.night" | translate }}</label>
+              </div>
+            </div>
+            <div class="row modal-body justify-content-center">
+              <div class="col-lg-3 d-flex align-items-center justify-content-end">
+                <label style="font-weight: bold;" class="form-label">{{ "PromosComponent.payOnly" | translate }}</label>
+              </div>
+              <div class="col-lg-3 d-flex align-items-center justify-content-center">
+                <input class="form-control" type="number" min="1" formControlName="payonly" name="payonly">
+              </div>
+              <div class="col-lg-3 d-flex align-items-center justify-content-start">
+                <label style="font-weight: bold;" class="form-label">{{ "PromosComponent.night" | translate }}</label>
+              </div>
+            </div>
+            <div class="row modal-body">
+                <br>
+            </div>
+            <div class="row modal-body">
+                <label style="font-weight: bold;" class="form-label">{{ "PromosComponent.ratepernight" | translate }}</label>
+                <div class="col-lg-12">
+                    <mat-radio-group formControlName="rateType" [(ngModel)]="selectedRate">
+                      <mat-radio-button *ngFor="let option of radioRatesOptions" [value]="option.value">
+                        {{ option.label }}
+                      </mat-radio-button>
+                    </mat-radio-group>
+                </div>
+            </div>
+          </ng-container>
+          
+          <ng-container *ngIf="tabIndex !== 3">
+            <div class="row modal-body">
+                <app-discount-selector
+                    [showErrors]="showErrors"
+                    (discountChange)="handleDiscountChange($event)">
+                </app-discount-selector>
+              </div>
+          </ng-container>
+          
+
+          <ng-container *ngIf="tabIndex === 0 || tabIndex === 3">
+            <div class="row modal-body">
+                <label style="font-weight: bold;" class="form-label">{{ "PromosComponent.cuponvalid" | translate }}</label>
+                <mat-form-field class="date-picker">
+                  <mat-date-range-input [rangePicker]="picker">
+                    <input matStartDate placeholder="Fecha de Llegada" [formControl]="intialDateFC" (dateChange)="addEventIntialDate('change', $event)">
+                    <input matEndDate placeholder="Fecha de Salida" [formControl]="endDateFC" (dateChange)="addEventEndDate('change', $event)">
+                  </mat-date-range-input>
+                  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-date-range-picker #picker></mat-date-range-picker>
+                </mat-form-field>
+              </div>
+          </ng-container>
+
+          <ng-container *ngIf="tabIndex === 1">
+            <div class="row modal-body align-items-center">
+                <label class="col-lg-8 col-form-label fw-bold">{{ "PromosComponent.arriveguest" | translate }}</label>
+                <div class="col-lg-4">
+                  <input class="form-control" type="number" min="1" formControlName="anticipatedNights" name="anticipatedNights">
+                </div>
+                <small style="color: red;" *ngIf="formGroup.get('anticipatedNights')?.invalid">
+                    La estancia anticipada no puede ser menor a 1 noche 
+                </small>
+                <label class="col-lg-8 col-form-label fw-bold">{{ "PromosComponent.daysbefore" | translate }}</label>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="tabIndex === 2">
+            <div class="row modal-body align-items-center">
+                <label class="col-lg-8 col-form-label fw-bold">{{ "PromosComponent.arriveguestmax" | translate }}</label>
+                <div class="col-lg-4">
+                  <input class="form-control" type="number" min="1" formControlName="anticipatedNightsmax" name="anticipatedNightsmax">
+                </div>
+                <small style="color: red;" *ngIf="formGroup.get('anticipatedNightsmax')?.invalid">
+                    La estancia anticipada no puede ser menor a 1 noche 
+                </small>
+                <label class="col-lg-8 col-form-label fw-bold">{{ "PromosComponent.daysbefore" | translate }}</label>
+            </div>
+          </ng-container>
+
+
+        <div class="row modal-body">
+          <label style="font-weight: bold;" class="form-label">{{ "PromosComponent.checkinDate" | translate }}</label>
+          <mat-form-field class="date-picker">
+            <mat-date-range-input [rangePicker]="pickerCheckIn">
+              <input matStartDate placeholder="Fecha de Llegada" [formControl]="intialDateFCCheckIn" (dateChange)="addEventIntialDateCheckIn('change', $event)">
+              <input matEndDate placeholder="Fecha de Salida" [formControl]="endDateFCCheckIn" (dateChange)="addEventEndDateCheckIn('change', $event)">
+            </mat-date-range-input>
+            <mat-datepicker-toggle matIconSuffix [for]="pickerCheckIn"></mat-datepicker-toggle>
+            <mat-date-range-picker #pickerCheckIn></mat-date-range-picker>
+          </mat-form-field>
+        </div>
+  
+        <ng-container *ngIf="tabIndex !== 3">
+            <div class="row modal-body">
+                <div class="col-lg-6">
+                  <label style="color:#00506a; font-weight: bold;" class="form-label">{{ "PromosComponent.estanciaMin" | translate }}</label>
+                  <input
+                       type="number" min="1"
+                      class="form-control" formControlName="minNoches" name="minNoches">
+                </div>
+                <div class="col-lg-6">
+                  <label style="color:#00506a; font-weight: bold;" class="form-label">
+                    {{ "PromosComponent.estanciaMax" | translate }}
+                    <span class="fa fa-question-circle" ngbTooltip="Si coloca un 0 la tarifa no tendra maximo de noches"></span>
+                  </label>
+                  <input type="number" min="1" class="form-control" formControlName="maxNoches" name="maxNoches">
+                </div>
+              </div>
+        </ng-container>
+  
+        <div class="row modal-body">
+          <div class="col-lg-12">
+            <label style="color:#00506a; font-weight: bold;" class="form-label">{{ "PromosComponent.validDays" | translate }}</label>
+            <section class="checkbox-section">
+                <ng-container *ngFor="let option of options(); let i = index">
+                  <mat-checkbox
+                    class="checkbox-margin" value="{{option}}"
+                    [checked]="option.checked"
+                    (change)="getOption($event.checked,i)">
+                    {{option.name}}
+                  </mat-checkbox>
+                </ng-container>
+                  <!-- Optional: display validation message -->
+            </section>
+          </div>
+        </div>
+  
+        <div class="row modal-body">
+          <div class="col-lg-12">
+            <label style="font-weight: bold;" class="form-label">{{ "PromosComponent.roomselect" | translate }}</label>
+          </div>
+        </div>
+  
+        <div class="row modal-body">
+          <app-camas-select 
+            [disponiblesIndexadosCamas]="disponiblesIndexadosCamas"
+            (selectionChanged)="selectionChanged($event)"
+          ></app-camas-select>
+        </div>
+  
+        <div class="row modal-body">
+          <div class="col-lg-12">
+            <label style="font-weight: bold;" class="form-label">{{ "PromosComponent.desc" | translate }}</label>
+          </div>
+          <div class="col-lg-12">
+            <mat-form-field class="square-input" appearance="outline">
+              <textarea formControlName="desc" matInput placeholder="" rows="3"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </form>

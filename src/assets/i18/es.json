@@ -57,8 +57,8 @@
         "parameters":"Parametros",
         "bloquedreports":"Fuera de Servicio",
         "catalogo-hab":"Catalogo de Habitaciones",
-        "rates-tittle":"Tarifario"
-
+        "rates-tittle":"Tarifario",
+        "promos-tittle":"Promociones"
     },
     "CalendarComponent":{
         "nva-rsv": "Nueva Reservación",
@@ -126,6 +126,32 @@
         "visibleOTAS": "CHANNEL MANAGER OTA's",
         "tarifaEspecialQuestion": "¿ QUISIERAS OFRECER UNA SEGUNDA TARIFA ?"
     },
+    "PromosComponent":{
+        "promosComponentTitle":"NUEVA PROMOCION",
+        "promosModalTitle" : "Nueva Promocion",
+        "NombrePromo":"Nombre para la Promocion",
+        "codigoPromo":"Codigo",
+        "numeroVeces":"Codigos de Canje Disponibles",
+        "cuponvalid":"Cupon valido solo para los siguientes dias",
+        "checkinDate":"Y el cliente llegue al hotel (Check-In) entre:",
+        "estanciaMin":"Estancia minima de noches:",
+        "estanciaMax":"Estancia minima de noches:",
+        "validDays":"Aplica los dias:",
+        "roomselect":"Solo aplica para las siguientes habitaciones:",
+        "desc":"Descripcion (Uso Interno)",
+        "selectaday":"Selecciona al menos un día valido",
+        "basicTab":"Básica",
+        "anticipadaTab":"Anticipada",
+        "lastminuteTab":"Ultimo Minuto",
+        "freenightTab":"Noche Gratis",
+        "arriveguest":"Cliente debe reservar con un minimo de:",
+        "arriveguestmax":"Cliente debe reservar con un Máximo de:",
+        "daysbefore":"Dias antes de llegar al hotel (Check-In)",
+        "stay":"QUEDATE",
+        "payOnly":"PAGA SOLO",
+        "night":"NOCHES",
+        "ratepernight":"CUAL TARIFA POR NOCHE SE VA A REGALAR?"
+    },
     "TempRatesComponent":{
         "TempSpecialRateTabTittle": "NUEVA TARFIA TEMPORADA",
         "TempActiveRate":"TARIFA ACTIVA",
@@ -148,6 +174,7 @@
         "TempvisibleOTAS": "CHANNEL MANAGER OTA's",
         "TemptarifaEspecialQuestion": "¿ QUISIERAS OFRECER UNA SEGUNDA TARIFA ?",
         "TempAddNewRate":"AGREGAR NUEVA TARIFA DE TEMPORADA"
+        
     },
     "DashboardComponent":{
         "adrTooltip":"Tarifa diaria promedio (ADR): el ingreso promedio obtenido por habitación por día, calculado dividiendo el ingreso total por habitación por la cantidad de habitaciones vendidas. Mide la estrategia de precios y el desempeño financiero de un hotel.",

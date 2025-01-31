@@ -469,19 +469,24 @@ export class ContentComponent implements OnInit{
 
     const existingEvents = this.scheduleObj.getEvents()
     console.log(existingEvents);
+    let cellDetails,rowData2
+    let numeroCuarto:string
+    let codigoCuarto:string
     
     const activeCellsData = this.scheduleObj.activeCellsData;
-    const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
-    const rowData2 = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
-    
-    const numeroCuarto = rowData2.resourceData.text
-    const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+    if(activeCellsData.element !== undefined){
+       cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
+       rowData2 = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
 
-    console.log(cellDetails)
-    console.log(rowData2)
+       numeroCuarto = rowData2.resourceData.text
 
+    }else{
+      numeroCuarto = args.data.Numero
+    }
 
-    if (startTime.toDateString() <= today.toDateString()) {
+    codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+
+    if (startTime.toDateString() >= today.toDateString()) {
       if (args.data.hasOwnProperty("Folio")) {
         if (args.type === 'Editor' || args.type === 'QuickInfo') {
           args.cancel = true;

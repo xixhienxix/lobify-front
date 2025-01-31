@@ -1,0 +1,61 @@
+
+  ::ng-deep .mat-datepicker-content {
+    z-index: 1050 !important; /* Make sure it's above the modal */
+  }
+  .modal-content {
+    z-index: 1040; /* Lower z-index to let the datepicker pop-up above */
+  }
+
+  .cdk-overlay-container, .cdk-overlay-pane {
+    z-index: 9999 !important;
+  }
+  .cdk-overlay-connected-position-bounding-box {
+    z-index: 99999 !important;
+  }
+  .square-input {
+    width: 100%;  /* Make it as wide as its container */
+  }
+  
+  .square-input textarea {
+    resize: none; /* Prevent resizing */
+    text-align: left; /* Align tex
+    t to the left */
+  }
+
+  .is-invalid {
+    border: 1px solid red;
+    background-color: #f8d7da;
+  }
+  
+  .invalid-feedback {
+    color: red;
+    font-size: 12px;
+  }
+
+
+  .modal-body {
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    margin-bottom: 15px; /* Adjust as needed */
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  
+  .row {
+    display: flex;
+    margin-bottom: 8px !important;
+    align-items: center; /* Centers all columns vertically in the same row */
+  }
+  
+  .col-lg-4 {
+    display: flex;
+    align-items: center; /* Centers the content (label/input) vertically in each column */
+    justify-content: flex-start; /* Aligns label to the left, input in the center if required */
+  }
+  
+  .form-label {
+    font-weight: bold;
+    margin-right: 10px; /* Adjust the space between the label and input */
+  }
+  
+  
