@@ -23,33 +23,29 @@
           <table *ngIf="!isLoading || !reloading" mat-table [dataSource]="dataSourcePromociones">
   
             <!-- Position Column -->
-            <ng-container matColumnDef="Nombre">
+            <ng-container matColumnDef="nombre">
               <th mat-header-cell *matHeaderCellDef> Nombre </th>
-              <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
+              <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
             </ng-container>
         
             <!-- Name Column -->
-            <ng-container matColumnDef="Tipo">
+            <ng-container matColumnDef="tipo">
               <th mat-header-cell *matHeaderCellDef> Tipo de Promocion </th>
-              <td mat-cell *matCellDef="let element"> 
-                <div [innerHTML]="formatDates(element)"></div>
-              </td>
+              <td mat-cell *matCellDef="let element"> {{element.tipo}}</td>
             </ng-container>
         
             <!-- Weight Column -->
-            <ng-container matColumnDef="Periodo">
+            <!-- <ng-container matColumnDef="Periodo">
               <th mat-header-cell *matHeaderCellDef> Periodo de Check-In </th>
               <td mat-cell *matCellDef="let element"> 
                   <div [innerHTML]="promocionesActivas(element)"></div>
               </td>
-            </ng-container>
+            </ng-container> -->
         
             <!-- Symbol Column -->
-            <ng-container matColumnDef="Estado">
+            <ng-container matColumnDef="estado">
               <th mat-header-cell *matHeaderCellDef> Estado </th>
-              <td mat-cell *matCellDef="let element"> 
-                <div [innerHTML]="estado(element)"></div>
-              </td>
+              <td mat-cell *matCellDef="let element"> {{element.estado}} </td>
             </ng-container>
   
             <!-- Estancia Column -->

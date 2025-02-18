@@ -9,6 +9,7 @@ import { Subject, takeUntil } from "rxjs";
 import { Habitacion } from "src/app/models/habitaciones.model";
 import { Prompt } from "src/app/models/prompt.model";
 import { AlertsComponent } from "src/app/_metronic/shared/alerts/alerts.component";
+import { ParametrosService } from "../../parametros/_services/parametros.service";
 export type listaCamas = {key:number;value:string;}
 
 @Component({
@@ -24,7 +25,7 @@ export class PromoComponent implements OnInit {
     cuartosArray:Habitacion[]=[];
     disponiblesIndexadosCamas:listaCamas[]=[]
 
-    displayColumnsPromocion:string[] = ['Nombre', 'Tipo', 'Periodo', 'Estado','Acciones'];
+    displayColumnsPromocion:string[] = ['nombre', 'tipo', 'estado','Acciones'];
     dataSourcePromociones = new MatTableDataSource<any>();
     
     private ngUnsubscribe = new Subject<void>();
@@ -32,13 +33,22 @@ export class PromoComponent implements OnInit {
     constructor (
         private modalService: NgbModal,
         private promosService:PromosService,
-        private _habitacionService:HabitacionesService
+        private _habitacionService:HabitacionesService,
+        private _parametrosService:ParametrosService
      ) {
 
     }
 
     ngOnInit(): void {
         this.getPromos(true);
+
+        this.promosService.subject.subscribe({
+            next:async (value)=>{
+                if(value){
+                    await this.getPromos(true);
+                }
+            }
+        })
 
         this._habitacionService.getAll().pipe(
                 takeUntil(this.ngUnsubscribe)).subscribe({
@@ -53,13 +63,19 @@ export class PromoComponent implements OnInit {
         });
     }
 
-    getPromos(refresh:boolean){
-        this.promosService.getAll().subscribe({
-            next:(value)=>{
-                console.log(value)
-            }
-        })
-    }
+    getPromos(refresh: boolean) {
+        this.promosService.getAll().pipe(takeUntil(this.ngUnsubscribe)).subscribe({
+          next: (value) => {
+            // Ensure the dataSource always has a valid array
+            this.dataSourcePromociones.data = value.length ? value : [];
+          },
+          error: () => {
+            // Handle errors and set empty data to show "NO PROMOS" row
+            this.dataSourcePromociones.data = [];
+          }
+        });
+      }
+      
 
     formatDates(promos:Promos){
 
@@ -84,6 +100,7 @@ export class PromoComponent implements OnInit {
     nvaPromocion(){
         const modalRef=this.modalService.open(NuevaPromocionModalComponent,{ size: 'md', backdrop:'static' });
         modalRef.componentInstance.disponiblesIndexadosCamas = this.disponiblesIndexadosCamas
+        modalRef.componentInstance.currentParametros = this._parametrosService.getCurrentParametrosValue
         modalRef.componentInstance.honAlertsEvent.subscribe({
             next:(value:Prompt)=>{
             this.promptMessage(value.title,value.message);

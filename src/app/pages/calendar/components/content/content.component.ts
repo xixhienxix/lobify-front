@@ -390,9 +390,7 @@ export class ContentComponent implements OnInit{
           });
         });
       });
-  
-      console.log("Después de Bloqueos: ", this.datasourceArray);
-  
+    
       // Refresh Calendar
       this.refreshCalendar(this.datasourceArray);
     });

@@ -3,7 +3,7 @@ import { Injectable } from "@angular/core";
 import { Promos } from "../models/promos";
 import { environment } from "src/environments/environment";
 import { LocalForageCache } from "../tools/cache/indexdb-expire";
-import { BehaviorSubject, map, Subject } from "rxjs";
+import { BehaviorSubject, map, Observable, Subject } from "rxjs";
 
 @Injectable({
     providedIn:'root'
@@ -15,8 +15,8 @@ export class PromosService {
         defaultExpiration: 10800
     });
 
-    private subject =new Subject<any>();
-    private currentPromos$=new BehaviorSubject<Promos[]>([]);
+    subject =new Subject<any>();
+    currentPromos$=new BehaviorSubject<Promos[]>([]);
     private currentPromosSubject =new Subject<any>();
 
     constructor (private http: HttpClient){
@@ -31,11 +31,11 @@ export class PromosService {
         return this.subject.asObservable();
     }
   
-    get getCurrentTarifasValue() {
+    get getCurrentPromosValue() {
       return this.currentPromos$;
     }
   
-    set setCurrentTarifasValue(promos: any) {
+    set setCurrentPromosValue(promos: any) {
       this.currentPromos$.next(promos);
       this.sendCustomFormNotification(true);
   
@@ -67,13 +67,27 @@ export class PromosService {
       }
 
     getAll(){
-        return this.http.get<Promos>(environment.apiUrl + '/promos')
+        return this.http.get<Promos[]>(environment.apiUrl + '/promos')
         .pipe(
             map(responseData=>{
                 this.writeIndexDB("Promos",responseData);
-                this.setCurrentTarifasValue = responseData 
+                this.setCurrentPromosValue = responseData 
                 return responseData
             })
+            )
+    }
+
+    postPromo(data:any):Observable<any>{
+        return this.http.post<any>(environment.apiUrl + '/promos', { data }).pipe(
+            map(responseData => {
+                if (responseData.success) {
+                    if(responseData.exist){
+                        return responseData
+                    } else
+                  this.sendPromosNotification(true);
+                }
+                return responseData; // ✅ Ensure response is returned
+              })
             )
     }
 }

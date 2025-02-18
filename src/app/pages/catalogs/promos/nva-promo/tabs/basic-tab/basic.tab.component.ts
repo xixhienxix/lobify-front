@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, signal, ViewEncapsulation } from "@angular/core";
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, SimpleChanges, ViewEncapsulation } from "@angular/core";
 import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { MAT_DATE_LOCALE, MAT_DATE_FORMATS } from "@angular/material/core";
 import { NgbActiveModal, NgbDateAdapter, NgbDateParserFormatter } from "@ng-bootstrap/ng-bootstrap";
@@ -7,7 +7,10 @@ import { Dias } from "src/app/models/days.model";
 import { Habitacion } from "src/app/models/habitaciones.model";
 import { Prompt } from "src/app/models/prompt.model";
 import { listaCamas } from "../../../promo.component";
-
+export type formResponse  = {
+    response:boolean,
+    data:{ [key: string]: any }
+}
 
 @Component({
     selector:'app-basic-tab',
@@ -19,7 +22,7 @@ import { listaCamas } from "../../../promo.component";
         { provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }
       ]
 })
-export class BasicTabComponent implements OnInit{
+export class BasicTabComponent implements OnInit, OnChanges{
     
       readonly options =signal<Dias[]> ([
           {rateIndex:0, name:'Lun', value:0, checked:false},
@@ -30,6 +33,8 @@ export class BasicTabComponent implements OnInit{
           {rateIndex:0, name:'Sab', value:5, checked:false},
           {rateIndex:0, name:'Dom', value:6, checked:false}
         ]);
+
+
 
     formGroup:FormGroup
     porcentajeChecked:boolean=false
@@ -78,38 +83,70 @@ export class BasicTabComponent implements OnInit{
         private cdr: ChangeDetectorRef
     ) {
         this.formGroup = this.fb.group({
-            estado:[false,Validators.required],
-            rateType:[false,Validators.required],
-            nombre:['',Validators.required],
-            codigo:['',Validators.required],
-            qtyPrecio:[0,Validators.required],
-            inventario:[100,Validators.required],
-            minNoches:[1,Validators.required],
-            maxNoches:[0,Validators.required],
-            desc:[''],
-            anticipatedNights:[1, [Validators.required,this.qtyNightsValidator.bind(this)]],
-            anticipatedNightsmax:[1, [Validators.required,this.qtyNightsValidator.bind(this)]],
-            payonly:[1, [Validators.required,this.qtyNightsValidator.bind(this)]],
-            stay:[1, [Validators.required,this.qtyNightsValidator.bind(this)]],
-
-        })
+            estado: [false, Validators.required],
+            rateType: [false, Validators.required],
+            nombre: ['', Validators.required],
+            codigo: ['', Validators.required],
+            qtyPrecio: [0, Validators.required],
+            inventario: [100, Validators.required],
+            minNoches: [1, Validators.required],
+            maxNoches: [0, Validators.required],
+            intialDateFCCheckIn: [null, Validators.required], // Add this
+            endDateFCCheckIn: [null, Validators.required], // Add this
+            intialDateFC: [null, Validators.required], 
+            endDateFC: [null, Validators.required],
+            desc: [''],
+            anticipatedNights: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
+            anticipatedNightsmax: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
+            payonly: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
+            stay: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
+          });
     }
 
-    qtyNightsValidator(control: FormControl): { [key: string]: any } | null {
-        const discountType = this.formGroup?.get('anticipatedNights')?.value;
-        const payOnly = this.formGroup?.get('payOnly')?.value;
-        const stay = this.formGroup?.get('stay')?.value;
-      
-        // Check if the discount type is 'porcentaje' and ensure the value is <= 100
-        if (control.value < 1) {
-          return { minLimit: true }; // Return error if value exceeds 100
+    ngOnChanges(changes: SimpleChanges): void {
+        if (changes['tabIndex'] && !changes['tabIndex'].firstChange) {
+          this.updateValidatorsBasedOnTabIndex();
         }
-      
-        return null; // No error
+      }
+
+      // Dynamically update form field validators based on the selected tabIndex
+    updateValidatorsBasedOnTabIndex() {
+        const controls = this.formGroup.controls;
+
+        // Example logic: Disable or enable validators based on tabIndex
+        if (this.tabIndex === 0) {
+        // For tabIndex 0, make 'nombre' and 'codigo' required
+        controls['nombre'].setValidators([Validators.required]);
+        controls['codigo'].setValidators([Validators.required]);
+        controls['anticipatedNights'].clearValidators();
+        } else if (this.tabIndex === 1) {
+        // For tabIndex 1, make 'anticipatedNights' required
+        controls['nombre'].clearValidators();
+        controls['codigo'].clearValidators();
+        controls['anticipatedNights'].setValidators([Validators.required, this.qtyNightsValidator.bind(this)]);
+        } else if (this.tabIndex === 2) {
+        // For tabIndex 2, adjust fields similarly
+        controls['nombre'].setValidators([Validators.required]);
+        controls['codigo'].setValidators([Validators.required]);
+        controls['anticipatedNightsmax'].setValidators([Validators.required]);
+        } else if (this.tabIndex === 3) {
+        // For tabIndex 3, set different rules
+        controls['stay'].setValidators([Validators.required]);
+        controls['payonly'].setValidators([Validators.required]);
+        controls['desc'].clearValidators();
+        }
+        // Mark all controls as dirty so validation triggers
+        Object.keys(controls).forEach(control => controls[control].updateValueAndValidity());
+    }
+
+    qtyNightsValidator(control:any) {
+        if (control.value < 1) {
+          return { 'invalidQty': true };
+        }
+        return null;
       }
 
     ngOnInit(): void {
-        console.log('Date format is set to: DD/MM/YYYY');
 
         // Listen for changes in FormControls (alternative to (dateChange) in HTML)
     this.intialDateFC.valueChanges.subscribe(value => {
@@ -137,51 +174,72 @@ export class BasicTabComponent implements OnInit{
         console.log('discountEvent:', event);
     }
 
-    onSubmit(){
-        const nombreControl = this.formGroup.get('nombre');
-        const codigoControl = this.formGroup.get('codigo');
-
-        this.showErrors = true;
-      
-        // Clear previous errors before applying new ones
-        nombreControl?.setErrors(null);
-        codigoControl?.setErrors(null);
-      
-        if (nombreControl?.value === '') {
-          nombreControl.setErrors({ 'required': true });
-          nombreControl.markAsTouched();  // Mark as touched for validation
-          nombreControl.markAsDirty();    // Mark as dirty to trigger validation immediately
+    onSubmit() {
+        this.formGroup.markAllAsTouched(); // Mark all fields as touched to trigger validation
+    
+        let response: formResponse;
+    
+        // Check if any form field is invalid
+        if (this.formGroup.invalid) {
+            this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Faltan Datos por capturar en una o más pestañas' });
+            response = { response: false, data: [] };
+            return response;
         }
-      
-        if (codigoControl?.value === '') {
-          codigoControl.setErrors({ 'required': true });
-          codigoControl.markAsTouched();  // Mark as touched for validation
-          codigoControl.markAsDirty();    // Mark as dirty to trigger validation immediately
-        }
-
+    
+        // Validate if at least one day is selected
         const anyChecked = this.options().some(option => option.checked);
         if (!anyChecked) {
-            this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Selecciona almenos un dia de la semana valido' });
-            return
+            this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Selecciona al menos un día de la semana válido' });
+            response = { response: false, data: [] };
+            return response;
         }
-
-          // Check if the form is invalid
-        if (this.formGroup.invalid ) {
-            this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Faltan Datos por capturar' });
-            return; // Prevent form submission
+    
+        // Validate the date range
+        if (!this.initialDate || !this.endDate || this.initialDate > this.endDate) {
+            this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Las fechas no son válidas' });
+            response = { response: false, data: [] };
+            return response;
         }
+    
+        // Gather all form values
+        const formValues: { [key: string]: any } = {};
+        Object.keys(this.formGroup.controls).forEach(controlName => {
+            const control = this.formGroup.get(controlName);
+            if (control) {
+                formValues[controlName] = control.value;
+            }
+        });
+    
+        // Send success response
+        response = { response: true, data: formValues };
+        return response;
+    }
+    
 
+    // getActiveTabForm(): FormGroup {
+    //     const activeTab = this.tabIndex; // Ensure you have a way to track the active tab index
+    //     return this.formTabs[activeTab]; // Assuming you store forms per tab in an array `formTabs`
+    // }
+    
+    
 
-        const formValues: { [key: string]: any } = {};  // <-- Add index signature
-
+    getFormData() {
+        const formValues: { [key: string]: any } = {};
+        
         // Loop through all form controls and get their values
         Object.keys(this.formGroup.controls).forEach(controlName => {
-          const control = this.formGroup.get(controlName);
-          if (control) {
-            formValues[controlName] = control.value;
-          }
+            const control = this.formGroup.get(controlName);
+            if (control) {
+                formValues[controlName] = control.value;
+            }
         });
+        
+        // Optionally, include additional data like selected days or other inputs
+        formValues.selectedDays = this.options().filter(option => option.checked).map(option => option.name);
+    
+        return formValues;
     }
+    
 
     selectionChanged(camasSelected:any){
         this.selectedCamas = camasSelected;  // Store the selected camas values

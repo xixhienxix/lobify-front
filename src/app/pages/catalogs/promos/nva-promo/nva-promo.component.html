@@ -11,24 +11,28 @@
             <app-basic-tab  
                 [tabIndex]="selectedTabIndex"
                 [disponiblesIndexadosCamas]="disponiblesIndexadosCamas"
+                (honAlertsEvent)="onAlertsEvent($event)"
             ></app-basic-tab>
         </mat-tab>
         <mat-tab [label]="'PromosComponent.anticipadaTab' | translate">
             <app-basic-tab  
                 [tabIndex]="selectedTabIndex"
                 [disponiblesIndexadosCamas]="disponiblesIndexadosCamas"
+                (honAlertsEvent)="onAlertsEvent($event)"
             ></app-basic-tab>
         </mat-tab>
         <mat-tab [label]="'PromosComponent.lastminuteTab' | translate">
             <app-basic-tab  
                 [tabIndex]="selectedTabIndex"
                 [disponiblesIndexadosCamas]="disponiblesIndexadosCamas"
+                (honAlertsEvent)="onAlertsEvent($event)"
             ></app-basic-tab>
         </mat-tab>
         <mat-tab [label]="'PromosComponent.freenightTab' | translate">
             <app-basic-tab  
                 [tabIndex]="selectedTabIndex"
                 [disponiblesIndexadosCamas]="disponiblesIndexadosCamas"
+                (honAlertsEvent)="onAlertsEvent($event)"
             ></app-basic-tab>        
         </mat-tab>
       </mat-tab-group>
