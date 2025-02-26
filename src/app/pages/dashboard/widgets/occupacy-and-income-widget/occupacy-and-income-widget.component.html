@@ -4,7 +4,7 @@
 <div class="d-flex flex-column">
     <!-- Top Row -->
     <!-- begin::Item -->
-    <div class="d-flex align-items-center p-5" style="background-color: var(--header-background);">
+    <div class="d-flex align-items-center p-5" style="background-color: var(--dark-blue-background);">
         <!-- begin::Label -->
         <div class="d-flex flex-column flex-grow-1 me-2 align-items-center text-center">
             <a  class="fw-bolder  fs-2" style="color: white;">
@@ -16,56 +16,56 @@
 </div>
     <!--end:Item-->
 
-
-<!-- begin::Item -->
-<div class="d-flex align-items-center p-5" style="background-color: var(--deep-red-background);">
-    <!-- begin::Label -->
-    <div class="d-flex flex-column flex-grow-1 me-2 align-items-center text-center">
-        <a  class="fw-bolder  fs-2" style="color: white;">
-            {{"OccupacyAndIncomeWidgetComponent.adr" | translate}} 
-                <span [matTooltip]="(adrTooltip ? 'DashboardComponent.adrTooltip' : 'DashboardComponent.adrTooltip') | translate"
-                class="ki-solid ki-information-2"></span>
-        </a>
-        <!-- <small  style="color: var(--light-blue-font); font-weight: bold; padding-left: 10%;">
-            {{"OccupacyAndIncomeWidgetComponent.average-daily-rate" | translate}}
-        </small> -->
-    </div>
-    <!-- end::Label -->
-    <!-- begin::Content -->
-    <div class="flex-grow-1 fw-bolder rounded-2 py-1" >
-        <div class="d-flex flex-column me-2">
-            <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: var(--light-blue-font); margin: inherit;">
-               $ {{adr.toLocaleString('es-MX')}}
-            </span>
+    <div class="d-flex flex-column">
+        <!-- begin::Item -->
+        <div class="d-flex align-items-center p-5" style="background-color: var(--light-blue-background);">
+            <!-- begin::Label -->
+            <div class="d-flex flex-column flex-grow-1 me-2 align-items-center text-center">
+                <a  class="fw-bolder  fs-2" style="color: white;">
+                    {{"OccupacyAndIncomeWidgetComponent.adr" | translate}} 
+                        <span [matTooltip]="(adrTooltip ? 'DashboardComponent.adrTooltip' : 'DashboardComponent.adrTooltip') | translate"
+                        class="ki-solid ki-information-2"></span>
+                </a>
+                <!-- <small  style="color: var(--light-blue-font); font-weight: bold; padding-left: 10%;">
+                    {{"OccupacyAndIncomeWidgetComponent.average-daily-rate" | translate}}
+                </small> -->
+            </div>
+            <!-- end::Label -->
+            <!-- begin::Content -->
+            <div class="flex-grow-1 fw-bolder rounded-2 py-1" >
+                <div class="d-flex flex-column me-2">
+                    <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: var(--dark-blue-background); margin: inherit;">
+                    $ {{adr.toLocaleString('es-MX')}}
+                    </span>
+                </div>
+            </div>
+            <!-- end::Content -->
+            <!-- begin::Label -->
+            <div class="d-flex flex-column flex-grow-1 me-2 align-items-center text-center">
+                <a  class="fw-bolder  fs-2" style="color: white;">
+                    {{"OccupacyAndIncomeWidgetComponent.revpar" | translate}}
+                    <span [matTooltip]="(revParTooltip ? 'DashboardComponent.revParTooltip' : 'DashboardComponent.revParTooltip') | translate"
+                    class="ki-solid ki-information-2"></span>
+                </a>
+                <!-- <small  style="color: var(--light-blue-font); font-weight: bold; padding-left: 10%;">
+                    {{"OccupacyAndIncomeWidgetComponent.income-by-free-hab" | translate}}
+                </small> -->
+            </div>
+            <!-- end::Label -->
+            <!-- begin::Content -->
+            <div class=" flex-grow-1 fw-bolder rounded-2 py-1">
+                <div class="d-flex flex-column me-2">
+                    <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: var(--deep-red-font); margin: inherit;">
+                        $ {{revPar.toLocaleString('es-MX')}}
+                    </span>
+                </div>
+            </div>
+            <!-- end::Content -->
         </div>
     </div>
-    <!-- end::Content -->
-    <!-- begin::Label -->
-    <div class="flex-grow-1 me-2">
-        <a  class="fw-bolder  fs-2" style="color: white;">
-            {{"OccupacyAndIncomeWidgetComponent.revpar" | translate}}
-            <span [matTooltip]="(revParTooltip ? 'DashboardComponent.revParTooltip' : 'DashboardComponent.revParTooltip') | translate"
-            class="ki-solid ki-information-2"></span>
-        </a>
-        <!-- <small  style="color: var(--light-blue-font); font-weight: bold; padding-left: 10%;">
-            {{"OccupacyAndIncomeWidgetComponent.income-by-free-hab" | translate}}
-        </small> -->
-    </div>
-    <!-- end::Label -->
-    <!-- begin::Content -->
-    <div class=" flex-grow-1 fw-bolder rounded-2 py-1">
-        <div class="d-flex flex-column me-2">
-            <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: var(--deep-red-font); margin: inherit;">
-                $ {{revPar.toLocaleString('es-MX')}}
-            </span>
-        </div>
-    </div>
-    <!-- end::Content -->
-</div>
-
 
 <!-- start: Line -->
-<div style="border:solid; border-width: thick; border-image: linear-gradient(to right, var(--light-blue-font) 50%, var(--deep-red-font) 50%)1 100;">
+<div style="border:solid; border-width: thick; border-image: linear-gradient(to right, var(--dark-blue-background) 50%, var(--deep-red-font) 50%)1 100;">
 </div> 
 <!-- end: Line -->
 
@@ -73,15 +73,12 @@
 <div class="d-flex flex-column">
 
 <!-- begin::Item -->
-<div class="d-flex align-items-center p-5 " style="background-color: var(--deep-red-background);">
+<div class="d-flex align-items-center p-5 " style="background-color: var(--light-blue-background);">
     <!-- begin::Label -->
     <div class="d-flex flex-column flex-grow-1 me-2 align-items-center text-center">
         <a  class="fw-bolder  fs-2" style="color: white;">
             {{"OccupacyAndIncomeWidgetComponent.hotel-occupacy-rate" | translate}}
         </a>
-        <!-- <small  style="color: var(--light-blue-font); font-weight: bold; padding-left: 10%;">
-            {{"OccupacyAndIncomeWidgetComponent.occupacy-percentage" | translate}}
-        </small> -->
     </div>
     <!-- end::Label -->
     <!-- begin::Content -->

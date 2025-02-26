@@ -467,7 +467,7 @@ export class ContentComponent implements OnInit{
           });
         }
       });
-  
+    
       // Refresh Calendar
       this.refreshCalendar(this.datasourceArray);
     });
@@ -547,15 +547,85 @@ export class ContentComponent implements OnInit{
   * @param args This functions is to fill the dropdown of Time that appears whenever yo create or modifiy and existing reservation
   */
   onPopupOpen = (args: any) => {
-    args.cancel = true; // Default to cancel popup
-  
-    const existingEvents = this.scheduleObj.getEvents();
-  
-    if (args.data.hasOwnProperty("Folio") && args.data.Subject !== 'Bloqueo') {
-      if (args.type === 'Editor' || args.type === 'QuickInfo') {
-        this.honEditRsv.emit({ row: args, folio: args.data.Folio });
-      }
-      return;
+    // Check if the 'Folio' property exists
+    args.cancel = true;
+    const today = new Date(); // Get today's date
+    const startTime = new Date(args.data.StartTime); // Convert StartTime to a Date object
+
+    const existingEvents = this.scheduleObj.getEvents()
+    console.log(existingEvents);
+    let cellDetails,rowData2
+    let numeroCuarto:string
+    let codigoCuarto:string
+    
+    const activeCellsData = this.scheduleObj.activeCellsData;
+    if(activeCellsData.element !== undefined){
+       cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
+       rowData2 = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
+
+       numeroCuarto = rowData2.resourceData.text
+
+    }else{
+      numeroCuarto = args.data.Numero
+    }
+
+    codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+
+    if (startTime.toDateString() >= today.toDateString()) {
+      if (args.data.hasOwnProperty("Folio")) {
+        if (args.type === 'Editor' || args.type === 'QuickInfo') {
+          args.cancel = true;
+          this.honEditRsv.emit({ row: args, folio: args.data.Folio });
+        }
+      } else if (args.type === 'QuickInfo') {
+        args.cancel = true;
+        const groupIndex = args.data.groupIndex;
+
+        const resourceCollection = this.scheduleObj.getResourceCollections();
+        const activeCellsData = this.scheduleObj.activeCellsData;
+        const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
+        const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!)
+        // Get current date and filter events
+        const now = new Date();
+        const events = this.scheduleObj.getEvents();
+
+        let filteredEvents
+        if(events && events.length !== 0){
+          filteredEvents = events.filter(event => new Date(event.EndTime) >= now);
+        
+        // Helper function to get only the date part of a Date object (ignore time)
+        const getDateOnly = (date: string | Date): string => {
+          return new Date(date).toISOString().split('T')[0];  // Format as YYYY-MM-DD
+        };
+
+        // Check for overlapping events (same day only, ignoring time)
+        const hasOverlap = filteredEvents.some(event => {
+          if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
+            const eventStartDate = getDateOnly(event.StartTime);
+            const eventEndDate = getDateOnly(event.EndTime);
+            const argsStartDate = getDateOnly(args.data.startTime);
+            const argsEndDate = getDateOnly(args.data.endTime);
+
+            // Check for date overlap (ignoring time)
+            return (argsStartDate <= eventEndDate && argsEndDate >= eventStartDate);
+          }
+          return false;
+        });
+
+        if(hasOverlap){
+          return
+        }else{
+          const numeroCuarto = rowData.resourceData.text
+          const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+          this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
+        }
+          
+        }else {
+          const numeroCuarto = rowData.resourceData.text
+          const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+          this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
+        }
+      }    
     }
     if(args.data.Subject === 'Bloqueo'){
       this.honDeleteBloqueo.emit({ row: args, folio: args.data.Folio });

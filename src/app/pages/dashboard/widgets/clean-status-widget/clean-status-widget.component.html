@@ -1,8 +1,8 @@
 <!-- begin::Body -->
 <!-- begin::Item -->
-<div class="d-flex align-items-center p-5" style="background-color: var(--header-background);">
+<div class="d-flex align-items-center p-5" style="background-color: var(--dark-blue-background);">
     <!-- begin::Label -->
-    <div class="flex-grow-1 me-2">
+    <div class="d-flex flex-column flex-grow-1 me-2 align-items-center text-center">
         <a  class="fw-bolder  fs-2" style="color: white;">
             {{ "CleanStatusWidgetComponent.tittle" | translate }}
         </a>
@@ -11,53 +11,54 @@
 </div>
 <!--end:Item-->
 
-
-<!-- begin::Item -->
-<div class="d-flex align-items-center p-5" style="background-color: var(--deep-red-background);">
-    <!-- begin::Label -->
-    <div class="flex-grow-1 me-2" >
-        <a  class="fw-bolder  fs-2" style="color: white;">
-            {{"CleanStatusWidgetComponent.clean" | translate}}
-        </a>
-    </div>
-    <!-- end::Label -->
-    <!-- begin::Content -->
-    <div class="flex-grow-1 fw-bolder rounded-2 py-1" >
-        <div class="d-flex flex-column me-2">
-            <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: var(--light-blue-font); margin: inherit;">
-                {{limpias.length}}
-            </span>
+<div class="d-flex flex-column">
+    <!-- begin::Item -->
+    <div class="d-flex align-items-center p-5" style="background-color: var(--light-blue-background);">
+        <!-- begin::Label -->
+        <div class="d-flex flex-column flex-grow-1 me-2 align-items-center text-center" >
+            <a  class="fw-bolder  fs-2" style="color: white;">
+                {{"CleanStatusWidgetComponent.clean" | translate}}
+            </a>
         </div>
-    </div>
-    <!-- end::Content -->
-    <!-- begin::Label -->
-    <div class="flex-grow-1 me-2">
-        <a  class="fw-bolder  fs-2" style="color: white;">
-            {{"CleanStatusWidgetComponent.dirty" | translate}}
-        </a>
-    </div>
-    <!-- end::Label -->
-    <!-- begin::Content -->
-    <div class=" flex-grow-1 fw-bolder rounded-2 py-1">
-        <div class="d-flex flex-column me-2">
-            <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: var(--header-background); margin: inherit;">
-                {{sucias.length}}
-            </span>
+        <!-- end::Label -->
+        <!-- begin::Content -->
+        <div class="flex-grow-1 fw-bolder rounded-2 py-1" >
+            <div class="d-flex flex-column me-2">
+                <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: var(--dark-blue-background); margin: inherit;">
+                    {{limpias.length}}
+                </span>
+            </div>
         </div>
+        <!-- end::Content -->
+        <!-- begin::Label -->
+        <div class="d-flex flex-column flex-grow-1 me-2 align-items-center text-center">
+            <a  class="fw-bolder  fs-2" style="color: white;">
+                {{"CleanStatusWidgetComponent.dirty" | translate}}
+            </a>
+        </div>
+        <!-- end::Label -->
+        <!-- begin::Content -->
+        <div class=" flex-grow-1 fw-bolder rounded-2 py-1">
+            <div class="d-flex flex-column me-2">
+                <span class="fw-bold text-gray-800;" style="font-size: 3rem; color: var(--dark-blue-background); margin: inherit;">
+                    {{sucias.length}}
+                </span>
+            </div>
+        </div>
+        <!-- end::Content -->
     </div>
-    <!-- end::Content -->
 </div>
-<!-- start: Line -->
-<div style="border:solid; border-width: thick; border-image:linear-gradient(to right, var(--light-blue-font) 50%, var(--header-background) 50%)1 100">
-</div> 
+    <!-- start: Line -->
+    <div style="border:solid; border-width: thick; border-image:linear-gradient(to right, var(--dark-blue-background) 50%, var(--header-background) 50%)1 100">
+    </div> 
 <!-- end: Line -->
 
 <!-- end: Item-->
 
 <!-- begin::Item -->
-<div class="d-flex align-items-center p-5 " style="background-color: var(--deep-red-background);">
+<div class="d-flex align-items-center p-5 " style="background-color: var(--light-blue-background);">
     <!-- begin::Label -->
-    <div class="flex-grow-1 me-2">
+    <div class="d-flex flex-column flex-grow-1 me-2 align-items-center text-center">
         <a  class="fw-bolder  fs-2" style="color: white;">
             {{"CleanStatusWidgetComponent.review" | translate}}
         </a>
@@ -73,7 +74,7 @@
     </div>
     <!-- end::Content -->
     <!-- begin::Label -->
-    <div class="flex-grow-1 me-2">
+    <div class="d-flex flex-column flex-grow-1 me-2 align-items-center text-center">
         <a  class="fw-bolder  fs-2" style="color: white;">
             {{"CleanStatusWidgetComponent.retouch" | translate}}
         </a>

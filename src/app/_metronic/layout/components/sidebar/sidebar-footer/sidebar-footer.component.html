@@ -1,8 +1,7 @@
-<div class="d-flex align-items-center p-5" style="background-color: var(--background-pink);">
+<div class="d-flex align-items-center p-5" style="background-color: var(--light-blue-background)">
   <div class="app-navbar-item p-1" [ngClass]="itemClass">
     <div class="cursor-pointer symbol" [ngClass]="userAvatarClass" data-kt-menu-trigger="{default: 'click'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
       <!-- <img src="./assets/media/avatars/300-3.jpg" /> -->
-      <app-keenicon style="padding-left: 50%;" name="profile-circle" class="fs-2 m-0"></app-keenicon>
     </div>
     <app-user-inner data-kt-menu='true'></app-user-inner>
   </div>
@@ -12,14 +11,19 @@
 
 </div>
 
+<div class="sidebar-footer-icons d-flex align-items-center justify-content-between w-100 px-3 py-2">
+  <img src="/assets/media/sidebar/footer/profile-whatsapp.svg" width="24" height="24">
+  <img src="/assets/media/sidebar/footer/profile-telefono.svg" width="24" height="24">
+  <img src="/assets/media/sidebar/footer/ayuda-online.svg" width="24" height="24">
+  <img src="/assets/media/sidebar/footer/profile-usuario.svg" width="24" height="24">
+</div>
+
 
 <a target="_blank" 
   class="btn btn-flex flex-center btn-custom btn-primary overflow-hidden text-nowrap px-0 h-40px w-100"
-  data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss-="click" title="logout"
-  (click)="logOut()">
+  data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-dismiss="click" title="logout">
 
   <span class="btn-label">
     Log out
   </span>
-  <app-keenicon style="padding-left: 50%;" name="profile-circle" class="fs-2 m-0"></app-keenicon>
 </a>

@@ -1,0 +1,27 @@
+.sidebar-footer-icons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensures even spacing */
+    width: 100%; /* Matches the button width */
+  }
+  
+  .sidebar-footer-icons app-keenicon {
+    flex: 1;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  
+  .sidebar-footer-icons app-keenicon span {
+    background-color: white; /* Circular background for icons */
+    border-radius: 50%; /* Make it circular */
+    padding: 8px; /* Adjust padding */
+    width: 36px; /* Set a fixed size */
+    height: 36px; /* Set a fixed size */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  

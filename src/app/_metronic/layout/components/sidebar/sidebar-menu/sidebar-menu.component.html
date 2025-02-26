@@ -6,7 +6,7 @@
     <div class="menu-item">
       <a class="menu-link without-sub" routerLink="/dashboard" routerLinkActive="active">
         <span class="menu-icon">
-          <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+          <img src="/assets/media/sidebar/dashboard.svg" width="24" height="24">
         </span>
         <span class="menu-title">{{"SidebarMenuComponent.dashboard" | translate}}</span>
       </a>
@@ -16,15 +16,221 @@
     <div class="menu-item">
       <a class="menu-link without-sub" routerLink="/calendar" routerLinkActive="active">
         <span class="menu-icon">
-          <app-keenicon name="switch" class="fs-2"></app-keenicon>
+          <img src="/assets/media/sidebar/calendar.svg" width="24" height="24">
         </span>
         <span class="menu-title">{{"SidebarMenuComponent.calendar" | translate}}</span>
       </a>
     </div>
-    <!-- Separator -->
-    <!-- <div class="menu-item">
+
+    <div class="menu-item">
       <div class="menu-content pt-8 pb-2">
-        <span class="menu-section text-muted text-uppercase fs-8 ls-1">Crafted</span>
+        <span class="menu-section text-uppercase ls-1">{{"SidebarMenuComponent.reports" | translate}}</span>
+      </div>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'prospects']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/reservaciones.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.prospects" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'inhouse']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/inhouse.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.huespeds" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'llegadas']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/arrivals.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.llegadas" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'salidas']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/salidas.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.reservationsreports" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'colgados']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/colgados.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.colgadosreports" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <div class="menu-content pt-8 pb-2">
+        <span class="menu-section text-uppercase ls-1">CRM Y OPORTUNIDADES</span>
+      </div>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'clientes']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/crm.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.lista-clientes" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'noshow']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/noshow.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.noshow" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <div class="menu-content pt-8 pb-2">
+        <span class="menu-section text-uppercase ls-1">{{"SideBarComponent.finantial-reports" | translate}}</span>
+      </div>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'transacciones']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/transacciones.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.transacciones" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'payment']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/payment.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.formasdepago" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'origenventa']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/origen-venta.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.origen-venta" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" [routerLink]="['/reports', 'findedia']" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/fin-de-dia.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.fin-dia" | translate}}</span>
+      </a>
+    </div>
+
+    <!-- Reports (Collapsible) -->
+    <!-- <div class="menu-item menu-accordion" data-kt-menu-trigger="click">
+      <a class="menu-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/calendar.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SidebarMenuComponent.reports" | translate}}</span>
+      </a>
+      <div class="menu-sub menu-sub-accordion">
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" routerLink="/reports/prospects" routerLinkActive="active">
+            <span class="menu-icon">
+              <img src="/assets/media/sidebar/crm.svg" width="24" height="24">
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.prospects" | translate}}</span>
+          </a>
+        </div>
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" routerLink="/reports/reservations" routerLinkActive="active">
+            <span class="menu-icon">
+              <img src="/assets/media/sidebar/reservations.svg" width="24" height="24">
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.reservationsreports" | translate}}</span>
+          </a>
+        </div>
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" routerLink="/reports/bloqueos" routerLinkActive="active">
+            <span class="menu-icon">
+              <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.bloquedreports" | translate}}</span>
+          </a>
+        </div>
+
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" [routerLink]="['/reports', 'llegadas']" routerLinkActive="active">            
+            <span class="menu-icon">
+              <img src="/assets/media/sidebar/arrivals.svg" width="24" height="24">
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.llegadas" | translate}}</span>
+          </a>
+        </div>
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" [routerLink]="['/reports', 'llegadas']" routerLinkActive="active">
+            <span class="menu-icon">
+              <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.llegadas" | translate}}</span>
+          </a>
+        </div>
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" [routerLink]="['/reports', 'salidas']" routerLinkActive="active">
+            <span class="menu-icon">
+              <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.reservationsreports" | translate}}</span>
+          </a>
+        </div>
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" [routerLink]="['/reports', 'colgados']" routerLinkActive="active">
+            <span class="menu-icon">
+              <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.colgadosreports" | translate}}</span>
+          </a>
+        </div>
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" [routerLink]="['/reports', 'noshow']" routerLinkActive="active">
+            <span class="menu-icon">
+              <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.noshow" | translate}}</span>
+          </a>
+        </div>
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" [routerLink]="['/reports', 'clientes']" routerLinkActive="active">
+            <span class="menu-icon">
+              <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.lista-clientes" | translate}}</span>
+          </a>
+        </div>
+
       </div>
     </div> -->
 
@@ -376,13 +582,18 @@
     <div class="menu-item">
       <div class="menu-content pt-8 pb-2">
         <span class="menu-section text-muted text-uppercase fs-8 ls-1">{{"SidebarMenuComponent.configurations" | translate}}</span>
+    <!-- Configurations (Collapsible) -->
+         <!-- Separator -->
+    <div class="menu-item" style="padding: 0.65rem 1rem;">
+      <div class="menu-section pt-8 pb-2">
+        <span class="menu-section text-uppercase  ls-1">{{"SidebarMenuComponent.configurations" | translate}}</span>
       </div>
     </div>
 
     <div class="menu-item">
       <a class="menu-link without-sub" routerLink="/params" routerLinkActive="active">
         <span class="menu-icon">
-          <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+          <img src="/assets/media/sidebar/hotel.svg" width="24" height="24">
         </span>
         <span class="menu-title">{{"SidebarMenuComponent.parameters" | translate}}</span>
       </a>
@@ -391,7 +602,7 @@
     <div class="menu-item">
       <a class="menu-link without-sub" routerLink="/catalogs" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
         <span class="menu-icon">
-          <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+          <img src="/assets/media/sidebar/rooms.svg" width="24" height="24">
         </span>
         <span class="menu-title">{{"SidebarMenuComponent.catalogo-hab" | translate}}</span>
       </a>
@@ -400,7 +611,7 @@
     <div class="menu-item">
       <a class="menu-link without-sub" routerLink="catalogs/rates" routerLinkActive="active">
         <span class="menu-icon">
-          <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+          <img src="/assets/media/sidebar/tarifas.svg" width="24" height="24">
         </span>
         <span class="menu-title">{{"SidebarMenuComponent.rates-tittle" | translate}}</span>
       </a>
@@ -409,63 +620,71 @@
     <!-- Chat -->
     <div class="menu-item menu-accordion" data-kt-menu-trigger="click">
       <!-- <span class="menu-link">
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" routerLink="/catalogs" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
         <span class="menu-icon">
-          <app-keenicon name="message-text-2" class="fs-2"></app-keenicon>
+          <img src="/assets/media/sidebar/promociones.svg" width="24" height="24">
         </span>
-        <span class="menu-title" routerLink="/params"  routerLinkActive="active"
-              data-link="">{{"SidebarMenuComponent.parameters" | translate}}
-        </span>
-      </span> -->
-      <!-- <span class="menu-link">
-        <span class="menu-icon">
-          <app-keenicon name="home-1" class="fs-2"></app-keenicon>
-        </span>
-        <span class="menu-title" routerLink="/catalogs"  routerLinkActive="active"
-              data-link="">{{"SidebarMenuComponent.catalogo-hab" | translate}}
-        </span>
-      </span>
-      <span class="menu-link">
-        <span class="menu-icon">
-          <app-keenicon name="home-1" class="fs-2"></app-keenicon>
-        </span>
-        <span class="menu-title" routerLink="catalogs/rates"  routerLinkActive="active"
-              data-link="">{{"SidebarMenuComponent.rates-tittle" | translate}}
-        </span>
-      </span> -->
-      
-      <!-- <div class="menu-sub menu-sub-accordion" routerLinkActive="menu-active-bg">
-        <div class="menu-item">
-          <a class="menu-link without-sub" routerLinkActive="active" routerLink="/apps/chat/private-chat">
-            <span
-              class="menu-bullet">
-              <span class="bullet bullet-dot"></span>
-            </span>
-            <span class="menu-title">{{"SidebarMenuComponent.catalogo-hab" | translate}}
-            </span>
-          </a>
-        </div> -->
-       <!--  <div class="menu-item">
-          <a class="menu-link without-sub" routerLinkActive="active" routerLink="/apps/chat/group-chat">
-            <span
-              class="menu-bullet">
-              <span class="bullet bullet-dot"></span>
-            </span>
-            <span class="menu-title">Group Chat
-            </span>
-          </a>
-        </div>
-        <div class="menu-item">
-          <a class="menu-link without-sub" routerLinkActive="active" routerLink="/apps/chat/drawer-chat">
-            <span
-              class="menu-bullet">
-              <span class="bullet bullet-dot"></span>
-            </span>
-            <span class="menu-title">Drawer Chat
-            </span>
-          </a>
-        </div>
-      </div> -->
+        <span class="menu-title">{{"SidebarMenuComponent.promos-tittle" | translate}}</span>
+      </a>
     </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" routerLink="/reports/bloqueos" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/bloqueos.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.bloquedreports" | translate}}</span>
+      </a>
+    </div>
+
+
+    <!-- <div class="menu-item menu-accordion" data-kt-menu-trigger="click">
+      <a class="menu-link">
+        <span class="menu-icon">
+          <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+        </span>
+        <span class="menu-title">{{"SidebarMenuComponent.configurations" | translate}}</span>
+      </a>
+      <div class="menu-sub menu-sub-accordion">
+        <div class="menu-item">
+          <a class="menu-link without-sub" routerLink="/params" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <span class="menu-icon">
+              <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.parameters" | translate}}</span>
+          </a>
+        </div>
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" routerLink="/catalogs" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <span class="menu-icon">
+              <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.catalogo-hab" | translate}}</span>
+          </a>
+        </div>
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" routerLink="catalogs/rates" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <span class="menu-icon">
+              <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.rates-tittle" | translate}}</span>
+          </a>
+        </div>
+
+        <div class="menu-item">
+          <a class="menu-link without-sub" routerLink="catalogs/promos" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
+            <span class="menu-icon">
+              <app-keenicon name="element-11" class="fs-2"></app-keenicon>
+            </span>
+            <span class="menu-title">{{"SidebarMenuComponent.promos-tittle" | translate}}</span>
+          </a>
+        </div>
+      </div>
+    </div> -->
 
   </div>
   <!--end::Menu-->

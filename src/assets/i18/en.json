@@ -60,8 +60,8 @@
         "parameters":"parameters",
         "catalogo-hab":"Room's Catalog",
         "rates-tittle":"Rates Catalog",
-        "lista-clientes":"Client List"
-
+        "lista-clientes":"Client List",
+        "promos-tittle":"Promos Catalog"
     },
     "RoomsComponent":{
         "norooms":"No Rooms"
@@ -119,8 +119,43 @@
         "RateTwoPerson": "Price for 2 Persons",
         "RateThreePerson": "Price for Three Persons",
         "RateKids": "Prices for Kids",
-        "SpecialRatesExample": "Example: WeekendRate"
-
+        "SpecialRatesExample": "Example: WeekendRate",
+        "validDays":"Applies for the days:",
+        "validrooms":"Solo aplica para las siguientes habitaciones:"
+    },
+    "PromosComponent":{
+        "promosComponentTitle":"NEW PROMO",
+        "promosModalTitle" : "New Promo",
+        "NombrePromo":"Promo Name",
+        "codigoPromo":"Codigo Name",
+        "numeroVeces":"Number of codes",
+        "cuponvalid":"Valid Cupon Date Range",
+        "checkinDate":"And the Guest arrives (Check-In) on:",
+        "estanciaMin":"Minimum nights stay:",
+        "estanciaMax":"Max nights stay:",
+        "roomselect":"Only applies for the rooms:",
+        "desc":"Description (Internal Use)",
+        "selectaday":"Select at least on valid day",
+        "basicTab":"Basic",
+        "anticipadaTab":"Anticipated",
+        "lastminuteTab":"Last Minuto",
+        "freenightTab":"Free Night",
+        "arriveguest":"Guest should have a min night stay of:",
+        "arriveguestmax":"Guest should have a max night stay of:",
+        "daysbefore":"Days before hotel arrival (Check-In)",
+        "stay":"STAY",
+        "payOnly":"PAY ONLY",
+        "night":"NIGHTS",
+        "ratepernight":"WHICH RATE PER NIGHT WOULD YOU GIVE FREE?"
+    },
+    "SideBarComponent":{
+        "small-title":"THE SIMPLE SOLUTION FOR SMALL HOTELS",
+        "finantial-reports":"REPORTES FINANCIEROS",
+        "crm-oport":"CRM Y OPORTUNIDADES",
+        "transacciones":"Transacciones",
+        "formasdepago":"Formas de Pago",
+        "origen-venta":"Origen de Venta",
+        "fin-dia":"Fin de Día"
     },
     "DashboardComponent":{
         "adrTooltip":"Average Daily Rate (ADR): The average revenue earned per room per day, calculated by dividing total room revenue by the number of rooms sold. It measures a hotel's pricing strategy and financial performance.",

@@ -15,6 +15,8 @@ export class SidebarLogoComponent implements OnInit, OnDestroy {
   @Input() toggleType: string = '';
   @Input() toggleState: string = '';
   currentLayoutType: LayoutType | null;
+  isLightTheme: boolean = true; // Set dynamically based on your theme logic
+
 
   toggleAttr: string;
 

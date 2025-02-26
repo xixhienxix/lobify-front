@@ -1,0 +1,39 @@
+<form [formGroup]="formGroup">
+    <div class="row col-md-12" style="justify-content: center;">
+      <div class="col-lg-12">
+        <!-- Bind mat-radio-group to formControlName -->
+        <mat-radio-group formControlName="discountType" class="row">
+          <div class="col-sm-6">
+            <mat-radio-button value="porcentaje" class="example-margin">
+              PORCENTAJE (%)
+            </mat-radio-button>
+          </div>
+          <div class="col-sm-6">
+            <mat-radio-button value="precioFijo" class="example-margin">
+              VALOR FIJO ($)
+            </mat-radio-button>
+          </div>
+        </mat-radio-group>
+      </div>
+      
+      <div class="col-lg-12">
+        <input 
+          type="number" 
+          min="1"
+          [max]="formGroup.get('discountType')?.value === 'porcentaje' ? 100 : null"
+          class="form-control"
+          placeholder="Cantidad"
+          autocomplete="off"
+          formControlName="qtyPrecio"
+          [class.is-invalid]="formGroup.get('qtyPrecio')?.invalid && formGroup.get('qtyPrecio')?.touched || showErrors"
+          [class.is-valid]="formGroup.get('qtyPrecio')?.valid && formGroup.get('qtyPrecio')?.touched" />
+        <small *ngIf="formGroup.get('qtyPrecio')?.value === null" style="color: red;">
+          Capture la cantidad/porcentaje del descuento
+        </small>
+        <small *ngIf="formGroup.get('qtyPrecio')?.invalid">
+            El porcentaje del precio debe ser un valor entre 1-100
+        </small>
+      </div>
+    </div>
+  </form>
+  

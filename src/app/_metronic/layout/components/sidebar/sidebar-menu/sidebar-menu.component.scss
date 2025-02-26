@@ -1,0 +1,14 @@
+.menu-section {
+    font-size: 1rem;
+    color: white;
+    font-weight: bolder;
+}
+
+#kt_app_sidebar_menu_scroll {
+    overflow-y: auto;
+    scrollbar-width: none; /* For Firefox */
+  }
+  
+  #kt_app_sidebar_menu_scroll::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Edge */
+  }

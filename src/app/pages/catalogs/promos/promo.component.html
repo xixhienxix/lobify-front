@@ -1,0 +1,95 @@
+<mat-tab-group>
+    <mat-tab>
+        <ng-template mat-tab-label>
+          {{"PromosComponent.promosComponentTitle" | translate}}
+          <button class="btn btn-active-color-primary" style="margin-left: 10%;">
+            <a>  
+              <span (click)="getPromos(true)"
+                class="svg-icon svg-icon-md svg-icon-danger">
+                <i class="fa-solid fa-refresh"></i>
+              </span>
+            </a>
+          </button>
+        </ng-template>
+        
+    <div class="card card-custom gutter-b">
+    
+      <div class="card-body">
+  
+        <!-- begin:Table -->
+  
+        <div class="table-responsive angular-bootstrap-table">
+  
+          <table *ngIf="!isLoading || !reloading" mat-table [dataSource]="dataSourcePromociones">
+  
+            <!-- Position Column -->
+            <ng-container matColumnDef="nombre">
+              <th mat-header-cell *matHeaderCellDef> Nombre </th>
+              <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
+            </ng-container>
+        
+            <!-- Name Column -->
+            <ng-container matColumnDef="tipo">
+              <th mat-header-cell *matHeaderCellDef> Tipo de Promocion </th>
+              <td mat-cell *matCellDef="let element"> {{element.tipo}}</td>
+            </ng-container>
+        
+            <!-- Weight Column -->
+            <!-- <ng-container matColumnDef="Periodo">
+              <th mat-header-cell *matHeaderCellDef> Periodo de Check-In </th>
+              <td mat-cell *matCellDef="let element"> 
+                  <div [innerHTML]="promocionesActivas(element)"></div>
+              </td>
+            </ng-container> -->
+        
+            <!-- Symbol Column -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef> Estado </th>
+              <td mat-cell *matCellDef="let element"> {{element.estado}} </td>
+            </ng-container>
+  
+            <!-- Estancia Column -->
+            <ng-container matColumnDef="Acciones">
+              <th mat-header-cell *matHeaderCellDef> Acciones </th>
+              <td  (click)="$event.stopPropagation()" mat-cell *matCellDef="let element"> 
+                <a
+                    title="Editar Tarifa"
+                    class="mx-3 btn btn-icon btn-light btn-hover-primary btn-sm"
+                    >
+                    <span (click)="editarPromocion(element)"
+                      class="svg-icon svg-icon-md svg-icon-primary">
+                      <i class="fa-solid fa-pen"></i>
+                    </span>
+                  </a>
+              
+                  <a title="Borrar Tarifa" class="btn btn-icon btn-light btn-hover-danger btn-sm">
+                    <span (click)="deletePromocion(element)" 
+                      class="svg-icon svg-icon-md svg-icon-danger">
+                      <i class="fa-solid fa-trash"></i>
+                    </span>
+                  </a>   
+              </td>
+            </ng-container>
+    
+            <tr mat-header-row *matHeaderRowDef="displayColumnsPromocion"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayColumnsPromocion;"></tr>
+            <tr class="mat-row" *matNoDataRow>
+              <td class="mat-cell m-8" style="size: x-large; padding: 5%;" [attr.colspan]="displayColumnsPromocion.length">
+                NO PROMOS
+              </td>
+            </tr>
+          </table>
+        
+          <mat-paginator [pageSizeOptions]="[5, 10, 20]"
+                         showFirstLastButtons 
+                         aria-label="Select page of periodic elements">
+          </mat-paginator>
+        </div>
+        <!-- end: Table -->
+       <app-loader-spinner *ngIf="isLoading || reloading"></app-loader-spinner>
+      </div>
+    </div>
+    <button mat-button class="btn" style="background-color: var(--light-blue-background); color: white;" (click)="nvaPromocion()"> Nueva Promoción </button>
+  
+      </mat-tab>
+</mat-tab-group>
