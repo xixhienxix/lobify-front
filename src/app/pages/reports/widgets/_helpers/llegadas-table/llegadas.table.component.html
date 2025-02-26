@@ -1,14 +1,14 @@
 <div class="reservations-table">
     <mat-accordion displayMode="flat" class="example-headers-align" multi>
-            <mat-expansion-panel *ngFor="let reservation of dataSource" style="background-color: var(--deep-red-background); color: white;">
-                <mat-expansion-panel-header style="background-color: var(--header-background);">
+            <mat-expansion-panel *ngFor="let reservation of dataSource" style="background-color: var(--dark-blue-background); color: white;">
+                <mat-expansion-panel-header style="background-color: var(--dark-blue-background);">
                   <mat-panel-title style="color: white;">
                     {{reservation.folio}} 
                   </mat-panel-title>
                   <mat-panel-description>
                     <div class="description-container" style="color: white;">
                         <span>{{reservation.nombre}}</span>
-                        <button (click)="onButtonClick($event,reservation)" mat-button class="btn btn-danger" style="background-color: var(--deep-red-background); color: white;">Folio</button>
+                        <button (click)="onButtonClick($event,reservation)" mat-button class="btn custom-folio-button" style="background-color: var(--light-blue-background); color: white;">Folio</button>
                       </div>                  
                     </mat-panel-description>
                 </mat-expansion-panel-header>
@@ -92,7 +92,7 @@
                   
               </mat-expansion-panel>
               <mat-expansion-panel *ngIf="dataSource.length === 0">
-                <mat-expansion-panel-header style="background-color: var(--header-background);">
+                <mat-expansion-panel-header style="background-color: var(--dark-blue-background);">
                     <mat-panel-title style="color: white;">
                       Sin Llegadas 
                     </mat-panel-title>

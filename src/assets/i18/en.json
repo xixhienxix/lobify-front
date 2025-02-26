@@ -139,6 +139,15 @@
         "night":"NIGHTS",
         "ratepernight":"WHICH RATE PER NIGHT WOULD YOU GIVE FREE?"
     },
+    "SideBarComponent":{
+        "small-title":"THE SIMPLE SOLUTION FOR SMALL HOTELS",
+        "finantial-reports":"REPORTES FINANCIEROS",
+        "crm-oport":"CRM Y OPORTUNIDADES",
+        "transacciones":"Transacciones",
+        "formasdepago":"Formas de Pago",
+        "origen-venta":"Origen de Venta",
+        "fin-dia":"Fin de Día"
+    },
     "DashboardComponent":{
         "adrTooltip":"Average Daily Rate (ADR): The average revenue earned per room per day, calculated by dividing total room revenue by the number of rooms sold. It measures a hotel's pricing strategy and financial performance.",
         "revPar":"Revenue per Available Room (RevPAR): A key performance metric in the hospitality industry that measures the revenue generated per available room, whether the room is occupied or not. It helps gauge the overall hotel performance in terms of both occupancy and rate."

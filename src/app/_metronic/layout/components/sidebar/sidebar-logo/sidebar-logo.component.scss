@@ -1,0 +1,38 @@
+.logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers all elements horizontally */
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    font-weight: bolder;
+  }
+  
+  .logo-container img {
+    display: block;
+    margin: 0 auto; /* Ensures images are centered */
+  }
+  
+  .logo-tag {
+    font-size: 9px;
+    color: #b2aeae;
+    text-align: center;
+    margin-top: 4px;
+    line-height: 1;
+  }
+  .theme-light-show {
+    display: block;  /* Visible only in light mode */
+  }
+  
+  .theme-dark-show {
+    display: none; /* Hide by default */
+  }
+  
+  /* When the theme is dark, show the dark logo instead */
+  .theme-dark .theme-light-show {
+    display: none;
+  }
+  
+  .theme-dark .theme-dark-show {
+    display: block;
+  }

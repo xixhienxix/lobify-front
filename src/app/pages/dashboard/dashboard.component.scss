@@ -22,4 +22,7 @@
   justify-content: space-between; /* Ensure content is spread out */
   border-radius: 0.5rem; /* Optional: Add border radius for rounded corners */
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: Add shadow for better visibility */
+  display: flex;  /* Flexbox for aligning content inside */
+  flex-direction: column;  /* Stack the content vertically */
 }
+
