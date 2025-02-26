@@ -35,6 +35,8 @@ import { DiscountSelectorComponent } from '../atoms/discount-radio-selector/disc
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { BasicTabComponent } from './promos/nva-promo/tabs/basic-tab/basic.tab.component';
+import { RoomGeneratorComponent } from './rooms/_helpers/room-generator/room-generator.component';
+import { AddRoomComponent } from './rooms/components/more-rooms/more-rooms.component';
 
 // Optionally define your date format
 export const MY_DATE_FORMATS = {
@@ -65,6 +67,8 @@ export const MY_DATE_FORMATS = {
     PromoComponent,
     NuevaPromocionModalComponent,
     BasicTabComponent,
+    RoomGeneratorComponent,
+    AddRoomComponent
   ],
   imports: [
     CommonModule,
