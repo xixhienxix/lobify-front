@@ -675,7 +675,7 @@ retriveBaseRatePrice(codigosCuarto: string, checkDay: Date, day:number=-1) {
 
 checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
 
-  const fechaDate = DateTime.fromISO(fecha.toISOString(), { zone: this.parametros.codigoZona });
+  const fechaDate = DateTime.fromISO(fecha.toISOString(), { zone: this.zona });
   
   const tarifaTemporada = this.tempRatesArray.find(obj => {
     const llegada = DateTime.fromISO(obj.Llegada.toString(), { zone: this.parametros.codigoZona });

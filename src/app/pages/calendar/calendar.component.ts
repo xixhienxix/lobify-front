@@ -358,8 +358,9 @@ export class CalendarComponent implements OnInit, OnDestroy {
       /** Default Values */
       modalRef.componentInstance.numeroCuarto = data.numeroCuarto
       modalRef.componentInstance.cuarto = data.codigoCuarto
-      modalRef.componentInstance.startTime = data.data.startTime
-      modalRef.componentInstance.endTime = data.data.endTime
+      modalRef.componentInstance.startTime = data.data.StartTime || data.data.startTime;
+      modalRef.componentInstance.endTime = data.data.EndTime || data.data.endTime;
+      
       modalRef.componentInstance.rsvFromCalendar=true
 
 

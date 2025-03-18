@@ -121,7 +121,7 @@
                 name="habitacion"
                 placeholder="-- Seleccione Tipo de Habitación -- "
                 required
-                (selectionChange)="buscaDispo($event.value)"
+                (selectionChange)="buscaDispo($event.value, tipodeCuartoDropDown)"
                 >
                     <mat-option disabled="true" value="0">-- Selecciona Habitación --</mat-option>
                     <mat-option value="1">Todos los Tipos de Cuartos</mat-option>

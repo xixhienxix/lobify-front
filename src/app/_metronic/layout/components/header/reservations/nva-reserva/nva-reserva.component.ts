@@ -15,6 +15,7 @@ import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
 import { DateTime } from 'luxon'; 
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
+import { MatSelect } from '@angular/material/select';
 
 export interface preAsig {
   numero:any,
@@ -658,7 +659,8 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
     )
   }
 
-  buscaDispo(habitacion: any) {
+  buscaDispo(habitacion: any, select:MatSelect) {
+    select.close(); // manually close dropdown
     // Reset disposition and set loading state
     this.rsvFromCalendar = false;
     this.resetDispo();

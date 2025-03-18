@@ -16,10 +16,20 @@
       <input
         matInput
         [(ngModel)]="filterText"
-        (input)="applyFilter({ nombre: filterText })"
+        (input)="applyFilter({ nombre: filterText})"
         placeholder="Filtro por Nombre"
       />
   </mat-form-field>
+
+  <mat-form-field class="filter-item" appearance="outline">
+    <mat-label>Folio</mat-label>
+    <input
+      matInput
+      [(ngModel)]="filterFolio"
+      (input)="applyFilter({ folio:filterFolio})"
+      placeholder="Filtro por Folio"
+    />
+</mat-form-field>
 
   <!-- Date Filter -->
   <mat-form-field class="filter-item" appearance="outline">

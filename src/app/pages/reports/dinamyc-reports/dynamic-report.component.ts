@@ -299,6 +299,13 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
         reservation.nombre.toLowerCase().includes(filters.nombre!.toLowerCase())
       );
     }
+
+    // Aply Folio Filter
+    if (filters.folio) {
+      filteredData = filteredData.filter((reservation) =>
+        reservation.folio.toUpperCase().includes(filters.folio!.toUpperCase())
+      );
+    }
   
     // Apply 'llegada' filter if present (Date comparison ignoring time)
     if (filters.llegada) {

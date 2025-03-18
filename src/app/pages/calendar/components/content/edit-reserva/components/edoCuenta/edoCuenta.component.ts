@@ -183,7 +183,9 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
       this.currentHuesped.adultos,
       this.currentHuesped.ninos,
       new Date(this.currentHuesped.llegada),
-      new Date(this.currentHuesped.salida)
+      new Date(this.currentHuesped.salida),
+      this.currentHuesped.habitacion,
+      this.tempRatesArray
     );
   
     this.tarifaDelDia = dailyRates;

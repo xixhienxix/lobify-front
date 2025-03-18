@@ -24,6 +24,7 @@ import { Tarifas } from 'src/app/models/tarifas';
 import { LogService } from 'src/app/services/activity-logs.service';
 import { CommunicationService } from 'src/app/pages/reports/_services/event.services';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
+import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
 
 @Component({
   selector: 'app-edit-reserva',
@@ -149,7 +150,7 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     private cdRef: ChangeDetectorRef,
     private _logService: LogService,
     private _communicationService: CommunicationService,
-    private cdr: ChangeDetectorRef
+    private _parametrosService: ParametrosService
   ){
     this._huespedService.currentHuesped$.subscribe({
       next: (reserva: Huesped) => {
@@ -383,7 +384,7 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
 
     const modalRef = this.modalService.open(ModificaReservaComponent,{ size: 'lg', backdrop:'static' })  
     modalRef.componentInstance.currentHuesped = this.currentHuesped;
-    modalRef.componentInstance.parametros = this.parametros
+    modalRef.componentInstance.parametros = this._parametrosService.getCurrentParametrosValue
     modalRef.componentInstance.estatusArray = this.estatusArray
     modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
     modalRef.componentInstance.roomCodes=roomCodes
@@ -393,7 +394,7 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     modalRef.componentInstance.editHuesped = true;
     modalRef.componentInstance.checkIn = this.checkIn
     modalRef.componentInstance.checkOut=this.checkOut
-    modalRef.componentInstance.zona=this.zona
+    modalRef.componentInstance.zona=this._parametrosService.getCurrentParametrosValue.codigoZona
 
 
 

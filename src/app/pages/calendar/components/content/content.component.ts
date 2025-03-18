@@ -579,9 +579,7 @@ export class ContentComponent implements OnInit{
         }
       } else if (args.type === 'QuickInfo') {
         args.cancel = true;
-        const groupIndex = args.data.groupIndex;
 
-        const resourceCollection = this.scheduleObj.getResourceCollections();
         const activeCellsData = this.scheduleObj.activeCellsData;
         const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
         const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!)
@@ -612,17 +610,15 @@ export class ContentComponent implements OnInit{
           return false;
         });
 
-        if(hasOverlap){
-          return
-        }else{
-          const numeroCuarto = rowData.resourceData.text
-          const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
-          this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
-        }
+          if(hasOverlap){
+            return
+          } else{
+
+            this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
+          }
           
         }else {
-          const numeroCuarto = rowData.resourceData.text
-          const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
+
           this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
         }
       }    
@@ -658,7 +654,6 @@ export class ContentComponent implements OnInit{
           const llegadaTimeMs = new Date(llegadaTime).getTime();
 
           const checkInDate = this.setCheckInOutTimeParametros(args.data.startTime, this.currentParametros.checkIn);
-          const checkOutDate = this.setCheckInOutTimeParametros(args.data.endTime, this.currentParametros.checkOut);
         
           // Allow no overlap when the event ends at the same time as the new reservation starts unless is Subject === Bloqueo
           if ((eventEndTime <= llegadaTimeMs) && event.Subject !== 'Bloqueo') {
@@ -674,11 +669,6 @@ export class ContentComponent implements OnInit{
       });
   
       if (!hasOverlap) {
-          const activeCellsData = this.scheduleObj.activeCellsData;
-          const cellDetails = this.scheduleObj.getCellDetails(activeCellsData.element!);
-          const rowData = this.scheduleObj.getResourcesByIndex(cellDetails.groupIndex!);
-          const numeroCuarto = rowData.resourceData.text;
-          const codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
 
     // this.tipoHabGroupDataSource
     // this.habitacionPorTipoDataSource

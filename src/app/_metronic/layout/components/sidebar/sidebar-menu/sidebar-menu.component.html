@@ -157,22 +157,45 @@
     </div>
 
     <div class="menu-item">
-      <a class="menu-link without-sub" routerLink="/catalogs" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+      <a class="menu-link without-sub" 
+         routerLink="/catalogs" 
+         routerLinkActive="active" 
+         [routerLinkActiveOptions]="{ exact: true }">
         <span class="menu-icon">
           <img src="/assets/media/sidebar/rooms.svg" width="24" height="24">
         </span>
         <span class="menu-title">{{"SidebarMenuComponent.catalogo-hab" | translate}}</span>
       </a>
     </div>
+    
 
     <div class="menu-item">
-      <a class="menu-link without-sub" routerLink="catalogs/rates" routerLinkActive="active">
+      <a class="menu-link without-sub" routerLink="catalogs/rates" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
         <span class="menu-icon">
           <img src="/assets/media/sidebar/tarifas.svg" width="24" height="24">
         </span>
         <span class="menu-title">{{"SidebarMenuComponent.rates-tittle" | translate}}</span>
       </a>
     </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" routerLink="/catalogs/promos" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/promociones.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SidebarMenuComponent.promos-tittle" | translate}}</span>
+      </a>
+    </div>
+
+    <div class="menu-item">
+      <a class="menu-link without-sub" routerLink="/reports/bloqueos" routerLinkActive="active">
+        <span class="menu-icon">
+          <img src="/assets/media/sidebar/bloqueos.svg" width="24" height="24">
+        </span>
+        <span class="menu-title">{{"SideBarComponent.bloquedreports" | translate}}</span>
+      </a>
+    </div>
+
   
 
 

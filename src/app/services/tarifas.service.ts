@@ -288,9 +288,12 @@ export class TarifasService {
 
     // const tarifaTemporada = tempRatesArray.find(obj => obj.Habitacion.includes(codigoCuarto));
     const tarifaTemporada = tempRatesArray.find(obj => {
-      const llegada = DateTime.fromISO(obj.Llegada.toString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
-      const salida = DateTime.fromISO(obj.Salida.toString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
-  
+      const llegada = DateTime.fromISO(obj.Llegada.toString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona })
+      .startOf("day"); // Set to 00:00:00
+
+    const salida = DateTime.fromISO(obj.Salida.toString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona })
+      .endOf("day"); // Set to 23:59:59
+
       // Compare DateTime objects
       const isWithinRange = fechaDate >= llegada && fechaDate <= salida;
   
@@ -338,6 +341,8 @@ export class TarifasService {
     ninos: number,
     initialDate: Date,
     endDate: Date,
+    habitacion:string='',
+    tempArray:Tarifas[]=[]
 ): { fecha: string; tarifaTotal: number }[] {
 
     const results: { fecha: string; tarifaTotal: number }[] = [];
@@ -369,9 +374,21 @@ export class TarifasService {
         results.push({ fecha: formattedDate, tarifaTotal });
     };
 
-    for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
+    for (let current = start.startOf('day'), updatedInitialDate = start; 
+          current < end; 
+          current = current.plus({ days: 1 }), updatedInitialDate = updatedInitialDate.plus({ days: 1 })) {
         let dailyTarifaTotal = 0;
-        let tarifaAplicada = false;
+
+        //check if temp Rate avaible
+        dailyTarifaTotal = this.checkIfTempRateAvaible(habitacion,updatedInitialDate.toJSDate(),tempArray,adultos,ninos);
+
+        if(dailyTarifaTotal !== 0){
+          const formattedDate = current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE);
+          results.push({ fecha: formattedDate, tarifaTotal: dailyTarifaTotal });
+
+        } else {
+
+          let tarifaAplicada = false;
 
         if (tarifa.Tarifa !== 'Tarifa Base' && tarifa.Estado) {
             const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
@@ -396,6 +413,7 @@ export class TarifasService {
 
             const formattedDate = current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE);
             results.push({ fecha: formattedDate, tarifaTotal: dailyTarifaTotal });
+        }
         }
     }
 
