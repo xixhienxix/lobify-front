@@ -48,6 +48,10 @@
   text-align: center;
 }
 
+.e-schedule .e-week-view .e-work-cells:not(.e-work-days) {
+  background-color: gray;
+}
+
 /*Hides Time in header*/
 .timeline-resource-grouping .e-time-slots {
   display: none;

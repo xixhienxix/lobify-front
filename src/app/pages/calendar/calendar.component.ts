@@ -623,6 +623,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
         const dataSource = await this.roomRates(event.Codigo);
         const tarifaEstandarArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa Base');
         const tempRatesArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa De Temporada');
+        const tarifasEspeciales = dataSource.filter((item: any)=> item.Tarifa !== 'Tarifa De Temporada' && item.Tarifa !== 'Tarifa Base')
         const huesped = this.allReservations.find(item => item.folio === event.Folio);
     
         let Difference_In_Time = event.EndTime.getTime() - event.StartTime.getTime();
@@ -710,14 +711,11 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 
   async roomRates(minihabs: string) {
-    const tarifasDisponibles = [...this.ratesArrayComplete]
-
-    let availbleRates = tarifasDisponibles.filter((item) => item.Estado === true);
-
-    availbleRates = availbleRates.filter(obj =>
-      obj.Habitacion.some(item => item === minihabs));
-    return availbleRates
+    return this.ratesArrayComplete.filter(
+      ({ Estado, Habitacion }) => Estado && Habitacion.includes(minihabs)
+    );
   }
+  
 
   getDifferences(obj1: Record<string, any>, obj2: Record<string, any>): Record<string, any> {
     const differences: Record<string, any> = {};

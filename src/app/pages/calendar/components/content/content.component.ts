@@ -183,6 +183,8 @@ export class ContentComponent implements OnInit{
   reservationsArray:Huesped[];
   bloqueosArray:Bloqueo[];
 
+  public scheduleView: View = 'Month';
+
   isInitialized = false;
   @Input() currentParametros:Parametros
 
