@@ -161,11 +161,14 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
           item.adultos,
           item.ninos,
           today,
-          tomorrow
+          tomorrow,
+          1
         );
 
-        if (totalDelDia.length > 0) {
-          return total + totalDelDia[0].tarifaTotal;
+        const checkTotalDelDia = Array.isArray(totalDelDia) ? totalDelDia[0]?.tarifaTotal ?? 0 : totalDelDia ?? 0;
+
+        if (checkTotalDelDia) {
+          return total + checkTotalDelDia;
         }
       }
 
@@ -211,11 +214,14 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
           item.adultos,
           item.ninos,
           today,
-          tomorrow
+          tomorrow,
+          1
         );
+
+        const checkTotalDelDia = Array.isArray(totalDelDia) ? totalDelDia[0]?.tarifaTotal ?? 0 : totalDelDia ?? 0;
   
-        if (totalDelDia.length > 0) {
-          return total + totalDelDia[0].tarifaTotal;
+        if (checkTotalDelDia) {
+          return total + checkTotalDelDia;
         }
       }
 

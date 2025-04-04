@@ -39,6 +39,7 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
   filteredReservations = new MatTableDataSource<any>([]);
   filterText: string = '';
   filterFolio: string = '';
+  filterRoomCode: string = '';
   filterDateValue: Date | null = null;
   llegadaDateValue: Date | null = null;
   salidaDateValue: Date | null = null;
@@ -285,7 +286,7 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
     this.applyFilter({ llegada: formattedDate, salida: formattedDate }); // Apply the date filter
   }
   
-  applyFilter(filters: { nombre?: string; folio?: string; estatus?: string; habitacion?: string; llegada?: string; salida?: string }): void {
+  applyFilter(filters: { nombre?: string; folio?: string; codigoCuarto?:string; estatus?: string; habitacion?: string; llegada?: string; salida?: string }): void {
     console.log('filtros:', filters);
   
     // Start with the full array as the initial data
@@ -304,6 +305,13 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
     if (filters.folio) {
       filteredData = filteredData.filter((reservation) =>
         reservation.folio.toUpperCase().includes(filters.folio!.toUpperCase())
+      );
+    }
+
+    // Aply Codigo Caurto Filter
+    if (filters.codigoCuarto) {
+      filteredData = filteredData.filter((reservation) =>
+        reservation.habitacion.toUpperCase().includes(filters.codigoCuarto!.toUpperCase())
       );
     }
   

@@ -608,56 +608,54 @@ export class CalendarComponent implements OnInit, OnDestroy {
   }
 
   async onResizeReservation(event: Record<string, any>) {
-    let arrayToCheck = []
-    if(event.Subject === 'Bloqueo'){
-      arrayToCheck = this.bloqueosArray
-    }else{
-      arrayToCheck = this.allReservations
-    }
-
-    if(event.Codigo === undefined){
-      return;
-    }
-
-    if(!this.checkValidResize(event, arrayToCheck)){
-        const dataSource = await this.roomRates(event.Codigo);
-        const tarifaEstandarArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa Base');
-        const tempRatesArray = dataSource.filter((item: any) => item.Tarifa === 'Tarifa De Temporada');
-        const tarifasEspeciales = dataSource.filter((item: any)=> item.Tarifa !== 'Tarifa De Temporada' && item.Tarifa !== 'Tarifa Base')
-        const huesped = this.allReservations.find(item => item.folio === event.Folio);
+    if (!event.Codigo) return;
+  
+    const arrayToCheck = event.Subject === 'Bloqueo' ? this.bloqueosArray : this.allReservations;
     
-        let Difference_In_Time = event.EndTime.getTime() - event.StartTime.getTime();
-        const stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
-    
-        const modalRef = this.modalService.open(WarningComponent, { size: 'md', backdrop: 'static' })
-        modalRef.componentInstance.ratesArrayComplete = dataSource
-        modalRef.componentInstance.stayNights = stayNights
-        modalRef.componentInstance.StartTime = event.StartTime
-        modalRef.componentInstance.EndTime = event.EndTime
-    
-        modalRef.componentInstance.Adultos = huesped?.adultos
-        modalRef.componentInstance.Ninos = huesped?.ninos
-        modalRef.componentInstance.parametros = this.currentParametros
-        modalRef.componentInstance.tarifaEstandarArray = tarifaEstandarArray
-        modalRef.componentInstance.tempRatesArray = tempRatesArray
-        modalRef.componentInstance.cuarto = event.Codigo
-        modalRef.componentInstance.folio = event.Folio
-        modalRef.componentInstance.roomCodesComplete = this.roomCodesComplete
-        modalRef.componentInstance.numeroCuarto = event.Numero
-        modalRef.componentInstance.alertHeader = "Advertencia"
-        modalRef.componentInstance.mensaje = "Al cambiarse la fecha de la reservacion es nesesario confirmar la tarifa que se utilizara para la misma. "
-        modalRef.result.then(async (result) => {
+    if (!this.checkValidResize(event, arrayToCheck)) {
+      const dataSource = await this.roomRates(event.Codigo);
+      const tarifaEstandarArray = dataSource.filter(({ Tarifa }) => Tarifa === 'Tarifa Base');
+      const tempRatesArray = dataSource.filter(({ Tarifa }) => Tarifa === 'Tarifa De Temporada');
+      const tarifasEspeciales = dataSource.filter(({ Tarifa }) => Tarifa !== 'Tarifa Base' && Tarifa !== 'Tarifa De Temporada');
+      
+      const huesped = this.allReservations.find(({ folio }) => folio === event.Folio);
+      const stayNights = Math.ceil((event.EndTime.getTime() - event.StartTime.getTime()) / (1000 * 3600 * 24));
+  
+      const modalRef = this.modalService.open(WarningComponent, { size: 'md', backdrop: 'static' });
+  
+      Object.assign(modalRef.componentInstance, {
+        ratesArrayComplete: dataSource,
+        stayNights,
+        StartTime: event.StartTime,
+        EndTime: event.EndTime,
+        Adultos: huesped?.adultos,
+        Ninos: huesped?.ninos,
+        parametros: this.currentParametros,
+        tarifaEstandarArray,
+        tempRatesArray,
+        tarifasEspeciales,
+        cuarto: event.Codigo,
+        folio: event.Folio,
+        roomCodesComplete: this.roomCodesComplete,
+        numeroCuarto: event.Numero,
+        alertHeader: "Advertencia",
+        mensaje: "Al cambiarse la fecha de la reservacion es necesario confirmar la tarifa que se utilizará para la misma."
+      });
+  
+      try {
+        const result = await modalRef.result;
         if (result) {
           this.onChangedRate(result);
         } else {
           this.closeResult = `Closed with: ${result}`;
         }
         await this.getReservations();
-      }, (reason) => {
+      } catch (reason) {
         this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-      });
+      }
     }
   }
+  
 
   checkValidResize(searchObj: any, dataArray: (Bloqueo | Huesped)[]): any | null {
     return dataArray.find(item => {

@@ -66,6 +66,8 @@
                         </div>
                       </div>
 
+                      <br>
+
                     <div class="row col-lg-12">
                         <div class="form-group col-lg-12">
                             <label style="color:#00506a; font-weight: bold;">Tipo de la Habitación</label>
@@ -110,6 +112,8 @@
                                 El Maximó de caracteres para el tipo de cuarto son 100
                               </div>
                     </div>
+
+                    <br>
                 <div class="row col-lg-12">
                     <div class="form-group col-lg-12">
                         <label style="color:#00506a; font-weight: bold;">Descripción</label>
@@ -139,122 +143,72 @@
                       </div>
                     </div>
                 </div>
+
+                <br>
+
                 <div class="row col-lg-12">
-
-                    <div class="form-group col-lg-4">
-                        <label style="color:#00506a; font-weight: bold;" class="form-label">Total de Personas</label>
-                            <div class="input-group">
-                                <div class="input-group-append">
-                                    <button style="background-color: transparent;border-right: 
-                                                    2px solid #e6e9ed; border-left: 2px solid #dadcdf; 
-                                                    border-top : 2px solid #dadcdf; 
-                                                    border-bottom: 2px solid #dadcdf;" 
-                                            class="btn btn-secondary" 
-                                            (click)="minus('personas')" 
-                                            type="button" 
-                                            ng-click="countVal=countVal+1">
-                                        <i class="fa fa-minus">
-                                        </i>
-                                    </button>
-                                </div>
-                                <input
-                                    style=" background-color: #e6e9ed; 
-                                            border-top: 2px solid #dadcdf; 
-                                            border-bottom: 2px solid #dadcdf;  
-                                            border-left: 2px solid #e6e9ed;"
-                                    class="text-center input-group form-control form-control-lg form-control-solid"
-                                    placeholder=""
-                                    [attr.disabled]="true"
-                                    [value]="personas"
-                                    min="1"
-                                    formControlName="personas"
-                                >
-                                <div class="input-group-append">
-                                    <button style=" border-right: 2px solid #dadcdf; 
-                                                    border-top: 2px solid #dadcdf; 
-                                                    border-bottom: 2px solid #dadcdf; 
-                                                    background-color: transparent;" 
-                                            class="btn btn-secondary" 
-                                            (click)="plus('personas')" 
-                                            type="button">
-                                        <i class="fa fa-plus">
-                                        </i>
-                                    </button>
-                                </div>
+                    <div class="form-group col-12">
+                        <label class="form-label">Total de Personas</label>
+                        <div class="input-group">
+                            <div class="input-group-append">
+                                <button class="btn btn-secondary" (click)="minus('personas')" type="button">
+                                    <i class="fa fa-minus"></i>
+                                </button>
                             </div>
-                    </div>
-
-                    <div class="form-group col-lg-4">
-                        <label style="color:#00506a; font-weight: bold;" class="form-label">Cantidad de Adultos</label>
-                            <div class="input-group">
-                                <div class="input-group-append">
-                                    <button style=" background-color: transparent;border-right: 2px solid #e6e9ed; 
-                                                    border-left: 2px solid #dadcdf; 
-                                                    border-top : 2px solid #dadcdf; 
-                                                    border-bottom: 2px solid #dadcdf;" 
-                                                    class="btn btn-secondary" 
-                                                    (click)="minus('adultos')" 
-                                                    type="button" 
-                                                    ng-click="countVal=countVal+1">
-                                        <i class="fa fa-minus">
-                                        </i>
-                                    </button>
-                                </div>
-                                <input
-                                style="background-color: #e6e9ed; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;  border-left: 2px solid #e6e9ed;"
-                                class="text-center input-group form-control form-control-lg form-control-solid"
-                                placeholder=""
-                                [attr.disabled]="true"
-                                [value]="adultos"
-                                min="1"
-                                formControlName="adultos"
-                                >
-                                <div class="input-group-append">
-                                    <button style="border-right: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf; background-color: transparent;" class="btn btn-secondary" (click)="plus('adultos')" type="button">
-                                        <i class="fa fa-plus">
-                                        </i>
-                                    </button>
-                                </div>
+                            <input class="text-center form-control" [attr.disabled]="true" [value]="personas" formControlName="personas">
+                            <div class="input-group-append">
+                                <button class="btn btn-secondary" (click)="plus('personas')" type="button">
+                                    <i class="fa fa-plus"></i>
+                                </button>
                             </div>
-                    </div>
-
-                    <div class="form-group col-lg-4">
-                        <label style="color:#00506a; font-weight: bold;" class="form-label">Cantidad de Niños</label>
-                            <div class="input-group">
-                                <div class="input-group-append">
-                                    <button style=" background-color: transparent; 
-                                                    border-left: 2px solid #dadcdf; 
-                                                    border-top: 2px solid #dadcdf; 
-                                                    border-top: 2px solid #dadcdf; 
-                                                    border-bottom: 2px solid #dadcdf;" 
-                                            class="btn btn-secondary" 
-                                            (click)="minus('ninos')" 
-                                            type="button">
-                                        <i class="fa fa-minus">
-                                        </i>
-                                    </button>
-                                </div>
-                                <input
-                                style="background-color: #e6e9ed; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf; border-left: 2px solid #e6e9ed;"
-                                [attr.disabled]="true"
-                                class="text-center input-group form-control form-control-lg form-control-solid" placeholder=""
-                                [value]="ninos"
-                                formControlName="ninos"
-                                >
-                                <div class="input-group-append">
-                                    <button style="background-color: transparent; border-right: 2px solid #dadcdf; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;" class="btn btn-secondary" (click)="plus('ninos')" type="button">
-                                        <i class="fa fa-plus">
-                                        </i>
-                                    </button>
-                                </div>
-                            </div>
+                        </div>
                     </div>
                 </div>
+                <br>
+                
+                <div class="row col-lg-12">
+                    <div class="form-group col-12 col-md-6">
+                        <label class="form-label">Cantidad de Adultos</label>
+                        <div class="input-group">
+                            <div class="input-group-append">
+                                <button class="btn btn-secondary" (click)="minus('adultos')" type="button">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+                            <input class="text-center form-control" [attr.disabled]="true" [value]="adultos" formControlName="adultos">
+                            <div class="input-group-append">
+                                <button class="btn btn-secondary" (click)="plus('adultos')" type="button">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="form-group col-12 col-md-6">
+                        <label class="form-label">Cantidad de Niños</label>
+                        <div class="input-group">
+                            <div class="input-group-append">
+                                <button class="btn btn-secondary" (click)="minus('ninos')" type="button">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+                            <input class="text-center form-control" [attr.disabled]="true" [value]="ninos" formControlName="ninos">
+                            <div class="input-group-append">
+                                <button class="btn btn-secondary" (click)="plus('ninos')" type="button">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <br>
+
                 <div class="row col-lg-12">
                     <div class="form-group col-lg-12">
                         <label style="color:#00506a; font-weight: bold;" class="form-label">Amenidades</label>
                         <div class="input-group">
-                                <mat-select
+                            <mat-select
                                 #itemSelect
                                 class="form-control form-control-lg"
                                 multiple
@@ -262,12 +216,9 @@
                                 [(ngModel)]="resultLocation"
                                 [class.is-invalid]="resultLocation.length===0 && inicio!==true"
                                 [class.is-valid]="resultLocation.length!==0 && inicio!==true"
-                                >
-                                <footer class="col-sm-12">
-                                  <button (click)="itemSelect.close()" mat-button class="col-sm-4 btn btn-success" style="color: white;">Confirmar</button>
-                                </footer>
+                            >
                                 <mat-select-trigger>
-                                     <button *ngIf="amenidadesFC.value?.length > 0" class="button1">{{amenidadesFC.value[0]}}
+                                    <button *ngIf="amenidadesFC.value?.length > 0" class="button1">{{amenidadesFC.value[0]}}
                                         <span (click)="$event.stopPropagation(); amenidadesValue(amenidadesFC.value[0]); amenidadesFC.value.splice(0,1);" class="lesser-size start-100 translate-middle badge rounded-pill bg-danger">   X    </span>
                                     </button>
                                     <button *ngIf="amenidadesFC.value?.length > 1" class="button2">{{amenidadesFC.value[1]}}
@@ -276,24 +227,29 @@
                                     <button *ngIf="amenidadesFC.value?.length > 2" class="button3">{{amenidadesFC.value[2]}}
                                         <span (click)="$event.stopPropagation(); amenidadesValue(amenidadesFC.value[2]); amenidadesFC.value.splice(0,1);" class="lesser-size start-100 translate-middle badge rounded-pill bg-danger">   X    </span>
                                     </button>
-
+                
                                     <span *ngIf="amenidadesFC.value?.length > 3" class="additional-selection">
                                         (+{{amenidadesFC.value.length - 3}} {{amenidadesFC.value?.length === 4 ? 'mas' : 'mas'}})
                                     </span>
                                 </mat-select-trigger>
-
-                                  <div>
+                
+                                <div>
                                     <mat-option #matOption [value]="amenidades.Descripcion" *ngFor="let amenidades of amenidadesArr; let i = index" >{{amenidades.Descripcion}}</mat-option>
-                                  </div>
-                                </mat-select>
+                                </div>
+                            </mat-select>
+                
+                            <!-- REfresh Icon
                             <div class="input-group-append">
-                                <button [attr.disabled]="reload"  class="btn btn-secondary">
-                                    <i class="ki ki-reload" aria-hidden="true"></i>
+                                <button [attr.disabled]="reload" class="btn btn-secondary" style="border-left: 2px solid #e6e9ed; border-top: 2px solid #dadcdf; border-bottom: 2px solid #dadcdf; background-color: transparent;">
+                                    <i class="ki ki-refresh" aria-hidden="true"></i>
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
                     </div>
                 </div>
+                
+                <br>
+
                 <div class="row col-lg-12">
                     <div class="form-group col-lg-12">
                         <label style="color:#00506a; font-weight: bold;" class="form-label">Camas</label>
@@ -332,32 +288,32 @@
                                         </div>
                                     </mat-option>
                                 </mat-select>
-                            <div class="input-group-append">
+                            <!-- Refresh Icon 
+                                <div class="input-group-append">
                                 <button  class="btn btn-secondary">
                                     <i class="ki ki-reload" aria-hidden="true"></i>
                                 </button>
-                            </div>
+                            </div> -->
                         </div>
-                    </div>
-                </div>
-
-                <div class="row col-lg-12">
-                    <div class="form-group col-lg-12">
-                        <label style="color:#00506a; font-weight: bold;">Vista</label>
-                        <input formControlName="vista" style="background-color: #e6e9ed;" class="form-control">
                     </div>
                 </div>
         </div> <!--End First Container-->
 
         <div [style.width]="editarHab===true ? '100%' : '50%'" class="float-child"> <!---Right Container-->
+            <div class="row col-lg-12">
+                <div class="form-group col-lg-12">
+                    <label style="color:#00506a; font-weight: bold;">Vista</label>
+                    <input formControlName="vista" style="background-color: #e6e9ed;" class="form-control">
+                </div>
+            </div>
+
+            <br>
             <ng-container *ngIf="editarHab===false">
                 <div class="col-md-12">
                     <label style="color:#00506a; font-weight: bold;">Generar Habitaciones (Inventario)</label>
-                    <p>¿Cuantas habitaciones fisicas tendrá este tipo de habitación?
-                    Las habitaciones fisicas se crearan automaticamente en el Calendario
-                    Una vez guardada la habitación, podra ir a tarifas para asignarlas</p>
+                    <p>¿Cuántas habitaciones físicas tendrá este tipo de habitación? Las habitaciones físicas se crearán automáticamente en el calendario. Una vez que la habitación sea guardada, podrá ir a tarifas para asignarlas.</p>
                 </div>
-                <br>
+
                 <div class="input-group">
                     <div class="input-group-append">
                         <button style="background-color: transparent;border-right: 2px solid #e6e9ed; border-left: 2px solid #dadcdf; border-top : 2px solid #dadcdf; border-bottom: 2px solid #dadcdf;" class="btn btn-secondary" (click)="removeInput()" type="button">
@@ -382,6 +338,7 @@
                     </div>
                 </div>
                 <br>
+                <br>
                 <div class="form-group col-md-12" style="font-weight: bold;">
                     <mat-checkbox (click)="clearHabsNumber(checked.checked)" #checked >¿Deseas asignar Numeración o Nombre Especiales? </mat-checkbox>
                 </div>
@@ -389,6 +346,7 @@
                     <small class="col-lg-12" style="color: red;" *ngIf="nombresIguales">Los Nombres de las habitaciones no pueden ser identicos</small>
                 </div>
                 <ng-container *ngIf="checked.checked">
+                    <br>
                     <div formArrayName="habs">
                         <ng-container *ngFor="let user of numeroHabs.controls; let i = index">
                             <div class="form-group" style="float:left; margin: 5px;">
@@ -405,10 +363,11 @@
                             There are duplicate values in the inputs.
                         </div>
                     </div>
+                    <br>
                 </ng-container>
                 <br>
             </ng-container>
-<br>
+            <br>
             <div class="row col-lg-12">
                 <div class="form-group col-lg-12">
                     <label
@@ -423,8 +382,8 @@
                 </div>
             </div>
 
-                <br>
-                <ng-container>
+            <br>
+            <ng-container>
                 <div class="row col-lg-12">
                     <div class="form-group col-lg-12">
                     <label style="color:#00506a; font-weight: bold;">Fotografias de la Habitación</label>

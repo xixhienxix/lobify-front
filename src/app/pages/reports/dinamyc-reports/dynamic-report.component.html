@@ -31,6 +31,16 @@
     />
 </mat-form-field>
 
+<mat-form-field class="filter-item" appearance="outline">
+  <mat-label>Codigo de Cuarto</mat-label>
+  <input
+    matInput
+    [(ngModel)]="filterRoomCode"
+    (input)="applyFilter({ codigoCuarto: filterRoomCode})"
+    placeholder="Filtro por Codigo de Cuarto"
+  />
+</mat-form-field>
+
   <!-- Date Filter -->
   <mat-form-field class="filter-item" appearance="outline">
       <mat-label>Filtra por Fecha</mat-label>

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ModalDismissReasons, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Subject, Subscription, map, takeUntil } from 'rxjs';
+import { Subject, Subscription, firstValueFrom, map, takeUntil } from 'rxjs';
 import { AlertsComponent } from 'src/app/_metronic/shared/alerts/alerts.component';
 import { GroupingState } from 'src/app/_metronic/shared/models/grouping.model';
 import { PaginatorState } from 'src/app/_metronic/shared/models/paginator.model';
@@ -50,12 +50,14 @@ export class RoomsComponent implements OnInit{
     "Tipo de la Habitación",
     "Capacidad Max.",
     "Inventario",
-  "Acciones"];
+    "Acciones"];
     expandedElement: roomTable | null = null;
 
 
   /**Subscription */
-  subscriptions:Subscription[]=[]
+  subscriptions:Subscription[]=[];
+  private unsubscribe$ = new Subject<void>();
+
   habitacionesporCodigo:Habitacion[]=[]
   habitacionesArr:any[]=[]
   private ngUnsubscribe = new Subject<void>();
@@ -82,13 +84,7 @@ export class RoomsComponent implements OnInit{
     ){
       this._habitacionService.getcustomFormNotification().subscribe({
         next: async ()=>{
-          // if(val){
-          //   this.promptMessage('Exito','Habitación(es) Generadas con éxito')
-          // }
-          // if(!val){
-          //   this.promptMessage('Error','No se pudo guardar la habitación intente de nuevo mas tarde')
-          // }
-          this.getHabitaciones(false)
+          this.getHabitaciones(true)
         },
         error: ()=>{
 
@@ -104,6 +100,13 @@ export class RoomsComponent implements OnInit{
     const sb = this._habitacionService.isLoading$.subscribe((res) => {
       this.isLoading = res
     });
+
+    this._habitacionService.currentHabitacionSubject
+      .pipe(takeUntil(this.unsubscribe$)) 
+      .subscribe((value: boolean) => {
+        this.getHabitaciones(value);
+      });
+
     this.subscriptions.push(sb);
     
     this.isLoading=false;
@@ -212,43 +215,58 @@ export class RoomsComponent implements OnInit{
     return this.dataSourceBS.filter(item => item.Codigo === row.Codigo).length;
   }
 
-  delete(habitacion:any){   
-    const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
-    modalRef.componentInstance.alertHeader = 'Advertencia'
-    modalRef.componentInstance.mensaje='Estas seguro que deseas eliminar la habitación?'          
-    modalRef.result.then((result) => {
-      this.isLoading=true
-
-      if(result=='Aceptar')        {
-        this._habitacionService.deleteHabitacion(habitacion.Codigo, habitacion.Numero).subscribe({
-          next:async (data)=>{
-            if(data!=0 && data!= null)
-              {
-                this.promptMessage('Error','Aun existen huespedes asignados a este codigo de cuarto, cambie el tipo de cuarto de los huespedes y vuelva a intentarlo')
-              }
-            else {
-              this.isLoading=false
-              this.getHabitaciones(true);
-              this.promptMessage('Exito','Habitacion eliminada con exito' )
-            }
-          },
-          error:()=>{
-            this.isLoading=false
-            this.promptMessage('Error','No se pudo eliminar la habitacion intente de nuevo')
-    
-          },
-          complete:()=>{
-            this.isLoading=false
-          }
-        })
-      } else if(result === 'Close click') {
-        this.isLoading=false
+  async delete(habitacion: any) {
+    console.log(habitacion);
+  
+    const roomCount  = this.dataSourceBS.filter(item => item.Codigo === habitacion.Codigo);
+  
+    const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+    modalRef.componentInstance.alertHeader = 'Advertencia';
+    modalRef.componentInstance.mensaje = '¿Estás seguro de que deseas eliminar la habitación?';
+  
+    try {
+      const result = await modalRef.result;
+      if (result !== 'Aceptar') {
+        this.isLoading = false;
+        return;
       }
-
-      this.closeResult = `Closed with: ${result}`;
-      }, (reason) => {
-          this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-      });
+  
+      this.isLoading = true;
+  
+      if (roomCount.length === 1) {
+        // Last room for this room code - Confirm deletion
+        const modalRefCodeDelete = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+        modalRefCodeDelete.componentInstance.alertHeader = 'Advertencia';
+        modalRefCodeDelete.componentInstance.mensaje = 'Este es el último inventario para este código de cuarto, al eliminar la habitacion tambien lo hara el cuarto. ¿Desea continuar?';
+  
+        const resultCodeDelete = await modalRefCodeDelete.result;
+        if (resultCodeDelete === 'Aceptar') {
+          await this.deleteRoom(habitacion.Codigo);
+        }
+      } else {
+        // Delete a single room
+        await this.deleteRoom(habitacion.Codigo, habitacion.Numero);
+      }
+    } catch (reason) {
+      this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
+    } finally {
+      this.isLoading = false;
+    }
+  }
+  
+  private async deleteRoom(codigo: string, numero: string= 'NN') {
+    try {
+      const response = await firstValueFrom(this._habitacionService.deleteHabitacion(codigo, numero));
+  
+      if ( ( response as { message: string }).message !== 'Success' ) {
+        this.promptMessage('Error', 'Aún existen huéspedes asignados a este código de cuarto. Cambie el tipo de cuarto de los huéspedes y vuelva a intentarlo.');
+      } else {
+        await this.getHabitaciones(true);
+        this.promptMessage('Éxito', 'Habitación eliminada con éxito.');
+      }
+    } catch (error) {
+      this.promptMessage('Error', 'No se pudo eliminar la habitación. Intente de nuevo.');
+    }
   }
 
   altaDehabitacion(){

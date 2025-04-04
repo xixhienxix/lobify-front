@@ -337,8 +337,11 @@ export class ContentComponent implements OnInit{
           0,
           this._parametrosService.convertToCorrectTimezone(event.date),
           this._parametrosService.convertToCorrectTimezone(event.date,true),
+          1
         );
-        const returningValue = (tarifasPorDia[0].tarifaTotal).toLocaleString('es-MX',{ style: 'currency', currency: 'MXN',minimumFractionDigits: 0,
+
+        const result = Array.isArray(tarifasPorDia) ? tarifasPorDia[0]?.tarifaTotal ?? 0 : tarifasPorDia ?? 0
+        const returningValue = (result).toLocaleString('es-MX',{ style: 'currency', currency: 'MXN',minimumFractionDigits: 0,
           maximumFractionDigits: 0, })
         return returningValue
       }

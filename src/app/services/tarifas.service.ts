@@ -161,72 +161,76 @@ export class TarifasService {
     ninos: number,
     initialDate: Date,
     endDate: Date,
-): { fecha: string; tarifaTotal: number }[] {
+    stayNights:number,
+    tarifaPromedio: boolean = false,
+    returnArray: boolean = true,
+): { fecha: string; tarifaTotal: number }[] | number {
 
-    
     const results: { fecha: string; tarifaTotal: number }[] = [];
+    let tarifaTotal = 0;
     const start = DateTime.fromISO(initialDate.toISOString());
-    const end = DateTime.fromISO(endDate.toISOString()).startOf('day'); // Ensure endDate excludes its time
+    const end = DateTime.fromISO(endDate.toISOString()).startOf('day');
 
     const applyRate = (item: any, date: DateTime) => {
-        let rate = 0;
-        switch (adultos) {
-            case 1:
-                rate = item.Tarifa_1;
-                break;
-            case 2:
-                rate = item.Tarifa_2;
-                break;
-            case 3:
-                rate = item.Tarifa_3;
-                break;
-            default:
-                rate = item.Tarifa_3;
-        }
-
-        let tarifaTotal = rate * adultos;
+        let rate = adultos <= 3 ? item[`Tarifa_${adultos}`] : item.Tarifa_3;
+        let total = rate * adultos;
         if (ninos !== 0) {
-            tarifaTotal += item.Tarifa_N * ninos;
+            total += item.Tarifa_N * ninos;
         }
 
-        const formattedDate = date.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE);
-        results.push({ fecha: formattedDate, tarifaTotal });
+        if (returnArray) {
+            const formattedDate = date.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE);
+            results.push({ fecha: formattedDate, tarifaTotal: total });
+        } else {
+            tarifaTotal += total;
+        }
     };
 
-    for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
-        let dailyTarifaTotal = 0;
-        let tarifaAplicada = false;
+    if (tarifa.Tarifa !== 'Tarifa Base') {
+        const initialDateLuxon = DateTime.fromJSDate(initialDate, { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
+        const endDateLuxon = DateTime.fromJSDate(endDate, { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
+        const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
+        const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
 
-        if (tarifa.Tarifa !== 'Tarifa Base' && tarifa.Estado) {
+        const isWithinRange =
+            initialDateLuxon >= llegadaDate && initialDateLuxon <= salidaDate &&
+            endDateLuxon >= llegadaDate && endDateLuxon <= salidaDate;
+
+        if (isWithinRange && tarifa.Estado) {
             const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
-            const day = current.weekday - 1; // Adjust for 0-based index
-
-            tarifa.TarifasActivas.forEach(item => {
-                const validDay = item.Dias?.some(x => x.name === dayNames[day] && x.checked);
-                if (validDay && item.Activa) {
-                    applyRate(item, current);
-                    tarifaAplicada = true;
+            for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
+                let tarifaAplicada = false;
+                tarifa.TarifasActivas.forEach(item => {
+                    const day = current.weekday - 1;
+                    const validDay = item.Dias?.some(x => x.name === dayNames[day] && x.checked);
+                    if (validDay && item.Activa) {
+                        applyRate(item, current);
+                        tarifaAplicada = true;
+                    }
+                });
+                if (!tarifaAplicada) {
+                    const baseRate = this.retriveBaseRatePrice(codigosCuarto, current.toJSDate(), standardRatesArray, adultos, ninos, tempRatesArray);
+                    returnArray
+                        ? results.push({ fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate })
+                        : (tarifaTotal += baseRate);
                 }
-            });
+            }
         }
-
-        if (!tarifaAplicada) {
-            dailyTarifaTotal = this.retriveBaseRatePrice(
-                codigosCuarto,
-                current.toJSDate(),
-                standardRatesArray,
-                adultos,
-                ninos,
-                tempRatesArray,
-            );
-
-            const formattedDate = current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE);
-            results.push({ fecha: formattedDate, tarifaTotal: dailyTarifaTotal });
+    } else {
+        for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
+            const baseRate = this.retriveBaseRatePrice(codigosCuarto, current.toJSDate(), standardRatesArray, adultos, ninos, tempRatesArray);
+            returnArray
+                ? results.push({ fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate })
+                : (tarifaTotal += baseRate);
+        }
+        if (!returnArray) {
+            tarifaTotal = tarifaPromedio ? Math.ceil(tarifaTotal / stayNights) : tarifaTotal;
         }
     }
 
-    return results;
+    return returnArray ? results : tarifaTotal;
 }
+
 
   retriveBaseRatePrice(
     codigosCuarto: string, 
@@ -421,42 +425,42 @@ export class TarifasService {
     return results;
 }
 
-retriveBaseRatePriceSeleccionado(
-    tarifaBase: Tarifas,
-    adultos: number, 
-    ninos: number,
-): number {
+  retriveBaseRatePriceSeleccionado(
+      tarifaBase: Tarifas,
+      adultos: number, 
+      ninos: number,
+  ): number {
 
-    let tarifaTotal = 0;
-    if (tarifaBase?.TarifasActivas.length !== 0) {
-        tarifaBase?.TarifasActivas.forEach((item) => {
-            let rate = 0;
-            switch (adultos) {
-                case 1:
-                    rate = item.Tarifa_1;
-                    break;
-                case 2:
-                    rate = item.Tarifa_2;
-                    break;
-                case 3:
-                    rate = item.Tarifa_3;
-                    break;
-                default:
-                    rate = item.Tarifa_3;
-            }
+      let tarifaTotal = 0;
+      if (tarifaBase?.TarifasActivas.length !== 0) {
+          tarifaBase?.TarifasActivas.forEach((item) => {
+              let rate = 0;
+              switch (adultos) {
+                  case 1:
+                      rate = item.Tarifa_1;
+                      break;
+                  case 2:
+                      rate = item.Tarifa_2;
+                      break;
+                  case 3:
+                      rate = item.Tarifa_3;
+                      break;
+                  default:
+                      rate = item.Tarifa_3;
+              }
 
-            tarifaTotal += rate * adultos;
+              tarifaTotal += rate * adultos;
 
-            if (ninos !== 0) {
-                tarifaTotal += item.Tarifa_N * ninos;
-            }
-        });
-    } else {
-        tarifaTotal = tarifaBase?.TarifaRack ?? 0;
-    }
+              if (ninos !== 0) {
+                  tarifaTotal += item.Tarifa_N * ninos;
+              }
+          });
+      } else {
+          tarifaTotal = tarifaBase?.TarifaRack ?? 0;
+      }
 
-    return Math.ceil(tarifaTotal ?? 0);
-}
+      return Math.ceil(tarifaTotal ?? 0);
+  }
 
 
 }

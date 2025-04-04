@@ -35,6 +35,7 @@ export class WarningComponent implements OnInit, OnDestroy {
   @Input() tempRatesArray:Tarifas[]
   @Input() Adultos:number=1;
   @Input() Ninos:number=0;
+  @Input() tarifasEspeciales:Tarifas[];
   
   constructor(public modal: NgbActiveModal) {}
 

@@ -19,7 +19,7 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
   });
   /*Oservables*/
   private currentHabitacion$=new BehaviorSubject<Habitacion[]>([]);
-  private currentHabitacionSubject =new Subject<any>();
+   currentHabitacionSubject =new Subject<any>();
 
   private currentCodigosCaurto$=new BehaviorSubject<Habitacion[]>([]);
   private currentCodigosCuartoSubject =new Subject<any>();
@@ -70,12 +70,12 @@ export class HabitacionesService extends TableService<Habitacion> implements OnD
   }
 
   async sendCustomFormNotification(_nuevoDatoAgregado:boolean){
-    if(_nuevoDatoAgregado=true){
-      this.currentHabitacionSubject.next(true)
+    if(_nuevoDatoAgregado){
+      this.currentHabitacionSubject.next(true);  
     }
   };
 
-  getcustomFormNotification() {
+  getcustomFormNotification(p0?: { next: (value: any) => void; }) {
     return this.currentHabitacionSubject.asObservable();
   }
 

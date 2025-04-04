@@ -16,6 +16,7 @@ import { DateTime } from 'luxon';
 import { IndexDBCheckingService } from 'src/app/services/_shared/indexdb.checking.service';
 import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 import { MatSelect } from '@angular/material/select';
+import { TarifasService } from 'src/app/services/tarifas.service';
 
 export interface preAsig {
   numero:any,
@@ -47,7 +48,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     private modalService:NgbModal,
     private _disponibilidadService: DisponibilidadService,
     private changeDetector: ChangeDetectorRef,
-    private _indexDbCheck: IndexDBCheckingService
+    private _indexDbCheck: IndexDBCheckingService,
+    private _tarifasService: TarifasService
   ){
 
   }
@@ -428,72 +430,108 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     this.formGroup.controls
 }
 
-ratesTotalCalc(tarifa: Tarifas, estanciaPorNoche: number, codigosCuarto = this.cuarto, tarifaPromedio = false) {
-  const adultos = this.quantity;
-  const ninos = this.quantityNin;
-  let tarifaTotal = 0;
+// ratesTotalCalc(
+//   tarifa: Tarifas, 
+//   codigosCuarto = this.cuarto, 
+//   tarifaPromedio = false
+// ) 
+//   {
+//   const adultos = this.quantity;
+//   const ninos = this.quantityNin;
+//   let tarifaTotal = 0;
 
-  const applyRate = (item: any) => {
-    let rate = 0;
-    switch (adultos) {
-      case 1:
-        rate = item.Tarifa_1;
-        break;
-      case 2:
-        rate = item.Tarifa_2;
-        break;
-      case 3:
-        rate = item.Tarifa_3;
-        break;
-      default:
-        rate = item.Tarifa_3;
-    }
-    tarifaTotal += rate; //     tarifaTotal += rate * adultos; antes se multiplicaba por adulto
-    if (ninos !== 0) {
-      tarifaTotal += item.Tarifa_N * ninos;
-    }
-  };
+//   const applyRate = (item: any) => {
+//     let rate = 0;
+//     switch (adultos) {
+//       case 1:
+//         rate = item.Tarifa_1;
+//         break;
+//       case 2:
+//         rate = item.Tarifa_2;
+//         break;
+//       case 3:
+//         rate = item.Tarifa_3;
+//         break;
+//       default:
+//         rate = item.Tarifa_3;
+//     }
+//     tarifaTotal += rate; //     tarifaTotal += rate * adultos; antes se multiplicaba por adulto
+//     if (ninos !== 0) {
+//       tarifaTotal += item.Tarifa_N * ninos;
+//     }
+//   };
 
-  if (tarifa.Tarifa !== 'Tarifa Base') {
+//   if (tarifa.Tarifa !== 'Tarifa Base') {
 
-    // Convert initial and end dates to Luxon DateTime
-    const initialDateLuxon = DateTime.fromJSDate(this.intialDate, { zone: this.parametros.codigoZona });
-    const endDateLuxon = DateTime.fromJSDate(this.endDate, { zone: this.parametros.codigoZona });
+//     // Convert initial and end dates to Luxon DateTime
+//     const initialDateLuxon = DateTime.fromJSDate(this.intialDate, { zone: this.parametros.codigoZona });
+//     const endDateLuxon = DateTime.fromJSDate(this.endDate, { zone: this.parametros.codigoZona });
 
-    // Convert tarifa dates to Luxon DateTime
-    const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: this.parametros.codigoZona });
-    const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: this.parametros.codigoZona });
+//     // Convert tarifa dates to Luxon DateTime
+//     const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: this.parametros.codigoZona });
+//     const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: this.parametros.codigoZona });
 
-    // Check if the initial and end dates are within the range
-    const isWithinRange =
-      (initialDateLuxon >= llegadaDate && initialDateLuxon <= salidaDate) &&
-      (endDateLuxon >= llegadaDate && endDateLuxon <= salidaDate);
+//     // Check if the initial and end dates are within the range
+//     const isWithinRange =
+//       (initialDateLuxon >= llegadaDate && initialDateLuxon <= salidaDate) &&
+//       (endDateLuxon >= llegadaDate && endDateLuxon <= salidaDate);
 
-    if (isWithinRange) {
-      if (tarifa.Estado) {
-        const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
+//     if (isWithinRange) {
+//       if (tarifa.Estado) {
+//         const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
   
-        for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
-          tarifa.TarifasActivas.forEach(item => {
-            const day = start.getDay();
-            const validDay = item.Dias?.some(x => x.name === dayNames[day] && x.checked);
-            if (validDay && item.Activa) {
-              applyRate(item);
-            } else {
-              tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start, day);
-            }
-          });
-        }
-      }
-    }
-  } else {
-    for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
-      tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
-    }
-    tarifaTotal = tarifaTotal/this.stayNights
-  }
+//         for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
+//           tarifa.TarifasActivas.forEach(item => {
+//             const day = start.getDay();
+//             const validDay = item.Dias?.some(x => x.name === dayNames[day] && x.checked);
+//             if (validDay && item.Activa) {
+//               applyRate(item);
+//             } else {
+//               tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start, day);
+//             }
+//           });
+//         }
+//       }
+//     }
+//   } else {
+//     for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
+//       tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
+//     }
+//     tarifaTotal = tarifaTotal/this.stayNights
+//   }
 
-  return tarifaPromedio ? Math.ceil(tarifaTotal / this.stayNights) : tarifaTotal;
+//   return tarifaPromedio ? Math.ceil(tarifaTotal / this.stayNights) : tarifaTotal;
+// }
+ratesToCalc(tarifa: Tarifas, codigosCuarto = this.cuarto, tarifaPromedio = false){
+  // return this._tarifasService.ratesTotalCalc(
+  //   tarifa,
+  //   this.standardRatesArray,
+  //   this.tempRatesArray,
+  //   codigosCuarto,
+  //   this.quantity,
+  //   this.quantityNin,
+  //   this.intialDate,
+  //   this.endDate,
+  //   tarifaPromedio,
+  //   false
+  // )
+
+  const rate = this._tarifasService.ratesTotalCalc(
+    tarifa,
+    this.standardRatesArray,
+    this.tempRatesArray,
+    codigosCuarto,
+    this.quantity,
+    this.quantityNin,
+    this.intialDate,
+    this.endDate,
+    this.stayNights,
+    tarifaPromedio,
+    false,
+  );
+
+  // Ensure it always returns a number
+  return Array.isArray(rate) ? rate[0]?.tarifaTotal ?? 0 : rate ?? 0;
 }
 
 retriveBaseRatePrice(codigosCuarto: string, checkDay: Date, day:number=-1) {
