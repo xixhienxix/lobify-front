@@ -187,36 +187,59 @@ export class TarifasService {
     };
 
     if (tarifa.Tarifa !== 'Tarifa Base') {
-        const initialDateLuxon = DateTime.fromJSDate(initialDate, { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
-        const endDateLuxon = DateTime.fromJSDate(endDate, { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
-        const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
-        const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: this._parametrosService.getCurrentParametrosValue.codigoZona });
+      const zonaHoraria = this._parametrosService.getCurrentParametrosValue.codigoZona;
+  
+      const initialDateLuxon = DateTime.fromJSDate(initialDate, { zone: zonaHoraria });
+      const endDateLuxon = DateTime.fromJSDate(endDate, { zone: zonaHoraria });
+      const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: zonaHoraria });
+      const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: zonaHoraria });
+  
+      const isWithinRange =
+          (llegadaDate >= initialDateLuxon && llegadaDate <= endDateLuxon) ||
+          (salidaDate >= initialDateLuxon && salidaDate <= endDateLuxon) ||
+          (llegadaDate <= initialDateLuxon && salidaDate >= endDateLuxon);
+  
+      if (isWithinRange && tarifa.Estado) {
+          const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
+          
+          for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
+              const isDateWithinTarifa = current >= llegadaDate && current <= salidaDate;
+              const applicableTarifa = isDateWithinTarifa 
+              ? tarifa 
+              : standardRatesArray.find(item => 
+                  item.Habitacion.some(hab => tarifa.Habitacion.includes(hab))
+              );  
 
-        const isWithinRange =
-            initialDateLuxon >= llegadaDate && initialDateLuxon <= salidaDate &&
-            endDateLuxon >= llegadaDate && endDateLuxon <= salidaDate;
-
-        if (isWithinRange && tarifa.Estado) {
-            const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
-            for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
-                let tarifaAplicada = false;
-                tarifa.TarifasActivas.forEach(item => {
-                    const day = current.weekday - 1;
-                    const validDay = item.Dias?.some(x => x.name === dayNames[day] && x.checked);
-                    if (validDay && item.Activa) {
-                        applyRate(item, current);
-                        tarifaAplicada = true;
-                    }
-                });
-                if (!tarifaAplicada) {
-                    const baseRate = this.retriveBaseRatePrice(codigosCuarto, current.toJSDate(), standardRatesArray, adultos, ninos, tempRatesArray);
-                    returnArray
-                        ? results.push({ fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate })
-                        : (tarifaTotal += baseRate);
-                }
-            }
-        }
-    } else {
+              let tarifaAplicada = false;
+              
+              if (applicableTarifa) {
+                  applicableTarifa.TarifasActivas.forEach(item => {
+                      const day = current.weekday - 1;
+                      if (item.Dias?.some(x => x.name === dayNames[day] && x.checked) && item.Activa) {
+                          applyRate(item, current);
+                          tarifaAplicada = true;
+                      }
+                  });
+              }
+  
+              if (!tarifaAplicada) {
+                  const baseRate = this.retriveBaseRatePrice(
+                      codigosCuarto,
+                      current.toJSDate(),
+                      standardRatesArray,
+                      adultos,
+                      ninos,
+                      tempRatesArray
+                  );
+  
+                  returnArray
+                      ? results.push({ fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate })
+                      : (tarifaTotal += baseRate);
+              }
+          }
+      }
+  }
+   else {
         for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
             const baseRate = this.retriveBaseRatePrice(codigosCuarto, current.toJSDate(), standardRatesArray, adultos, ninos, tempRatesArray);
             returnArray

@@ -25,6 +25,11 @@ export interface preAsig {
   disabled:boolean
 }
 
+interface Period {
+  from: string;
+  to: string;
+}
+
 @Component({
   selector: 'app-nva-reserv-modal',
   templateUrl: './nva-reserva.component.html',
@@ -83,6 +88,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   filterRatesbyRoomName:Tarifas[]=[]
   @Input() roomCodesComplete:Habitacion[]=[]
   preAsignadasArray:preAsig[]=[]
+  currentAvaibleRates: Tarifas[] = [];
+  currentOverlapRateDays:any[]=[];
 
   estatusArray:Estatus[]=[];
   folios:Foliador[]=[];
@@ -430,91 +437,11 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     this.formGroup.controls
 }
 
-// ratesTotalCalc(
-//   tarifa: Tarifas, 
-//   codigosCuarto = this.cuarto, 
-//   tarifaPromedio = false
-// ) 
-//   {
-//   const adultos = this.quantity;
-//   const ninos = this.quantityNin;
-//   let tarifaTotal = 0;
-
-//   const applyRate = (item: any) => {
-//     let rate = 0;
-//     switch (adultos) {
-//       case 1:
-//         rate = item.Tarifa_1;
-//         break;
-//       case 2:
-//         rate = item.Tarifa_2;
-//         break;
-//       case 3:
-//         rate = item.Tarifa_3;
-//         break;
-//       default:
-//         rate = item.Tarifa_3;
-//     }
-//     tarifaTotal += rate; //     tarifaTotal += rate * adultos; antes se multiplicaba por adulto
-//     if (ninos !== 0) {
-//       tarifaTotal += item.Tarifa_N * ninos;
-//     }
-//   };
-
-//   if (tarifa.Tarifa !== 'Tarifa Base') {
-
-//     // Convert initial and end dates to Luxon DateTime
-//     const initialDateLuxon = DateTime.fromJSDate(this.intialDate, { zone: this.parametros.codigoZona });
-//     const endDateLuxon = DateTime.fromJSDate(this.endDate, { zone: this.parametros.codigoZona });
-
-//     // Convert tarifa dates to Luxon DateTime
-//     const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: this.parametros.codigoZona });
-//     const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: this.parametros.codigoZona });
-
-//     // Check if the initial and end dates are within the range
-//     const isWithinRange =
-//       (initialDateLuxon >= llegadaDate && initialDateLuxon <= salidaDate) &&
-//       (endDateLuxon >= llegadaDate && endDateLuxon <= salidaDate);
-
-//     if (isWithinRange) {
-//       if (tarifa.Estado) {
-//         const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
-  
-//         for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
-//           tarifa.TarifasActivas.forEach(item => {
-//             const day = start.getDay();
-//             const validDay = item.Dias?.some(x => x.name === dayNames[day] && x.checked);
-//             if (validDay && item.Activa) {
-//               applyRate(item);
-//             } else {
-//               tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start, day);
-//             }
-//           });
-//         }
-//       }
-//     }
-//   } else {
-//     for (let start = new Date(this.intialDate); start < this.endDate; start.setDate(start.getDate() + 1)) {
-//       tarifaTotal += this.retriveBaseRatePrice(codigosCuarto, start);
-//     }
-//     tarifaTotal = tarifaTotal/this.stayNights
-//   }
 
 //   return tarifaPromedio ? Math.ceil(tarifaTotal / this.stayNights) : tarifaTotal;
 // }
 ratesToCalc(tarifa: Tarifas, codigosCuarto = this.cuarto, tarifaPromedio = false){
-  // return this._tarifasService.ratesTotalCalc(
-  //   tarifa,
-  //   this.standardRatesArray,
-  //   this.tempRatesArray,
-  //   codigosCuarto,
-  //   this.quantity,
-  //   this.quantityNin,
-  //   this.intialDate,
-  //   this.endDate,
-  //   tarifaPromedio,
-  //   false
-  // )
+
 
   const rate = this._tarifasService.ratesTotalCalc(
     tarifa,
@@ -529,6 +456,8 @@ ratesToCalc(tarifa: Tarifas, codigosCuarto = this.cuarto, tarifaPromedio = false
     tarifaPromedio,
     false,
   );
+
+  console.log('rateValue :', rate);
 
   // Ensure it always returns a number
   return Array.isArray(rate) ? rate[0]?.tarifaTotal ?? 0 : rate ?? 0;
@@ -756,29 +685,64 @@ checkIfTempRateAvaible(codigoCuarto: string, fecha: Date, day:number=-1 ) {
     return false
   }
 
-  roomRates(minihabs:string){
-    let availbleRates = this.ratesArrayComplete.filter((item) => item.Estado === true); 
+roomRates(minihabs: string) {
+  let availbleRates = this.ratesArrayComplete.filter((item) => item.Estado === true);
 
-    availbleRates  = availbleRates.filter(obj =>
-      obj.Habitacion.some(item => item === minihabs));
+  availbleRates = availbleRates.filter(obj => obj.Habitacion.includes(minihabs));
+
+  // Update date range validation: include rates that overlap with the customer’s stay
+  availbleRates = availbleRates.filter(item => {
+    const llegadaDate = new Date(item.Llegada);
+    const salidaDate = new Date(item.Salida);
     
-    // Add date range validation
-    availbleRates = availbleRates.filter(item => {
-      const llegadaDate = new Date(item.Llegada);
-      const salidaDate = new Date(item.Salida);
-      
-      // Check if the initial and end dates are within the range
-      const isWithinRange =
-        (this.intialDate >= llegadaDate && this.intialDate <= salidaDate) &&
-        (this.endDate >= llegadaDate && this.endDate <= salidaDate);
-        
-      return isWithinRange; // Keep only items that are within the date range
-    });
+    // Check if there is any overlap with the customer’s requested range
+    return this.intialDate <= salidaDate && this.endDate >= llegadaDate;
+  });
 
-    availbleRates = availbleRates.filter(item => item.Tarifa !== 'Tarifa De Temporada');
+  availbleRates = availbleRates.filter(item => item.Tarifa !== 'Tarifa De Temporada');
+  this.currentAvaibleRates = availbleRates;
 
-    return availbleRates
+  return availbleRates;
+}
+
+rateDateRange(tarifa: Tarifas): Period[] {
+  if (tarifa.Tarifa === 'Tarifa Base') {
+    return [];
   }
+
+  // Ensure global range is correctly parsed
+  const start = DateTime.fromISO(this.intialDate.toISOString()).startOf('day');
+  const end = DateTime.fromISO(this.endDate.toISOString()).endOf('day');
+
+  // Parse tarifa date range
+  const tarifaStart = DateTime.fromISO(String(tarifa.Llegada)).startOf('day');
+  const tarifaEnd = DateTime.fromISO(String(tarifa.Salida)).endOf('day');
+
+  // Ensure there is an actual overlap
+  if (tarifaEnd < start || tarifaStart > end) {
+    console.log('No overlap with global range.');
+    return [];
+  }
+
+  // Calculate the overlapping range
+  const overlapStart = tarifaStart < start ? start : tarifaStart;
+  const overlapEnd = tarifaEnd > end ? end : tarifaEnd;
+
+
+  const availableRanges: Period[] = [{
+    from: overlapStart.toFormat("dd 'de' MMMM"),
+    to: overlapEnd.toFormat("dd 'de' MMMM"),
+  }];
+
+  this.currentOverlapRateDays.push({
+    tarifa:tarifa.TarifaRack,
+    avaibleRanges:availableRanges
+  });
+
+  return availableRanges;
+}
+
+
 
   maxPeopleCheck(habitacion:any){
     var maxPeopleFlag
