@@ -18,7 +18,7 @@ export const DEFAULT_AUTH = {
 })
 export class AuthService implements OnDestroy {
   // private fields
-  private unsubscribe: Subscription[] = []; // Read more: => https://brianflove.com/2016/12/11/anguar-2-unsubscribe-observables/
+  private unsubscribe: Subscription[] = []; 
   authModel:AuthModel= DEFAULT_AUTH
   // public fields
   currentUser$: Observable<UserType>;

@@ -153,42 +153,31 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   private async processHospedaje(item: any, fromDate: Date) {
-
-    // await this._dbCheckingService.checkIndexedDB(['tarifas'], true);
-    // const ratesArrayComplete = await this._dbCheckingService.loadTarifas(true);
-  
-
-    // const tarifa = ratesArrayComplete.find(item => 
-    //   item.Tarifa === this.currentHuesped.tarifa.Tarifa &&
-    //   item.Habitacion.some(room => room.trim().toLowerCase() === this.currentHuesped.habitacion.toLowerCase())
-    // )!;
-
-    // const standarRate = this.standardRatesArray.filter(obj =>
-    //   obj.Habitacion.includes(this.currentHuesped.habitacion)
-    // );
-
-    // // Filter the `standardRatesArray`
-    // const tempRate = this.tempRatesArray.filter(obj =>
-    //   obj.Habitacion.includes(this.currentHuesped.habitacion) &&
-    //   this.isDateInRange(
-    //     this.currentHuesped.llegada, 
-    //     this.currentHuesped.salida, 
-    //     obj.Llegada, 
-    //     obj.Salida
-    //   )
-    // );
     
-    const dailyRates = this._tarifasService.ratesTotalCalcSelected(
+    this.tarifaDelDia = [];
+
+    const dailyRates = this._tarifasService.ratesTotalCalc(
       this.currentHuesped.tarifa,
+      this.standardRatesArray,
+      this.tempRatesArray,
+      this.currentHuesped.habitacion,
       this.currentHuesped.adultos,
       this.currentHuesped.ninos,
       new Date(this.currentHuesped.llegada),
       new Date(this.currentHuesped.salida),
-      this.currentHuesped.habitacion,
-      this.tempRatesArray
-    );
-  
-    this.tarifaDelDia = dailyRates;
+      this.currentHuesped.noches,
+      false,
+      false,
+      true
+    ) ?? [];
+
+    if(Array.isArray(dailyRates)){
+      dailyRates.forEach(element => {
+        this.tarifaDelDia.push({ fecha:element.fecha, tarifaTotal: element.tarifaTotal })
+      });
+    }
+
+    //  this.tarifaDelDia = dailyRates;
     this.impuestoSobreHospedaje = item.Total! * this._parametrosService.getCurrentParametrosValue.ish / 100;
     this.subTotalAlojamiento = item.Cargo!.toLocaleString();
     this.subtotalAlojamientoSinISH = item.Total - this.impuestoSobreHospedaje

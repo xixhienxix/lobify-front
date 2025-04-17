@@ -7,6 +7,11 @@ import { edoCuenta } from "../models/edoCuenta.model";
 import { ParametrosService } from "../pages/parametros/_services/parametros.service";
 import { AuthService } from "../modules/auth";
 import { LogService } from "./activity-logs.service";
+import { HuespedService } from "./huesped.service";
+import { Huesped } from "../models/huesped.model";
+import { DateTime } from "luxon";
+import { TarifasService } from "./tarifas.service";
+import { Tarifas } from "../models/tarifas";
 
 const EMPTY_EDO = {
   Folio:0,
@@ -46,6 +51,7 @@ getNotification(){
 
     constructor(
                 private http: HttpClient, 
+                private _tarifasService: TarifasService
               ) {
                }
 
@@ -125,6 +131,61 @@ getNotification(){
             return estadoDeCuenta    
         }))
       
+  }
+
+  calculaSaldoPendiente(huesped:Huesped, salidaReal:DateTime, standardRatesArray:Tarifas[], tempRatesArray:Tarifas[]){
+    const llegada = new Date(huesped.llegada);
+    const salida = salidaReal.toJSDate();
+
+    // Calculate difference in milliseconds
+    const diffInMs = salida.getTime() - llegada.getTime();
+
+    // Convert to days
+    const adjustedDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24)) === 0 ? 1 : Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+    const adjustedSalidaReal = this.checkSameDay(new Date(huesped.llegada), salidaReal);
+
+    const result = this._tarifasService.ratesTotalCalc(
+      huesped.tarifa,
+      standardRatesArray,
+      tempRatesArray,
+      huesped.habitacion,
+      huesped.adultos,
+      huesped.ninos,
+      new Date(huesped.llegada),
+      adjustedSalidaReal,
+      adjustedDays,
+      false,
+      false,
+      true
+    ) ?? [];
+
+    let saldoPendiente = 0;
+
+    if(Array.isArray(result)){
+      result.forEach(element=>{
+        saldoPendiente += element.tarifaTotal
+      })
+    }
+
+    return saldoPendiente
+  }
+
+  checkSameDay(llegadaReal:Date, salidaReal:DateTime){
+    const llegada = DateTime.fromJSDate(new Date(llegadaReal));
+    let salida = salidaReal; // assuming salidaReal is already a Luxon DateTime
+
+    // Compare only the date part (year, month, day)
+    if (
+      llegada.year === salida.year &&
+      llegada.month === salida.month &&
+      llegada.day === salida.day
+    ) {
+      salida = llegada.plus({ days: 1 }); // add 1 day
+    }
+
+    // Convert to JS Date if needed
+    return salida.toJSDate();
   }
 
   actualizaSaldo(folio:string,monto:number){

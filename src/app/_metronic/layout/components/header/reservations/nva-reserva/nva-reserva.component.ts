@@ -18,6 +18,8 @@ import { Parametros } from 'src/app/pages/parametros/_models/parametros';
 import { MatSelect } from '@angular/material/select';
 import { TarifasService } from 'src/app/services/tarifas.service';
 
+import {animate, state, style, transition, trigger} from '@angular/animations';
+
 export interface preAsig {
   numero:any,
   codigo:string,
@@ -33,8 +35,16 @@ interface Period {
 @Component({
   selector: 'app-nva-reserv-modal',
   templateUrl: './nva-reserva.component.html',
+  animations: [
+    trigger('detailExpand', [
+      state('collapsed', style({height: '0px', minHeight: '0'})),
+      state('expanded', style({height: '*'})),
+      transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
+    ]),
+  ],
   styleUrls: ['./nva-reserva.component.scss'],
   encapsulation: ViewEncapsulation.None,
+
 
   // NOTE: For this example we are only providing current component, but probably
   // NOTE: you will w  ant to provide your main App Module
@@ -127,6 +137,10 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
   /**Table */
   displayedColumns: string[] = ['Tarifa', '$ Promedio x Noche', 'Total', 'Acciones'];
+  isExpansionDetailRow = (index: number, row: any) => row === this.expandedElement;
+  displayedInnerColumns: string[] = ['tarifa', 'fecha', 'tarifaTotal'];
+
+
   dataSource = new MatTableDataSource<any>();
   displayedColumnsFooter: string[] = ['Habitacion', 'Numero'];
 
@@ -138,6 +152,10 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   noDisabledCheckIn:boolean=true;
   todayDate:Date = new Date();
   // closeResult: string;
+
+  // Expandable Row
+  expandedElement: any | null = null;
+  // isExpanded = (element: any) => this.expandedElement === element;
 
   @Input() standardRatesArray:Tarifas[]=[]
   @Input() tempRatesArray:Tarifas[]=[]
@@ -440,27 +458,48 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
 
 //   return tarifaPromedio ? Math.ceil(tarifaTotal / this.stayNights) : tarifaTotal;
 // }
-ratesToCalc(tarifa: Tarifas, codigosCuarto = this.cuarto, tarifaPromedio = false){
+ratesToCalc(tarifa: Tarifas, onlyBreakDown:boolean = false, codigosCuarto = this.cuarto, tarifaPromedio = false){
 
+  if(onlyBreakDown){
+    const result = this._tarifasService.ratesTotalCalc(
+      tarifa,
+      this.standardRatesArray,
+      this.tempRatesArray,
+      codigosCuarto,
+      this.quantity,
+      this.quantityNin,
+      this.intialDate,
+      this.endDate,
+      this.stayNights,
+      tarifaPromedio,
+      false,
+      true
+    ) ?? [];
 
-  const rate = this._tarifasService.ratesTotalCalc(
-    tarifa,
-    this.standardRatesArray,
-    this.tempRatesArray,
-    codigosCuarto,
-    this.quantity,
-    this.quantityNin,
-    this.intialDate,
-    this.endDate,
-    this.stayNights,
-    tarifaPromedio,
-    false,
-  );
+    return result
+  }else {
+    const rate = this._tarifasService.ratesTotalCalc(
+      tarifa,
+      this.standardRatesArray,
+      this.tempRatesArray,
+      codigosCuarto,
+      this.quantity,
+      this.quantityNin,
+      this.intialDate,
+      this.endDate,
+      this.stayNights,
+      tarifaPromedio,
+      false,
+    );
 
-  console.log('rateValue :', rate);
+    // Ensure it always returns a number
+    return Array.isArray(rate) ? rate[0]?.tarifaTotal ?? 0 : rate ?? 0;
+  }
+}
 
-  // Ensure it always returns a number
-  return Array.isArray(rate) ? rate[0]?.tarifaTotal ?? 0 : rate ?? 0;
+getTooltipText(element: any): string {
+  const rates = this.ratesToCalc(element, true); // Get the array of objects
+  return rates.map((rate:any) => `${rate.tarifa} - ${rate.fecha}: $${rate.tarifaTotal}`).join('\n');
 }
 
 retriveBaseRatePrice(codigosCuarto: string, checkDay: Date, day:number=-1) {
@@ -962,6 +1001,18 @@ rateDateRange(tarifa: Tarifas): Period[] {
     }
   }
 
+    /** Checks whether an element is expanded. */
+    isExpanded(element: any) {
+      return this.expandedElement === element;
+    }
+
+  ratesBreakDownToogle(element:any){
+    console.log('Clicked element:', element);
+    console.log('Before:', this.expandedElement);
+    this.expandedElement = this.expandedElement === element ? null : element;
+    console.log('After:', this.expandedElement);
+  }
+
   promptMessage(header:string,message:string){
     const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
     modalRef.componentInstance.alertHeader = header
@@ -1008,4 +1059,5 @@ rateDateRange(tarifa: Tarifas): Period[] {
   }
 
 }
+
 

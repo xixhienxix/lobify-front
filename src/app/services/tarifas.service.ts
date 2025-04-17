@@ -161,15 +161,18 @@ export class TarifasService {
     ninos: number,
     initialDate: Date,
     endDate: Date,
-    stayNights:number,
+    stayNights: number,
     tarifaPromedio: boolean = false,
     returnArray: boolean = true,
-): { fecha: string; tarifaTotal: number }[] | number {
+    onlyBreakDown:boolean = false
+): { fecha: string; tarifaTotal: number }[] | number | any[] 
+ {
 
     const results: { fecha: string; tarifaTotal: number }[] = [];
     let tarifaTotal = 0;
     const start = DateTime.fromISO(initialDate.toISOString());
     const end = DateTime.fromISO(endDate.toISOString()).startOf('day');
+    let tarifaBreakDown: any[] = [];
 
     const applyRate = (item: any, date: DateTime) => {
         let rate = adultos <= 3 ? item[`Tarifa_${adultos}`] : item.Tarifa_3;
@@ -183,76 +186,82 @@ export class TarifasService {
             results.push({ fecha: formattedDate, tarifaTotal: total });
         } else {
             tarifaTotal += total;
+            tarifaBreakDown.push({ tarifa: item.Descripcion, fecha: date.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: total });
         }
     };
 
     if (tarifa.Tarifa !== 'Tarifa Base') {
-      const zonaHoraria = this._parametrosService.getCurrentParametrosValue.codigoZona;
-  
-      const initialDateLuxon = DateTime.fromJSDate(initialDate, { zone: zonaHoraria });
-      const endDateLuxon = DateTime.fromJSDate(endDate, { zone: zonaHoraria });
-      const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: zonaHoraria });
-      const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: zonaHoraria });
-  
-      const isWithinRange =
-          (llegadaDate >= initialDateLuxon && llegadaDate <= endDateLuxon) ||
-          (salidaDate >= initialDateLuxon && salidaDate <= endDateLuxon) ||
-          (llegadaDate <= initialDateLuxon && salidaDate >= endDateLuxon);
-  
-      if (isWithinRange && tarifa.Estado) {
-          const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
-          
-          for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
-              const isDateWithinTarifa = current >= llegadaDate && current <= salidaDate;
-              const applicableTarifa = isDateWithinTarifa 
-              ? tarifa 
-              : standardRatesArray.find(item => 
-                  item.Habitacion.some(hab => tarifa.Habitacion.includes(hab))
-              );  
+        const zonaHoraria = this._parametrosService.getCurrentParametrosValue.codigoZona;
 
-              let tarifaAplicada = false;
-              
-              if (applicableTarifa) {
-                  applicableTarifa.TarifasActivas.forEach(item => {
-                      const day = current.weekday - 1;
-                      if (item.Dias?.some(x => x.name === dayNames[day] && x.checked) && item.Activa) {
-                          applyRate(item, current);
-                          tarifaAplicada = true;
-                      }
-                  });
-              }
-  
-              if (!tarifaAplicada) {
-                  const baseRate = this.retriveBaseRatePrice(
-                      codigosCuarto,
-                      current.toJSDate(),
-                      standardRatesArray,
-                      adultos,
-                      ninos,
-                      tempRatesArray
-                  );
-  
-                  returnArray
-                      ? results.push({ fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate })
-                      : (tarifaTotal += baseRate);
-              }
-          }
-      }
-  }
-   else {
+        const initialDateLuxon = DateTime.fromJSDate(initialDate, { zone: zonaHoraria });
+        const endDateLuxon = DateTime.fromJSDate(endDate, { zone: zonaHoraria });
+        const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: zonaHoraria });
+        const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: zonaHoraria });
+
+        const isWithinRange =
+            (llegadaDate >= initialDateLuxon && llegadaDate <= endDateLuxon) ||
+            (salidaDate >= initialDateLuxon && salidaDate <= endDateLuxon) ||
+            (llegadaDate <= initialDateLuxon && salidaDate >= endDateLuxon);
+
+        if (isWithinRange && tarifa.Estado) {
+            const dayNames = ["Dom", "Lun", "Mar", "Mie", "Jue", "Vie", "Sab"];
+
+            for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
+                const isDateWithinTarifa = current >= llegadaDate && current <= salidaDate;
+                const applicableTarifa = isDateWithinTarifa
+                    ? tarifa
+                    : standardRatesArray.find(item =>
+                        item.Habitacion.some(hab => tarifa.Habitacion.includes(hab))
+                    );
+
+                let tarifaAplicada = false;
+
+                if (applicableTarifa) {
+                    applicableTarifa.TarifasActivas.forEach(item => {
+                        const day = current.weekday - 1;
+                        if (item.Dias?.some(x => x.name === dayNames[day] && x.checked) && item.Activa) {
+                            applyRate(item, current);
+                            tarifaAplicada = true;
+                        }
+                    });
+                }
+
+                if (!tarifaAplicada) {
+                    const baseRate = this.retriveBaseRatePrice(
+                        codigosCuarto,
+                        current.toJSDate(),
+                        standardRatesArray,
+                        adultos,
+                        ninos,
+                        tempRatesArray
+                    );
+
+                    if (returnArray) {
+                        results.push({ fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate });
+                    } else {
+                        tarifaTotal += baseRate;
+                        tarifaBreakDown.push({ tarifa: "Tarifa Base", fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate });
+                    }
+                }
+            }
+        }
+    } else {
         for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
             const baseRate = this.retriveBaseRatePrice(codigosCuarto, current.toJSDate(), standardRatesArray, adultos, ninos, tempRatesArray);
-            returnArray
-                ? results.push({ fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate })
-                : (tarifaTotal += baseRate);
+            if (returnArray) {
+                results.push({ fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate });
+            } else {
+                tarifaTotal += baseRate;
+                tarifaBreakDown.push({ tarifa: "Tarifa Base", fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate });
+            }
         }
         if (!returnArray) {
             tarifaTotal = tarifaPromedio ? Math.ceil(tarifaTotal / stayNights) : tarifaTotal;
         }
     }
+    return onlyBreakDown ? tarifaBreakDown : returnArray ? results : tarifaTotal;
+  }
 
-    return returnArray ? results : tarifaTotal;
-}
 
 
   retriveBaseRatePrice(

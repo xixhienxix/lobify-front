@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Subscription } from 'rxjs';
@@ -16,7 +16,7 @@ import { edoCuenta } from 'src/app/models/edoCuenta.model';
   templateUrl: './saldar.cuenta.component.html',
   styleUrls: ['./saldar.cuenta.component.scss']
 })
-export class SaldoCuentaComponent implements OnInit {
+export class SaldoCuentaComponent implements OnInit, OnDestroy {
   @Input() folio:string;
   @Output() passEntry: EventEmitter<any> = new EventEmitter();
 

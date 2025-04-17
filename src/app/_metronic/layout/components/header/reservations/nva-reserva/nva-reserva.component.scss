@@ -173,3 +173,23 @@ tr.mat-mdc-footer-row {
 
 
 
+
+.inner-table {
+  font-size: 0.8rem; // Reduce text size
+  width: 90%; // Make it smaller than the parent table
+  margin: auto; // Center it
+}
+
+.inner-table th, .inner-table td {
+  padding: 4px; // Reduce cell padding
+}
+
+.inner-table {
+  max-height: 300px; 
+  overflow-y: auto; // Make it scrollable
+  display: block;
+}
+
+.expanded td {
+  background-color: #f5f5f5; // Light gray for expanded rows
+}

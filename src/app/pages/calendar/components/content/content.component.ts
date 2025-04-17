@@ -570,9 +570,15 @@ export class ContentComponent implements OnInit{
       this.honDeleteBloqueo.emit({ row: args, folio: args.data.Folio });
       return;
     }
+
+    const startDateOnly = new Date(startTime);
+    startDateOnly.setHours(0, 0, 0, 0);
+
+    const todayDateOnly = new Date(today);
+    todayDateOnly.setHours(0, 0, 0, 0);
   
     // If event is in the future or today
-    if (startTime >= today) {
+    if (startDateOnly >= todayDateOnly) {
       if (args.data.hasOwnProperty("Folio")) {
         // Editing an existing reservation
         if (args.type === "Editor" || args.type === "QuickInfo") {
