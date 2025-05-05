@@ -38,7 +38,8 @@ export interface Huesped {
     ID_Socio?:number;
     estatus_Ama_De_Llaves?:string;
     hotel?:string;
-  
+    desgloseEdoCuenta:{ fecha: string; tarifaTotal: number }[] | number | any[]
+
   }
 
   // export const DEFAULT_HUESPED:Huesped = {

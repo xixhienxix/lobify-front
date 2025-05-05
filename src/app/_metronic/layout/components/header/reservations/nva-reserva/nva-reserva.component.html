@@ -146,11 +146,11 @@
     <table mat-table [dataSource]="roomRates(cuarto)">
       <ng-container matColumnDef="Tarifa">
         <th mat-header-cell *matHeaderCellDef> Tarifa </th>
-        <td mat-cell *matCellDef="let element" matTooltip="{{ getTooltipText(element) }}"> 
+        <td mat-cell *matCellDef="let element"> 
           <div>
             <strong>{{ element.Tarifa }}</strong>
             <br>
-            <small *ngIf="element.validity">{{ element.validity }}</small>
+            <small *ngFor="let date of rateDateRange(element)">Aplica del: {{ date.from }} - {{ date.to }}   </small>
           </div>
          </td>
       </ng-container>
@@ -238,7 +238,7 @@
                             <div>
                               <strong>{{ element.Tarifa }}</strong>
                               <br>
-                              <small *ngFor="let date of rateDateRange(element)"> {{ date.from }} - {{ date.to }}   </small>
+                              <small *ngFor="let date of rateDateRange(element)">Aplica del: {{ date.from }} - {{ date.to }}   </small>
                             </div>
                            </td>
                         </ng-container>
@@ -342,7 +342,13 @@
                               <table mat-table [dataSource]="roomRates(roomCode.Codigo)">                        
                                 <ng-container matColumnDef="Tarifa">
                                   <th mat-header-cell *matHeaderCellDef> Tarifa </th>
-                                  <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
+                                  <td mat-cell *matCellDef="let element"> 
+                                    <div>
+                                      <strong>{{ element.Tarifa }}</strong>
+                                      <br>
+                                      <small *ngFor="let date of rateDateRange(element)">Aplica del: {{ date.from }} - {{ date.to }}   </small>
+                                    </div>
+                                   </td>
                                 </ng-container>
                             
                                 <ng-container matColumnDef="$ Promedio x Noche">

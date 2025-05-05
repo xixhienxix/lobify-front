@@ -10,17 +10,23 @@
       <table mat-table [dataSource]="roomRates(cuarto)">
         <ng-container matColumnDef="Tarifa">
           <th mat-header-cell *matHeaderCellDef> Tarifa </th>
-          <td mat-cell *matCellDef="let element"> {{element.Tarifa}} </td>
+          <td mat-cell *matCellDef="let element"> 
+            <div>
+              <strong>{{ element.Tarifa }}</strong>
+              <br>
+              <small *ngFor="let date of rateDateRange(element)">Aplica del: {{ date.from }} - {{ date.to }}   </small>
+            </div>
+           </td>
         </ng-container>
     
         <ng-container matColumnDef="$ Promedio x Noche">
           <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-          <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights)/stayNights | currency : 'MXN' : 'symbol' : '1.0-0'}} </td>
+          <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element)/stayNights | currency : 'MXN' : 'symbol' : '1.0-0'}} </td>
         </ng-container>
     
         <ng-container matColumnDef="Total">
           <th mat-header-cell *matHeaderCellDef> Total </th>
-          <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element,stayNights) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td>
+          <td mat-cell *matCellDef="let element"> {{ratesTotalCalc(element) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td>
         </ng-container>
 
         <ng-container matColumnDef="Acciones">

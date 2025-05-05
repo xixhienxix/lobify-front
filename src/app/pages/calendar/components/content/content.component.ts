@@ -197,7 +197,7 @@ export class ContentComponent implements OnInit{
   /**
    * Used to Set how many days displays on the Scheduler in one view
    */
-  public dayInterval: number = 5;
+  public dayInterval: number = 12;
   /**
    * Specify WorkDays, non workdays appear as gray columns on the schedule
    */

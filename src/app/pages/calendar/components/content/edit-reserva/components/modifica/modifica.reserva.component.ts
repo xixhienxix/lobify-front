@@ -7,7 +7,7 @@ import { DisponibilidadService } from 'src/app/services/disponibilidad.service';
 import { Huesped } from 'src/app/models/huesped.model';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { MatTableDataSource } from '@angular/material/table';
-import { preAsig } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
+import { Period, preAsig } from 'src/app/_metronic/layout/components/header/reservations/nva-reserva/nva-reserva.component';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { TarifasRadioButton, Tarifas, TarifasDisponibles } from 'src/app/models/tarifas';
 import { Estatus } from 'src/app/pages/calendar/_models/estatus.model';
@@ -115,6 +115,7 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   todayDate:Date = new Date();
   cuarto=''
   beforeChangesCustomer:PropertiesChanged;
+  currentOverlapRateDays:any[]=[];
   // closeResult: string;
 
 
@@ -794,6 +795,42 @@ ratesToCalc(tarifa: Tarifas, onlyBreakDown:boolean = false, codigosCuarto = this
   }
 }
 
+rateDateRange(tarifa: Tarifas): Period[] {
+  if (tarifa.Tarifa === 'Tarifa Base') {
+    return [];
+  }
+
+  // Ensure global range is correctly parsed
+  const start = DateTime.fromISO(this.intialDate.toISOString()).startOf('day');
+  const end = DateTime.fromISO(this.endDate.toISOString()).endOf('day');
+
+  // Parse tarifa date range
+  const tarifaStart = DateTime.fromISO(String(tarifa.Llegada)).startOf('day');
+  const tarifaEnd = DateTime.fromISO(String(tarifa.Salida)).endOf('day');
+
+  // Ensure there is an actual overlap
+  if (tarifaEnd < start || tarifaStart > end) {
+    console.log('No overlap with global range.');
+    return [];
+  }
+
+  // Calculate the overlapping range
+  const overlapStart = tarifaStart < start ? start : tarifaStart;
+  const overlapEnd = tarifaEnd > end ? end : tarifaEnd;
+
+
+  const availableRanges: Period[] = [{
+    from: overlapStart.toFormat("dd 'de' MMMM"),
+    to: overlapEnd.toFormat("dd 'de' MMMM"),
+  }];
+
+  this.currentOverlapRateDays.push({
+    tarifa:tarifa.TarifaRack,
+    avaibleRanges:availableRanges
+  });
+
+  return availableRanges;
+}
 
 isInSeason(tarifa: any, checkDate: Date): boolean {
   const startDate = new Date(tarifa.Llegada);

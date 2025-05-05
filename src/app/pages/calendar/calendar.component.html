@@ -1,6 +1,4 @@
-<div class="container" style="height: 100%;">
-    <div class="card card-custom content-card">
-        <app-content
+        <app-content style="display: flex; flex: 1; overflow: auto; max-height: 500px;"
             #calendar 
             [roomCodes]="roomCodes"
             [roomCodesComplete]="roomCodesComplete"
@@ -19,14 +17,12 @@
             (onRefreshingFinished)="onRefreshingFinished($event)"
             (honNvaRsvDateRange)="onNvaRsvDateRange($event)">
         </app-content>
-    </div>
     <div class="card card-custom footer-card" *ngIf="allReservations && roomCodesComplete">
         <app-footer
             [allReservations]="allReservations"
             [houseKeepingCodes]="roomCodesComplete">
         </app-footer>
     </div>
-</div>
 
 <ng-container *ngIf="_isLoading | async">
     <app-loader-spinner></app-loader-spinner>

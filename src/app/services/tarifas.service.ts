@@ -167,7 +167,6 @@ export class TarifasService {
     onlyBreakDown:boolean = false
 ): { fecha: string; tarifaTotal: number }[] | number | any[] 
  {
-
     const results: { fecha: string; tarifaTotal: number }[] = [];
     let tarifaTotal = 0;
     const start = DateTime.fromISO(initialDate.toISOString());
@@ -193,10 +192,10 @@ export class TarifasService {
     if (tarifa.Tarifa !== 'Tarifa Base') {
         const zonaHoraria = this._parametrosService.getCurrentParametrosValue.codigoZona;
 
-        const initialDateLuxon = DateTime.fromJSDate(initialDate, { zone: zonaHoraria });
-        const endDateLuxon = DateTime.fromJSDate(endDate, { zone: zonaHoraria });
-        const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: zonaHoraria });
-        const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: zonaHoraria });
+        const initialDateLuxon = DateTime.fromJSDate(initialDate, { zone: zonaHoraria }).startOf('day');
+        const endDateLuxon = DateTime.fromJSDate(endDate, { zone: zonaHoraria }).startOf('day');
+        const llegadaDate = DateTime.fromISO(tarifa.Llegada.toString(), { zone: zonaHoraria }).startOf('day');
+        const salidaDate = DateTime.fromISO(tarifa.Salida.toString(), { zone: zonaHoraria }).startOf('day');
 
         const isWithinRange =
             (llegadaDate >= initialDateLuxon && llegadaDate <= endDateLuxon) ||
@@ -208,11 +207,22 @@ export class TarifasService {
 
             for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
                 const isDateWithinTarifa = current >= llegadaDate && current <= salidaDate;
+
+                const applicableTempTarifa = tempRatesArray.find(item => {
+                  const llegadaDate = DateTime.fromISO(item.Llegada.toString()); 
+                  const salidaDate = DateTime.fromISO(item.Salida.toString());
+                
+                  const isDateWithinRange = current >= llegadaDate && current <= salidaDate;
+                  const hasMatchingHabitacion = item.Habitacion.some(hab => tarifa.Habitacion.includes(hab));
+                
+                  return isDateWithinRange && hasMatchingHabitacion;
+                });
+
                 const applicableTarifa = isDateWithinTarifa
-                    ? tarifa
-                    : standardRatesArray.find(item =>
-                        item.Habitacion.some(hab => tarifa.Habitacion.includes(hab))
-                    );
+                ? tarifa
+                : (applicableTempTarifa || standardRatesArray.find(item =>
+                    item.Habitacion.some(hab => tarifa.Habitacion.includes(hab))
+                  ));
 
                 let tarifaAplicada = false;
 
@@ -244,10 +254,12 @@ export class TarifasService {
                     }
                 }
             }
+        } else {
         }
     } else {
         for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
             const baseRate = this.retriveBaseRatePrice(codigosCuarto, current.toJSDate(), standardRatesArray, adultos, ninos, tempRatesArray);
+            console.log('-->',baseRate);
             if (returnArray) {
                 results.push({ fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate });
             } else {
@@ -259,6 +271,7 @@ export class TarifasService {
             tarifaTotal = tarifaPromedio ? Math.ceil(tarifaTotal / stayNights) : tarifaTotal;
         }
     }
+
     return onlyBreakDown ? tarifaBreakDown : returnArray ? results : tarifaTotal;
   }
 

@@ -48,10 +48,6 @@
   text-align: center;
 }
 
-.e-schedule .e-week-view .e-work-cells:not(.e-work-days) {
-  background-color: gray;
-}
-
 /*Hides Time in header*/
 .timeline-resource-grouping .e-time-slots {
   display: none;
@@ -104,4 +100,14 @@
   height: 21px;
   background-size: 45px;
   background-repeat: no-repeat;
+}
+
+// Center onDataBound Values in TimeLine Month view
+.e-schedule .e-timeline-month-view .e-work-cells {
+  text-align: center;
+}
+
+.e-resource-group-cells > div {
+  color: #fa6d7c !important;
+  font-weight: bold;
 }

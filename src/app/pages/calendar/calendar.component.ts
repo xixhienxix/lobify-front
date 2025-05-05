@@ -778,7 +778,8 @@ export class CalendarComponent implements OnInit, OnDestroy {
       vip: currentHuesped.vip, // Example default value
       ID_Socio: undefined, // Default or placeholder value
       estatus_Ama_De_Llaves: currentHuesped.estatus_Ama_De_Llaves, // Example default value
-      hotel: currentHuesped.hotel // Example default value
+      hotel: currentHuesped.hotel, // Example default value
+      desgloseEdoCuenta: currentHuesped.desgloseEdoCuenta
     };
   }
 

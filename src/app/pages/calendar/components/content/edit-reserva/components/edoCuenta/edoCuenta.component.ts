@@ -62,7 +62,6 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
     public divisasService: DivisasService,
     private _tarifasService: TarifasService,
     private _parametrosService: ParametrosService,
-    private _dbCheckingService: IndexDBCheckingService
     
   ) {
     const sb = this._edoCuentaService.getNotification().subscribe(data => {
@@ -156,28 +155,23 @@ export class EdoCuentaComponent implements OnInit, OnDestroy, OnChanges {
     
     this.tarifaDelDia = [];
 
-    const dailyRates = this._tarifasService.ratesTotalCalc(
-      this.currentHuesped.tarifa,
-      this.standardRatesArray,
-      this.tempRatesArray,
-      this.currentHuesped.habitacion,
-      this.currentHuesped.adultos,
-      this.currentHuesped.ninos,
-      new Date(this.currentHuesped.llegada),
-      new Date(this.currentHuesped.salida),
-      this.currentHuesped.noches,
-      false,
-      false,
-      true
-    ) ?? [];
+    // const dailyRates = this._tarifasService.ratesTotalCalc(
+    //   this.currentHuesped.tarifa,
+    //   this.standardRatesArray,
+    //   this.tempRatesArray,
+    //   this.currentHuesped.habitacion,
+    //   this.currentHuesped.adultos,
+    //   this.currentHuesped.ninos,
+    //   new Date(this.currentHuesped.llegada),
+    //   new Date(this.currentHuesped.salida),
+    //   this.currentHuesped.noches,
+    //   false,
+    //   false,
+    //   true
+    // ) ?? [];
 
-    if(Array.isArray(dailyRates)){
-      dailyRates.forEach(element => {
-        this.tarifaDelDia.push({ fecha:element.fecha, tarifaTotal: element.tarifaTotal })
-      });
-    }
+    this.tarifaDelDia = Array.isArray(this.currentHuesped.desgloseEdoCuenta) ? this.currentHuesped.desgloseEdoCuenta : [];
 
-    //  this.tarifaDelDia = dailyRates;
     this.impuestoSobreHospedaje = item.Total! * this._parametrosService.getCurrentParametrosValue.ish / 100;
     this.subTotalAlojamiento = item.Cargo!.toLocaleString();
     this.subtotalAlojamientoSinISH = item.Total - this.impuestoSobreHospedaje
