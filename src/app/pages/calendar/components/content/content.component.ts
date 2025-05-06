@@ -545,7 +545,7 @@ export class ContentComponent implements OnInit{
   * Event that triggers when popup add event window triggers, and lets you interact with popup
   * @param args This functions is to fill the dropdown of Time that appears whenever yo create or modifiy and existing reservation
   */
-  onPopupOpen = (args: any) => {
+  onPopupOpen = async (args: any) => {
     args.cancel = true; // Default cancel
   
     const today = new Date();
@@ -585,26 +585,51 @@ export class ContentComponent implements OnInit{
           this.honEditRsv.emit({ row: args, folio: args.data.Folio });
         }
       } else if (args.type === "QuickInfo") {
-        // Creating a new reservation - Check for overlaps
         const now = new Date();
         const filteredEvents = existingEvents.filter(event => new Date(event.EndTime) >= now);
-  
-        const hasOverlap = filteredEvents.some(event => {
-          if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
-            const eventStartDate = new Date(event.StartTime).toISOString().split("T")[0];
-            const eventEndDate = new Date(event.EndTime).toISOString().split("T")[0];
-            const argsStartDate = new Date(args.data.StartTime).toISOString().split("T")[0];
-            const argsEndDate = new Date(args.data.EndTime).toISOString().split("T")[0];
-  
-            return argsStartDate <= eventEndDate && argsEndDate >= eventStartDate;
-          }
-          return false;
-        });
-  
-        if (!hasOverlap) {
+      
+        // Map and await all async overlap checks
+        const overlapResults = await Promise.all(
+          filteredEvents.map(async (event) => {
+            const parametros = await this._indexDBService.loadParametros();
+            const [checkInHour, checkInMinute] = parametros.checkIn.split(':').map(Number);
+            const [checkOutHour, checkOutMinute] = parametros.checkOut.split(':').map(Number);
+            const timeZone = parametros.codigoZona || 'UTC';
+        
+            const argsStart = DateTime
+              .fromJSDate(new Date(args.data.StartTime), { zone: timeZone })
+              .set({ hour: checkInHour, minute: checkInMinute });
+        
+            const argsEnd = DateTime
+              .fromJSDate(new Date(args.data.EndTime), { zone: timeZone })
+              .minus({ days: 1 })
+              .set({ hour: checkOutHour, minute: checkOutMinute });
+        
+            if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
+              const eventStart = DateTime.fromJSDate(new Date(event.StartTime), { zone: timeZone });
+              const eventEnd = DateTime.fromJSDate(new Date(event.EndTime), { zone: timeZone });
+        
+              const overlap = argsStart <= eventEnd && argsEnd >= eventStart;
+        
+              return { overlap, argsStart, argsEnd };
+            }
+        
+            return { overlap: false };
+          })
+        );
+      
+        const hasOverlap = overlapResults.some(r => r.overlap);
+        // Get first valid transformed values if needed
+        const validArgs = overlapResults.find(r => r.argsStart && r.argsEnd);
+
+        if (!hasOverlap && validArgs) {
+          args.data.endTime = validArgs?.argsEnd?.toJSDate() ?? new Date(args.data.endTime);
+          args.data.EndTime = validArgs?.argsEnd?.toJSDate() ?? new Date(args.data.EndTime);
+               
           this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
         }
       }
+      
     }
   };
   

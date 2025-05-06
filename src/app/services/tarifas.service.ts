@@ -259,7 +259,6 @@ export class TarifasService {
     } else {
         for (let current = start.startOf('day'); current < end; current = current.plus({ days: 1 })) {
             const baseRate = this.retriveBaseRatePrice(codigosCuarto, current.toJSDate(), standardRatesArray, adultos, ninos, tempRatesArray);
-            console.log('-->',baseRate);
             if (returnArray) {
                 results.push({ fecha: current.setLocale('es-MX').toLocaleString(DateTime.DATE_HUGE), tarifaTotal: baseRate });
             } else {
@@ -271,7 +270,6 @@ export class TarifasService {
             tarifaTotal = tarifaPromedio ? Math.ceil(tarifaTotal / stayNights) : tarifaTotal;
         }
     }
-
     return onlyBreakDown ? tarifaBreakDown : returnArray ? results : tarifaTotal;
   }
 

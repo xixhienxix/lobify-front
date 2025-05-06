@@ -42,31 +42,12 @@ export interface Tarifas {
 }
 
 
-export interface TarifasRadioButton {
+export interface TarifasRadioButton extends Tarifas {
 
-    Tarifa:string;
-    Habitacion:string[];
-    Llegada:Date;
-    Salida:Date;
-    Plan:string;
-    Politicas?:Politicas[];
-    EstanciaMinima:number;
-    EstanciaMaxima:number;
-    TarifaRack?:number;
-    TarifaXAdulto?:number[]
-    TarifaXNino?:number[]
-    Estado:boolean,
-    Adultos:number,
-    Ninos:number,
-    Dias?:{
-        name: string;
-        value: number;
-        checked: boolean;
-    }[],
-    hotel?:string;
-    Descuento?:number,
-    checked:boolean
-
+    checked: boolean;
+    TarifaXAdulto?: number[];
+    TarifaXNino?: number[];
+    
 }
 
 export const DEFAULT_TARIFAS: Tarifas = {

@@ -622,7 +622,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
       const stayNights = Math.ceil((event.EndTime.getTime() - event.StartTime.getTime()) / (1000 * 3600 * 24));
   
       const modalRef = this.modalService.open(WarningComponent, { size: 'md', backdrop: 'static' });
-  
+
       Object.assign(modalRef.componentInstance, {
         ratesArrayComplete: dataSource,
         stayNights,

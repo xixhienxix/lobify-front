@@ -33,4 +33,5 @@ export interface PropertiesChanged {
     pendiente:number;
     noches:number;
     numeroCuarto:string;
+    desgloseEdoCuenta:{ fecha: string; tarifaTotal: number }[] | number | any[]
 }

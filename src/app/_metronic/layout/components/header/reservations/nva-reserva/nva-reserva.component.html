@@ -157,12 +157,12 @@
   
       <ng-container matColumnDef="$ Promedio x Noche">
         <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-        <td mat-cell *matCellDef="let element"> {{ ratesToCalc(element) /stayNights }}</td>
+        <td mat-cell *matCellDef="let element"> {{ roundUp(ratesToCalc(element)/stayNights) | currency : 'MXN' : 'symbol' : '1.0-0' }}</td>
       </ng-container>
   
       <ng-container matColumnDef="Total">
         <th mat-header-cell *matHeaderCellDef> Total </th>
-        <td mat-cell *matCellDef="let element"> {{ ratesToCalc(element) }} </td>
+        <td mat-cell *matCellDef="let element"> {{ roundUp(ratesToCalc(element)) | currency : 'MXN' : 'symbol' : '1.0-0' }} </td>
       </ng-container>
 
       <ng-container matColumnDef="Acciones">
@@ -245,12 +245,12 @@
                     
                         <ng-container matColumnDef="$ Promedio x Noche">
                           <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-                          <td mat-cell *matCellDef="let element"> {{ratesToCalc(element)/stayNights | currency : 'MXN' : 'symbol' : '1.0-0'}} </td>
+                          <td mat-cell *matCellDef="let element"> {{ roundUp(ratesToCalc(element)/stayNights) | currency : 'MXN' : 'symbol' : '1.0-0' }} </td>
                         </ng-container>
                     
                         <ng-container matColumnDef="Total">
                           <th mat-header-cell *matHeaderCellDef> Total </th>
-                          <td mat-cell *matCellDef="let element"> {{ratesToCalc(element) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td>
+                          <td mat-cell *matCellDef="let element"> {{ roundUp(ratesToCalc(element)) | currency : 'MXN' : 'symbol' : '1.0-0' }} </td>
                         </ng-container>
               
                         <ng-container matColumnDef="Acciones">
@@ -353,12 +353,12 @@
                             
                                 <ng-container matColumnDef="$ Promedio x Noche">
                                   <th mat-header-cell *matHeaderCellDef> $ Promedio x Noche </th>
-                                  <td mat-cell *matCellDef="let element">{{ratesToCalc(element,false,roomCode.Codigo,false)/stayNights | currency : 'MXN' : 'symbol' : '1.0-0'}} </td><!--{{ratesTotalCalc(element,stayNights)/stayNights}}-->
+                                  <td mat-cell *matCellDef="let element">{{ roundUp(ratesToCalc(element,false,roomCode.Codigo,false)/stayNights) | currency : 'MXN' : 'symbol' : '1.0-0' }} </td><!--{{ratesTotalCalc(element,stayNights)/stayNights}}-->
                                 </ng-container>
                             
                                 <ng-container matColumnDef="Total">
                                   <th mat-header-cell *matHeaderCellDef> Total </th>
-                                  <td mat-cell *matCellDef="let element"> {{ratesToCalc(element,false,roomCode.Codigo) | currency : 'MXN' : 'symbol' : '1.0-0'}} </td><!--{{ratesTotalCalc(element,stayNights)}}-->
+                                  <td mat-cell *matCellDef="let element"> {{ roundUp(ratesToCalc(element,false,roomCode.Codigo)) | currency : 'MXN' : 'symbol' : '1.0-0' }} </td><!--{{ratesTotalCalc(element,stayNights)}}-->
                                 </ng-container>
                       
                                 <ng-container matColumnDef="Acciones">

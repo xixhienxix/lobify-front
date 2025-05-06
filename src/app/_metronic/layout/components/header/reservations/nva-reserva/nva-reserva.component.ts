@@ -186,17 +186,20 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
     this.loadForm();
 
     if(this.startTime !== '' && this.endTime !== ''){
+      
       this.updateDatePicker(this.startTime,this.endTime);
       this.intialDate = new Date(this.startTime);
       this.endDate = new Date(this.endTime);
+
       //Minus 1 day 
       // Check if endDate is different from intialDate
       if (this.endDate.getTime() !== this.intialDate.getTime()) {
         this.todaysDateComparer(this.intialDate);
 
-        // Subtract one day from endDate
+        // Subtract one day from endDate [Not Needed since a fix was added on calendar component, ]
+        // Pending response from syncfusion to see why the endDate is always one day later than selected
         const adjustedEndDate = new Date(this.endDate);
-        adjustedEndDate.setDate(adjustedEndDate.getDate() - 1);
+        adjustedEndDate.setDate(adjustedEndDate.getDate());
 
         // Ensure adjustedEndDate is not equal to intialDate
         if (adjustedEndDate.getTime() !== this.intialDate.getTime()) {
@@ -205,7 +208,8 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
       }
 
       let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
-      this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+
+      this.stayNights = Math.floor(Difference_In_Time / (1000 * 3600 * 24));
 
       if(this.cuarto){
         this.formGroup.patchValue({ habitacion: this.cuarto });
@@ -917,6 +921,10 @@ rateDateRange(tarifa: Tarifas): Period[] {
       }
       recursiveFunc(formToInvestigate);
       return invalidControls;
+    }
+
+    roundUp(value: number): number {
+      return Math.ceil(value);
     }
 
   private getDismissReason(reason: any): string {
