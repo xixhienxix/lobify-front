@@ -609,6 +609,10 @@ export class ContentComponent implements OnInit{
               const eventStart = DateTime.fromJSDate(new Date(event.StartTime), { zone: timeZone });
               const eventEnd = DateTime.fromJSDate(new Date(event.EndTime), { zone: timeZone });
         
+              const isSameDay = argsStart.hasSame(argsEnd, 'day');
+              if (isSameDay) {
+                return { overlap: true }; // Immediate overlap due to same-day booking
+              }
               const overlap = argsStart <= eventEnd && argsEnd >= eventStart;
         
               return { overlap, argsStart, argsEnd };
