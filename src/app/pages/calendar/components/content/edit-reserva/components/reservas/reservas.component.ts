@@ -159,7 +159,7 @@ export class ReservasComponent implements OnInit {
     const endDate = new Date(this.currentHuesped.salida);
 
     let Difference_In_Time = intialDate.getTime() - endDate.getTime();
-    this.noches = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+    this.noches = Math.floor(Difference_In_Time / (1000 * 3600 * 24));
     // this.noches = this.toDate.diff(this.fromDate, ["days"])
 
     // this.noches=-parseInt((this.currentHuesped.llegada.toString()).split("/")[0])+parseInt((this.currentHuesped.salida.toString()).split("/")[0])

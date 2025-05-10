@@ -611,22 +611,24 @@ export class ContentComponent implements OnInit{
         
               const isSameDay = argsStart.hasSame(argsEnd, 'day');
               if (isSameDay) {
-                return { overlap: true }; // Immediate overlap due to same-day booking
+                return { overlap: true, argsStart, argsEnd };
               }
-              const overlap = argsStart <= eventEnd && argsEnd >= eventStart;
         
+              const overlap = argsStart <= eventEnd && argsEnd >= eventStart;
               return { overlap, argsStart, argsEnd };
             }
         
-            return { overlap: false };
+            // Always include argsStart and argsEnd, even if Project/Task ID don't match
+            return { overlap: false, argsStart, argsEnd };
           })
         );
+        
       
         const hasOverlap = overlapResults.some(r => r.overlap);
         // Get first valid transformed values if needed
         const validArgs = overlapResults.find(r => r.argsStart && r.argsEnd);
 
-        if (!hasOverlap && validArgs) {
+         if (!hasOverlap && validArgs) {
           args.data.endTime = validArgs?.argsEnd?.toJSDate() ?? new Date(args.data.endTime);
           args.data.EndTime = validArgs?.argsEnd?.toJSDate() ?? new Date(args.data.EndTime);
                
@@ -871,7 +873,6 @@ findOverlappingObjects(
   if(args.requestType === 'eventCreated'){
     args.data
   }
-
 }
 
  applyStylesToCells(cells: NodeListOf<Element>, selectedDate: Date): void {

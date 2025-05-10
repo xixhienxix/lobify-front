@@ -216,7 +216,7 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
 
     if (this.intialDate && this.endDate) {
       const differenceInTime = this.endDate.getTime() - this.intialDate.getTime();
-      this.stayNights = Math.ceil(differenceInTime / (1000 * 3600 * 24));
+      this.stayNights = Math.floor(differenceInTime / (1000 * 3600 * 24));
 
       this.getDisponibilidad(this.intialDate, this.endDate, this.currentHuesped.habitacion, this.stayNights, "No Folio", this.cuarto);
     }
@@ -325,7 +325,7 @@ addEventSalidaDate(eventType: string, event: any) {
 
     let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
 
-    this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+    this.stayNights = Math.floor(Difference_In_Time / (1000 * 3600 * 24));
 
     this.resetDispo();
     this.todaysDateComparer(this.intialDate);
@@ -847,7 +847,7 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
 
     let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
 
-    this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+    this.stayNights = Math.floor(Difference_In_Time / (1000 * 3600 * 24));
 
     this.resetDispo();
     this.todaysDateComparer(this.intialDate);
@@ -861,7 +861,7 @@ isInSeason(tarifa: any, checkDate: Date): boolean {
 
     let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
 
-    this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+    this.stayNights = Math.floor(Difference_In_Time / (1000 * 3600 * 24));
 
     this.resetDispo();
     this.todaysDateComparer(this.endDate);

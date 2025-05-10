@@ -724,7 +724,7 @@ rateDateRange(tarifa: Tarifas): Period[] {
 
     let Difference_In_Time = this.endDate.getTime() - this.intialDate.getTime();
 
-    this.stayNights = Math.ceil(Difference_In_Time / (1000 * 3600 * 24));
+    this.stayNights = Math.floor(Difference_In_Time / (1000 * 3600 * 24));
 
     this.resetDispo();
     this.todaysDateComparer(this.intialDate);

@@ -239,8 +239,8 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     const fechaLlegada = DateTime.fromISO(llegada.split("T")[0]);
     const fechaSalida = DateTime.fromISO(salida.split("T")[0]);
 
-    const nochesAlojadas = Math.ceil(todayDate.diff(fechaLlegada, 'days').days);
-    const nochesReservadas = Math.ceil(fechaSalida.diff(fechaLlegada, 'days').days);
+    const nochesAlojadas = Math.floor(todayDate.diff(fechaLlegada, 'days').days);
+    const nochesReservadas = Math.floor(fechaSalida.diff(fechaLlegada, 'days').days);
 
     this.nochesReales = nochesAlojadas === 0 ? 1 : nochesAlojadas;
     this.totalAlojamientoNuevo = 0; // this.huesped.tarifa * this.nochesReales
