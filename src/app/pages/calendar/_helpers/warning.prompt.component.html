@@ -1,6 +1,6 @@
 <div class="modal-header">
     <h4 class="modal-title">{{alertHeader}}</h4>
-    <button mat-button (click)="modal.close()">
+    <button class="btn btn-danger" mat-button (click)="modal.close()">
       <span aria-hidden="true">&times;</span>
     </button>
   </div>
@@ -46,6 +46,6 @@
 
 
 <div class="modal-footer">
-    <button type="button" class="btn btn-light" (click)="modal.close({tarifaSeleccionada,stayNights,StartTime,EndTime, folio, totalSeleccionado, cuarto , numeroCuarto, desgloseEdoCuenta})">Aceptar</button>
-    <button type="button" class="btn btn-light" (click)="modal.close()">Cancelar Cambio</button>
+    <button type="button" class="btn btn-primary" (click)="modal.close({tarifaSeleccionada,stayNights,StartTime,EndTime, folio, totalSeleccionado, cuarto , numeroCuarto, desgloseEdoCuenta})">Aceptar</button>
+    <button type="button" class="btn btn-danger" (click)="modal.close()">Cancelar Cambio</button>
   </div>

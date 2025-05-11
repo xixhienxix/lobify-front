@@ -65,3 +65,4 @@ src/environments/environment.prod.ts
 src/environments/environment.ts
 /.firebase
 /.firebase
+/.firebase

@@ -587,16 +587,13 @@ export class ContentComponent implements OnInit{
       } else if (args.type === "QuickInfo") {
         const now = new Date();
         const filteredEvents = existingEvents.filter(event => new Date(event.EndTime) >= now);
-      
-        // Map and await all async overlap checks
-        const overlapResults = await Promise.all(
-          filteredEvents.map(async (event) => {
-            const parametros = await this._indexDBService.loadParametros();
-            const [checkInHour, checkInMinute] = parametros.checkIn.split(':').map(Number);
-            const [checkOutHour, checkOutMinute] = parametros.checkOut.split(':').map(Number);
-            const timeZone = parametros.codigoZona || 'UTC';
-        
-            const argsStart = DateTime
+
+              const parametros = await this._indexDBService.loadParametros();
+              const [checkInHour, checkInMinute] = parametros.checkIn.split(':').map(Number);
+              const [checkOutHour, checkOutMinute] = parametros.checkOut.split(':').map(Number);
+              const timeZone = parametros.codigoZona || 'UTC';
+
+              const argsStart = DateTime
               .fromJSDate(new Date(args.data.StartTime), { zone: timeZone })
               .set({ hour: checkInHour, minute: checkInMinute });
         
@@ -604,6 +601,18 @@ export class ContentComponent implements OnInit{
               .fromJSDate(new Date(args.data.EndTime), { zone: timeZone })
               .minus({ days: 1 })
               .set({ hour: checkOutHour, minute: checkOutMinute });
+
+          // Early exit if no events to compare
+          if (filteredEvents.length === 0) {
+            args.data.endTime = argsEnd.toJSDate();
+            args.data.EndTime = argsEnd.toJSDate();
+            this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
+            return;
+          }
+
+        // Map and await all async overlap checks
+        const overlapResults = await Promise.all(
+          filteredEvents.map(async (event) => {
         
             if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
               const eventStart = DateTime.fromJSDate(new Date(event.StartTime), { zone: timeZone });
