@@ -735,6 +735,17 @@ export class ContentComponent implements OnInit{
         });
         (args.element as HTMLElement).innerText = filteredData.length.toString();
   }
+  if (
+    (this.currentView === 'TimelineMonth' || this.currentView === 'TimelineDay') &&
+    args.element.classList.contains('e-work-cells') &&
+    args.date instanceof Date // ensures args.date is not undefined and is a Date
+  ) {
+    const day = args.date.getDay(); // 0 = Sunday, 6 = Saturday
+
+    if (day === 0 || day === 6) {
+      args.element.classList.add('weekend-cell');
+    }
+  }
 }
 
 findOverlappingObjects(
