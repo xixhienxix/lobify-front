@@ -258,7 +258,7 @@ export class ReservasComponent implements OnInit {
       modalRef.result.then( (value) =>{
         this._promesasService.updatePromesaEstatus(row._id,row.Estatus).subscribe({
           next:(item)=>{
-            if(this.currentHuesped.estatus=='Reserva Sin Pago')
+            if(this.currentHuesped.estatus=='Reserva Sin Pago'||this.currentHuesped.estatus=='Esperando Deposito')
               {
                 this.currentHuesped.estatus='Deposito Realizado'
               }

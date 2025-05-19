@@ -255,7 +255,10 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
     this.colorMap = {
       'Huesped en Casa': this.colorDict[0],
       'Reserva Sin Pago': this.colorDict[3],
+      'Reserva Confirmada': this.colorDict[3],
       'Deposito Realizado': this.colorDict[3],
+      'Esperando Deposito': this.colorDict[3],
+      'Totalmente Pagada': this.colorDict[3],
       'Hizo Checkout': this.colorDict[4],
       'Uso Interno': this.colorDict[2],
       'Bloqueo': this.colorDict[3],

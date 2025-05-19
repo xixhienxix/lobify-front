@@ -70,7 +70,7 @@
                 </mat-select>
               </ng-container>
               
-              <ng-container *ngIf="isCurrentStatus(['Reserva Sin Pago', 'Deposito Realizado'])">
+              <ng-container *ngIf="isCurrentStatus(['Reserva Sin Pago', 'Deposito Realizado', 'Esperando Deposito', 'Totalmente Pagada', 'Reserva Confirmada'])">
                 <mat-select formControlName='estatus' style="font-weight: bold; font-size: larger; color: white;" #selected (selectionChange)="openDialog(currentHuesped, selected.value)" [style.background-color]="backgroundColor(currentHuesped.estatus)" name="filter_for" id="demo" class="btn">
                   <ng-container *ngFor="let estatus of filteredEstatusArray([2, 3, 8, 9, 10])">
                     <mat-option style="color: white; font-weight: bold; font-size: medium;" [style.background-color]="estatus.color" [value]="estatus.estatus">{{estatus.estatus}}</mat-option>

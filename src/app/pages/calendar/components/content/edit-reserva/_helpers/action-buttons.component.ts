@@ -126,7 +126,7 @@ export class ReservationActionsComponent {
   @Output() honCheckOut: EventEmitter<any> = new EventEmitter();
 
   get isReservable() {
-    return [ 'Reserva Sin Pago', 'Reserva Temporal', 'Deposito Realizado'].includes(this.estatus);
+    return ['Reserva Confirmada', 'Reserva Sin Pago', 'Reserva Temporal', 'Esperando Deposito', 'Deposito Realizado', 'Totalmente Pagada'].includes(this.estatus);
   }
 
   get isHuespedEnCasa() {
@@ -138,7 +138,7 @@ export class ReservationActionsComponent {
   }
 
   get canSendConfirmation() {
-    return ['Reserva Sin Pago', 'Deposito Realizado'].includes(this.estatus);
+    return ['Reserva Sin Pago', 'Deposito Realizado', 'Esperando Deposito', 'Totalmente Pagada', 'Reserva Confirmada'].includes(this.estatus);
   }
 
   confirmaReserva(estatus:number,folio:string){
