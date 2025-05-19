@@ -550,6 +550,7 @@ export class ContentComponent implements OnInit{
   
     const today = new Date();
     const startTime = new Date(args.data.StartTime);
+    const endTime = new Date(args.data.EndTime);
     const existingEvents = this.scheduleObj.getEvents();
   
     let numeroCuarto: string;
@@ -574,11 +575,14 @@ export class ContentComponent implements OnInit{
     const startDateOnly = new Date(startTime);
     startDateOnly.setHours(0, 0, 0, 0);
 
+    const endDateOnly = new Date(endTime);
+    endDateOnly.setHours(0, 0, 0, 0);
+
     const todayDateOnly = new Date(today);
     todayDateOnly.setHours(0, 0, 0, 0);
   
     // If event is in the future or today
-    if (startDateOnly >= todayDateOnly) {
+    if (startDateOnly >= todayDateOnly || endDateOnly >= todayDateOnly) {
       if (args.data.hasOwnProperty("Folio")) {
         // Editing an existing reservation
         if (args.type === "Editor" || args.type === "QuickInfo") {
@@ -644,7 +648,6 @@ export class ContentComponent implements OnInit{
           this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
         }
       }
-      
     }
   };
   

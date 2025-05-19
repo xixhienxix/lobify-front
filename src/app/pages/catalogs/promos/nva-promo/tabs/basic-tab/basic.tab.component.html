@@ -23,9 +23,15 @@
                 [name]="field.name"
                 class="form-control"
                 [formControlName]="field.formControlName"
+                (blur)="onCodigoBlur(field)"
               />
               <div *ngIf="formGroup.get(field.formControlName)?.invalid && formGroup.get(field.formControlName)?.touched" class="invalid-feedback">
                 <span *ngIf="formGroup.get(field.formControlName)?.hasError('required')">This field is required</span>
+              </div>
+              <div *ngIf="formGroup.get('codigo')?.hasError('invalidCharacters') && formGroup.get('codigo')?.dirty">
+                <span class="text-danger">
+                  No se aceptan caracteres especiales ni espacios para el código de la promoción
+                </span>
               </div>
             </div>
           </div>
@@ -144,7 +150,7 @@
                     {{ "PromosComponent.estanciaMax" | translate }}
                     <span class="fa fa-question-circle" ngbTooltip="Si coloca un 0 la tarifa no tendra maximo de noches"></span>
                   </label>
-                  <input type="number" min="1" class="form-control" formControlName="maxNoches" name="maxNoches">
+                  <input type="number" class="form-control" formControlName="maxNoches" name="maxNoches">
                 </div>
               </div>
         </ng-container>

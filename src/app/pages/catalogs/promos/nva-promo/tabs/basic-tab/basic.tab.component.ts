@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, SimpleChanges, ViewEncapsulation } from "@angular/core";
-import { FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
+import { AbstractControl, FormBuilder, FormControl, FormGroup, Validators } from "@angular/forms";
 import { MAT_DATE_LOCALE, MAT_DATE_FORMATS } from "@angular/material/core";
 import { NgbActiveModal, NgbDateAdapter, NgbDateParserFormatter } from "@ng-bootstrap/ng-bootstrap";
 import { CustomAdapter, CustomDateParserFormatter } from "src/app/tools/date-picker.utils";
@@ -7,6 +7,8 @@ import { Dias } from "src/app/models/days.model";
 import { Habitacion } from "src/app/models/habitaciones.model";
 import { Prompt } from "src/app/models/prompt.model";
 import { listaCamas } from "../../../promo.component";
+import { nonZeroRequired } from "../../../_helpers/validators/nonzero.validators";
+import { alphanumericValidator } from "../../../_helpers/validators/onlyalphanumeric.validator";
 export type formResponse  = {
     response:boolean,
     data:{ [key: string]: any }
@@ -48,17 +50,39 @@ export class BasicTabComponent implements OnInit, OnChanges{
     @Output() honAlertsEvent : EventEmitter<Prompt> = new EventEmitter();
 
     /**Valid Cupon Dates */
-    intialDateFC = new FormControl(new Date());
-    endDateFC = new FormControl(new Date((new Date()).valueOf() + 1000*3600*24));
     selectedCamas: string[] = [];
     selectedRate: string = ''; // This will store the selected value ('low' or 'high')
 
+    intialDateFC: FormControl;
+    endDateFC: FormControl;
+    intialDateFCCheckIn: FormControl;
+    endDateFCCheckIn: FormControl;
 
-    intialDateFCCheckIn = new FormControl(new Date());
-    endDateFCCheckIn = new FormControl(new Date((new Date()).valueOf() + 1000*3600*24));
+    specialCharacterOnInput:boolean=false;
 
     initialDate: Date | null = null; // Variable to store start date
     endDate: Date | null = null; // Variable to store end date
+
+    controlTabMap = new Map<string, number[]>([
+      ['estado', [0, 1, 2, 3]],
+      ['promoFields', [0, 1, 2]], // except 'name' shown also in 3
+      ['name', [0, 1, 2, 3]], // explicitly rendered in tab 3
+      ['stay', [3]],
+      ['payonly', [3]],
+      ['rateType', [3]],
+      ['intialDateFC', [0, 3]],
+      ['endDateFC', [0, 3]],
+      ['intialDateFCCheckIn', [0, 1, 2, 3]],
+      ['endDateFCCheckIn', [0, 1, 2, 3]],
+      ['anticipatedNights', [1]],
+      ['anticipatedNightsmax', [2]],
+      ['minNoches', [0, 1, 2]],
+      ['maxNoches', [0, 1, 2]],
+      ['validDays', [0, 1, 2, 3]],
+      ['desc', [0, 1, 2, 3]],
+      ['camasSelect', [0, 1, 2, 3]],
+      ['discountSelector', [0, 1, 2]]
+    ]);
 
     promoOptions = [
         { label: 'PROMO ACTIVA', value: true },
@@ -81,27 +105,37 @@ export class BasicTabComponent implements OnInit, OnChanges{
         public modal:NgbActiveModal,
         private fb : FormBuilder,
         private cdr: ChangeDetectorRef
-    ) {
-        this.formGroup = this.fb.group({
-            estado: [false, Validators.required],
-            rateType: [false, Validators.required],
-            nombre: ['', Validators.required],
-            codigo: ['', Validators.required],
-            qtyPrecio: [0, Validators.required],
-            inventario: [100, Validators.required],
-            minNoches: [1, Validators.required],
-            maxNoches: [0, Validators.required],
-            intialDateFCCheckIn: [null, Validators.required], // Add this
-            endDateFCCheckIn: [null, Validators.required], // Add this
-            intialDateFC: [null, Validators.required], 
-            endDateFC: [null, Validators.required],
-            desc: [''],
-            anticipatedNights: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
-            anticipatedNightsmax: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
-            payonly: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
-            stay: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
-          });
-    }
+    )  // Initialize FormControls first{}
+    {
+    this.intialDateFC = new FormControl(new Date(), Validators.required);
+    this.endDateFC = new FormControl(new Date(Date.now() + 1000 * 3600 * 24), Validators.required);
+    this.intialDateFCCheckIn = new FormControl(new Date(), Validators.required);
+    this.endDateFCCheckIn = new FormControl(new Date(Date.now() + 1000 * 3600 * 24), Validators.required);
+  
+    // Use them in the form group
+    this.formGroup = this.fb.group({
+      estado: [false, Validators.required],
+      rateType: [false, Validators.required],
+      nombre: ['', Validators.required],
+      codigo: ['', [Validators.required, alphanumericValidator]],
+      qtyPrecio: [0, Validators.required],
+      inventario: [100, Validators.required],
+      minNoches: [1, Validators.required],
+      maxNoches: [0, nonZeroRequired],
+      
+      // Use the already initialized FormControls
+      intialDateFCCheckIn: this.intialDateFCCheckIn,
+      endDateFCCheckIn: this.endDateFCCheckIn,
+      intialDateFC: this.intialDateFC,
+      endDateFC: this.endDateFC,
+  
+      desc: [''],
+      anticipatedNights: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
+      anticipatedNightsmax: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
+      payonly: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
+      stay: [1, [Validators.required, this.qtyNightsValidator.bind(this)]],
+    });
+  }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (changes['tabIndex'] && !changes['tabIndex'].firstChange) {
@@ -175,53 +209,98 @@ export class BasicTabComponent implements OnInit, OnChanges{
     }
 
     onSubmit() {
-        this.formGroup.markAllAsTouched(); // Mark all fields as touched to trigger validation
-    
-        let response: formResponse;
-    
-        // Check if any form field is invalid
-        if (this.formGroup.invalid) {
-            this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Faltan Datos por capturar en una o más pestañas' });
-            response = { response: false, data: [] };
-            return response;
-        }
-    
-        // Validate if at least one day is selected
-        const anyChecked = this.options().some(option => option.checked);
-        if (!anyChecked) {
-            this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Selecciona al menos un día de la semana válido' });
-            response = { response: false, data: [] };
-            return response;
-        }
-    
-        // Validate the date range
-        if (!this.initialDate || !this.endDate || this.initialDate > this.endDate) {
-            this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Las fechas no son válidas' });
-            response = { response: false, data: [] };
-            return response;
-        }
-    
-        // Gather all form values
-        const formValues: { [key: string]: any } = {};
-        Object.keys(this.formGroup.controls).forEach(controlName => {
-            const control = this.formGroup.get(controlName);
-            if (control) {
-                formValues[controlName] = control.value;
-            }
-        });
-    
-        // Send success response
-        response = { response: true, data: formValues };
-        return response;
-    }
-    
+      let response: formResponse;
+  
+      // Get relevant controls for the active tab
+      const relevantControls = this.getRelevantControls();
+      console.log('Relevant Controls:', relevantControls);
+  
+      // Mark relevant controls as touched to trigger validation messages
+      relevantControls.forEach(control => {
+          if (control && control.markAsTouched) {
+              control.markAsTouched();
+          }
+      });
+  
+      // Log each control's validation state after marking as touched
+      relevantControls.forEach((control, index) => {
+          const controlName = Object.keys(this.formGroup.controls)[index];
+          if (control) {
+              console.log(`${controlName}: Invalid = ${control.invalid}, Touched = ${control.touched}, Value = ${control.value}`);
+              console.log(`${controlName} Errors:`, control.errors); // Check validation errors
+          }
+      });
+  
+      // Check if any relevant control is invalid
+      const anyInvalid = relevantControls.some(control => control && control.invalid);
+      console.log('Is form valid?', !anyInvalid);  // Log the final validation result
+      if (anyInvalid) {
+          this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Faltan Datos por capturar en esta pestaña' });
+          response = { response: false, data: [] };
+          return response;
+      }
+  
+      // Additional validations...
+      // Validate if at least one day is selected
+      const anyChecked = this.options().some(option => option.checked);
+      if (!anyChecked) {
+          this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Selecciona al menos un día de la semana válido' });
+          response = { response: false, data: [] };
+          return response;
+      }
+  
+      // Validate the date range
+      if (!this.initialDate || !this.endDate || this.initialDate > this.endDate) {
+          this.honAlertsEvent.emit({ title: 'Advertencia', message: 'Las fechas no son válidas' });
+          response = { response: false, data: [] };
+          return response;
+      }
+  
+      // Gather all form values regardless of tab
+      const formValues: { [key: string]: any } = {};
+      Object.keys(this.formGroup.controls).forEach(controlName => {
+          const control = this.formGroup.get(controlName);
+          if (control) {
+              formValues[controlName] = control.value;
+          }
+      });
+  
+      console.log('Collected Data:', formValues); // Log the collected form data
+  
+      response = { response: true, data: formValues };
+      return response;
+  }
+  
+  
+  
+  getRelevantControls(): AbstractControl[] {
+    return Object.keys(this.formGroup.controls)
+        .filter(controlName => {
+            const allowedTabs = this.controlTabMap.get(controlName);
+            const isRelevant = allowedTabs ? allowedTabs.includes(this.tabIndex) : false;
+            console.log(`Control: ${controlName}, Relevant for tab ${this.tabIndex}: ${isRelevant}`);
+            return isRelevant;
+        })
+        .map(controlName => this.formGroup.get(controlName))
+        .filter((control): control is AbstractControl => control !== null); // Ensure it's a valid control
+}
 
-    // getActiveTabForm(): FormGroup {
-    //     const activeTab = this.tabIndex; // Ensure you have a way to track the active tab index
-    //     return this.formTabs[activeTab]; // Assuming you store forms per tab in an array `formTabs`
-    // }
-    
-    
+
+
+isControlInActiveTab(controlName: string): boolean {
+  // Example logic, modify as per your tab logic:
+  switch (this.tabIndex) {
+      case 0:
+          return controlName.startsWith('tab0_'); // Controls related to tab 0
+      case 1:
+          return controlName.startsWith('tab1_'); // Controls related to tab 1
+      case 2:
+          return controlName.startsWith('tab2_'); // Controls related to tab 2
+      default:
+          return false; // In case no tab matches, return false
+  }
+}
+
 
     getFormData() {
         const formValues: { [key: string]: any } = {};
@@ -262,9 +341,17 @@ export class BasicTabComponent implements OnInit, OnChanges{
           }
           return item;
         });
-      }
-    
+    }
 
+    onCodigoBlur(field: any) {
+      if (field.id === 'codigo') {
+        const ctrl = this.formGroup.get('codigo');
+        if (ctrl) {
+          const cleaned = (ctrl.value || '').trim().replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+          ctrl.setValue(cleaned);
+        }
+      }
+    }
 
     // Called when user selects a new start date
     addEventIntialDate(type: string, event: any) {
