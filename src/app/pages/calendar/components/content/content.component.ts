@@ -243,16 +243,16 @@ export class ContentComponent implements OnInit{
 
   /**Data Models */
   colorDict={
-    0:'#99d284',
+    0:'#a6e390',
     1:'#fab3db',
     2:'#d0aaec',
-    3:'#fac34e',
-    4:'#DD4F5D',
+    3:'#ffce54',
+    4:'#fb7f8c',
     5:'#808080'
 
     //#fab3db - Reserva Temporal
     //#d0aaec - Reserva Uso Temporal
-    //#fac34e - Reservacion
+    //#ffce54 - Reservacion
   }
 
   checkInTime: any
@@ -389,10 +389,7 @@ export class ContentComponent implements OnInit{
         const colorMap: Record<string, string> = {
           'Huesped en Casa': this.colorDict[0],
           'Reserva Sin Pago': this.colorDict[3],
-          'Reserva Confirmada': this.colorDict[3],
           'Deposito Realizado': this.colorDict[3],
-          'Esperando Deposito': this.colorDict[3],
-          'Totalmente Pagada': this.colorDict[3],
           'Hizo Checkout': this.colorDict[4],
           'Uso Interno': this.colorDict[2],
           'Bloqueo': this.colorDict[3],

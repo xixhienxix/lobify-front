@@ -64,15 +64,15 @@ export class CalendarComponent implements OnInit, OnDestroy {
   isLoading:boolean=false;
 
   colorDict = {
-    0: '#99d284',
+    0: '#a6e390',
     1: '#fab3db',
     2: '#d0aaec',
-    3: '#fac34e',
-    4: '#DD4F5D'
+    3: '#ffce54',
+    4: '#fb7f8c'
 
     //#fab3db - Reserva Temporal
     //#d0aaec - Reserva Uso Temporal
-    //#fac34e - Reservacion
+    //#ffce54 - Reservacion
   }
   //Models
   estatusArray: Estatus[] = []

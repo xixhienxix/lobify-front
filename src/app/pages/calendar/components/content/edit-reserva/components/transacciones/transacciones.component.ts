@@ -205,10 +205,7 @@ interface StateMapping {
       const estatus = this.currentHuesped?.estatus;
       const disabledStatuses = [
         'Reserva Cancelada',
-        'Reserva Confirmada',
-        'Esperando Deposito',
         'Deposito Realizado',
-        'Totalmente Pagada',
         'Reserva Sin Pago'
       ];
   
@@ -680,7 +677,7 @@ interface StateMapping {
         if(this.abonoFormGroup.controls["conceptoManual"].value=== 'Deposito Inicial'){
           try {
             await firstValueFrom(
-              this._estatusService.actualizaEstatus('Reserva Confirmada', this.currentHuesped.folio, this.currentHuesped)
+              this._estatusService.actualizaEstatus('Deposito Realizado', this.currentHuesped.folio, this.currentHuesped)
             );
             console.log('Estatus updated successfully.');
             // You can handle any success-related logic here if needed.

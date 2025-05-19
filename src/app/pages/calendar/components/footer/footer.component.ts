@@ -31,7 +31,6 @@ export class FooterComponent implements OnInit, OnChanges{
   private statusMap: { [key: string]: keyof IStatusArray } = {
     'Huesped en Casa': 'huespedEnCasa',
     'Reserva Sin Pagar': 'reservaSinPago',
-    'Reserva Confirmada': 'reservaConfirmada',
     'Hizo Checkout': 'checkOuts',
     'Uso Interno': 'usoInterno',
     'Bloqueo': 'bloqueo',

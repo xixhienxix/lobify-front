@@ -117,7 +117,7 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
       llegada.setHours(0, 0, 0, 0);
 
       if (llegada.getTime() === today.getTime()) {
-        if(item.estatus === 'Reserva Confirmada' || item.estatus === 'Deposito Realizado'){
+        if(item.estatus === 'Deposito Realizado'){
           this.porcentajeOcupaccion.push(item);
         }
       }else if(item.estatus === 'Huesped en Casa'){
@@ -143,7 +143,7 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
       const salida = new Date(guest.salida);
 
       // Check if today is within the guest's arrival and departure range
-      return (guest.estatus === 'Huesped en Casa' || guest.estatus === 'Reserva Sin Pago' || guest.estatus === 'Reserva Confirmada') &&
+      return (guest.estatus === 'Huesped en Casa' || guest.estatus === 'Reserva Sin Pago' || guest.estatus === 'Deposito Realizado') &&
             ((llegada <= todayEnd && salida >= todayStart));
     });
 
@@ -196,7 +196,7 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
       const salida = new Date(guest.salida);
   
       // Check if today is within the guest's arrival and departure range
-      return (guest.estatus === 'Huesped en Casa' || guest.estatus === 'Reserva Sin Pago' || guest.estatus === 'Reserva Confirmada') &&
+      return (guest.estatus === 'Huesped en Casa' || guest.estatus === 'Reserva Sin Pago' || guest.estatus === 'Deposito Realizado') &&
         (llegada <= todayEnd && salida >= todayStart);
     });
   

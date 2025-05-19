@@ -83,7 +83,7 @@ export class NvaReservaComponent implements  OnInit, OnDestroy, AfterViewInit
   tarifaSeleccionada:TarifasRadioButton[]=[];
 
   /** Styling */
-  styleDisponibilidad:string='background-color:#99d284;'
+  styleDisponibilidad:string='background-color:#a6e390;'
 
   /** Models */
   // ocupadasSet = new Set();
@@ -668,7 +668,7 @@ rateDateRange(tarifa: Tarifas): Period[] {
         this.maxPeopleFlag=true
         this.styleDisponibilidad='background-color:#fa6d7c;'
       }else{
-        this.styleDisponibilidad='background-color:#99d284;'
+        this.styleDisponibilidad='background-color:#a6e390;'
         this.maxPeopleFlag=false
 
       }
@@ -683,7 +683,7 @@ rateDateRange(tarifa: Tarifas): Period[] {
         this.maxPeopleFlag=true
         this.styleDisponibilidad='background-color:#fa6d7c;'
       }else{
-        this.styleDisponibilidad='background-color:#99d284;'
+        this.styleDisponibilidad='background-color:#a6e390;'
         this.maxPeopleFlag=false
       }
     }

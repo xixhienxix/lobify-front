@@ -203,13 +203,13 @@
               <mat-accordion [style]="accordionDisplay" class="example-headers-align" multi>
                 <mat-expansion-panel  [expanded]="step === 1"  hideToggle>
                   <!-- HEADER DEL ACCORDION DE DISPONIBILIDAD -->
-                  <mat-expansion-panel-header *ngIf="!checkAvaibility(cuarto)" [ngStyle]="{'background-color': revisaCapacidad(cuarto) ? '#fa6d7c' : '#99d284' }">
+                  <mat-expansion-panel-header *ngIf="!checkAvaibility(cuarto)" [ngStyle]="{'background-color': revisaCapacidad(cuarto) ? '#fa6d7c' : '#a6e390' }">
                     <mat-panel-title>
                       DISPONIBILIDAD
                     </mat-panel-title>
                   </mat-expansion-panel-header>
                   <!-- [FIN] HEADER DEL ACCORDION DE DISPONIBILIDAD -->
-                  <mat-expansion-panel-header *ngIf="checkAvaibility(cuarto)" [ngStyle]="{'background-color': revisaCapacidad(cuarto) ? '#fa6d7c' : '#99d284' }">
+                  <mat-expansion-panel-header *ngIf="checkAvaibility(cuarto)" [ngStyle]="{'background-color': revisaCapacidad(cuarto) ? '#fa6d7c' : '#a6e390' }">
                     <mat-panel-title>
                       SIN DISPONIBILIDAD
                     </mat-panel-title>
@@ -333,7 +333,7 @@
                     <ng-container *ngIf="cuarto === '1'">
                       <!--CUANDO SE SELECCIONARON TODOS LOS CUARTOS-->
                       <ng-container *ngFor="let roomCode of availavilityRooms; ">
-                        <div style="color: black" [ngStyle]="{'background-color': revisaCapacidad(roomCode.Codigo) ? '#fa6d7c' : '#99d284' }" class=" modal-header"><h2 style="font-weight: bold; color: black">{{roomCode.Codigo.replace("_"," ").toUpperCase()}}</h2>                           
+                        <div style="color: black" [ngStyle]="{'background-color': revisaCapacidad(roomCode.Codigo) ? '#fa6d7c' : '#a6e390' }" class=" modal-header"><h2 style="font-weight: bold; color: black">{{roomCode.Codigo.replace("_"," ").toUpperCase()}}</h2>                           
                           <small style="margin-left: 5%; margin-right: 5%; font-weight: bold; font: bold;" *ngIf="revisaCapacidad(roomCode.Codigo)">
                             <div [innerHTML]="mensajeCapacidad"></div>
                           </small> (Cap. Max.: {{roomCode.Personas}})

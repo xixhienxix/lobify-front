@@ -91,10 +91,7 @@ export interface Huesped {
     ],
     2: [
         'Reserva Sin Pago',
-        'Reserva Confirmada',
         'Deposito Realizado',
-        'Esperando Deposito',
-        'Totalmente Pagada'
     ],
     4: [
       'Check-Out'
