@@ -623,7 +623,9 @@ export class ContentComponent implements OnInit{
               const eventEnd = DateTime.fromJSDate(new Date(event.EndTime), { zone: timeZone });
         
               const isSameDay = argsStart.hasSame(argsEnd, 'day');
-              if (isSameDay) {
+              const isEndAfterStart = argsEnd > argsStart;
+
+              if (isSameDay && isEndAfterStart) {
                 return { overlap: true, argsStart, argsEnd };
               }
         
@@ -645,6 +647,17 @@ export class ContentComponent implements OnInit{
           args.data.endTime = validArgs?.argsEnd?.toJSDate() ?? new Date(args.data.endTime);
           args.data.EndTime = validArgs?.argsEnd?.toJSDate() ?? new Date(args.data.EndTime);
                
+        // Check if startTime and endTime are same day
+        const sameDay =
+        args.data.startTime.getFullYear() === args.data.endTime.getFullYear() &&
+        args.data.startTime.getMonth() === args.data.endTime.getMonth() &&
+        args.data.startTime.getDate() === args.data.endTime.getDate();
+      
+      if (sameDay) {
+        args.data.endTime.setDate(args.data.startTime.getDate() + 1);
+        args.data.EndTime.setDate(args.data.StartTime.getDate() + 1);
+      }
+      
           this.honNvaRsvDateRange.emit({ data: args.data, numeroCuarto, codigoCuarto });
         }
       }
