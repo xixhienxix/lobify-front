@@ -26,7 +26,8 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
     2: '#d0aaec',
     3: '#ffce54',
     4: '#fb7f8c',
-    5: '#808080'
+    5: '#808080',
+    6: '#a8d5e5'
   };
 
   @Input() colorMap: Record<string, string> = {};
@@ -255,10 +256,10 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
     this.colorMap = {
       'Huesped en Casa': this.colorDict[0],
       'Reserva Sin Pago': this.colorDict[3],
-      'Reserva Confirmada': this.colorDict[3],
-      'Deposito Realizado': this.colorDict[3],
-      'Esperando Deposito': this.colorDict[3],
-      'Totalmente Pagada': this.colorDict[3],
+      'Reserva Confirmada': this.colorDict[6],
+      'Deposito Realizado': this.colorDict[6],
+      'Esperando Deposito': this.colorDict[6],
+      'Totalmente Pagada': this.colorDict[6],
       'Hizo Checkout': this.colorDict[4],
       'Uso Interno': this.colorDict[2],
       'Bloqueo': this.colorDict[3],
