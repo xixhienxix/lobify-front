@@ -34,11 +34,21 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
     private cdr: ChangeDetectorRef,
     private _tarifasService: TarifasService
   ){
-    // this._huespedService.currentHuesped$.subscribe({
-    //     next:(reserva:Huesped)=>{
-    //       this.currentHuesped = reserva
-    //     }
-    //   })
+    this.llegadaDateFC.valueChanges.subscribe((arrivalDate) => {
+      if (arrivalDate) {
+        // Calculate llegada + 1 day
+        const newMinDepartureDate = new Date(arrivalDate);
+        newMinDepartureDate.setDate(newMinDepartureDate.getDate() + 1);
+        this.minDepartureDate = newMinDepartureDate;
+    
+        // Always set salidaDateFC to arrival + 1 day
+        this.salidaDateFC.setValue(newMinDepartureDate);
+      } else {
+        this.minDepartureDate = null;
+        this.salidaDateFC.setValue(null); // Optional: only if you want to clear both when arrival is cleared
+      }
+    });
+    
   }
   ocupadasSet = new Set();
 
@@ -117,6 +127,9 @@ export class ModificaReservaComponent implements OnInit , AfterViewInit{
   beforeChangesCustomer:PropertiesChanged;
   currentOverlapRateDays:any[]=[];
   // closeResult: string;
+
+  minDepartureDate: Date | null = null;
+
 
 
   @Input() ratesArray:Tarifas[]=[];
