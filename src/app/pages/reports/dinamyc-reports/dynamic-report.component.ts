@@ -258,7 +258,7 @@ export class DynamicReportComponent implements OnInit, AfterViewInit, OnDestroy 
       'Reserva Sin Pago': this.colorDict[3],
       'Reserva Confirmada': this.colorDict[6],
       'Deposito Realizado': this.colorDict[6],
-      'Esperando Deposito': this.colorDict[6],
+      'Esperando Deposito': this.colorDict[3],
       'Totalmente Pagada': this.colorDict[6],
       'Hizo Checkout': this.colorDict[4],
       'Uso Interno': this.colorDict[2],

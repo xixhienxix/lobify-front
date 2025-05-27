@@ -1,10 +1,9 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
-
 export const environment = {
   production: false,
-  appVersion: 'v8.2.0',
+  appVersion: 'v8.3.0',
   USERDATA_KEY: 'authf649fc9a5f55',
   isMockEnabled: true,
   //apiUrl: 'https://us-central1-lobify-api.cloudfunctions.net/api',

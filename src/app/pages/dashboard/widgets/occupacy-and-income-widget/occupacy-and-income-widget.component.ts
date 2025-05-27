@@ -251,7 +251,7 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
     const hoy = new Date();
     
     // Filtrar reservaciones activas para hoy
-    const reservacionesHoy = this.allReservations.filter(reservacion => {
+    const reservacionesHoy = this.allReservations.filter(rsv => rsv.estatus !== 'Reserva Temporal').filter(reservacion => {
         const fechaLlegada = new Date(reservacion.llegada);
         const fechaSalida = new Date(reservacion.salida);
     
@@ -277,7 +277,7 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
         this.inventario = [];
         this.disponibles = [];
 
-        this.allReservations.forEach(item => {
+        this.allReservations.filter(rsv => rsv.estatus !== 'Reserva Temporal' ).forEach(item => {
           const llegada = new Date(item.llegada);
           llegada.setHours(0, 0, 0, 0);
 

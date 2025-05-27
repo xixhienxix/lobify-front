@@ -308,6 +308,16 @@ export class ReservasComponent implements OnInit {
     this.onAgregarPago.emit(pago);
   }
 
+  calculateNights(){
+    const llegada = DateTime.fromISO(this.currentHuesped.llegada).startOf('day');
+    const salida  = DateTime.fromISO(this.currentHuesped.salida).startOf('day');
+
+    // Calculate the difference in days
+    const days = salida.diff(llegada, 'days').days; 
+
+    return Math.floor(days);
+  }
+
   /*Modal HELPERS*/
 
   getDismissReason(reason: any): string 

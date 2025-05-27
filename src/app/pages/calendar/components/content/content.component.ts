@@ -217,7 +217,8 @@ export class ContentComponent implements OnInit{
   public currentView: View = 'TimelineDay';
   public allowMultiple:boolean = true;
   public group: GroupModel = {
-    resources: ['Type', 'Rooms'],enableCompactView: false
+    resources: ['Type', 'Rooms'], allowGroupEdit:true
+
   };
 
   public data: DataManager = new DataManager({
@@ -238,7 +239,7 @@ export class ContentComponent implements OnInit{
   public resourceDataSource: Record<string, any>[]= [];
 
   public eventSettings: EventSettingsModel = {
-    dataSource: this.resourceDataSource
+    dataSource: this.resourceDataSource,
   };
 
   /**Data Models */
@@ -392,7 +393,7 @@ export class ContentComponent implements OnInit{
           'Reserva Sin Pago': this.colorDict[3],
           'Reserva Confirmada': this.colorDict[6],
           'Deposito Realizado': this.colorDict[6],
-          'Esperando Deposito': this.colorDict[6],
+          'Esperando Deposito': this.colorDict[3],
           'Totalmente Pagada': this.colorDict[6],
           'Hizo Checkout': this.colorDict[4],
           'Uso Interno': this.colorDict[2],
@@ -781,11 +782,16 @@ findOverlappingObjects(
 
   return objects.filter((obj: Record<string, any>) => {
     // Avoid returning the same object as the target
-    if (obj.Id === target.Id) {
-      return false;
-    }
+    // if (obj.Id === target.Id) {
+    //   return false;
+    // }
 
-    const numCuarto = this.getNumeroByTaskID(target.TaskId);
+    let numCuarto
+    if(Array.isArray(target.TaskId)){
+      numCuarto = this.getNumeroByTaskID(target.TaskId[0]);
+    }else {
+      numCuarto = this.getNumeroByTaskID(target.TaskId);
+    }
     
     // Make sure to parse the object's start and end times
     const objStart = new Date(obj.StartTime);
@@ -809,6 +815,8 @@ findOverlappingObjects(
         (checkOutDateStripped >= objStartStripped && checkOutDateStripped <= objEndStripped) || // Check if checkOutDate is between objStartStripped and objEndStripped
         (checkInDateStripped <= objStartStripped && checkOutDateStripped >= objEndStripped) || // Check if target range fully encompasses the object range
         (checkInDateStripped <= objEndStripped && checkOutDateStripped >= objStartStripped); // Check if any part of the target range overlaps the object range
+    } if(obj.Folio.startsWith('S')){
+      return false
     } else {
 
       // Check for overlapping dates considering both date and time
@@ -830,47 +838,64 @@ findOverlappingObjects(
     return data.resourceData.ClassName !== "e-parent-node";
   }
 
-  onDataBound(){
-
-  const workCells = document.querySelectorAll(".e-work-cells.e-resource-group-cells");
-  workCells.forEach((cell, index) => {
-      let projectEvents = [];    
+  onDataBound(): void {
+    const workCells = document.querySelectorAll<HTMLElement>('.e-work-cells.e-resource-group-cells');
+  
+    workCells.forEach((cell) => {
+      const groupIndex = Number(cell.getAttribute('data-group-index'));
       const timestamp = Number(cell.getAttribute('data-date'));
       const startDate = new Date(timestamp);
       const endDate = new Date(startDate);
-      endDate.setDate(startDate.getDate() + 1); // add one day
-      const events = this.scheduleObj.getEvents(startDate, endDate);
-      const cellProjectId = this.scheduleObj.getResourcesByIndex(Number(cell.getAttribute("data-group-index"))).groupData!.ProjectId; 
-      const groupIndex = Number(cell.getAttribute("data-group-index"));       
-      //Header of avaibility
-        events.forEach(event => {
-            if (event.ProjectId === cellProjectId) {
-                projectEvents.push(event);
-            } 
-        });
-        const totalChildResources = this.habitacionPorTipoDataSource.filter(category => category.groupId === cellProjectId).length;
-        const emptyChildResources = totalChildResources - projectEvents.length;
-        (cell as HTMLElement).innerText = emptyChildResources.toString();
+      endDate.setDate(startDate.getDate() + 1);
+  
+      const resources = this.scheduleObj.getResourcesByIndex(groupIndex);
+      const projectId = resources.groupData?.ProjectId[0]; // ahora el project id es regresado como si fuera un array 
+  
+      let events = this.scheduleObj.getEvents(startDate, endDate);
 
-        //Code Block for Rates on grouping column
-        // this.ratesArrayComplete.map((item) => {
-        //   if(item.Tarifa === 'Tarifa De Temporada'){
-        //     return item.TarifaRack
-        //   }
-        // });
-        const eventObj = {
-          groupIndex:groupIndex,
-          date: DateTime.fromMillis(timestamp, { zone: this.currentParametros.codigoZona }).toISO()
-
+      // Filter by resource
+      events = events.filter(event => {
+        if (Array.isArray(event.ProjectId)) {
+          return event.ProjectId.includes(projectId);
         }
-        const resourses = this.scheduleObj.getResourcesByIndex(groupIndex);
-        const fareValue = this.getDailyRates(eventObj,resourses.resourceData.text);
-        const newElement = document.createElement('div');
-        newElement.innerText = fareValue
-        newElement.style.marginTop = '10px';
-        (cell as HTMLElement).appendChild(newElement);
-  });
+        return event.ProjectId === projectId;
+      });
+
+      // Filter out end-on-same-day events
+      events = events.filter(event => {
+        const eventEnd = new Date(event.EndTime);
+        return eventEnd.toDateString() !== startDate.toDateString();
+      });
+  
+      // Filter out Reserva Temporal
+      events = events.filter(event => {
+        const reservation = this.allReservations.find(res => res.folio === event.Folio);
+        return !(reservation && reservation.estatus === 'Reserva Temporal');
+      });
+  
+      // Count availability
+      const totalChildResources = this.habitacionPorTipoDataSource.filter(
+        category => category.groupId === projectId
+      ).length;
+      const emptyChildResources = totalChildResources - events.length;
+  
+      // Display
+      cell.innerText = emptyChildResources.toString();
+  
+      // Add daily rate
+      const eventObj = {
+        groupIndex,
+        date: DateTime.fromMillis(timestamp, { zone: this.currentParametros.codigoZona }).toISO()
+      };
+      const fareValue = this.getDailyRates(eventObj, resources.resourceData.text);
+      const rateElement = document.createElement('div');
+      rateElement.innerText = fareValue;
+      rateElement.style.marginTop = '10px';
+      cell.appendChild(rateElement);
+    });
   }
+  
+  
 
   getIconClass(text: string) {
     let huesped

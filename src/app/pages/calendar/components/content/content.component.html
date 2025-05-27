@@ -7,6 +7,7 @@
     height='100%'
     allowSwiping="false"
     [showTimeIndicator]="false"
+    [rowAutoHeight]="true"
       [selectedDate]="selectedDate" 
       [group]="group" 
       [workDays]="workDays" 
@@ -29,7 +30,8 @@
       <ng-template #eventSettingsTemplate let-data>
         <div class='template-wrap'>
             <div style="width: 100%; font-weight: bolder;" class="subject">{{data.Subject}}</div>
-            <div style="width: 100%; font-weight: bolder;" class="some-image"><img class="image" src="https://ej2.syncfusion.com/angular/demos/assets/schedule/images/margaret.png" /> {{data.Saldo | currency:'MX' : 'symbol' : '1.0-0' }}</div>
+            <div style="width: 100%; font-weight: bolder;" class="some-image">{{data.Saldo | currency:'MX' : 'symbol' : '1.0-0' }}</div> 
+            <!-- <div style="width: 100%; font-weight: bolder;" class="some-image"><img class="image" src="https://ej2.syncfusion.com/angular/demos/assets/schedule/images/margaret.png" /> {{data.Saldo | currency:'MX' : 'symbol' : '1.0-0' }}</div> Image inside the reservation--> 
         </div>
       </ng-template>
 

@@ -4,7 +4,7 @@
 
 export const environment = {
   production: false,
-  appVersion: 'v8.2.0',
+  appVersion: 'v8.3.0',
   USERDATA_KEY: 'authf649fc9a5f55',
   isMockEnabled: true,
   // apiUrl:'https://us-central1-lobify-api.cloudfunctions.net/api',

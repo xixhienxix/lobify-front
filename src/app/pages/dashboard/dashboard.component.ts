@@ -420,7 +420,10 @@ export class DashboardComponent implements OnInit {
   async getCuentas(){
     this._edoCuentaService.getTodasLasCuentas().subscribe({
       next:(value)=>{
-        this.allAccounts = value;
+        const reservasTemporales = this.allReservations.filter(rsv => rsv.estatus === 'Reserva Temporal').map(folio => folio.folio);
+        const valueNoTemp = value.filter(edo => !reservasTemporales.includes(String(edo.Folio)));
+
+        this.allAccounts = valueNoTemp;
         const todayDate = new Date();
         const saldoDelDia = value.filter(item => {
             // Create a new Date object for the item and normalize it
