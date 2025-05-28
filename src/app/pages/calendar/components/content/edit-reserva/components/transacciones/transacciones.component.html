@@ -379,7 +379,7 @@
         </ng-container>
       </td>
 
-      <td mat-footer-cell *matFooterCellDef> Total: </td>
+      <td mat-footer-cell *matFooterCellDef> Total:</td>
 
     </ng-container>
 
@@ -418,7 +418,7 @@
           $ -{{row.Abono.toLocaleString("es-MX",{ minimumFractionDigits: 2 })}}
         </ng-container>
       </td>
-      <td mat-footer-cell *matFooterCellDef="let row"> ${{calculoFooter(row).toLocaleString("es-MX",{ minimumFractionDigits: 2 })}}
+      <td mat-footer-cell *matFooterCellDef="let row"> ${{totalSelected.toLocaleString("es-MX",{ minimumFractionDigits: 2 })}}
       </td>
     </ng-container>
 

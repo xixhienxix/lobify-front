@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { edoCuenta } from 'src/app/models/edoCuenta.model';
 import { Habitacion } from 'src/app/models/habitaciones.model';
 import { Huesped, reservationStatusMap } from 'src/app/models/huesped.model';
@@ -26,12 +26,13 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
   @Input() allReservations: Huesped[];
   @Input() changing: Subject<Huesped[]>;
   @Input() changingValueRooms: Subject<Habitacion[]>;
-  @Input() totalIncome: any;
   @Input() standardRatesArray: Tarifas[]=[];
   @Input() tempRatesArray: Tarifas[]=[];
   @Input() ratesArrayComplete: Tarifas[]=[];
   @Input() totalRooms: number = 0;
   @Input() roomCodesComplete: Habitacion[] = [];
+  @Input() loading:BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  @Input() totalIncome: number = 0;
 
 
   constructor(private cdr: ChangeDetectorRef,
@@ -73,25 +74,25 @@ export class OccupacyAndIncomeWidgetComponent implements OnInit, OnChanges{
     }
   }
 
-  getTotalIncomeForToday(): number {
-    const todayDate = new Date();
-    const data = this.allAccounts;
-    todayDate.setHours(0, 0, 0, 0); // Reset time to the start of the day
+//   getTotalIncomeForToday(): number {
+//     const todayDate = new Date();
+//     const data = this.allAccounts;
+//     todayDate.setHours(0, 0, 0, 0); // Reset time to the start of the day
 
-    // Filter for today’s date
-    const todayData = data.filter(item => {
-        const itemDate = new Date(item.Fecha);
-        itemDate.setHours(0, 0, 0, 0); // Reset time to the start of the day
-        return itemDate.getTime() === todayDate.getTime();
-    });
+//     // Filter for today’s date
+//     const todayData = data.filter(item => {
+//         const itemDate = new Date(item.Fecha);
+//         itemDate.setHours(0, 0, 0, 0); // Reset time to the start of the day
+//         return itemDate.getTime() === todayDate.getTime();
+//     });
+//     console.log('Todays Reservations:', todayData);
+//     // Calculate total income from 'Cargo' properties
+//     const totalIncome = todayData.reduce((total, item) => {
+//         return total + (item.Abono ?? 0);
+//     }, 0);
 
-    // Calculate total income from 'Cargo' properties
-    const totalIncome = todayData.reduce((total, item) => {
-        return total + (item.Abono ?? 0);
-    }, 0);
-
-    return totalIncome;
-}
+//     return totalIncome;
+// }
 
   occupancyPercentage(){
       // Count rooms that are occupied

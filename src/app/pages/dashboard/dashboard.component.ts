@@ -65,6 +65,7 @@ export class DashboardComponent implements OnInit {
   standardRatesArray: Tarifas[] = [];
   tempRatesArray: Tarifas[] = [];
   allAccounts:edoCuenta[]=[]
+  todaysIncome:number=0;
 
   @ViewChild('modal') private modalComponent: ModalComponent;
   
@@ -418,12 +419,14 @@ export class DashboardComponent implements OnInit {
 
 
   async getCuentas(){
+    this._isLoading.next(true);
     this._edoCuentaService.getTodasLasCuentas().subscribe({
       next:(value)=>{
         const reservasTemporales = this.allReservations.filter(rsv => rsv.estatus === 'Reserva Temporal').map(folio => folio.folio);
         const valueNoTemp = value.filter(edo => !reservasTemporales.includes(String(edo.Folio)));
 
         this.allAccounts = valueNoTemp;
+        this.todaysIncome = this.getTotalIncomeForToday();
         const todayDate = new Date();
         const saldoDelDia = value.filter(item => {
             // Create a new Date object for the item and normalize it
@@ -433,8 +436,11 @@ export class DashboardComponent implements OnInit {
             // Compare normalized dates
             return itemDate.getTime() === todayDate.getTime() && item.Abono !== 0 && item.Cargo === 0;
           });
+          this._isLoading.next(false);
+
       },
       error:()=>{
+        this._isLoading.next(false);
       }
   })
 }
@@ -588,6 +594,24 @@ export class DashboardComponent implements OnInit {
         this._estatusService.updatedStatus.next('Check-Out');
       }
     })
+  }
+
+  getTotalIncomeForToday(){
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0); // Normalize
+    
+      const todayData = this.allAccounts.filter(item => {
+        const itemDate = new Date(item.Fecha);
+        itemDate.setHours(0, 0, 0, 0);
+        return (
+          itemDate.getTime() === todayDate.getTime() &&
+          item.Forma_de_Pago !== 'Cortesía'
+        );
+      });
+      
+      const totalIncome = todayData.reduce((total, item) => total + (item.Abono ?? 0), 0);
+      return totalIncome;
+      
   }
 
   async onChangeEstatus(data: { cuarto: string; estatus: string }) {

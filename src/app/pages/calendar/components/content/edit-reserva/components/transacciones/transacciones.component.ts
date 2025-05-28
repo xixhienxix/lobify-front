@@ -120,6 +120,7 @@ interface StateMapping {
     descuentosChecked:boolean=false;
     fechaCancelado:DateTime;
     inputDisabled:boolean=false
+    totalSelected:number=0;
   
     /**Forms */
     nuevosConceptosFormGroup:FormGroup;
@@ -143,7 +144,7 @@ interface StateMapping {
     displayedColumns:string[] = ['select','Fecha','Concepto','F.P.','_id','Valor','Fecha_Cancelado','Cantidad']
     
     /**Obseervables */
-    formasDePago:string[]=['Efectivo','Tarjeta de Credito','Tarjeta de Debito']
+    formasDePago:string[]=['Efectivo','Tarjeta de Credito','Tarjeta de Debito', 'Cortesía']
 
     radioButtons = [
       { id: 'abonosRadio', label: 'Abonos', checked: 'abonosChecked' },
@@ -185,7 +186,9 @@ interface StateMapping {
       this.loadForm();
       this.getCodigosDeCargo();
       this.checkFormStatus();
-
+      this.totalSelected = this.currentEdoCuenta.reduce((acc:number, item:any) => {
+        return acc + (item.Cargo || 0) - (item.Abono || 0);
+      }, 0);
     }
   
     maxCantidad(){
@@ -584,6 +587,11 @@ interface StateMapping {
         resetChecks();
         if (event.source.checked) {
           updateState(currentState);
+          
+          this.totalSelected = currentState.data.reduce((acc:number, item:any) => {
+            return acc + (item.Cargo || 0) - (item.Abono || 0);
+          }, 0);
+
         }
       }
     }
@@ -616,9 +624,7 @@ interface StateMapping {
         this.submittedAbono = true;
         return;
       }
-    
-      this.isLoading = true;
-    
+        
       // Create the payment object based on the tipo
       let pago: edoCuenta;
     
@@ -638,7 +644,44 @@ interface StateMapping {
           hotel: this.currentHuesped.hotel
         };
       } else if (tipo === 'Abono') {
-        pago = {
+            let saldo
+            const saldoNoches = this.currentEdoCuenta
+            .filter(item => item.Descripcion === 'HOSPEDAJE')
+            .reduce((sum, item) => sum + (item.Cargo || 0), 0);
+          
+          const pagosPorCortesias = this.currentEdoCuenta
+            .filter(item => item.Forma_de_Pago === 'Cortesía')
+            .reduce((sum, item) => sum + (item.Abono || 0), 0);
+      
+            const nochesSaldadas = saldoNoches === pagosPorCortesias ? true : false;
+            const saldoPendienteNoches = nochesSaldadas === false ? (saldo = saldoNoches - pagosPorCortesias) : saldo = 0
+          if(this.abonoFormGroup.controls['formaDePagoAbono'].value === 'Cortesía'){
+            if(saldoPendienteNoches !== this.abonoFormGroup.controls["cantidadAbono"].value){
+              // Show alert modal
+              let mensaje = saldo === 0 ? 'utilize otra forma de pago' : 'se ajustara el monto total a liquidar'
+              const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+              modalRef.componentInstance.alertHeader = 'Error';
+              modalRef.componentInstance.mensaje = `La forma de pago de cortesía solo puede ser usada para saldar la estancía, ${mensaje}`;
+              this.abonosf.cantidadAbono.patchValue(saldo === 0 ? this.currentHuesped.pendiente : saldoPendienteNoches);
+              return
+            }
+          } else if(this.currentHuesped.estatus === 'Uso Interno' && this.abonoFormGroup.controls['formaDePagoAbono'].value !== 'Cortesía') {
+            if (this.abonoFormGroup.controls["cantidadAbono"].value !== saldoPendienteNoches && saldoPendienteNoches !== 0 ){
+              const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+              modalRef.componentInstance.alertHeader = 'Error';
+              modalRef.componentInstance.mensaje = `Los cargos por HOSPEDAJE en un folio de Uso Interno deben ser pagados utilizando la forma de pago 'Cortesía', asimismo los cargos por HOSPEDAJE deben ser pagados completos sin parcialidades utilizando esta forma de pago, se ah ajustado el monto restante de HOSPEDAJE pendiente en la cuenta`;
+              this.abonosf.cantidadAbono.patchValue(saldoPendienteNoches);
+              return
+            }
+          }
+
+          // Trigger Autoriza only if Cortesía
+          if(this.abonoFormGroup.controls['formaDePagoAbono'].value === 'Cortesía'){
+            const authorized = await this.autoriza();        
+            if (!authorized) return; // Exit if not authorized
+          }
+
+          pago = {
           id: (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0'),
           Folio: this.currentHuesped.folio,
           Fecha: new Date(),
@@ -648,7 +691,7 @@ interface StateMapping {
           Forma_de_Pago: this.abonoFormGroup.controls["formaDePagoAbono"].value,
           Cantidad: 1,
           Cargo: 0,
-          Abono: this.abonoFormGroup.controls["cantidadAbono"].value,
+          Abono:  this.abonoFormGroup.controls["cantidadAbono"].value,
           Estatus: 'Activo',
           hotel: this.currentHuesped.hotel
         };
@@ -660,6 +703,8 @@ interface StateMapping {
       }
     
       try {
+        this.isLoading = true;
+
         // Submit the payment
         await firstValueFrom(this._edoCuentaService.agregarPago(pago)).then(
           async (response)=>{
@@ -731,12 +776,7 @@ interface StateMapping {
         return ''
       }
     }
-
-    calculoFooter(row:any){
-      return 0
-    }
     
-  
     aplicaDescuento(autoriza:string){
       
       if(this.secondFormGroup.invalid){
@@ -806,34 +846,35 @@ interface StateMapping {
       this.descuentoButton=false
       this.isLoading=true
     }
-    autoriza(){
-      this.isLoading=true
-      const modalRef = this.modalService.open(SuperUserComponent,{ size: 'sm', backdrop:'static' })
-      modalRef.result.then((result) => {
-        this.isLoading=false
-  
-        this.closeResult = `Closed with: ${result}`;
-        }, (reason) => {
-            this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
-            this.estadoDeCuenta=[]
-            this.getEdoCuenta();
-            this.isLoading=false
+
+    autoriza(): Promise<boolean> {
+      this.isLoading = true;
+    
+      return new Promise((resolve) => {
+        const modalRef = this.modalService.open(SuperUserComponent, { size: 'sm', backdrop: 'static' });
+    
+        const sb = modalRef.componentInstance.passEntry.subscribe((receivedEntry: any) => {
+          this.isLoading = false;
+          if (receivedEntry === 3) {
+            this.aplicaDescuento(receivedEntry.username);
+            modalRef.close();
+            resolve(true); // Authorized
+          } else {
+            const modalRef2 = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+            modalRef2.componentInstance.alertHeader = 'Error';
+            modalRef2.componentInstance.mensaje = 'Usuario no autorizado para realizar descuentos';
+            resolve(false); // Not authorized
+          }
         });
-     const sb = modalRef.componentInstance.passEntry.subscribe((receivedEntry:any) => {
-        this.isLoading=false
-            if(receivedEntry === 3){
-              this.aplicaDescuento(receivedEntry.username);
-              modalRef.close()
-            }else 
-            {
-              const modalRef2= this.modalService.open(AlertsComponent,{ size: 'md', backdrop:'static' })
-              modalRef2.componentInstance.alertHeader='Error'
-              modalRef2.componentInstance.mensaje='Usuario no autorizado para realizar descuentos'
-            }
-        })
-  
-        this.subscription.push(sb)
+    
+        this.subscription.push(sb);
+    
+        modalRef.result.finally(() => {
+          this.isLoading = false;
+        });
+      });
     }
+
     /*MODALS*/
     ajustes(){
       const modalRef = this.modalService.open(AjustesComponent,{ size: 'lg', backdrop:'static' })
@@ -862,6 +903,7 @@ interface StateMapping {
   
   
     }
+
     resetFiltros(){
       this.activosChecked=true;
       this.canceladosChecked=false;

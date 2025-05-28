@@ -69,7 +69,7 @@ export class ReservasComponent implements OnInit {
   adicionalArray:Adicional[]=[];
   estatusArray:Estatus[]=[];
   promesasPagoList:any[]=[];
-  formasDePago:string[]=['Efectivo','Tarjeta de Credito','Tarjeta de Debito']
+  formasDePago:string[]=['Efectivo','Tarjeta de Credito','Tarjeta de Debito', 'Cortesía']
   private subscriptions: Subscription[] = [];
   clickedRow = new Set<any>()
   clickedRows = new Set<any>();

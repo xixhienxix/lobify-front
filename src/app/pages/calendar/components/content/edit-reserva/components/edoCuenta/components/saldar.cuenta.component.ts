@@ -26,7 +26,7 @@ export class SaldoCuentaComponent implements OnInit, OnDestroy {
   submittedAbono:boolean=false
   isLoading:boolean=false
   estadoDeCuenta:edoCuenta[]=[]
-  formasDePago:string[]=['Efectivo','Tarjeta de Credito','Tarjeta de Debito']
+  formasDePago:string[]=['Efectivo','Tarjeta de Credito','Tarjeta de Debito', 'Cortesía']
   saldoPendiente:number
 
   constructor(public modal: NgbActiveModal,
