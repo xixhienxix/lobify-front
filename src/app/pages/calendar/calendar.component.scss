@@ -36,3 +36,16 @@
     //     display: none; /* Hide footer on mobile */
     // }
 }
+
+.container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+  
+  .content-card {
+    flex: 1 1 auto; // let it grow and take up space
+    overflow: hidden; // Important to avoid double scrollbars
+    display: flex; // Allow children (e.g., app-content) to grow
+    flex-direction: column;
+  }

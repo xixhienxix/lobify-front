@@ -1,10 +1,11 @@
+<div class="app-content-wrapper d-flex flex-column flex-grow-1" style="overflow-y: auto;">
 
     <ejs-schedule 
     #scheduleObj 
     [(currentView)]="scheduleView"
     width='100%'
     cssClass='timeline-resource-grouping' 
-    height='100%'
+    [height]="'100%'"
     allowSwiping="false"
     [showTimeIndicator]="false"
     [rowAutoHeight]="true"
@@ -108,3 +109,4 @@
     </ejs-schedule>
 
 
+</div>

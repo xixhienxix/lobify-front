@@ -1,29 +1,34 @@
-        <app-content style="display: flex; flex: 1; overflow: auto; max-height: 500px;"
-            #calendar 
-            [roomCodes]="roomCodes"
-            [roomCodesComplete]="roomCodesComplete"
-            [ratesArrayComplete]="ratesArrayComplete"
-            [allReservations]="allReservations"
-            [changing]="changingValue"
-            [estatusArray]="houseKeepingCodes"
-            [currentParametros]="currentParametros"
-            (honRefreshCalendar)="refreshCalendarData($event)"
-            (honDeleteBloqueo)="onDeleteBloqueo($event)"
-            (honEditRsv)="onEditRsv($event)"
-            (onResizeReserva)="onResizeReservation($event)" 
-            (onChangedRate)="onChangedRate($event)" 
-            (onChangeEstatus)="onChangeEstatus($event)"
-            (onOpenEnviarReservacion)="openEnviarReservacion()"
-            (onRefreshingFinished)="onRefreshingFinished($event)"
-            (honNvaRsvDateRange)="onNvaRsvDateRange($event)">
-        </app-content>
-    <div class="card card-custom footer-card" *ngIf="allReservations && roomCodesComplete">
-        <app-footer
-            [allReservations]="allReservations"
-            [houseKeepingCodes]="roomCodesComplete">
-        </app-footer>
+<div class="container">
+    <div class="content-card">
+      <app-content
+        #calendar 
+        [roomCodes]="roomCodes"
+        [roomCodesComplete]="roomCodesComplete"
+        [ratesArrayComplete]="ratesArrayComplete"
+        [allReservations]="allReservations"
+        [changing]="changingValue"
+        [estatusArray]="houseKeepingCodes"
+        [currentParametros]="currentParametros"
+        (honRefreshCalendar)="refreshCalendarData($event)"
+        (honDeleteBloqueo)="onDeleteBloqueo($event)"
+        (honEditRsv)="onEditRsv($event)"
+        (onResizeReserva)="onResizeReservation($event)" 
+        (onChangedRate)="onChangedRate($event)" 
+        (onChangeEstatus)="onChangeEstatus($event)"
+        (onOpenEnviarReservacion)="openEnviarReservacion()"
+        (onRefreshingFinished)="onRefreshingFinished($event)"
+        (honNvaRsvDateRange)="onNvaRsvDateRange($event)">
+      </app-content>
     </div>
-
-<ng-container *ngIf="_isLoading | async">
-    <app-loader-spinner></app-loader-spinner>
-  </ng-container>
+  
+    <!-- Optional footer -->
+    <!--
+    <div class="card card-custom footer-card" *ngIf="allReservations && roomCodesComplete">
+      <app-footer
+        [allReservations]="allReservations"
+        [houseKeepingCodes]="roomCodesComplete">
+      </app-footer>
+    </div>
+    -->
+  </div>
+  
