@@ -416,10 +416,20 @@ export class ContentComponent implements OnInit{
       // Process Reservations
       dataSource.value.forEach((item: Huesped) => {
         this.reservationsArray.push(item);
-  
+
         if (!reservationStatusMap[8].includes(item.estatus)) {
           const llegada = this.adjustTime(item.llegada, this.checkInTime);
           const salida = this.adjustTime(item.salida, this.checkOutTime);
+
+              // Filter for specific status
+              if (reservationStatusMap[4].includes(item.estatus) && item.folio === 'W1105') {
+                const today = DateTime.now().setZone(this.currentParametros.codigoZona).startOf('day');
+                const salidaDate = DateTime.fromISO(item.salida, { zone: this.currentParametros.codigoZona }).startOf('day');
+
+                if (!(today.hasSame(salidaDate, 'day'))) {
+                  return; // Skip this item
+                }
+              }
 
           this.datasourceArray.push({
             Id: reservasIdCounter++,

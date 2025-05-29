@@ -596,8 +596,6 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     }
 
     saldarCuenta(){
-      
-    
       const saldoPendiente = this._edoCuentaService.calculaSaldoPendiente(this.currentHuesped, DateTime.local().setZone(this._parametrosService.getCurrentParametrosValue.codigoZona), this.standardRatesArray, this.tempRatesArray)
 
       const modalRef = this.modalService.open(SaldoCuentaComponent,{size:'sm' , backdrop:'static'});
