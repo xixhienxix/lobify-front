@@ -63,6 +63,12 @@
   background: #fff; /**COLOR DE FONDO DE LOS EVENTOS*/
 }
 
+.e-schedule .e-timeline-view .e-resource-group-cells {
+  background-color: #fafafa;
+}
+
+
+
 .timeline-resource-grouping.e-schedule .e-timeline-view .e-resource-left-td,  /* Tamaña de ancho de columna del grupo del tipo de cuarto*/
 .timeline-resource-grouping.e-schedule .e-timeline-month-view .e-resource-left-td {
   width: 150px;
