@@ -1,6 +1,6 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 
-import { Component, EventEmitter,Input,  OnDestroy,  OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, EventEmitter,Input,  OnDestroy,  OnInit, Output, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Internationalization, setCulture } from '@syncfusion/ej2-base';
 import { ChangeEventArgs } from '@syncfusion/ej2-buttons';
 import {
@@ -422,7 +422,7 @@ export class ContentComponent implements OnInit{
           const salida = this.adjustTime(item.salida, this.checkOutTime);
 
               // Filter for specific status
-              if (reservationStatusMap[4].includes(item.estatus) && item.folio === 'W1105') {
+              if (reservationStatusMap[4].includes(item.estatus)) {
                 const today = DateTime.now().setZone(this.currentParametros.codigoZona).startOf('day');
                 const salidaDate = DateTime.fromISO(item.salida, { zone: this.currentParametros.codigoZona }).startOf('day');
 

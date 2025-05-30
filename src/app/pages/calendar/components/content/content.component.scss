@@ -58,11 +58,14 @@
   display: none;
 }
 
+.e-schedule .e-timeline-view .e-work-cells,
+.e-schedule .e-timeline-month-view .e-work-cells {
+  background: #fff; /**COLOR DE FONDO DE LOS EVENTOS*/
+}
 
-
-.timeline-resource-grouping.e-schedule .e-timeline-view .e-resource-left-td, 
+.timeline-resource-grouping.e-schedule .e-timeline-view .e-resource-left-td,  /* Tamaña de ancho de columna del grupo del tipo de cuarto*/
 .timeline-resource-grouping.e-schedule .e-timeline-month-view .e-resource-left-td {
-  width: 100px;
+  width: 150px;
 }
 
 .timeline-resource-grouping.e-schedule .e-timeline-view .e-resource-text, 
@@ -115,3 +118,6 @@
 .weekend-cell {
   background-color: #f0f0f0 !important; // light gray
 }
+
+
+
