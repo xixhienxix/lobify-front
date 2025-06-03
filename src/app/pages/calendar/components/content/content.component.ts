@@ -221,6 +221,14 @@ export class ContentComponent implements OnInit{
 
   };
 
+  // Parameters
+  parametros:Parametros
+  checkInHour:number
+  checkInMinute:number
+  checkOutHour:number
+  checkOutMinute:number
+  timeZone:string;
+
   public data: DataManager = new DataManager({
     url: environment.apiUrl+'/version',
     adaptor:new UrlAdaptor(),
@@ -360,6 +368,7 @@ export class ContentComponent implements OnInit{
 
   async ngOnInit() {
 
+    this.retriveParamsData();
     await this.checkRoomCodesIndexDB();
     this._indexDBService.checkIndexedDB(['tarifas'],true);
     this.ratesArrayComplete = await this._indexDBService.loadTarifas(true);
@@ -484,6 +493,13 @@ export class ContentComponent implements OnInit{
     });
     this.isInitialized = true;
   }
+
+  async retriveParamsData(){
+    this.parametros = await this._indexDBService.loadParametros();
+    [this.checkInHour, this.checkInMinute] = this.parametros.checkIn.split(':').map(Number);
+    [this.checkOutHour, this.checkOutMinute] = this.parametros.checkOut.split(':').map(Number);
+    this.timeZone = this.parametros.codigoZona || 'UTC';
+  }
   
 
   parseTime(time: string) {
@@ -579,7 +595,7 @@ export class ContentComponent implements OnInit{
     codigoCuarto = this.roomCodesComplete.find(item => item.Numero === numeroCuarto)?.Codigo;
   
     // If event is "Bloqueo", trigger delete event and exit.
-    if (args.data.Subject === "Bloqueo") {
+    if (args.data?.Subject === "Bloqueo") {
       this.honDeleteBloqueo.emit({ row: args, folio: args.data.Folio });
       return;
     }
@@ -604,19 +620,14 @@ export class ContentComponent implements OnInit{
         const now = new Date();
         const filteredEvents = existingEvents.filter(event => new Date(event.EndTime) >= now);
 
-              const parametros = await this._indexDBService.loadParametros();
-              const [checkInHour, checkInMinute] = parametros.checkIn.split(':').map(Number);
-              const [checkOutHour, checkOutMinute] = parametros.checkOut.split(':').map(Number);
-              const timeZone = parametros.codigoZona || 'UTC';
-
-              const argsStart = DateTime
-              .fromJSDate(new Date(args.data.StartTime), { zone: timeZone })
-              .set({ hour: checkInHour, minute: checkInMinute });
+            const argsStart = DateTime
+              .fromJSDate(new Date(args.data.StartTime), { zone: this.timeZone })
+              .set({ hour: this.checkInHour, minute: this.checkInMinute });
         
             const argsEnd = DateTime
-              .fromJSDate(new Date(args.data.EndTime), { zone: timeZone })
-              .minus({ days: 1 })
-              .set({ hour: checkOutHour, minute: checkOutMinute });
+              .fromJSDate(new Date(args.data.EndTime), { zone: this.timeZone })
+              // .minus({ days: 1 })
+              .set({ hour: this.checkOutHour, minute: this.checkOutMinute });
 
           // Early exit if no events to compare
           if (filteredEvents.length === 0) {
@@ -627,28 +638,7 @@ export class ContentComponent implements OnInit{
           }
 
         // Map and await all async overlap checks
-        const overlapResults = await Promise.all(
-          filteredEvents.map(async (event) => {
-        
-            if (event.ProjectId === args.data.ProjectId && event.TaskId === args.data.TaskId) {
-              const eventStart = DateTime.fromJSDate(new Date(event.StartTime), { zone: timeZone });
-              const eventEnd = DateTime.fromJSDate(new Date(event.EndTime), { zone: timeZone });
-        
-              const isSameDay = argsStart.hasSame(argsEnd, 'day');
-              const isEndAfterStart = argsEnd > argsStart;
-
-              if (isSameDay && isEndAfterStart) {
-                return { overlap: true, argsStart, argsEnd };
-              }
-        
-              const overlap = argsStart <= eventEnd && argsEnd >= eventStart;
-              return { overlap, argsStart, argsEnd };
-            }
-        
-            // Always include argsStart and argsEnd, even if Project/Task ID don't match
-            return { overlap: false, argsStart, argsEnd };
-          })
-        );
+        const overlapResults = await this.checkOverlapInCalendar(args,filteredEvents, argsStart, argsEnd);
         
       
         const hasOverlap = overlapResults.some(r => r.overlap);
@@ -675,6 +665,58 @@ export class ContentComponent implements OnInit{
       }
     }
   };
+
+
+  async checkOverlapInCalendar(args: any, filteredEvents: any, argsStart: any, argsEnd: any) {
+    const taskId = Array.isArray(args.data.TaskId) ? args.data.TaskId[0] : args.data.TaskId;
+    const projectId = Array.isArray(args.data.ProjectId) ? args.data.ProjectId[0] : args.data.ProjectId;
+  
+    const overlapResults = await Promise.all(
+      filteredEvents.map(async (event: any) => {
+        const eventStart = DateTime.fromJSDate(new Date(event.StartTime), { zone: this.timeZone });
+        const eventEnd = DateTime.fromJSDate(new Date(event.EndTime), { zone: this.timeZone });
+  
+        const isSameDay = argsStart.hasSame(argsEnd, 'day');
+        const isEndAfterStart = argsEnd > argsStart;
+  
+        // 1. Same-day exact match (Project & Task IDs must match)
+        if (isSameDay && isEndAfterStart && event.ProjectId === projectId && event.TaskId === taskId) {
+          return { overlap: true, argsStart, argsEnd };
+        }
+  
+        // 2. Bloqueo events: ignore time when comparing
+        if (event.Subject === 'Bloqueo') {
+          const argsStartDate = argsStart.startOf('day');
+          const argsEndDate = argsEnd.endOf('day');
+          const eventStartDate = eventStart.startOf('day');
+          const eventEndDate = eventEnd.endOf('day');
+  
+          const overlaps =
+            argsStartDate <= eventEndDate && argsEndDate >= eventStartDate;
+  
+          if (overlaps) {
+            return { overlap: true, argsStart, argsEnd };
+          }
+        }
+  
+        // 3. General events: time is relevant (Project & Task IDs must match)
+        if (event.ProjectId === projectId && event.TaskId === taskId) {
+          const overlaps =
+            argsStart <= eventEnd && argsEnd >= eventStart;
+  
+          if (overlaps) {
+            return { overlap: true, argsStart, argsEnd };
+          }
+        }
+  
+        return { overlap: false, argsStart, argsEnd };
+      })
+    );
+  
+    return overlapResults;
+  }
+  
+  
   
 
   setCheckInOutTimeParametros(date:Date, time:string){
@@ -858,9 +900,6 @@ findOverlappingObjects(
       const endDate = new Date(startDate);
       endDate.setDate(startDate.getDate() + 1);
   
-      const resources = this.scheduleObj.getResourcesByIndex(groupIndex);
-      const projectId = resources.groupData?.ProjectId[0]; // ahora el project id es regresado como si fuera un array 
-  
       let events = this.scheduleObj.getEvents(startDate, endDate);
 
       // Filter by resource
@@ -870,6 +909,13 @@ findOverlappingObjects(
         }
         return event.ProjectId === projectId;
       });
+
+      const resources = this.scheduleObj.getResourcesByIndex(groupIndex);
+      
+      const projectId = Array.isArray(resources.groupData?.ProjectId)
+                                      ? resources.groupData!.ProjectId[0]
+                                      : resources.groupData?.ProjectId ?? null;
+    
 
       // Filter out end-on-same-day events
       events = events.filter(event => {
