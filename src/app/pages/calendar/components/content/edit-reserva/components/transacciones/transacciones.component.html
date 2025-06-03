@@ -201,7 +201,7 @@
         <mat-form-field style="width: 100%;" appearance="fill">
           <mat-label>Forma de Pago</mat-label>
           <mat-select [attr.disabled]="inputDisabled" style="font-weight: bold;" formControlName="formaDePagoAbono">
-            <mat-option *ngFor="let pago of formasDePago" value={{pago}}>{{pago}}</mat-option>
+            <mat-option *ngFor="let pago of filteredFormasDePago" value={{pago}}>{{pago}}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>

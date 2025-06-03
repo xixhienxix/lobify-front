@@ -1024,7 +1024,27 @@ onEventRendered(args: EventRenderedArgs): void {
   }
 }
 
-onStatusChange(cuarto:string, estatus:string){
+onStatusChange(cuarto:string, estatus:string, data:any){
+  const now = DateTime.now().setZone(this.timeZone);
+
+  const existingEvents = this.scheduleObj.getEvents()
+    .filter(event => {
+      const start = DateTime.fromJSDate(new Date(event.StartTime), { zone: this.timeZone });
+      const end = DateTime.fromJSDate(new Date(event.EndTime), { zone: this.timeZone });
+  
+      return (
+        now >= start &&
+        now <= end &&
+        event.Subject === 'Bloqueo' &&
+        event.Numero === cuarto
+      );
+    });
+
+  if(existingEvents){
+    this.promptMessage('Alert', 'Habitaciones con bloqueo vigente no pueden cambiar su estatus');
+    return;
+  }
+
   this.onChangeEstatus.emit({cuarto,estatus})
 }
 

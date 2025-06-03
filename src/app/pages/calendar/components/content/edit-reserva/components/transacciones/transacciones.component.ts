@@ -165,6 +165,13 @@ interface StateMapping {
     @Output() honRefreshEdoCuenta: EventEmitter<boolean> = new EventEmitter();
     @Output() honActualizaSaldo: EventEmitter<boolean> = new EventEmitter();
 
+    get filteredFormasDePago(): string[] {
+      if (this.currentHuesped.estatus !== 'Reserva Temporal') {
+        return this.formasDePago.filter(pago => pago !== 'Cortesía');
+      }
+      return this.formasDePago;
+    }
+
     constructor(    
       public modalService: NgbModal,
       private _estatusService: EstatusService,

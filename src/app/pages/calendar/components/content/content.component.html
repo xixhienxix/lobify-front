@@ -58,7 +58,7 @@
       
           <mat-menu #menu="matMenu">
             <ng-container *ngFor="let estatus of estatusArray">
-              <button (click)="onStatusChange(data.resourceData.text, estatus.Descripcion)" mat-menu-item>
+              <button (click)="onStatusChange(data.resourceData.text, estatus.Descripcion, data)" mat-menu-item>
                 <span>{{estatus.Descripcion}}</span>
               </button>
             </ng-container>
