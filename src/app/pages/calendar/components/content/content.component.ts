@@ -673,6 +673,12 @@ export class ContentComponent implements OnInit{
   
     const overlapResults = await Promise.all(
       filteredEvents.map(async (event: any) => {
+
+        // ✅ Short-circuit: skip if Folio starts with 'S'
+        if (event.Folio.startsWith('S')) {
+          return { overlap: false, argsStart, argsEnd };
+        }
+
         const eventStart = DateTime.fromJSDate(new Date(event.StartTime), { zone: this.timeZone });
         const eventEnd = DateTime.fromJSDate(new Date(event.EndTime), { zone: this.timeZone });
   
