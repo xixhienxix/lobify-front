@@ -73,8 +73,7 @@ private bloqueoResponseSubject = new Subject<any>();
        .pipe(
          map(responseData=>{
           const postArray = []
-           for(const key in responseData)
-           {
+           for(const key in responseData){
              if(responseData.hasOwnProperty(key))
              postArray.push(responseData[key]);
             }

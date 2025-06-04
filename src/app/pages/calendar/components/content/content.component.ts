@@ -579,7 +579,7 @@ export class ContentComponent implements OnInit{
     const today = new Date();
     const startTime = new Date(args.data.StartTime);
     const endTime = new Date(args.data.EndTime);
-    const existingEvents = this.scheduleObj.getEvents();
+    const existingEvents = this.scheduleObj.getEvents().filter(item=> !this.bloqueosArray.filter(item=>item.Completed !== true).includes(item.Folio));
   
     let numeroCuarto: string;
     let codigoCuarto: string;
@@ -685,7 +685,7 @@ export class ContentComponent implements OnInit{
         }
   
         // 2. Bloqueo events: ignore time when comparing
-        if (event.Subject === 'Bloqueo') {
+        if (event.Subject === 'Bloqueo' && event.ProjectId === projectId && event.TaskId === taskId) {
           const argsStartDate = argsStart.startOf('day');
           const argsEndDate = argsEnd.endOf('day');
           const eventStartDate = eventStart.startOf('day');

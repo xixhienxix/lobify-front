@@ -185,7 +185,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
     this._huespedService.getAll().subscribe({
       next: async (value) => {
         this.allReservations = [];
-        const bloqueosArray = await this._checkIndexDb.loadBloqueos(true);
+        const bloqueosArray = (await this._checkIndexDb.loadBloqueos(true)).filter(item=>item.Completed !== true);
         this.changingValue.next({value, bloqueosArray:bloqueosArray});
         this.allReservations = [...value]
       }

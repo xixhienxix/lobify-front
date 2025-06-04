@@ -67,3 +67,4 @@ src/environments/environment.ts
 /.firebase
 /.firebase
 /.firebase
+*.cache
