@@ -839,10 +839,10 @@ findOverlappingObjects(
   };
 
   return objects.filter((obj: Record<string, any>) => {
-    // Avoid returning the same object as the target
-    // if (obj.Id === target.Id) {
-    //   return false;
-    // }
+    // Evita que se compare con la misma reserva Ex. si mueves una reserva de 3 dias un dia adelante esta validacion evita que haga overlap consigo misma y te permita hacer el movimiento
+    if (obj.Id === target.Id) {
+      return false;
+    }
 
     let numCuarto
     if(Array.isArray(target.TaskId)){
