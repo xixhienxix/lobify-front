@@ -65,7 +65,6 @@ export class ReservasComponent implements OnInit {
   today:DateTime=DateTime.now();
 
   /*Models*/
-
   adicionalArray:Adicional[]=[];
   estatusArray:Estatus[]=[];
   promesasPagoList:any[]=[];

@@ -613,7 +613,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
   
     const arrayToCheck = event.Subject === 'Bloqueo' ? this.bloqueosArray : this.allReservations;
     
-    if (!this.checkValidResize(event, arrayToCheck)) {
+    //if (!this.checkValidResize(event, arrayToCheck)) {
       const dataSource = await this.roomRates(event.Codigo);
       const tarifaEstandarArray = dataSource.filter(({ Tarifa }) => Tarifa === 'Tarifa Base');
       const tempRatesArray = dataSource.filter(({ Tarifa }) => Tarifa === 'Tarifa De Temporada');
@@ -654,29 +654,29 @@ export class CalendarComponent implements OnInit, OnDestroy {
       } catch (reason) {
         this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
       }
-    }
+    //}
   }
   
-
-  checkValidResize(searchObj: any, dataArray: (Bloqueo | Huesped)[]): any | null {
-    return dataArray.find(item => {
-      // Check for Bloqueo type
-      if ('Desde' in item && 'Hasta' in item) {
-        const startDateMatches = this.compareDates(new Date(searchObj.StartTime), new Date(item.Desde));
-        const endDateMatches = this.compareDates(new Date(searchObj.EndTime), new Date(item.Hasta));
-        return item.Habitacion === searchObj.Codigo && startDateMatches && endDateMatches;
-      }
+// DEPRECATED
+  // checkValidResize(searchObj: any, dataArray: (Bloqueo | Huesped)[]): any | null {
+  //   return dataArray.find(item => {
+  //     // Check for Bloqueo type
+  //     if ('Desde' in item && 'Hasta' in item) {
+  //       const startDateMatches = this.compareDates(new Date(searchObj.StartTime), new Date(item.Desde));
+  //       const endDateMatches = this.compareDates(new Date(searchObj.EndTime), new Date(item.Hasta));
+  //       return item.Habitacion === searchObj.Codigo && startDateMatches && endDateMatches;
+  //     }
   
-      // Check for Huesped type
-      if ('llegada' in item && 'salida' in item) {
-        const startDateMatches = this.compareDates(new Date(searchObj.StartTime), new Date(item.llegada));
-        const endDateMatches = this.compareDates(new Date(searchObj.EndTime), new Date(item.salida));
-        return item.habitacion === searchObj.Codigo && startDateMatches && endDateMatches;
-      }
+  //     // Check for Huesped type
+  //     if ('llegada' in item && 'salida' in item) {
+  //       const startDateMatches = this.compareDates(new Date(searchObj.StartTime), new Date(item.llegada));
+  //       const endDateMatches = this.compareDates(new Date(searchObj.EndTime), new Date(item.salida));
+  //       return item.habitacion === searchObj.Codigo && startDateMatches && endDateMatches;
+  //     }
   
-      return false;
-    });
-  }
+  //     return false;
+  //   });
+  // }
 
   compareDates(date1: Date, date2: Date): boolean {
     return date1.getDate() === date2.getDate() &&
