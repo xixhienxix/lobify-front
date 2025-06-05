@@ -628,6 +628,7 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
       
       const sb = this._huespedService.updateEstatusHuesped(this.currentHuesped).subscribe({  
         next:(value)=>{
+          this.onChangeAmaStatus.emit({cuarto:this.currentHuesped.numeroCuarto, estatus:'SUCIA'})
           this.onFetchReservations.emit();
 
           const modalRef = this.modalService.open(AlertsComponent,{ size: 'sm', backdrop:'static' })
