@@ -1045,8 +1045,8 @@ onStatusChange(cuarto:string, estatus:string, data:any){
       );
     });
 
-  if(existingEvents){
-    this.promptMessage('Alert', 'Habitaciones con bloqueo vigente no pueden cambiar su estatus');
+    if(existingEvents.length !== 0){    
+      this.promptMessage('Alert', 'Habitaciones con bloqueo vigente no pueden cambiar su estatus');
     return;
   }
 
