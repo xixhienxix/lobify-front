@@ -908,20 +908,19 @@ findOverlappingObjects(
   
       let events = this.scheduleObj.getEvents(startDate, endDate);
 
-      // Filter by resource
-      events = events.filter(event => {
-        if (Array.isArray(event.ProjectId)) {
-          return event.ProjectId.includes(projectId);
-        }
-        return event.ProjectId === projectId;
-      });
 
       const resources = this.scheduleObj.getResourcesByIndex(groupIndex);
       
       const projectId = Array.isArray(resources.groupData?.ProjectId)
                                       ? resources.groupData!.ProjectId[0]
                                       : resources.groupData?.ProjectId ?? null;
-    
+      // Filter by resource
+      events = events.filter(event => {
+        if (Array.isArray(event.ProjectId)) {
+          return event.ProjectId.includes(projectId);
+        }
+        return event.ProjectId === projectId;
+      });    
 
       // Filter out end-on-same-day events
       events = events.filter(event => {
