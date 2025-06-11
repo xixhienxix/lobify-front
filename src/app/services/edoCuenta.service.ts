@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { BehaviorSubject, Observable, Subject } from "rxjs";
+import { BehaviorSubject, firstValueFrom, Observable, Subject } from "rxjs";
 import { map } from "rxjs/operators";
 import { environment } from "src/environments/environment";
 import { edoCuenta } from "../models/edoCuenta.model";
@@ -133,15 +133,9 @@ getNotification(){
       
   }
 
-  calculaSaldoPendiente(huesped:Huesped, salidaReal:DateTime, standardRatesArray:Tarifas[], tempRatesArray:Tarifas[]){
-    const llegada = new Date(huesped.llegada);
-    const salida = salidaReal.toJSDate();
+  calculaSaldoPendienteTarifa(huesped:Huesped, salidaReal:DateTime, standardRatesArray:Tarifas[], tempRatesArray:Tarifas[]){
 
-    // Calculate difference in milliseconds
-    const diffInMs = salida.getTime() - llegada.getTime();
-
-    // Convert to days
-    const adjustedDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24)) === 0 ? 1 : Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+    const adjustedDays = this.checkDifferenceInMins(huesped.llegada, salidaReal);
 
     const adjustedSalidaReal = this.checkSameDay(new Date(huesped.llegada), salidaReal);
 
@@ -160,15 +154,25 @@ getNotification(){
       true
     ) ?? [];
 
-    let saldoPendiente = 0;
+    let saldoTarfiaPendiente = 0;
 
     if(Array.isArray(result)){
       result.forEach(element=>{
-        saldoPendiente += element.tarifaTotal
+        saldoTarfiaPendiente += element.tarifaTotal
       })
     }
 
-    return saldoPendiente
+    return saldoTarfiaPendiente
+  }
+
+  checkDifferenceInMins(llegadaString:string, salidaReal:DateTime){
+    const llegada = new Date(llegadaString);
+    const salida = salidaReal.toJSDate();
+
+    // Calculate difference in milliseconds
+    const diffInMs =  salida.getTime() - llegada.getTime();
+    return Math.floor(diffInMs / (1000 * 60 * 60 * 24)) === 0 ? 1 : Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
   }
 
   checkSameDay(llegadaReal:Date, salidaReal:DateTime){
@@ -196,4 +200,18 @@ getNotification(){
     return this.http.post<edoCuenta>(environment.apiUrl+'/edo_cuenta/totales',{folio})
   }
 
+  async revisaDepositoPrevio(folio:string): Promise<{ abonos: boolean; totalAbonos: number }>{
+    let depositoPrevio = false;  // declare outside try
+
+    try {
+      const edoCuenta = await firstValueFrom(this.getCuentas(folio));
+      depositoPrevio = edoCuenta.some(item => (item.Abono ?? 0) > 0);
+      const totalAbono = edoCuenta.reduce((sum, item) => sum + (item.Abono ?? 0), 0);
+
+      if(depositoPrevio){ return { abonos:depositoPrevio, totalAbonos: totalAbono } } else { return {abonos:depositoPrevio, totalAbonos:0} }
+      
+    } catch (error) {
+      return {abonos: depositoPrevio, totalAbonos:0}
+    }
+  }
 }

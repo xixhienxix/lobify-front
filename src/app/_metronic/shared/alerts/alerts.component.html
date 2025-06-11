@@ -1,8 +1,6 @@
 <div class="modal-header">
     <h4 class="modal-title">{{alertHeader}}</h4>
-    <button type="button" class="close" aria-label="Close" (click)="modal.close('Close click')">
-      <span aria-hidden="true">&times;</span>
-    </button>
+    <button *ngIf="!simple" style=" background-color:var(--deep-red-btn); font-weight: bold; color: white;" class="btn" (click)="closeModal()"> X </button>
   </div>
   <div class="modal-body">
     <p>{{mensaje}}</p>
@@ -27,5 +25,5 @@
 
 <div class="modal-footer">
     <button type="button" class="btn btn-light" (click)="modal.close('Aceptar')">Aceptar</button>
-    <button type="button" class="btn btn-light" (click)="modal.close('Close click')">Cerrar</button>
+    <button type="button" class="btn btn-light" *ngIf="!simple" (click)="modal.close('Close click')">Cerrar</button>
   </div>

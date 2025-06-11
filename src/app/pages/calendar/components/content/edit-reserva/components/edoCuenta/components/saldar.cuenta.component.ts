@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { Subscription } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 
 import {DateTime} from 'luxon'
 import { HuespedService } from 'src/app/services/huesped.service';
@@ -18,6 +18,9 @@ import { edoCuenta } from 'src/app/models/edoCuenta.model';
 })
 export class SaldoCuentaComponent implements OnInit, OnDestroy {
   @Input() folio:string;
+  @Input() desgloseEdoCuenta:any;
+  @Input() saldoPendiente:number=0;
+  @Input() pendienteHospedaje:number=0;
   @Output() passEntry: EventEmitter<any> = new EventEmitter();
 
   tarifaDiasDiferencia:number
@@ -27,7 +30,6 @@ export class SaldoCuentaComponent implements OnInit, OnDestroy {
   isLoading:boolean=false
   estadoDeCuenta:edoCuenta[]=[]
   formasDePago:string[]=['Efectivo','Tarjeta de Credito','Tarjeta de Debito', 'Cortesía']
-  saldoPendiente:number
 
   constructor(public modal: NgbActiveModal,
     public fb :FormBuilder,
@@ -62,11 +64,10 @@ export class SaldoCuentaComponent implements OnInit, OnDestroy {
 
     this.isLoading=true
     
-    let pago:edoCuenta;
+    let pago, updatedHospedaje:edoCuenta;
 
     
       pago = {
-
         Folio:this.folio,
         Fecha: new Date(),
         Fecha_Cancelado:'',
@@ -77,40 +78,47 @@ export class SaldoCuentaComponent implements OnInit, OnDestroy {
         Cargo:0,
         Abono:this.abonosf.cantidadAbono.value,
         Estatus:'Activo'
-
       }
-    
 
-    
-this.isLoading=true
-    const sb = this.edoCuentaService.agregarPago(pago).subscribe(
-      (value:any)=>{
+      updatedHospedaje = {
+        Folio:this.folio,
+        Fecha: new Date(),
+        Fecha_Cancelado:'',
+        Referencia:'',
+        Descripcion:'HOSPEDAJE',
+        Forma_de_Pago:'',
+        Cantidad:1,
+        Cargo:this.pendienteHospedaje,
+        Abono:0,
+        Estatus:'Activo',
+        Total:this.pendienteHospedaje
+      }
 
-        this.isLoading=false
-       
-            
-        // this.estadoDeCuenta=[]
-        // this.edoCuentaService.getCuentas(this.folio);
-        this.passBack(value)
+      const actualizarSaldos = [
+        this.edoCuentaService.agregarPago(pago),
+        this.edoCuentaService.updateRowByConcepto(this.folio, 'HOSPEDAJE', updatedHospedaje)
+      ];
       
-      },
-      (err)=>
-      {
-        this.isLoading=false
-        if(err)
-        {
-          const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop:'static' });
-          modalRef.componentInstance.alertHeader = 'Error'
-          modalRef.componentInstance.mensaje=err.message
-
-          this.isLoading=false
+      const sb = forkJoin(actualizarSaldos).subscribe({
+        next: ([pagoResponse, hospedajeResponse]) => {
+          this.isLoading = false;
       
+          // Do something with both responses
+          this.passBack('exito'); // or pass both if needed
+        },
+        error: (err) => {
+          this.isLoading = false;
+      
+          const modalRef = this.modalService.open(AlertsComponent, { size: 'sm', backdrop: 'static' });
+          modalRef.componentInstance.alertHeader = 'Error';
+          modalRef.componentInstance.mensaje = err.message;
+        },
+        complete: () => {
+          // Optional: final cleanup
         }
-      },
-      ()=>{//FINALLY
-      }
-      )
-      this.subscription.push(sb)
+      });
+      
+      this.subscription.push(sb);
   }
 
   passBack(exito:string) {

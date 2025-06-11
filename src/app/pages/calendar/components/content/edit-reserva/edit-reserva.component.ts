@@ -3,7 +3,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, EventEmitter, Input, OnCha
 import { ModalDismissReasons, NgbActiveModal, NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { Huesped } from 'src/app/models/huesped.model';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import { HuespedService } from 'src/app/services/huesped.service';
+import { HuespedService, overlayResponse } from 'src/app/services/huesped.service';
 import { Subject, Subscription, catchError, finalize, firstValueFrom, forkJoin, of, switchMap } from 'rxjs';
 import { AlertsMessageInterface } from 'src/app/models/message.model';
 import { Adicional } from 'src/app/models/adicional.model';
@@ -69,6 +69,8 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
   //Model
   porPagar:number=0;
   pendiente:number=0;
+
+  updatedDesglose : { fecha: string; tarifaTotal: number }[] = [];
 
   private _currentHuesped!: Huesped;
   private _currentRoom!: Habitacion;
@@ -313,9 +315,39 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
     this._communicationService.reactivaSubject.next(this.currentHuesped);
   }
 
-  onEstatusUpdate(estatus: number): void {
+  async onEstatusUpdate(estatus: number): Promise<void> {
     const oldStatus = this.currentHuesped.estatus;
     this.isLoading = true;
+    let overlap : overlayResponse
+    let overlapResponse, validResponse : boolean = false;
+
+    if(estatus === 1){
+
+      const valid = this.validateCheckIn(this.currentHuesped.llegada);
+      overlap = await this._huespedService.verifyOverlap(this.currentHuesped);
+
+      if(!valid) {
+        validResponse = await this.promptMessage('Error', 'No se puede realizar un Check-In para reservaciones futuras', true);
+        this.isLoading=false;
+        return
+      }
+      if(overlap.exist){
+        overlapResponse = await this.promptMessage(
+          'Conflicto de Reserva Detectado',
+          `Esta habitación ya está asignada para hoy${
+            overlap.depositoPrevio ? ' a una reserva confirmada con pago anticipado.' : ''
+          }${
+            this.currentHuesped.estatus === 'Reserva Temporal'
+              ? ' La reserva actual es temporal y no tiene garantía de disponibilidad.'
+              : ''
+          }`,
+          true
+        );
+        this.isLoading = false;
+
+        return; 
+      }
+    }
   
     this._estatusService.actualizaEstatus(estatus.toString(), this.folio, this.currentHuesped).pipe(
       switchMap(() => {
@@ -595,12 +627,54 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
       this.onFetchReservations.emit(huesped);
     }
 
-    saldarCuenta(){
-      const saldoPendiente = this._edoCuentaService.calculaSaldoPendiente(this.currentHuesped, DateTime.local().setZone(this._parametrosService.getCurrentParametrosValue.codigoZona), this.standardRatesArray, this.tempRatesArray)
+    async saldarCuenta(){
+      const salidaReal = DateTime.local().setZone(this._parametrosService.getCurrentParametrosValue.codigoZona);
 
+      const diffInDays = this._edoCuentaService.checkDifferenceInMins(this.currentHuesped.llegada, salidaReal);
+
+      const saldoPendiente = this._edoCuentaService.calculaSaldoPendienteTarifa(
+        this.currentHuesped,
+        salidaReal,
+        this.standardRatesArray,
+        this.tempRatesArray
+      );
+
+      const abonosTotales = await this._edoCuentaService.revisaDepositoPrevio(this.currentHuesped.folio);
+      const totalReal = saldoPendiente - abonosTotales.totalAbonos
+
+      let totalTarifa = 0;
+
+      const desglose = this.currentHuesped.desgloseEdoCuenta;
+      const desgloseTyped = desglose as { tarifa: string; fecha: string; tarifaTotal: number }[];
+
+      
+      if (
+        Array.isArray(desglose) &&
+        desglose.length > 0 &&
+        typeof desglose[0] === 'object' &&
+        'tarifaTotal' in desglose[0]
+      ) {
+      
+        if (desgloseTyped.length > diffInDays) {
+          const excessDays = desgloseTyped.length - diffInDays;
+          desgloseTyped.splice(-excessDays);
+        }
+      
+        for (const item of desgloseTyped) {
+          const tarifa = Number(item.tarifaTotal); // Ensure numeric
+          if (!isNaN(tarifa)) {
+            totalTarifa += tarifa;
+          }
+        }
+      }
+      this.updatedDesglose = desgloseTyped      
+      
       const modalRef = this.modalService.open(SaldoCuentaComponent,{size:'sm' , backdrop:'static'});
       modalRef.componentInstance.folio=this.currentHuesped.folio
-      modalRef.componentInstance.saldoPendiente=saldoPendiente
+      modalRef.componentInstance.desgloseEdoCuenta = desgloseTyped
+      modalRef.componentInstance.saldoPendiente=totalReal
+      modalRef.componentInstance.pendienteHospedaje=saldoPendiente
+      
 
       const sb = modalRef.componentInstance.passEntry.subscribe(() => {
         //Recibir Data del Modal usando EventEmitter
@@ -625,6 +699,9 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
       this.currentHuesped.porPagar = 0
       this.currentHuesped.noches = this.nochesReales
       this.currentHuesped.estatus = 'Check-Out';
+      this.currentHuesped.desgloseEdoCuenta = this.updatedDesglose
+
+      console.log('this.updatedDesglose', this.updatedDesglose)
       
       const sb = this._huespedService.updateEstatusHuesped(this.currentHuesped).subscribe({  
         next:(value)=>{
@@ -665,6 +742,45 @@ export class EditReservaComponent implements OnInit, OnDestroy, OnChanges{
               return  `with: ${reason}`;
           }
     }
+
+    promptMessage(header: string, message: string, simple:boolean=false): Promise<any> {
+      return new Promise((resolve, reject) => {
+        const modalRef = this.modalService.open(AlertsComponent, {
+          size: 'sm',
+          backdrop: 'static'
+        });
+    
+        modalRef.componentInstance.alertHeader = header;
+        modalRef.componentInstance.mensaje = message;
+        modalRef.componentInstance.simple = simple
+    
+        modalRef.result.then(
+          (result) => {
+            resolve(result);  // Resolve the promise with result
+          },
+          (reason) => {
+            reject(reason);   // Reject the promise with reason
+          }
+        );
+      });
+    }
+
+  validateCheckIn(checkInDate:string){
+    if (!checkInDate || !DateTime.fromISO(checkInDate).isValid) {
+      return false;
+    }
+
+    const timeZone = this._parametrosService.getCurrentParametrosValue.codigoZona;
+    const tz = timeZone ?? 'America/Mexico_City';
+
+
+    const checkInDateDT = DateTime.fromISO(checkInDate).setZone(tz);
+    const today = DateTime.now().setZone(tz);
+
+    return today.hasSame(checkInDateDT, 'day');
+
+  }
+    
 
   closeModal(){
     this.modal.close();

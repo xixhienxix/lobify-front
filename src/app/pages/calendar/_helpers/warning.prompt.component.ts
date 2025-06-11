@@ -115,7 +115,20 @@ export class WarningComponent implements OnInit, OnDestroy {
           tarifaPromedio,
           false,
         );
-    
+        console.log({
+          tarifa,
+          tarifaEstandarArray: this.tarifaEstandarArray,
+          tempRatesArray: this.tempRatesArray,
+          codigosCuarto,
+          Adultos: this.Adultos,
+          Ninos: this.Ninos,
+          StartTime: this.StartTime,
+          EndTime: this.EndTime,
+          stayNights: this.stayNights,
+          tarifaPromedio,
+          includeImpuestos: false
+        });
+        console.log('-> Rate', rate);    
         // Ensure it always returns a number
         return Array.isArray(rate) ? rate[0]?.tarifaTotal ?? 0 : rate ?? 0;
       }

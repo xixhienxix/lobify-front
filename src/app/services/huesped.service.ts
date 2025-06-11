@@ -7,6 +7,11 @@ import { LocalForageCache } from "../tools/cache/indexdb-expire";
 import { Edo_Cuenta_Service } from "./edoCuenta.service";
 import { LogService } from "./activity-logs.service";
 import { DEFAULT_TARIFAS } from "../models/tarifas";
+import { DateTime } from 'luxon'
+import { ParametrosService } from "../pages/parametros/_services/parametros.service";
+export interface overlayResponse{
+  exist:boolean, depositoPrevio:boolean
+}
 export const EMPTY_CUSTOMER: Huesped = {
   folio:'',
   adultos:1,
@@ -70,7 +75,8 @@ export class HuespedService {
     constructor(
       private http:HttpClient,
       private _estadoDeCuenta: Edo_Cuenta_Service,
-      private _logService: LogService
+      private _logService: LogService,
+      private _ParametrosService: ParametrosService
     ){
       this.huespedUpdate$=this.currentHuesped$.asObservable();
     }
@@ -265,6 +271,107 @@ export class HuespedService {
     
       return allHuespedes;
     }
+
+    async verifyOverlap(currentHuesped: Huesped): Promise<overlayResponse> {
+      const parametros = this._ParametrosService.getCurrentParametrosValue;
+    
+      try {
+        let reservations = await this.readIndexDB('Reservations');
+        if (!reservations || reservations.length === 0) {
+          reservations = await firstValueFrom(this.getAll());
+        }
+    
+        const targetDate = DateTime.fromISO(currentHuesped.llegada).setZone(parametros.codigoZona);
+    
+        const overlapReservations: Huesped[] = reservations.filter((rsv: Huesped) => {
+          const rsvDate = DateTime.fromISO(rsv.llegada).setZone(parametros.codigoZona);
+    
+          return (
+            rsvDate.hasSame(targetDate, 'day') &&
+            rsv.habitacion === currentHuesped.habitacion &&
+            rsv.numeroCuarto === currentHuesped.numeroCuarto &&
+            rsv.folio !== currentHuesped.folio &&
+            rsv.estatus !== 'Reserva Temporal'
+          );
+        });
+    
+        if (overlapReservations.length > 0) {
+          const depositoPrevio = await this._estadoDeCuenta.revisaDepositoPrevio(overlapReservations[0].folio);
+          return {
+            exist: true,
+            depositoPrevio: !!depositoPrevio.abonos
+          };
+        }
+    
+        return {
+          exist: false,
+          depositoPrevio: false
+        };
+    
+      } catch (error) {
+        console.error('Error reading Reservations from IndexedDB:', error);
+        return {
+          exist: false,
+          depositoPrevio: false,
+        };
+      }
+    }
+    
+
+      async checkOverlapInCalendar(args: any, filteredEvents: any, argsStart: any, argsEnd: any, timeZone:string) {
+        const taskId = Array.isArray(args.data.TaskId) ? args.data.TaskId[0] : args.data.TaskId;
+        const projectId = Array.isArray(args.data.ProjectId) ? args.data.ProjectId[0] : args.data.ProjectId;
+      
+        const overlapResults = await Promise.all(
+          filteredEvents.map(async (event: any) => {
+    
+            // ✅ Short-circuit: skip if Folio starts with 'S'
+            if (event.Folio.startsWith('S')) {
+              return { overlap: false, argsStart, argsEnd };
+            }
+    
+            const eventStart = DateTime.fromJSDate(new Date(event.StartTime), { zone: timeZone });
+            const eventEnd = DateTime.fromJSDate(new Date(event.EndTime), { zone: timeZone });
+      
+            const isSameDay = argsStart.hasSame(argsEnd, 'day');
+            const isEndAfterStart = argsEnd > argsStart;
+      
+            // 1. Same-day exact match (Project & Task IDs must match)
+            if (isSameDay && isEndAfterStart && event.ProjectId === projectId && event.TaskId === taskId) {
+              return { overlap: true, argsStart, argsEnd };
+            }
+      
+            // 2. Bloqueo events: ignore time when comparing
+            if (event.Subject === 'Bloqueo' && event.ProjectId === projectId && event.TaskId === taskId) {
+              const argsStartDate = argsStart.startOf('day');
+              const argsEndDate = argsEnd.endOf('day');
+              const eventStartDate = eventStart.startOf('day');
+              const eventEndDate = eventEnd.endOf('day');
+      
+              const overlaps =
+                argsStartDate <= eventEndDate && argsEndDate >= eventStartDate;
+      
+              if (overlaps) {
+                return { overlap: true, argsStart, argsEnd };
+              }
+            }
+      
+            // 3. General events: time is relevant (Project & Task IDs must match)
+            if (event.ProjectId === projectId && event.TaskId === taskId) {
+              const overlaps =
+                argsStart <= eventEnd && argsEnd >= eventStart;
+      
+              if (overlaps) {
+                return { overlap: true, argsStart, argsEnd };
+              }
+            }
+      
+            return { overlap: false, argsStart, argsEnd };
+          })
+        );
+      
+        return overlapResults;
+      }
     
     
 }

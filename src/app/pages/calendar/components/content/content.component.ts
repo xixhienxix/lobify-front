@@ -33,6 +33,7 @@ import { TarifasService } from 'src/app/services/tarifas.service';
 import { ParametrosService } from 'src/app/pages/parametros/_services/parametros.service';
 import { DateTime } from 'luxon'
 import { BloqueoService } from 'src/app/services/bloqueo.service';
+import { HuespedService } from 'src/app/services/huesped.service';
 
 loadCldr(frNumberData, frtimeZoneData, frGregorian, frNumberingSystem);
 
@@ -296,7 +297,8 @@ export class ContentComponent implements OnInit{
     private _indexDBService: IndexDBCheckingService,
     private _tarifasService: TarifasService,
     private _parametrosService: ParametrosService,
-    private _bloqueosService: BloqueoService
+    private _bloqueosService: BloqueoService,
+    private _huespedService: HuespedService
   ) {
     this.selectedDate = new Date(this.todayDate.getFullYear(), this.todayDate.getMonth(), this.todayDate.getDate())
     this.activatedRoute.data.subscribe((val) => {
@@ -638,7 +640,7 @@ export class ContentComponent implements OnInit{
           }
 
         // Map and await all async overlap checks
-        const overlapResults = await this.checkOverlapInCalendar(args,filteredEvents, argsStart, argsEnd);
+        const overlapResults = await this._huespedService.checkOverlapInCalendar(args,filteredEvents, argsStart, argsEnd, this.timeZone);
         
       
         const hasOverlap = overlapResults.some(r => r.overlap);
@@ -666,64 +668,6 @@ export class ContentComponent implements OnInit{
     }
   };
 
-
-  async checkOverlapInCalendar(args: any, filteredEvents: any, argsStart: any, argsEnd: any) {
-    const taskId = Array.isArray(args.data.TaskId) ? args.data.TaskId[0] : args.data.TaskId;
-    const projectId = Array.isArray(args.data.ProjectId) ? args.data.ProjectId[0] : args.data.ProjectId;
-  
-    const overlapResults = await Promise.all(
-      filteredEvents.map(async (event: any) => {
-
-        // ✅ Short-circuit: skip if Folio starts with 'S'
-        if (event.Folio.startsWith('S')) {
-          return { overlap: false, argsStart, argsEnd };
-        }
-
-        const eventStart = DateTime.fromJSDate(new Date(event.StartTime), { zone: this.timeZone });
-        const eventEnd = DateTime.fromJSDate(new Date(event.EndTime), { zone: this.timeZone });
-  
-        const isSameDay = argsStart.hasSame(argsEnd, 'day');
-        const isEndAfterStart = argsEnd > argsStart;
-  
-        // 1. Same-day exact match (Project & Task IDs must match)
-        if (isSameDay && isEndAfterStart && event.ProjectId === projectId && event.TaskId === taskId) {
-          return { overlap: true, argsStart, argsEnd };
-        }
-  
-        // 2. Bloqueo events: ignore time when comparing
-        if (event.Subject === 'Bloqueo' && event.ProjectId === projectId && event.TaskId === taskId) {
-          const argsStartDate = argsStart.startOf('day');
-          const argsEndDate = argsEnd.endOf('day');
-          const eventStartDate = eventStart.startOf('day');
-          const eventEndDate = eventEnd.endOf('day');
-  
-          const overlaps =
-            argsStartDate <= eventEndDate && argsEndDate >= eventStartDate;
-  
-          if (overlaps) {
-            return { overlap: true, argsStart, argsEnd };
-          }
-        }
-  
-        // 3. General events: time is relevant (Project & Task IDs must match)
-        if (event.ProjectId === projectId && event.TaskId === taskId) {
-          const overlaps =
-            argsStart <= eventEnd && argsEnd >= eventStart;
-  
-          if (overlaps) {
-            return { overlap: true, argsStart, argsEnd };
-          }
-        }
-  
-        return { overlap: false, argsStart, argsEnd };
-      })
-    );
-  
-    return overlapResults;
-  }
-  
-  
-  
 
   setCheckInOutTimeParametros(date:Date, time:string){
     // Convert to Luxon DateTime

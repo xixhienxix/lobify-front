@@ -20,6 +20,7 @@ export class AlertsComponent implements OnInit, AfterContentInit, OnDestroy {
   countdown:number=0
   isProgress:boolean
   subscription:Subscription[]=[]
+  simple:boolean=false;
   
   constructor(public modal: NgbActiveModal,
     ) {
@@ -41,9 +42,15 @@ export class AlertsComponent implements OnInit, AfterContentInit, OnDestroy {
           this.countdown=this.interval-x
           if(this.countdown==1){this.modal.close()}
         })
+        
 
 this.subscription.push(sb)
   }
+
+  closeModal(){
+    this.modal.close();
+    }
+
   ngOnDestroy():void
   {
     this.subscription.forEach(sb=>sb.unsubscribe())

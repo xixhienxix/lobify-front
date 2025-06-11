@@ -620,7 +620,7 @@ export class CalendarComponent implements OnInit, OnDestroy {
       const tarifasEspeciales = dataSource.filter(({ Tarifa }) => Tarifa !== 'Tarifa Base' && Tarifa !== 'Tarifa De Temporada');
       
       const huesped = this.allReservations.find(({ folio }) => folio === event.Folio);
-      const stayNights = Math.floor((event.EndTime.getTime() - event.StartTime.getTime()) / (1000 * 3600 * 24));
+      const stayNights = Math.max(1, Math.floor((event.EndTime.getTime() - event.StartTime.getTime()) / (1000 * 3600 * 24)));
   
       const modalRef = this.modalService.open(WarningComponent, { size: 'md', backdrop: 'static' });
 
